@@ -9,8 +9,7 @@
 
 ・キャラクターのインスペクターが正しいか
 ①Animator
-→SD_unitychan_humanoidにはTestAnimation
-→SD_unitychan_humanoid2には2TestAnimation
+→SD_unitychan_humanoidと、　SD_unitychan_humanoid2にはUnitychanAnimator
 
 ②FaceUpdate
 AutoBlinkforSD
