@@ -1,0 +1,55 @@
+・Layerが0～7まであるか
+染川が
+6:Player
+7:Weapon
+を新規追加しました。
+
+6:Playerは、それぞれキャラクターに設定
+7:Weaponは、キャラの右手につけたStaffに設定
+
+・キャラクターのインスペクターが正しいか
+①Animator
+→SD_unitychan_humanoidにはTestAnimation
+→SD_unitychan_humanoid2には2TestAnimation
+
+②FaceUpdate
+AutoBlinkforSD
+IKLookAt
+
+③RigidBody
+→Mass 60
+→Drag  0
+→Angular Drag 0.05
+→UseGravityチェックあり
+→Is Kinematicチェックなし
+→None
+→Discrete
+→Constraints内のチェックは、FreezeRotationだけ
+全てチェックあり
+
+④CapluseCollider
+→Center X 0 Y 0.5 Z 0
+→Radius 0.5
+→Height 1
+→Direction Y-Axis
+
+⑤UnitychanController
+がきちんとついているか
+
+・MainCameraのインスペクターが正しいか
+①CameraSampleというスクリプトがついているか
+②Culling Maskで、Weaponのチェックが外れているか
+
+・ButtleCameraのインスペクターが正しいか
+CameraSampleというスクリプトがついているか
+
+・CameraControllerのインスペクターが正しいか
+CameraMngというスクリプトがついているか
+
+・ButtleMngのインスペクターが正しいか
+①ButtleMngというスクリプトがついているか
+②CharListの値が2になっているか
+③CharListの、
+　Element0がSD_unitychan_humanoid
+  Element1がSD_unitychan_humanoid2
+  になっているか
