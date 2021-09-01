@@ -11,7 +11,7 @@ public class CameraSample : MonoBehaviour
     void Start()
     {
         //unitychan‚Ìî•ñ‚ğæ“¾
-        this.player = GameObject.Find("SD_unitychan_humanoid");
+        this.player = GameObject.Find("SD_unitychan_humanoid0");
 
         // MainCamera(©•ª©g)‚Æplayer‚Æ‚Ì‘Š‘Î‹——£‚ğ‹‚ß‚é
         offset = transform.position - player.transform.position;

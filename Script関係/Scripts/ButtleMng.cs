@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // キャラのターンを管理する
+// ButtleCanvasの表示/非表示もここで管理する
+// ここで、戦闘時はUnitychanControllerを非アクティブにするってしたほうが良さそう
 
 public class ButtleMng : MonoBehaviour
 {
     // enumとキャラオブジェクトをセットにしたmapを制作するためのリスト
     // キャラオブジェクトを要素としてアタッチできるようにしておく
     public List<GameObject> charList;
+    public Canvas buttleUICanvas;           // 表示/非表示をこのクラスで管理される
+    public GameObject buttleWarpPointPack;  // 戦闘時にフィールド上の戦闘ポイントにキャラをワープさせる
 
     // キャラ識別用enum
     enum CharcterNum
@@ -18,10 +22,14 @@ public class ButtleMng : MonoBehaviour
         MAX
     }
 
-    private GameObject buttleCamera;                // バトルカメラ格納用 
     private const string key_isAttack = "isAttack"; // 攻撃モーション(全キャラで名前を揃える必要がある)
 
     CharcterNum nowTurnChar_ = CharcterNum.MAX;     // 現在行動順が回ってきているキャラクター
+
+    private const int buttleCharMax_ = 2;           // バトル参加可能キャラ数の最大値(最終的には3にする)
+    private Vector3[] buttleWarpPointsPos_       = new Vector3[buttleCharMax_];      // 戦闘時の配置位置を保存しておく変数
+    private Quaternion[] buttleWarpPointsRotate_ = new Quaternion[buttleCharMax_];   // 戦闘時の回転角度を保存しておく変数(クォータニオン)
+    private bool setCallOnce_ = false;              // 戦闘モードに切り替わった最初のタイミングだけ切り替わる
 
     // それぞれのキャラ用に、必要なものをstructでまとめる
     // AnimatorとかHPとか
@@ -55,16 +63,41 @@ public class ButtleMng : MonoBehaviour
             charSetting[(int)anim.Key].animTime = 0.0f;
         }
 
-        buttleCamera = GameObject.Find("ButtleCamera");
         nowTurnChar_ = CharcterNum.UNI;
+
+        buttleUICanvas.gameObject.SetActive(false);
+
+        // ワープポイントの数ぶん、for文を回す
+        for (int i = 0; i < buttleWarpPointPack.transform.childCount; i++)
+        {
+            // 個別にワープポイントを変数へ保存していく
+            buttleWarpPointsPos_[i] = buttleWarpPointPack.transform.GetChild(i).gameObject.transform.position;
+            buttleWarpPointsRotate_[i] = buttleWarpPointPack.transform.GetChild(i).gameObject.transform.rotation;
+        }
     }
 
     void Update()
     {
-        // ButtoleCameraがOFFならここでreturnする
-        if (!buttleCamera.activeSelf)
+        // FieldMngで遭遇タイミングを調整しているため、それを参照し、戦闘モード以外ならreturnする
+        if (FieldMng.nowMode_ != FieldMng.MODE.BUTTLE)
         {
+            setCallOnce_ = false;
+            buttleUICanvas.gameObject.SetActive(false);
             return;
+        }
+
+        if(!setCallOnce_)
+        {
+            setCallOnce_ = true;
+            buttleUICanvas.gameObject.SetActive(true);
+
+            // 戦闘用座標と回転角度を代入する
+            // キャラの角度を変更は、ButtleWarpPointの箱の角度を回転させると可能。(1体1体向きを変えることもできる)
+            foreach (KeyValuePair<CharcterNum, GameObject> character in charMap_)
+            {
+                character.Value.gameObject.transform.position = buttleWarpPointsPos_[(int)character.Key];
+                character.Value.gameObject.transform.rotation = buttleWarpPointsRotate_[(int)character.Key];
+            }
         }
 
         Debug.Log(nowTurnChar_ + "の攻撃");

@@ -19,8 +19,8 @@ public class CameraMng : MonoBehaviour
 
     void Update()
     {
-        //スペースキーが押されている間、サブカメラをアクティブにする
-        if (Input.GetKey(KeyCode.A))
+        // FieldMngで遭遇タイミングを調整しているため、それを参照する
+        if (FieldMng.nowMode_ == FieldMng.MODE.BUTTLE)
         {
             //サブカメラをアクティブに設定
             mainCamera.SetActive(false);
