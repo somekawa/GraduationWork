@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // キャラの基本移動と方向転換のみのScript
-// →戦闘用Scriptは別で用意する
+// →戦闘用Scriptは別
+
 public class UnitychanController : MonoBehaviour
 {
     private Rigidbody rigid;      // Rigidbodyコンポーネント
     private Animator animator_;   // Animator コンポーネント
 
     private const string key_isRun = "isRun";         // Animatorで自分で設定したフラグの名前
-    //private const string key_isAttack = "isAttack";
 
     // 押下状態を確認したいキーをまとめたもの
     private KeyCode[] keyArray_ = new KeyCode[4] { KeyCode.UpArrow, KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow };
@@ -23,15 +23,15 @@ public class UnitychanController : MonoBehaviour
 
     void Update()
     {
-        // 攻撃モーションテスト用
-        //if (Input.GetKeyDown(KeyCode.Space))
-        //{
-        //    this.animator_.SetBool(key_isAttack, true);
-        //}
-        //else
-        //{
-        //    this.animator_.SetBool(key_isAttack, false);
-        //}
+        // 探索モード以外で自由に動かれたらいけないので、return処理を加える。
+        // 町の中でもSEARCHにしておけばいいかな？
+        if(FieldMng.nowMode != FieldMng.MODE.SEARCH)
+        {
+            // ここでRunのアニメーションを変更しておかないと、モードが切り替わる瞬間まで走っていたら
+            // 走りモーションが戦闘中に継続してしまう。
+            this.animator_.SetBool(key_isRun, false);
+            return;
+        }
 
         bool tmpFlg = false;       // 座標移動のボタン押下時にtrueになる
         foreach (KeyCode i in keyArray_)

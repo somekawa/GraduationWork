@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class CameraMng : MonoBehaviour
 {
-    private GameObject mainCamera;      //メインカメラ格納用
-    private GameObject buttleCamera;       //サブカメラ格納用 
+    private GameObject mainCamera;      // メインカメラ格納用
+    private GameObject buttleCamera;    // バトルカメラ格納用 
 
     void Start()
     {
@@ -20,7 +20,7 @@ public class CameraMng : MonoBehaviour
     void Update()
     {
         // FieldMngで遭遇タイミングを調整しているため、それを参照する
-        if (FieldMng.nowMode_ == FieldMng.MODE.BUTTLE)
+        if (FieldMng.nowMode == FieldMng.MODE.BUTTLE)
         {
             //サブカメラをアクティブに設定
             mainCamera.SetActive(false);

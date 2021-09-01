@@ -4,23 +4,21 @@ using UnityEngine;
 
 public class CameraSample : MonoBehaviour
 {
-    private GameObject player;   //プレイヤー情報格納用
-    private Vector3 offset;      //相対距離取得用
+    private GameObject player_;   // プレイヤー情報格納用
+    private Vector3 offset_;      // 相対距離取得用
 
-    // Use this for initialization
     void Start()
     {
         //unitychanの情報を取得
-        this.player = GameObject.Find("SD_unitychan_humanoid0");
+        this.player_ = GameObject.Find("SD_unitychan_humanoid0");
 
         // MainCamera(自分自身)とplayerとの相対距離を求める
-        offset = transform.position - player.transform.position;
+        offset_ = transform.position - player_.transform.position;
     }
 
-    // Update is called once per frame
     void Update()
     {
         //新しいトランスフォームの値を代入する
-        transform.position = player.transform.position + offset;
+        transform.position = player_.transform.position + offset_;
     }
 }

@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// 町のそとでの画面管理をする。
+// 町の外での画面管理をする。
 // 探索・戦闘・メニュー画面の切り替わり時にenumで変更を行う
-// 他のMngとかも、このスクリプトを参照して変更を行う
+// 他のMngとかも、このスクリプトにあるnowMode_を参照して変更を行う
 
 public class FieldMng : MonoBehaviour
 {
@@ -20,7 +20,7 @@ public class FieldMng : MonoBehaviour
         MAX
     }
 
-    public static MODE nowMode_ = MODE.SEARCH;       // 現在のモード
+    public static MODE nowMode = MODE.SEARCH;       // 現在のモード
 
     private float toButtleTime_ = 5.0f;              // 5秒経過でバトルへ遷移する
     private float time_ = 0.0f;                      // 現在の経過時間
@@ -36,7 +36,7 @@ public class FieldMng : MonoBehaviour
     {
         //Debug.Log("現在のMODE" + nowMode_);
 
-        switch(nowMode_)
+        switch(nowMode)
         {
             case MODE.SEARCH :
             if (time_ < toButtleTime_)
@@ -45,7 +45,7 @@ public class FieldMng : MonoBehaviour
             }
             else
             {
-                nowMode_ = MODE.BUTTLE;
+                nowMode = MODE.BUTTLE;
                 time_ = 0.0f;
             }
             break;
@@ -57,7 +57,7 @@ public class FieldMng : MonoBehaviour
             }
             else
             {
-                nowMode_ = MODE.SEARCH;
+                nowMode = MODE.SEARCH;
                 time_ = 0.0f;
             }
             break;

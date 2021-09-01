@@ -25,7 +25,7 @@ public class ImageRotate : MonoBehaviour
 
     void Update()
     {
-        Debug.Log(targetRotate_);
+        //Debug.Log(targetRotate_);
 
         // ƒL[‚É‚æ‚Á‚ÄA‰ñ“]•ûŒü‚ğŒˆ’è‚·‚é
         if (Input.GetKeyDown(KeyCode.J))

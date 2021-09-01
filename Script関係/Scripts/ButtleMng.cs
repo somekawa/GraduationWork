@@ -4,8 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 // キャラのターンを管理する
-// ButtleCanvasの表示/非表示もここで管理する
-// ここで、戦闘時はUnitychanControllerを非アクティブにするってしたほうが良さそう
+// ButtleCanvasの表示/非表示もここで管理している
 
 public class ButtleMng : MonoBehaviour
 {
@@ -83,7 +82,7 @@ public class ButtleMng : MonoBehaviour
     void Update()
     {
         // FieldMngで遭遇タイミングを調整しているため、それを参照し、戦闘モード以外ならreturnする
-        if (FieldMng.nowMode_ != FieldMng.MODE.BUTTLE)
+        if (FieldMng.nowMode != FieldMng.MODE.BUTTLE)
         {
             nowTurnChar_ = CharcterNum.UNI;
             setCallOnce_ = false;
@@ -138,29 +137,18 @@ public class ButtleMng : MonoBehaviour
             }
             else
             {
+                // animTime値が1.0を上回ったとき
                 // animTime値の初期化と、モーションがWaitになった為isMoveをfalseへ戻す
                 charSetting[(int)nowTurnChar_].animTime = 0.0f;
                 charSetting[(int)nowTurnChar_].isMove = false;
 
-                // animTimeが1.0f以上になったら次のキャラが行動できるようにする
-                nowTurnChar_++;
-                // 最大まで加算されたら、初期値に戻す
-                if (nowTurnChar_ >= CharcterNum.MAX)
+                // 次のキャラが行動できるようにする
+                // 最大まで加算されたら、初期値に戻す(前演算子重要)
+                if (++nowTurnChar_ >= CharcterNum.MAX)
                 {
                     nowTurnChar_ = CharcterNum.UNI;
                 }
             }
         }
-
-        // ↓元のキャラモーション操作
-        //if (Input.GetKeyDown(KeyCode.Space))
-        //{
-        //    charSetting[(int)nowTurnChar_].animator.SetBool(key_isAttack, true);
-        //    //nowTurnChar_++; // ここで加算するとfalseに辿り着いてないのか変な動きになる
-        //}
-        //else
-        //{
-        //    charSetting[(int)nowTurnChar_].animator.SetBool(key_isAttack, false);
-        //}
     }
 }
