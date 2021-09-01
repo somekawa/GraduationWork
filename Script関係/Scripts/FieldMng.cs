@@ -22,8 +22,8 @@ public class FieldMng : MonoBehaviour
 
     public static MODE nowMode = MODE.SEARCH;       // 現在のモード
 
-    private float toButtleTime_ = 5.0f;              // 5秒経過でバトルへ遷移する
-    private float time_ = 0.0f;                      // 現在の経過時間
+    private float toButtleTime_ = 30.0f;            // 30秒経過でバトルへ遷移する
+    private float time_ = 0.0f;                     // 現在の経過時間
 
     // Start is called before the first frame update
     void Start()
@@ -67,4 +67,11 @@ public class FieldMng : MonoBehaviour
             break;
         }
     }
+
+    // 現在値 / エンカウント発生値
+    public float GetNowEncountTime()
+    {
+        return time_ / toButtleTime_;
+    }
+
 }

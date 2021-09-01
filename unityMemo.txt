@@ -126,7 +126,7 @@ https://light11.hatenadiary.com/entry/2019/04/18/003100
 https://xr-hub.com/archives/7057
 なぜか、MainCameraをunityちゃんの子オブジェクトに
 する方法は全部失敗した。
-CameraSample.scの方法でやった
+CameraSample.csの方法でやった
 -----------------------------------------------
 
 <MainCameraとButtleCameraを切り替える>----------
@@ -255,9 +255,9 @@ MODEというのは、探索モード/戦闘モード/メニュー
 
 空のオブジェクトを作成して、FieldMngと命名。
 それに新規Scriptをアタッチして、その名前も
-FieldMng.scにした。
+FieldMng.csにした。
 
-FieldMng.sc内ではさっき書いた通り、時間経過で遷移するようにswitch文を書いている。
+FieldMng.cs内ではさっき書いた通り、時間経過で遷移するようにswitch文を書いている。
 
 MODEが切り替わる事でCameraMng内のカメラ切替や、
 ButtleMng内の攻撃モーション操作ができるようにならないといけないから、static変数でnowModeをつくり、
@@ -265,7 +265,7 @@ ButtleMng内の攻撃モーション操作ができるようにならないと�
 見れるようにした。
 
 また、ButtleUICanvasについては、ButtleMngで
-表示/非表示を管理するために、ButtleMng.scにpublic変数を追加して、アタッチできる場所を用意した。
+表示/非表示を管理するために、ButtleMng.csにpublic変数を追加して、アタッチできる場所を用意した。
 missingに注意すること！！
 
 これからも「複数クラスからの参照」があり、
@@ -276,7 +276,7 @@ missingに注意すること！！
 
 <MODEがButtleなら、UnitychanControllerをoffに>--
 
-UnitychanController.scに、MODEがSEARCHなら動く
+UnitychanController.csに、MODEがSEARCHなら動く
 ようにしたらいいね。それ以外ならreturnさせれば早い。
 
 MODEが切り替わる時に走っていると、走りモーション
@@ -338,4 +338,122 @@ https://madnesslabo.net/utage/?page_id=11109#i-17
 
 BWPの箱を回転させれば、その向きにキャラも変更できるはず。できました。
 ------------------------------------------------
+
+<敵とのエンカウントまでの色変化の作り方>---------
+テストとして、普通の3DオブジェクトにEncountColorという新規Scriptで作成したものをアタッチして行った。
+
+参照したもの↓
+https://teratail.com/questions/302182
+
+今回は、255とかのbyte単位で変化させるのを使用した
+
+色合いの変化を
+青→青緑→緑→黄色→オレンジ→赤
+と変化させた。
+
+まず、青の値を減算して緑の値を加算する
+加算：green * (time_ / toButtleTime_)
+減算：255 - (blue * (time_ / toButtleTime_))
+
+time_ / toButtleTime_は、
+(現在値 / エンカウント発生時間)なので
+0～1の値にできる。
+これに255を乗算するとその時間に適した値を出せる。
+減算したい時はさらに先頭に255 - をつけると良い。
+
+time_ / toButtleTime_が0.5fを超えたら
+redStartFlg_をtrueにして、赤の加算を始める。
+このとき、青の減算を早めて、緑も減算を行う。
+
+これで、色の変化は完成した。
+
+次に、time_ / toButtleTime_の計算をFieldMng.cs
+で行い、EncountColor.csに引っ張ってくる方法を考える。
+
+------------------------------------------------
+
+<EncountColor.csがFieldMng.csの値を参照する>----
+
+EncountColor.csで変数追加して、
+(private FieldMng fieldMng_;)
+
+Start関数で名前検索をかけて、中のコンポーネントの
+FieldMngを取得する。
+
+fieldMng_ =　GameObject.Find("FieldMng").
+　　　　　　  GetComponent<FieldMng>();
+
+あとは、Update関数で毎回取得して、
+float time = fieldMng_.GetNowEncountTime();
+
+いままで、(time_ / toButtleTime_)と書いて計算式を書いていたところをtimeに変更する。
+
+最後に、戦闘が終了したら、また青からスタートするように戻す方法を考えないととと・・・
+
+nowModeがMODE.BUTTLEなら計算をせずreturnにして
+値を初期化する。
+
+------------------------------------------------
+
+<[Field]をバトルカメラから除外する>-
+
+新規でレイヤーを作成[Field]
+MainCameraのCullingMaskでは、[Field]に
+チェックをつける。
+
+ButtleCameraのCullingMaskでは、[Field]に
+チェックをつけない。
+
+他にも映したくないものが増えてきたら[Field]に
+レイヤーを設定すればいい
+
+------------------------------------------------
+
+<FieldUICanvasを作成して、画像の色を変更させる>--
+
+素材を入手したときのアナウンスとかも入れられるように、新規にヒエラルキーにFieldUICanvasを作った。
+
+レイヤーはFieldに設定し、さっきまで色変化のテストにつかっていたものを修正していく。
+
+①FieldUICanvas内にImageを作成。
+　テストでつくったwhite.pngを入れる。
+　Colorをクリックすると、色相環がでてくるが、
+　色相環の右下に[RGB0-255]とか書いてるやつがある　これを[RGB0-1.0]に変更しておく。
+
+②EncountColor.csではマテリアルだったところを
+  Imageにしたり変更を行う
+　特に注意する点は、①で0～1.0にしたため、
+
+image_.color = 
+new Color(r/255.0f , g/255.0f , b/255.0f, 1.0f);
+
+こんなかんじで、255.0fで割る必要がある。
+
+------------------------------------------------
+
+<UI要素はCulling Maskできないと書かれてて>-------
+
+FieldUICanvasを追加したものの、なぜかレイヤー分けしてもバトルカメラにエンカウント目安UIでてきたので
+調べたところ。
+Culling Maskができないとか書かれてた。
+
+よって、FieldUICanvasを非表示にする方法を考えることになった。
+
+他の普通のオブジェクトは[Field]でカメラ分けできると思うから、レイヤー自体は残しておきます。
+
+ButtleMng.csのUpdate関数の最初のif文に、
+戦闘モードじゃなかったらbuttleUICanvasをfalseに
+するってところがあるから、このタイミングで
+FieldUICanvasはtrueになっている必要がある。
+
+よって、ButtleMngのpublic変数を増やして、
+FieldUICanvasをアタッチできるようにしたら早い。
+
+FieldUICanvasをfalseに戻すほうもちゃんと書いとく
+
+これで、戦闘モード中はカメラに映らないように修正ができた。
+-----------------------------------------------
+
+
+
 

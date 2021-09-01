@@ -12,6 +12,7 @@ public class ButtleMng : MonoBehaviour
     // キャラオブジェクトを要素としてアタッチできるようにしておく
     public List<GameObject> charList;
     public Canvas buttleUICanvas;           // 表示/非表示をこのクラスで管理される
+    public Canvas FieldUICanvas;           // 表示/非表示をこのクラスで管理される
     public GameObject buttleWarpPointPack;  // 戦闘時にフィールド上の戦闘ポイントにキャラをワープさせる
 
     // キャラ識別用enum
@@ -92,6 +93,7 @@ public class ButtleMng : MonoBehaviour
                 buttleCommandUI_.ResetRotate();   // UIの回転を一番最初に戻す
             }
             buttleUICanvas.gameObject.SetActive(false);
+            FieldUICanvas.gameObject.SetActive(true);
             return;
         }
 
@@ -99,6 +101,7 @@ public class ButtleMng : MonoBehaviour
         {
             setCallOnce_ = true;
             buttleUICanvas.gameObject.SetActive(true);
+            FieldUICanvas.gameObject.SetActive(false);
 
             // 戦闘用座標と回転角度を代入する
             // キャラの角度を変更は、ButtleWarpPointの箱の角度を回転させると可能。(1体1体向きを変えることもできる)
