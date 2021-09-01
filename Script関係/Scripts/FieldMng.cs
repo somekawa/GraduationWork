@@ -34,7 +34,7 @@ public class FieldMng : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Debug.Log("åªç›ÇÃMODE" + nowMode_);
+        //Debug.Log("åªç›ÇÃMODE" + nowMode_);
 
         switch(nowMode_)
         {
@@ -51,6 +51,15 @@ public class FieldMng : MonoBehaviour
             break;
 
             case MODE.BUTTLE:
+            if (time_ < toButtleTime_)
+            {
+                time_ += Time.deltaTime;
+            }
+            else
+            {
+                nowMode_ = MODE.SEARCH;
+                time_ = 0.0f;
+            }
             break;
 
             default:

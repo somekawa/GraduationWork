@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 // キャラのターンを管理する
 // ButtleCanvasの表示/非表示もここで管理する
@@ -30,6 +31,8 @@ public class ButtleMng : MonoBehaviour
     private Vector3[] buttleWarpPointsPos_       = new Vector3[buttleCharMax_];      // 戦闘時の配置位置を保存しておく変数
     private Quaternion[] buttleWarpPointsRotate_ = new Quaternion[buttleCharMax_];   // 戦闘時の回転角度を保存しておく変数(クォータニオン)
     private bool setCallOnce_ = false;              // 戦闘モードに切り替わった最初のタイミングだけ切り替わる
+
+    private ImageRotate buttleCommandUI_;           // バトル中のコマンドUIを取得して、保存しておく変数
 
     // それぞれのキャラ用に、必要なものをstructでまとめる
     // AnimatorとかHPとか
@@ -65,6 +68,7 @@ public class ButtleMng : MonoBehaviour
 
         nowTurnChar_ = CharcterNum.UNI;
 
+        buttleCommandUI_ = buttleUICanvas.transform.Find("Image").GetComponent<ImageRotate>();
         buttleUICanvas.gameObject.SetActive(false);
 
         // ワープポイントの数ぶん、for文を回す
@@ -81,7 +85,13 @@ public class ButtleMng : MonoBehaviour
         // FieldMngで遭遇タイミングを調整しているため、それを参照し、戦闘モード以外ならreturnする
         if (FieldMng.nowMode_ != FieldMng.MODE.BUTTLE)
         {
+            nowTurnChar_ = CharcterNum.UNI;
             setCallOnce_ = false;
+
+            if(buttleUICanvas.gameObject.activeSelf)
+            {
+                buttleCommandUI_.ResetRotate();   // UIの回転を一番最初に戻す
+            }
             buttleUICanvas.gameObject.SetActive(false);
             return;
         }
@@ -100,7 +110,7 @@ public class ButtleMng : MonoBehaviour
             }
         }
 
-        Debug.Log(nowTurnChar_ + "の攻撃");
+        //Debug.Log(nowTurnChar_ + "の攻撃");
 
         // キャラ毎のモーションを呼ぶ
         if (Input.GetKeyDown(KeyCode.Space))

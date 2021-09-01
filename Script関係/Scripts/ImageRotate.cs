@@ -25,6 +25,8 @@ public class ImageRotate : MonoBehaviour
 
     void Update()
     {
+        Debug.Log(targetRotate_);
+
         // キーによって、回転方向を決定する
         if (Input.GetKeyDown(KeyCode.J))
         {
@@ -72,5 +74,13 @@ public class ImageRotate : MonoBehaviour
                 // 何も処理を行わない
             }
         }
+    }
+
+    // 戦闘モードが終了した直後に、回転を初期値に戻す
+    public void ResetRotate()
+    {
+        var resetRotate = Quaternion.Euler(new Vector3(0.0f, 0.0f, 0.0f));
+        transform.rotation = resetRotate;
+        targetRotate_ = 0.0f;
     }
 }
