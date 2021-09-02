@@ -611,6 +611,7 @@ b.AttackStart関数でエフェクトの座標を調整する
 →BoxColliderのIsTriggerはチェックなしでok
 →Rigidbodyの追加をし、UseGravityはチェックなし
 ②新規Tag  →Enemy
+　①にEnemyというタグをつける
 ③MagicMove.csに判定があるので、敵に当たると
 　弾と敵が消えるのを確認する
 ------------------------------------------------
@@ -630,13 +631,51 @@ if(!charSetting[(int)nowTurnChar_].isMove)
 
 ------------------------------------------------
 
-敵をbox(豆腐くん)でつくって当たり判定のかくにん
-当たったら色が赤になるーとかそんな感じでやろ。
-最終的に、キャラのターンが変わるのは、敵に攻撃が当たって相手のダメージMotionが終了したら。みたいな判定になりそう。それなら構造体のisMoveとかanimTimeで作ったモーションに間をつくるってのがいらないかも。。。苦労したのに＞＜;
+<ButtleMng.csの肥大化軽減方法について>----------
+ButtleMngは、あくまで戦闘中全般をまとめるのが目的なのに、今はキャラクターの内容に偏っている。
+そのため、新規にCharacterMngをつくって、
+戦闘中/探索中の両方のキャラ状態を管理できるスクリプトを用意したほうが良い。
+
+空のオブジェクトを作成して、[CharacterMng]と命名
+新規Scriptを作成して、[CharacterMng.cs]と命名
+空のオブジェクトに新規Scriptをアタッチする。
+
+ButtleMng.csでは、CharacterMng.csの
+Buttle関数とButtleSetCallOnce関数を呼び出している
+
+*重要*
+それぞれにアタッチするものも増減があったため
+記載しておく
+
+→の左辺が引数、右辺がヒエラルキーのやつ
+<ButtleMng>
+・ButtleUICanvas → ButtleUICanvas
+・FieldUICanvas  → FieldUICanvas 
+
+<CharacterMng>
+・ButtleUICanvas→ButtleUICanvas
+・CharList：2
+Element0 → SD_unitychan_humanoid0
+Element1 → SD_unitychan_humanoid1
+・ButtleWarpPointPack → ButtleWarpPointPack
+・UniAttackPrefab_    → UniAttack
+
+------------------------------------------------
 
 なにもしないでも敵に遭遇できるアイテムがあったら便利そう。
 
 企画書のパワポを共有で用意するぐらいしとこ。
+
+明日は、敵の生成ポイントをつくって、
+(プレイヤーに似た感じ)
+1体の敵の位置にむかって弾が飛ぶようにして
+複数いたら、誰に当てるか選択肢がでて選んで攻撃
+とできるようにする
+
+にげるコマンドの実装
+
+
+
 
 
 

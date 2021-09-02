@@ -102,3 +102,24 @@ CameraMngというスクリプトがついているか
 →Enemyというタグを追加しました。
 敵を配置した際は、このタグをつけるようにしてください。
 
+*重要*
+<ButtleMng>と<CharacterMng>に分けたことにより、
+アタッチするものも増減があったため記載します。
+
+→の左辺が引数、右辺がヒエラルキーのやつ
+<ButtleMng>
+[ButtleMng.cs]
+
+・ButtleUICanvas → ButtleUICanvas
+・FieldUICanvas  → FieldUICanvas 
+
+<CharacterMng>
+[CharacterMng.cs]
+
+・ButtleUICanvas → ButtleUICanvas
+・CharList：2
+Element0 → SD_unitychan_humanoid0
+Element1 → SD_unitychan_humanoid1
+・ButtleWarpPointPack → ButtleWarpPointPack
+・UniAttackPrefab_    → UniAttack
+
