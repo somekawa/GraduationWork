@@ -9,6 +9,7 @@ using UnityEngine;
 public class FieldMng : MonoBehaviour
 {
     // 様々なクラスからMODEの状態は見られることになるから、nowMode_はstatic変数にしたほうがいい
+    // このクラスは画面状態の遷移を管理するだけで、それ以外の画面処理は他のScriptで行う
 
     // 画面状態一覧
     public enum MODE
@@ -22,31 +23,38 @@ public class FieldMng : MonoBehaviour
 
     public static MODE nowMode = MODE.SEARCH;       // 現在のモード
 
-    private float toButtleTime_ = 30.0f;            // 30秒経過でバトルへ遷移する
+    private float toButtleTime_ = 10.0f;            // 30秒経過でバトルへ遷移する
     private float time_ = 0.0f;                     // 現在の経過時間
 
-    // Start is called before the first frame update
+    private UnitychanController player_;            // プレイヤー情報格納用
+
     void Start()
     {
-        
+        //unitychanの情報を取得
+        player_ = GameObject.Find("SD_unitychan_humanoid0").GetComponent<UnitychanController>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         //Debug.Log("現在のMODE" + nowMode_);
 
-        switch(nowMode)
+        //Debug.Log(time_);
+
+        switch (nowMode)
         {
             case MODE.SEARCH :
-            if (time_ < toButtleTime_)
+            if (player_.GetMoveFlag() && time_ < toButtleTime_)
             {
                 time_ += Time.deltaTime;
             }
-            else
+            else if(time_ > toButtleTime_)
             {
                 nowMode = MODE.BUTTLE;
                 time_ = 0.0f;
+            }
+            else
+            {
+                // 何も処理を行わない
             }
             break;
 

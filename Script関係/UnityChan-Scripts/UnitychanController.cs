@@ -75,10 +75,16 @@ public class UnitychanController : MonoBehaviour
         if (movedir != Vector3.zero)
         {
             // 座標更新
-            //　キャラクターを移動させる処理
+            // キャラクターを移動させる処理
             rigid.MovePosition(rigid.position + movedir * Time.deltaTime);
             // キャラ方向転換
             transform.rotation = Quaternion.LookRotation(movedir);
         }
+    }
+
+    // キャラが移動中か
+    public bool GetMoveFlag()
+    {
+        return this.animator_.GetBool(key_isRun);
     }
 }

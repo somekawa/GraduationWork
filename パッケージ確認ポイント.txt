@@ -11,9 +11,9 @@
 ①Animator
 →SD_unitychan_humanoidと、　SD_unitychan_humanoid2にはUnitychanAnimator
 
-②FaceUpdate
-AutoBlinkforSD
-IKLookAt
+②FaceUpdate.cs
+AutoBlinkforSD.cs
+IKLookAt.cs
 
 ③RigidBody
 →Mass 60
@@ -32,7 +32,7 @@ IKLookAt
 →Height 1
 →Direction Y-Axis
 
-⑤UnitychanController
+⑤UnitychanController.cs
 がきちんとついているか
 
 ・MainCameraのインスペクターが正しいか
@@ -40,7 +40,8 @@ IKLookAt
 ②Culling Maskで、Weaponのチェックが外れているか
 
 ・ButtleCameraのインスペクターが正しいか
-CameraSampleというスクリプトがついているか
+①CameraSampleというスクリプトがついているか
+②Culling Maskで、Fieldのチェックが外れているか
 
 ・CameraControllerのインスペクターが正しいか
 CameraMngというスクリプトがついているか
@@ -49,8 +50,8 @@ CameraMngというスクリプトがついているか
 ①ButtleMngというスクリプトがついているか
 ②CharListの値が2になっているか
 ③CharListの、
-　Element0がSD_unitychan_humanoid
-  Element1がSD_unitychan_humanoid2
+　Element0がSD_unitychan_humanoid0
+  Element1がSD_unitychan_humanoid1
   になっているか
 
 ------------------------------------------------
@@ -64,14 +65,14 @@ CameraMngというスクリプトがついているか
 
 →ButtleWarpPointPackという引数の所にヒエラルキー  のButtleWarpPointPackを追加してください。
 
-・ButtleUICanvasにImageがあるか確認
+・ButtleUICanvasの子にImageがあるか確認
 →Imageは回転する画像をつける
 　今は、「テスト画像だからいいの」がついてる
 
 →ImageにImageRotate.csがついているか確認
 　これが回転で使用されるやつ。
 
-・FieldUICanvasにImageがあるか確認
+・FieldUICanvasの子にImageがあるか確認
 →Imageは色変化用の画像をつける
 　今は、「white」がついてる
 
