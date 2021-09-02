@@ -17,7 +17,7 @@ public class ImageRotate : MonoBehaviour
     }
 
     // 選択コマンド
-    enum COMMAND
+    public enum COMMAND
     {
         NON,    // 回転中で選択中コマンドがない状態
         ATTACK, // 攻撃コマンド(初期コマンド)
@@ -32,8 +32,8 @@ public class ImageRotate : MonoBehaviour
 
     // キーを角度,値をCOMMANDのenumで作ったmap
     private Dictionary<int, COMMAND> commandMap_;
-    private COMMAND nowCommand_ = COMMAND.ATTACK;   // 現在の選択中コマンド
-    
+    public COMMAND nowCommand_ = COMMAND.ATTACK;   // 現在の選択中コマンド
+
     void Start()
     {
         // コマンド状態の追加
@@ -48,7 +48,7 @@ public class ImageRotate : MonoBehaviour
     void Update()
     {
         //Debug.Log(targetRotate_);
-        Debug.Log(nowCommand_);
+        //Debug.Log(nowCommand_);
 
         // キーによって、回転方向を決定する
         if (Input.GetKeyDown(KeyCode.J))
@@ -123,5 +123,11 @@ public class ImageRotate : MonoBehaviour
         var resetRotate = Quaternion.Euler(new Vector3(0.0f, 0.0f, 0.0f));
         transform.rotation = resetRotate;
         targetRotate_ = 0.0f;
+    }
+
+    // 現在のコマンド状態をreturnする
+    public COMMAND GetNowCommand()
+    {
+        return nowCommand_;
     }
 }

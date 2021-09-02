@@ -117,8 +117,17 @@ public class ButtleMng : MonoBehaviour
         // キャラ毎のモーションを呼ぶ
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            charSetting[(int)nowTurnChar_].animator.SetBool(key_isAttack, true);
-            charSetting[(int)nowTurnChar_].isMove = true;
+            // 現在の有効コマンドが攻撃コマンドになっているか
+            if(buttleCommandUI_.GetNowCommand() == ImageRotate.COMMAND.ATTACK)
+            {
+                Debug.Log("攻撃コマンドが有効コマンドです");
+                charSetting[(int)nowTurnChar_].animator.SetBool(key_isAttack, true);
+                charSetting[(int)nowTurnChar_].isMove = true;
+            }
+            else
+            {
+                Debug.Log("攻撃コマンドが有効コマンドではありません");
+            }
         }
         else
         {
