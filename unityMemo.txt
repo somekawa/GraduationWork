@@ -541,13 +541,74 @@ GetNowCommandという関数はImageRotate.csに新規で
 
 -----------------------------------------------
 
-unityちゃんの通常攻撃魔法でもやろう。
+<unityちゃんの通常攻撃>-------------------------
+
+KY_effectsというアセットのエフェクトで作成する。
+
+参照したもの↓
+https://gametukurikata.com/program/shockwave
+
+KY_effects > MagicEffectsPackFree > prefab
+の中の、ErekiBall2を複製して「UniAttack」と命名。
+(オリジナルは念のためとっとくようにする)
+
+①一度、ヒエラルキーにおいてアンパッケージ化する
+
+②UniAttackの親オブジェクトにSphereColliderを
+　つける。IsTriggerにチェックをつける
+　RigidBodyを追加し、UseGravityのチェックを外す
+
+③ButtleMng.csにAttackStart()という上記のサイト　の関数を追加して、②をアタッチできるようにする
+
+④新規Scriptで、「MagicMove.cs」を作成
+　内容は、上記のサイトのShockwaveMoveスクリプトを
+　持ってくる。一部判定でいらない部分があるので
+　削除もおこなう
+
+⑤UniAttackに、MagicMove.csをアタッチ
+
+⑥再びPrefab化する
+
+⑦ButtleMngというオブジェクトについている　　ButtleMng.csにProjectファイルのprefabから直接　ドラッグ&ドロップする
+　(ヒエラルキーに置いてたUniAttackは消してよし)
+
+UniAttackが自然消滅しないから、Start関数に、
+Destroy(this.gameObject,5);
+みたいに指定した時間が過ぎたら消えるようにしとく
+
+でもたぶん最終的には敵に当たったら消えるからいらないとは思う。
+
+
+<発動させたキャラの位置から弾がでるようにする>
+よくよく考えたら、ちゃんと座標指定ができてなかった。
+
+ButtleMng.csのAttackStart()という関数で弾の発生位置を調整してインスタンスしているから、キャラの戦闘開始時の座標を保存して、それを使用する必要がある。
+
+a.戦闘開始時のそれぞれのキャラ座標を保存する
+①CharcterSettingの構造体に、buttlePosという変数　を追加する
+
+②Update関数内で、setCallOnce_がfalseの時に
+　foreach文で戦闘用座標と回転角度を代入している所　がある為、そこに
+charSetting[(int)character.Key].buttlePos = character.Value.gameObject.transform.position;
+　と追加する。
+　おそらく、非戦闘時にメニュー画面でキャラの立　　ち位置を交換とかしても、戦闘開始時に必ずここの　処理が呼ばれるので、エフェクト発生位置の目安に　できる。
+
+b.AttackStart関数でエフェクトの座標を調整する
+　今行動ターンが来ているキャラだとわかるように      AttackStart((int)nowTurnChar_);という風に
+　引数を持たせる。
+　
+　あとは、関数内で
+　var adjustPos = 
+　new Vector3(charSetting[charNum].buttlePos.x, 　　　　charSetting[charNum].buttlePos.y + 0.5f, 　　　　charSetting[charNum].buttlePos.z);
+　とすれば完成ですね。
+
+-----------------------------------------------
+
 敵をbox(豆腐くん)でつくって当たり判定のかくにん
 当たったら色が赤になるーとかそんな感じでやろ。
+最終的に、キャラのターンが変わるのは、敵に攻撃が当たって相手のダメージMotionが終了したら。みたいな判定になりそう。それなら構造体のisMoveとかanimTimeで作ったモーションに間をつくるってのがいらないかも。。。苦労したのに＞＜;
 
 なにもしないでも敵に遭遇できるアイテムがあったら便利そう。
-
-ButtleMngとRotateのScriptに参照関係ができあがりそう。
 
 企画書のパワポを共有で用意するぐらいしとこ。
 

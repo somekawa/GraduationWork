@@ -15,6 +15,10 @@ public class ButtleMng : MonoBehaviour
     public Canvas FieldUICanvas;           // 表示/非表示をこのクラスで管理される
     public GameObject buttleWarpPointPack;  // 戦闘時にフィールド上の戦闘ポイントにキャラをワープさせる
 
+    //　通常攻撃弾のプレハブ
+    [SerializeField]
+    private GameObject uniAttackPrefab_;
+
     // キャラ識別用enum
     enum CharcterNum
     {
@@ -41,6 +45,7 @@ public class ButtleMng : MonoBehaviour
         public Animator animator;   // 各キャラについているAnimatorのコンポーネント
         public bool isMove;         // Waitモーション時はfalse
         public float animTime;      // 次のキャラの行動に遷移するまでの間
+        public Vector3 buttlePos;   // 戦闘開始時に設定されるポジション(攻撃エフェクト等のInstance位置に利用)
     }
 
     // 上記の構造体を配列にしたもの
@@ -97,6 +102,7 @@ public class ButtleMng : MonoBehaviour
             return;
         }
 
+        // 戦闘開始時に設定される項目
         if(!setCallOnce_)
         {
             setCallOnce_ = true;
@@ -109,6 +115,10 @@ public class ButtleMng : MonoBehaviour
             {
                 character.Value.gameObject.transform.position = buttleWarpPointsPos_[(int)character.Key];
                 character.Value.gameObject.transform.rotation = buttleWarpPointsRotate_[(int)character.Key];
+
+                // ここで座標を保存しておくことで、メニュー画面での並び替えでも反映できるだろうし、
+                // 攻撃エフェクトの発生位置の目安になる
+                charSetting[(int)character.Key].buttlePos = character.Value.gameObject.transform.position;
             }
         }
 
@@ -123,6 +133,7 @@ public class ButtleMng : MonoBehaviour
                 Debug.Log("攻撃コマンドが有効コマンドです");
                 charSetting[(int)nowTurnChar_].animator.SetBool(key_isAttack, true);
                 charSetting[(int)nowTurnChar_].isMove = true;
+                AttackStart((int)nowTurnChar_);
             }
             else
             {
@@ -162,5 +173,17 @@ public class ButtleMng : MonoBehaviour
                 }
             }
         }
+    }
+
+    void AttackStart(int charNum)
+    {
+        // エフェクトの発生位置高さ調整
+        var adjustPos = new Vector3(charSetting[charNum].buttlePos.x, charSetting[charNum].buttlePos.y + 0.5f, charSetting[charNum].buttlePos.z);
+
+        //　通常攻撃弾プレハブをインスタンス化
+        //var uniAttackInstance = Instantiate(uniAttackPrefab_, transform.position + transform.forward, Quaternion.identity);
+        var uniAttackInstance = Instantiate(uniAttackPrefab_, adjustPos + transform.forward, Quaternion.identity);
+        //　通常攻撃弾の飛んでいく方向を指定
+        uniAttackInstance.GetComponent<MagicMove>().SetDirection(transform.forward);
     }
 }

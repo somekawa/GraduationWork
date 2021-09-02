@@ -81,3 +81,20 @@ CameraMngというスクリプトがついているか
 
 ・まだ未使用だが、新規レイヤーとして[Field]が
 　あるか確認
+
+
+------------------------------------------------
+<0902更新>
+・MagicEffectというファイルにUniAttackという
+　エフェクトが追加されているか(Prefabです)
+①SphereCollider
+→IsTriggerにチェックあり
+②RigidBody
+→UseGravityにチェックなし
+③MagicMove.cs
+→Power 10
+　
+・ButtleMngのオブジェクトにある、ButtleMng.csの
+　引数にUniAttackPrefab_という項目があるか
+→UniAttackPrefab_には、UniAttackをアタッチする
+
