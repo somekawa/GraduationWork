@@ -132,8 +132,13 @@ public class ButtleMng : MonoBehaviour
             {
                 Debug.Log("攻撃コマンドが有効コマンドです");
                 charSetting[(int)nowTurnChar_].animator.SetBool(key_isAttack, true);
-                charSetting[(int)nowTurnChar_].isMove = true;
-                AttackStart((int)nowTurnChar_);
+                // isMoveがfalseのときだけ攻撃エフェクトのInstanceとisMoveのtrue化処理を行うようにして、
+                // エフェクトがボタン連打で大量発生するのを防ぐ
+                if(!charSetting[(int)nowTurnChar_].isMove)
+                {
+                    AttackStart((int)nowTurnChar_);
+                    charSetting[(int)nowTurnChar_].isMove = true;
+                }
             }
             else
             {

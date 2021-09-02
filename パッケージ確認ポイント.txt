@@ -98,3 +98,7 @@ CameraMngというスクリプトがついているか
 　引数にUniAttackPrefab_という項目があるか
 →UniAttackPrefab_には、UniAttackをアタッチする
 
+・新規Tagの追加
+→Enemyというタグを追加しました。
+敵を配置した際は、このタグをつけるようにしてください。
+

@@ -45,21 +45,13 @@ public class MagicMove : MonoBehaviour
         rigid.AddForce(direction * power);
     }
 
-    //　衝突しない判定
     void OnTriggerEnter(Collider col)
     {
-        //　敵に当たった場合はダメージを与える
+        // 呼ばれてはいる
+        // 敵に当たった場合
         if (col.tag == "Enemy")
         {
-            Destroy(col.gameObject);
-        }
-    }
-
-    //　衝突する判定
-    void OnCollisionEnter(Collision col)
-    {
-        if (col.gameObject.tag == "Enemy")
-        {
+            Debug.Log("Hit");
             Destroy(col.gameObject);
         }
     }
