@@ -11,21 +11,44 @@ public class ImageRotate : MonoBehaviour
     // 回転方向
     enum DIR
     {
-        NON,
-        LEFT,
-        RIGHT
+        NON,    // 回転なし
+        LEFT,   // 左回転
+        RIGHT   // 右回転
+    }
+
+    // 選択コマンド
+    enum COMMAND
+    {
+        NON,    // 回転中で選択中コマンドがない状態
+        ATTACK, // 攻撃コマンド(初期コマンド)
+        MAGIC,  // 魔法コマンド
+        ITEM,   // アイテムコマンド
+        ESCAPE, // 逃走コマンド
+        MAX     
     }
 
     private DIR rotateDir_ = DIR.NON;   // 回転方向の指定
     private float targetRotate_ = 0.0f; // 回転角度
+
+    // キーを角度,値をCOMMANDのenumで作ったmap
+    private Dictionary<int, COMMAND> commandMap_;
+    private COMMAND nowCommand_ = COMMAND.ATTACK;   // 現在の選択中コマンド
     
     void Start()
     {
+        // コマンド状態の追加
+        commandMap_ = new Dictionary<int, COMMAND>(){
+            {0,COMMAND.ATTACK},
+            {90,COMMAND.MAGIC},
+            {180,COMMAND.ESCAPE},
+            {270,COMMAND.ITEM},
+        };
     }
 
     void Update()
     {
         //Debug.Log(targetRotate_);
+        Debug.Log(nowCommand_);
 
         // キーによって、回転方向を決定する
         if (Input.GetKeyDown(KeyCode.J))
@@ -45,6 +68,12 @@ public class ImageRotate : MonoBehaviour
             // 何も処理を行わない
         }
 
+        // 360以上か以下なら、targetRotate_を0に戻す
+        if (targetRotate_ >= 360 || targetRotate_ <= -360)
+        {
+            targetRotate_ = 0;
+        }
+
         // 目標角度をオイラー角からクォータニオンにする
         var target = Quaternion.Euler(new Vector3(0.0f, 0.0f, targetRotate_));
 
@@ -54,14 +83,26 @@ public class ImageRotate : MonoBehaviour
         // Quaternion.Angleで2つのクォータニオンの間の角度を求める
         if (Quaternion.Angle(now_rot, target) <= 1.0f)
         {
+            // 回転終了
+            int rota = (int)targetRotate_;
+            if (rota < 0)   // 左回転の場合は、rotaがマイナス値になるため+360して右回転と同じ値に変更する
+            {
+                rota += 360;
+            }
+            // 現在の回転角度を見て、COMMANDを決定する
+            nowCommand_ = commandMap_[rota];
+
             // Angleの値が指定の幅以下になったら目標地点に来た扱いにして、処理を止める
             transform.rotation = target;
             rotateDir_ = DIR.NON;
         }
         else
         {
+            // 回転中
+            nowCommand_ = COMMAND.NON;
+
             // 指定の幅に届いていない場合は、回転方向を確認して、回転を続ける
-            if(rotateDir_ == DIR.RIGHT)
+            if (rotateDir_ == DIR.RIGHT)
             {
                 transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f));
             }

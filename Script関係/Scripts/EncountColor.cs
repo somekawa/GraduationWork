@@ -8,7 +8,6 @@ public class EncountColor : MonoBehaviour
     // 決められた時間内に赤まで必ず到達する仕組み
     // redStartFlg_は、時間値でtrueに変化する
 
-    // intだとエラーがでる
     private readonly float red   = 255.0f;
     private readonly float green = 255.0f;
     private readonly float blue  = 255.0f;

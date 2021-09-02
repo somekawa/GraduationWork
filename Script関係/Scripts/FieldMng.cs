@@ -23,7 +23,7 @@ public class FieldMng : MonoBehaviour
 
     public static MODE nowMode = MODE.SEARCH;       // Œ»Ý‚Ìƒ‚[ƒh
 
-    private float toButtleTime_ = 10.0f;            // 30•bŒo‰ß‚Åƒoƒgƒ‹‚Ö‘JˆÚ‚·‚é
+    private float toButtleTime_ = 30.0f;            // 30•bŒo‰ß‚Åƒoƒgƒ‹‚Ö‘JˆÚ‚·‚é
     private float time_ = 0.0f;                     // Œ»Ý‚ÌŒo‰ßŽžŠÔ
 
     private UnitychanController player_;            // ƒvƒŒƒCƒ„[î•ñŠi”[—p
@@ -47,7 +47,7 @@ public class FieldMng : MonoBehaviour
             {
                 time_ += Time.deltaTime;
             }
-            else if(time_ > toButtleTime_)
+            else if(time_ >= toButtleTime_)
             {
                 nowMode = MODE.BUTTLE;
                 time_ = 0.0f;
