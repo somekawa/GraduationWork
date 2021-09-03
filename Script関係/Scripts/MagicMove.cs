@@ -21,7 +21,7 @@ public class MagicMove : MonoBehaviour
         particle = GetComponentInChildren<ParticleSystem>();
 
         // 5•bŒã‚ÉÁ‚¦‚éH
-        Destroy(this.gameObject,5);
+        //Destroy(this.gameObject,5);
     }
 
     void Update()
@@ -53,9 +53,8 @@ public class MagicMove : MonoBehaviour
         {
             Debug.Log("Hit");
             Destroy(col.gameObject);
+            Destroy(this.gameObject);
             col = null; // DestroyŒã‚Énull‘ã“üˆ—
         }
-
-        // ‚±‚Ì‚Ü‚Ü‚Å‚Í“G‚ğŠÑ’Ê‚µ‚Ä‚µ‚Ü‚¤
     }
 }

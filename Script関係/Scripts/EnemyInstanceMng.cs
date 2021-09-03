@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class EnemyInstanceMng : MonoBehaviour
 {
-    public GameObject EnemyInstancePointPack;
-    public GameObject EnemyCube;
+    public GameObject EnemyInstancePointPack;   // 敵の出現位置を設定したもの
+    public GameObject EnemyCube;                // テスト用の敵
 
     // キーがint , valueがList Vector3の[各ワープポイントの数]のmapがいいかも
     private Dictionary<int, List<Vector3>> enemyPosSetMap_ = new Dictionary<int, List<Vector3>>();
@@ -44,5 +44,10 @@ public class EnemyInstanceMng : MonoBehaviour
             //　敵プレハブをインスタンス化
             Instantiate(EnemyCube, pos, Quaternion.identity);
         }
+    }
+
+    public Vector3 GetEnemyPos(int mapNum)
+    {
+        return enemyPosSetMap_[mapNum][0];
     }
 }

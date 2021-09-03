@@ -49,6 +49,7 @@ public class CharacterMng : MonoBehaviour
     private Dictionary<CharcterNum, GameObject> charMap_;
 
     private ImageRotate buttleCommandUI_;           // バトル中のコマンドUIを取得して、保存しておく変数
+    private EnemyInstanceMng enemyInstanceMng_;     // 敵インスタンス管理クラスの情報
 
     void Start()
     {
@@ -78,6 +79,7 @@ public class CharacterMng : MonoBehaviour
         }
 
         buttleCommandUI_ = buttleUICanvas.transform.Find("Image").GetComponent<ImageRotate>();
+        enemyInstanceMng_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>();
     }
 
     void Update()
@@ -177,13 +179,22 @@ public class CharacterMng : MonoBehaviour
 
     void AttackStart(int charNum)
     {
+        // 敵の位置を取得する
+        var enePos = enemyInstanceMng_.GetEnemyPos(1);
+        enePos.y = 0.0f;        // ここで0.0fにしないと斜め上方向に飛んでしまう
+
+        // 通常攻撃弾の方向の計算
+        var dir = (enePos - charSetting[charNum].buttlePos).normalized;
+
         // エフェクトの発生位置高さ調整
         var adjustPos = new Vector3(charSetting[charNum].buttlePos.x, charSetting[charNum].buttlePos.y + 0.5f, charSetting[charNum].buttlePos.z);
 
         //　通常攻撃弾プレハブをインスタンス化
         //var uniAttackInstance = Instantiate(uniAttackPrefab_, transform.position + transform.forward, Quaternion.identity);
         var uniAttackInstance = Instantiate(uniAttackPrefab_, adjustPos + transform.forward, Quaternion.identity);
+
         //　通常攻撃弾の飛んでいく方向を指定
-        uniAttackInstance.GetComponent<MagicMove>().SetDirection(transform.forward);
+        //uniAttackInstance.GetComponent<MagicMove>().SetDirection(transform.forward);
+        uniAttackInstance.GetComponent<MagicMove>().SetDirection(dir);
     }
 }
