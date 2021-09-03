@@ -110,22 +110,32 @@ public class CharacterMng : MonoBehaviour
         // キャラ毎のモーションを呼ぶ
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            // 現在の有効コマンドが攻撃コマンドになっているか
-            if (buttleCommandUI_.GetNowCommand() == ImageRotate.COMMAND.ATTACK)
+            // 選択されたコマンドに対する処理
+            switch(buttleCommandUI_.GetNowCommand())
             {
-                Debug.Log("攻撃コマンドが有効コマンドです");
-                charSetting[(int)nowTurnChar_].animator.SetBool(key_isAttack, true);
-                // isMoveがfalseのときだけ攻撃エフェクトのInstanceとisMoveのtrue化処理を行うようにして、
-                // エフェクトがボタン連打で大量発生するのを防ぐ
-                if (!charSetting[(int)nowTurnChar_].isMove)
-                {
-                    AttackStart((int)nowTurnChar_);
-                    charSetting[(int)nowTurnChar_].isMove = true;
-                }
-            }
-            else
-            {
-                Debug.Log("攻撃コマンドが有効コマンドではありません");
+                case ImageRotate.COMMAND.ATTACK:
+                    Debug.Log("攻撃コマンドが有効コマンドです");
+                    charSetting[(int)nowTurnChar_].animator.SetBool(key_isAttack, true);
+                    // isMoveがfalseのときだけ攻撃エフェクトのInstanceとisMoveのtrue化処理を行うようにして、
+                    // エフェクトがボタン連打で大量発生するのを防ぐ
+                    if (!charSetting[(int)nowTurnChar_].isMove)
+                    {
+                        AttackStart((int)nowTurnChar_);
+                        charSetting[(int)nowTurnChar_].isMove = true;
+                    }
+                    break;
+                case ImageRotate.COMMAND.MAGIC:
+                    Debug.Log("魔法コマンドが有効コマンドです");
+                    break;
+                case ImageRotate.COMMAND.ITEM:
+                    Debug.Log("アイテムコマンドが有効コマンドです");
+                    break;
+                case ImageRotate.COMMAND.ESCAPE:
+                    Debug.Log("逃走コマンドが有効コマンドです");
+                    break;
+                default:
+                    Debug.Log("無効なコマンドです");
+                    break;
             }
         }
         else

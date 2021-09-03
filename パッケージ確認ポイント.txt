@@ -1,11 +1,12 @@
-・Layerが0～7まであるか
-染川が
+・Layerが0～8まであるか
 6:Player
 7:Weapon
+8:Field
 を新規追加しました。
 
 6:Playerは、それぞれキャラクターに設定
 7:Weaponは、キャラの右手につけたStaffに設定
+8:Fieldはまだ未使用
 
 ・キャラクターのインスペクターが正しいか
 ①Animator
@@ -56,6 +57,8 @@ CameraMngというスクリプトがついているか
 
 ------------------------------------------------
 <0901更新>
+*重要*
+0902の更新で、一部ここの記載とは異なります。
 
 ・ButtleMngオブジェクトにButtleMng.csのアタッチ
 →ButtleMng.scのアタッチが増えている。
@@ -78,10 +81,6 @@ CameraMngというスクリプトがついているか
 
 →ImageにEncountColor.csがついているか確認
 　これが色変化で使用されるやつ。
-
-・まだ未使用だが、新規レイヤーとして[Field]が
-　あるか確認
-
 
 ------------------------------------------------
 <0902更新>
@@ -122,4 +121,7 @@ Element0 → SD_unitychan_humanoid0
 Element1 → SD_unitychan_humanoid1
 ・ButtleWarpPointPack → ButtleWarpPointPack
 ・UniAttackPrefab_    → UniAttack
+
+------------------------------------------------
+<0903更新>
 
