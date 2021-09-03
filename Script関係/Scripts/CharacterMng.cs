@@ -28,6 +28,8 @@ public class CharacterMng : MonoBehaviour
     private const string key_isAttack = "isAttack"; // 攻撃モーション(全キャラで名前を揃える必要がある)
 
     CharcterNum nowTurnChar_ = CharcterNum.MAX;     // 現在行動順が回ってきているキャラクター
+    private bool selectFlg_ = false;
+
     private const int buttleCharMax_ = 2;           // バトル参加可能キャラ数の最大値(最終的には3にする)
     private Vector3[] buttleWarpPointsPos_ = new Vector3[buttleCharMax_];            // 戦闘時の配置位置を保存しておく変数
     private Quaternion[] buttleWarpPointsRotate_ = new Quaternion[buttleCharMax_];   // 戦闘時の回転角度を保存しておく変数(クォータニオン)
@@ -48,8 +50,11 @@ public class CharacterMng : MonoBehaviour
     // キーをキャラ識別enum,値を(キャラ識別に対応した)キャラオブジェクトで作ったmap
     private Dictionary<CharcterNum, GameObject> charMap_;
 
-    private ImageRotate buttleCommandUI_;           // バトル中のコマンドUIを取得して、保存しておく変数
-    private EnemyInstanceMng enemyInstanceMng_;     // 敵インスタンス管理クラスの情報
+    private ImageRotate buttleCommandUI_;                         // バトル中のコマンドUIを取得して、保存しておく変数
+    private EnemySelect buttleEnemySelect_;                       // バトル中の選択アイコン情報
+
+    private int enemyNum_ = 0;                                    // バトル時の敵の数
+    private Dictionary<int, List<Vector3>> enemyInstancePos_;     // 敵のインスタンス位置の全情報
 
     void Start()
     {
@@ -78,8 +83,10 @@ public class CharacterMng : MonoBehaviour
             buttleWarpPointsRotate_[i] = buttleWarpPointPack.transform.GetChild(i).gameObject.transform.rotation;
         }
 
-        buttleCommandUI_ = buttleUICanvas.transform.Find("Image").GetComponent<ImageRotate>();
-        enemyInstanceMng_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>();
+        buttleCommandUI_   = buttleUICanvas.transform.Find("Image").GetComponent<ImageRotate>();
+        buttleEnemySelect_ = buttleUICanvas.transform.Find("EnemySelectObj").GetComponent<EnemySelect>();
+
+        enemyInstancePos_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().GetEnemyPos();
     }
 
     void Update()
@@ -88,6 +95,15 @@ public class CharacterMng : MonoBehaviour
         {
             nowTurnChar_ = CharcterNum.UNI;
         }
+    }
+
+    // ButtleMng.csから敵の数を受け取る
+    public void SetEnemyNum(int enemyNum)
+    {
+        enemyNum_ = enemyNum;
+
+        // 矢印アイコンが表示できるように座標を渡す
+        buttleEnemySelect_.SetPosList(enemyInstancePos_[enemyNum_]);
     }
 
     // 戦闘開始時に設定される項目(ButtleMng.csで参照)
@@ -116,15 +132,28 @@ public class CharacterMng : MonoBehaviour
             switch(buttleCommandUI_.GetNowCommand())
             {
                 case ImageRotate.COMMAND.ATTACK:
-                    Debug.Log("攻撃コマンドが有効コマンドです");
-                    charSetting[(int)nowTurnChar_].animator.SetBool(key_isAttack, true);
-                    // isMoveがfalseのときだけ攻撃エフェクトのInstanceとisMoveのtrue化処理を行うようにして、
-                    // エフェクトがボタン連打で大量発生するのを防ぐ
-                    if (!charSetting[(int)nowTurnChar_].isMove)
+
+                    if(!selectFlg_)
                     {
-                        AttackStart((int)nowTurnChar_);
-                        charSetting[(int)nowTurnChar_].isMove = true;
+                        selectFlg_ = true;
                     }
+                    else
+                    {
+                        Debug.Log("攻撃コマンドが有効コマンドです");
+                        charSetting[(int)nowTurnChar_].animator.SetBool(key_isAttack, true);
+                        // isMoveがfalseのときだけ攻撃エフェクトのInstanceとisMoveのtrue化処理を行うようにして、
+                        // エフェクトがボタン連打で大量発生するのを防ぐ
+                        if (!charSetting[(int)nowTurnChar_].isMove)
+                        {
+                            AttackStart((int)nowTurnChar_);
+                            charSetting[(int)nowTurnChar_].isMove = true;
+                            selectFlg_ = false;
+                        }
+                    }
+
+                    buttleCommandUI_.SetRotaFlg(!selectFlg_);
+                    buttleEnemySelect_.SetActive(selectFlg_);
+
                     break;
                 case ImageRotate.COMMAND.MAGIC:
                     Debug.Log("魔法コマンドが有効コマンドです");
@@ -180,7 +209,7 @@ public class CharacterMng : MonoBehaviour
     void AttackStart(int charNum)
     {
         // 敵の位置を取得する
-        var enePos = enemyInstanceMng_.GetEnemyPos(1);
+        var enePos = buttleEnemySelect_.GetSelectEnemyPos();
         enePos.y = 0.0f;        // ここで0.0fにしないと斜め上方向に飛んでしまう
 
         // 通常攻撃弾の方向の計算
@@ -196,5 +225,8 @@ public class CharacterMng : MonoBehaviour
         //　通常攻撃弾の飛んでいく方向を指定
         //uniAttackInstance.GetComponent<MagicMove>().SetDirection(transform.forward);
         uniAttackInstance.GetComponent<MagicMove>().SetDirection(dir);
+
+        // 選択した敵の番号を渡す
+        uniAttackInstance.GetComponent<MagicMove>().SetTargetNum(buttleEnemySelect_.GetSelectNum() + 1);
     }
 }

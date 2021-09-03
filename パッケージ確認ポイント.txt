@@ -137,3 +137,19 @@ Element1 → SD_unitychan_humanoid1
 →EnemyInstancePointPackという引数に、
 　EnemyInstancePointPackのオブジェクトがアタッチ
 　されているか
+
+・BattleUICanvasの子に、EnemySelectObjという
+　球体が追加されているか
+→EnemySelectObjには、EnemySelect.csがアタッチさ　れているか
+
+現在の操作で可能なこと
+・走る
+・時間経過で戦闘に入る
+・攻撃コマンドを押すと、敵の頭上に球体がでてくる
+　(球体は選択している敵の頭上に現れる)
+・球体が表示中にHキーやJキーで選択する敵を変更
+　できる
+・敵の頭上に球体がある状態で、再びSPACEキーを押す　とキャラから弾がでる
+・ぶつかると弾と敵が消滅する
+・ヒエラルキーのButtleMngにあるEnemyNumという引数　の値を(1～4)まで変更できるので、全ての数で操作　の確認をお願いします。
+

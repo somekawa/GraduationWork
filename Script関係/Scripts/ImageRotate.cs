@@ -34,6 +34,8 @@ public class ImageRotate : MonoBehaviour
     private Dictionary<int, COMMAND> commandMap_;
     public COMMAND nowCommand_ = COMMAND.ATTACK;   // 現在の選択中コマンド
 
+    private bool rotaFlg_ = true;       // 回転をしてもいいかを判定する(true:回転してよい)
+
     void Start()
     {
         // コマンド状態の追加
@@ -49,6 +51,11 @@ public class ImageRotate : MonoBehaviour
     {
         //Debug.Log(targetRotate_);
         //Debug.Log(nowCommand_);
+
+        if(!rotaFlg_)
+        {
+            return;
+        }
 
         // キーによって、回転方向を決定する
         if (Input.GetKeyDown(KeyCode.J))
@@ -129,5 +136,11 @@ public class ImageRotate : MonoBehaviour
     public COMMAND GetNowCommand()
     {
         return nowCommand_;
+    }
+
+    // CharacterMng.csのselectFlg_によって、回転できるかできないかのフラグを切り替える
+    public void SetRotaFlg(bool flag)
+    {
+        rotaFlg_ = flag;
     }
 }

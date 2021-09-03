@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class MagicMove : MonoBehaviour
 {
-    //　飛んでいく方向
+    // 飛んでいく方向
     private Vector3 direction;
-    //　飛ばす力
+    // 飛ばす力
     [SerializeField]
     private float power;
-    //　Rigidbody
+    // Rigidbody
     private Rigidbody rigid;
-    //　パーティクルシステム
+    // パーティクルシステム
     private ParticleSystem particle;
+    // 目標の敵か判別する番号
+    private int targetNum_;
 
     void Start()
     {
@@ -39,6 +41,11 @@ public class MagicMove : MonoBehaviour
         this.direction = direction;
     }
 
+    public void SetTargetNum(int num)
+    {
+        targetNum_ = num;
+    }
+
     //　力を加えて飛ばす
     void FixedUpdate()
     {
@@ -47,14 +54,17 @@ public class MagicMove : MonoBehaviour
 
     void OnTriggerEnter(Collider col)
     {
-        // 呼ばれてはいる
         // 敵に当たった場合
         if (col.tag == "Enemy")
         {
-            Debug.Log("Hit");
-            Destroy(col.gameObject);
-            Destroy(this.gameObject);
-            col = null; // Destroy後にnull代入処理
+            // 目標の敵に当たった場合
+            if(targetNum_ == int.Parse(col.name))
+            {
+                Debug.Log("Hit");
+                Destroy(col.gameObject);
+                Destroy(this.gameObject);
+                col = null; // Destroy後にnull代入処理
+            }
         }
     }
 }

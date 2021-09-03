@@ -32,22 +32,28 @@ public class EnemyInstanceMng : MonoBehaviour
 
     void Update()
     {
-        
+
     }
 
     // 敵のインスタンス処理(配置ポジションをButtleMng.csで指定できるように引数を用意している)
     public void EnemyInstance(int mapNum)
     {
+        int num = 1;
         // 指定されたマップのリストを取り出して、foreach文で回す
         foreach(Vector3 pos in enemyPosSetMap_[mapNum])
         {
             //　敵プレハブをインスタンス化
-            Instantiate(EnemyCube, pos, Quaternion.identity);
+            //Instantiate(EnemyCube, pos, Quaternion.identity);
+            GameObject enemy = Instantiate(EnemyCube, pos, Quaternion.identity) as GameObject;
+            enemy.name = num.ToString();
+
+            num++;
         }
     }
 
-    public Vector3 GetEnemyPos(int mapNum)
+    // CharacterMng.csに座標情報を渡す
+    public Dictionary<int, List<Vector3>> GetEnemyPos()
     {
-        return enemyPosSetMap_[mapNum][0];
+        return enemyPosSetMap_;
     }
 }

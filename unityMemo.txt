@@ -707,7 +707,7 @@ Buttle関数のスペースキーを押したの処理にswitch文を入れて�
 　名前をint型で取得できるようになる)
 
 [→実際の座標にするBox(1)]として[1]の子供に
-[InstancePoint1]というCubeを作成
+また、[1]というCubeを作成
 BoxColliderをRemoveして、座標(x:0,y:0.5,z:3.5)に
 設置する。
 
@@ -800,13 +800,89 @@ SPACEキー押下→攻撃モーション
 
 ・・・どうやってつくろう＞＜
 
+(案)
+CharacterMng.csでSpaceキーを押したときに、
+矢印のクラスへenemyInstanceMng_のpos情報を渡して、矢印のクラスで敵選択の操作をする。
+再びSPACEキーを押されたら選択した敵の座標が矢印のクラスからCharacterMng.csにreturnされるようにして、そのreturnされた座標に対して攻撃を飛ばすようにする。
+※cancelボタンが押されてもreturn -1;とかにして、
+　CharacterMng.csに戻されるようにする。
+
+------------------------------------------------
+
+<上記の(案)を使って、敵選択を実装する>-----------
+
+まずは、CharacterMng.cのStart関数で、敵の出現座標を全てEnemyInstanceMng.csから受け取っておく。
+
+矢印のクラスへenemyInstanceMng_のpos情報を渡す際に敵の出現座標を全て渡すのは効率が悪いので、
+ButtleMng.cs側で敵の出現数を決定した後、
+CharacterMng.csに新規で用意したSetEnemyNum関数に
+値を設定するようにした。
+(enemyNum_という変数に保存しておく)
+
+これで矢印のクラスpos情報を渡すときは、
+enemyInstancePos_[enemyNum_]とすれば必要な座標だけ渡すことができる。はず。
+
+あとは、テストとして矢印の代わりにSphereを用意して[EnemySelectObj]と命名。Collider外す。
+そこに新規Scriptの[EnemySelect.cs]をアタッチ。
+
+[EnemySelectObj]は、ButtleUICanvasの子供にしておく。
+
+CharacterMng.csにはもともとbuttleUICanvasをアタッチしていたので、private変数でEnemySelect.csを
+取得できるようにする。
+
+EnemySelect.cs側にSetPosList関数を用意して、
+CharacterMng.csのSetEnemyNum関数内で呼び出す。
+
+SetPosList関数ではY座標を高くしないといけないため
+参照したもの↓
+https://among-ev.hatenadiary.org/entry/20100925/1285412730
+上記のサイトを参考に調整した。
+
+次は、キー操作で矢印の位置が移動するようにする。
+EnemySelect.csのUpdate関数に条件付きで位置移動を
+させれば完成。
+※InstancePointを全て左から順にするようにヒエラル　キーを設定しなおす
+
+<ATTACKを選択する前から矢印がでてるバグ>
+CharacterMng.csでselectFlg_という変数を作り、
+ATTACK時に切り替えられるようにしておく。
+また、矢印の表示/非表示をCameraMng.cs側で
+設定できるように、SetActiveという関数を追加した。
+
+
+EnemySelect.csにGetSelectEnemyPosを追加して、
+最終的に選択した敵の座標をCharacterMng.csの
+AttackStart関数に情報を引っ張ってこれるようにした
+
+<敵選択中にコマンドがくるくるしちゃうバグ>
+ImageRotate.csにrotaFlg_という変数を追加してSetRotaFlgという関数も追加。
+CharacterMng.cs側で設定できるようにしたため、
+buttleCommandUI_.SetRotaFlg(!selectFlg);という
+処理をButtle関数のATTACKのcase文内に追加した。
+
+<選択した敵にぶつかるまえに違う敵に当たり、
+ 弾が消滅してしまうバグ>
+MgicMove.csのOnTriggerEnter関数で当たり判定をするとき、選択した敵以外ならDestroyしないようにする
+
+CharacterMng.csのAttackStart関数で生成されるから
+ここに、選択した敵かの判別ができるようにしたい
+MagicMove.csにSetTargetNum関数を作り、
+CharacterMng.cs側から選択した敵の番号を設定できるようにした。
+
+次に、EnemyInstanceMng.csのEnemyInstance関数で
+生成した敵の名前を[EnemyCube]から変更し、
+生成順で番号にした。詳細は下のサイト
+
+EnemyCubeに名前を付ける
+参照したもの↓
+https://teratail.com/questions/44869
+
+あとはMagicMove.csの当たり判定時にif文を追加して
+当たった敵と選択していた敵の番号が一致しているかを見てDestroyするかしないかを決めるようにした。
+
 ------------------------------------------------
 
 なにもしないでも敵に遭遇できるアイテムがあったら便利そう。
-
-1体の敵の位置にむかって弾が飛ぶようにして
-複数いたら、誰に当てるか選択肢がでて選んで攻撃
-とできるようにする。
 
 キャラが攻撃対象を選ぶ時に、
 矢印が敵の頭の上に浮いててフワフワくるくるしてて
