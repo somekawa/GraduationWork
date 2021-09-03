@@ -90,6 +90,7 @@ CameraMngというスクリプトがついているか
 →IsTriggerにチェックあり
 ②RigidBody
 →UseGravityにチェックなし
+→Radius 0.5
 ③MagicMove.cs
 →Power 10
 　
@@ -124,4 +125,15 @@ Element1 → SD_unitychan_humanoid1
 
 ------------------------------------------------
 <0903更新>
+・Prefabファイルの中に、MagicEffectとEnemyという
+　フォルダが追加されているか。
 
+・階層移動によりCharacterMngのUniAttackが外れてい　ないか
+
+・EnemyInstancePointPackがヒエラルキーにあるか
+
+・EnemyInstanceMngという空のオブジェクトに
+　EnemyInstanceMng.csがついているか
+→EnemyInstancePointPackという引数に、
+　EnemyInstancePointPackのオブジェクトがアタッチ
+　されているか

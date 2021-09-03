@@ -662,6 +662,110 @@ Element1 → SD_unitychan_humanoid1
 
 ------------------------------------------------
 
+<攻撃コマンド以外のコマンドを仮実装する>---------
+CharacterMng.csに、攻撃コマンド以外のコマンドを
+仮実装していく。
+
+Buttle関数のスペースキーを押したの処理にswitch文を入れておく。
+コマンド別にデバッグログが出力されるようにしとく
+
+いまはこれで十分だろう。
+------------------------------------------------
+
+<敵の生成ポイントをつくる>----------------------
+
+出現ポイントを用意しておいて、そこにインスタンスされるようにしたい。
+
+ヒエラルキーの階層としては、
+
+敵のワープポイント管理親
+　→1体の時の親
+　　→実際の座標にするBox(1)
+　→2体の時の親
+　　→実際の座標にするBox(1)
+　　→実際の座標にするBox(2)
+　→3体の時の親
+　　→実際の座標にするBox(1)
+　　→実際の座標にするBox(2)
+　　→実際の座標にするBox(3)
+　→4体の時の親
+　　→実際の座標にするBox(1)
+　　→実際の座標にするBox(2)
+　　→実際の座標にするBox(3)
+　　→実際の座標にするBox(4)
+
+こんな感じかしら？
+
+------------------------------------------------
+
+<まずは、中央に1体出せるようにしよう>------------
+[敵のワープポイント管理親]として、[EnemyInstancePointPack]という空のオブジェクトを作成
+
+[→1体の時の親]として、EnemyInstancePointPackの
+子供に[1]という空のオブジェクトを作成
+(ここを番号にすることによって、
+　名前をint型で取得できるようになる)
+
+[→実際の座標にするBox(1)]として[1]の子供に
+[InstancePoint1]というCubeを作成
+BoxColliderをRemoveして、座標(x:0,y:0.5,z:3.5)に
+設置する。
+
+※EnemyCubeはEnemyMaterialで赤を用意してアタッチ
+　その後、Prefab化してヒエラルキーから除外する。
+
+空のオブジェクトを作成し[EnemyInstanceMng]と命名
+新規Scriptを作成し、[EnemyInstanceMng.cs]と命名
+空のオブジェクトに新規Scriptをアタッチする。
+
+EnemyInstanceMngのEnemyInstancePointPackという
+引数に、ヒエラルキーのEnemyInstancePointPackを
+アタッチする。
+
+<EnemyInstanceMng.csの中身>
+Start関数で2重foreach分を回す。
+子と孫で順番に回したあとに、enemyPosSetMap_という変数にインスタンスしたい座標について保存する。
+詳細はスクリプトを読んでね。
+
+テストとして、public変数を追加して、Enemyとする
+先ほどPrefab化したEnemyCube(Assets-Prefab-Enemy)
+をEnemyInstanceMngのEnemyCubeという引数にアタッチする。
+
+あとはEnemyCubeのインスタンスタイミングの調整と、
+実際のインスタンス処理を行えば完成かな？
+
+①インスタンスタイミング
+ButtleMng.csのUpdate関数内にある
+if(!setCallOnce_)の中にEnemyInstanceMng.csが
+呼び出せればよい。
+まずは、ButtleMng.csにFindでEnemyInstanceMngを
+取得した変数を用意しておく。
+
+②実際のインスタンス処理
+これはEnemyInstanceMng.csでやる内容
+EnemyInstance(int mapNum)というpublic関数を
+用意したため、そこを見てね。
+あとは、この関数を①の呼び出し予定位置で呼べば終わり。
+
+------------------------------------------------
+
+<敵が2,3,4体でるバージョンもつくろう>------------
+
+EnemyInstancePointPackに[2][3][4]もつくろう
+設定方法は上記と同じ。
+確認するときは、ButtleMng.csで呼んでいるEnemyInstance関数の引数値を変更してね。
+
+※デバッグ用に、ButtleMngのインスペクターからいじ　れるようにしときます。
+　→debugEnemyNumという引数をButtleMngに追加
+
+-----------------------------------------------
+
+<UniAttackプレハブの修正>-----------------------
+UniAttackプレハブについて
+RigidBodyのRadius→0.5
+
+------------------------------------------------
+
 なにもしないでも敵に遭遇できるアイテムがあったら便利そう。
 
 企画書のパワポを共有で用意するぐらいしとこ。
@@ -672,7 +776,9 @@ Element1 → SD_unitychan_humanoid1
 複数いたら、誰に当てるか選択肢がでて選んで攻撃
 とできるようにする
 
-にげるコマンドの実装
+最終的には、ButtleWarpPointPackと
+EnemyInstancePointPackの2つをPrefab化しておいて
+ヒエラルキーからは除外し、AssetsフォルダからMng系にアタッチするように変更する予定。
 
 
 

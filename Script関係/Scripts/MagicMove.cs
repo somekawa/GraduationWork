@@ -53,6 +53,9 @@ public class MagicMove : MonoBehaviour
         {
             Debug.Log("Hit");
             Destroy(col.gameObject);
+            col = null; // DestroyŒã‚Énull‘ã“üˆ—
         }
+
+        // ‚±‚Ì‚Ü‚Ü‚Å‚Í“G‚ğŠÑ’Ê‚µ‚Ä‚µ‚Ü‚¤
     }
 }

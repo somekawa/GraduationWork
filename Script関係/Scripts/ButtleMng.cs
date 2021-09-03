@@ -8,17 +8,22 @@ using UnityEngine.UI;
 public class ButtleMng : MonoBehaviour
 {
     public Canvas buttleUICanvas;           // 表示/非表示をこのクラスで管理される
-    public Canvas FieldUICanvas;            // 表示/非表示をこのクラスで管理される
+    public Canvas fieldUICanvas;            // 表示/非表示をこのクラスで管理される
+
+    public int debugEnemyNum = 1;           // インスペクターから敵の生成数を変えれるように 
 
     private bool setCallOnce_ = false;      // 戦闘モードに切り替わった最初のタイミングだけ切り替わる
 
     private ImageRotate buttleCommandUI_;   // バトル中のコマンドUIを取得して、保存しておく変数
 
-    private CharacterMng characterMng_;     // キャラクター管理クラスの情報
+    private CharacterMng characterMng_;         // キャラクター管理クラスの情報
+    private EnemyInstanceMng enemyInstanceMng_; // 敵インスタンス管理クラスの情報
 
     void Start()
     {
         characterMng_ = GameObject.Find("CharacterMng").GetComponent<CharacterMng>();
+        enemyInstanceMng_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>();
+
         buttleCommandUI_ = buttleUICanvas.transform.Find("Image").GetComponent<ImageRotate>();
         buttleUICanvas.gameObject.SetActive(false);
     }
@@ -35,7 +40,7 @@ public class ButtleMng : MonoBehaviour
                 buttleCommandUI_.ResetRotate();   // UIの回転を一番最初に戻す
             }
             buttleUICanvas.gameObject.SetActive(false);
-            FieldUICanvas.gameObject.SetActive(true);
+            fieldUICanvas.gameObject.SetActive(true);
             return;
         }
 
@@ -44,9 +49,12 @@ public class ButtleMng : MonoBehaviour
         {
             setCallOnce_ = true;
             buttleUICanvas.gameObject.SetActive(true);
-            FieldUICanvas.gameObject.SetActive(false);
+            fieldUICanvas.gameObject.SetActive(false);
 
             characterMng_.ButtleSetCallOnce();
+
+            // 敵のInstanceタイミング
+            enemyInstanceMng_.EnemyInstance(debugEnemyNum);
         }
 
         characterMng_.Buttle();
