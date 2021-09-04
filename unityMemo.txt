@@ -1043,6 +1043,9 @@ https://robamemo.hatenablog.com/entry/2017/09/08/114144
 　.assetも削除する
 
 ②Excelの方にシートを追加する。
+　シート名は[Chapter0]と[Chapter1]にした。
+　※ここのシート名の決め方は結構大事
+　　このあとのパスの書き方に影響がでる
 
 ③上記の手順の⑤番目でsepalate sheetに
 　チェックを付けてcreateを押す。
@@ -1057,7 +1060,7 @@ https://robamemo.hatenablog.com/entry/2017/09/08/114144
 ⑤MobList_importer.csのパス指定を変更する。      var exportPath ="Assets/Resources/" + sheetName + ".asset";
   ※だいたい30行目らへんにある。
 　　ここもファイルの階層を変更するなら適時修正
-　　していくころ！
+　　していくこと！
 
 ⑥データを参照するスクリプトを作成する。
 　PopMob.csを作成して、サイト内容をコピー
@@ -1089,7 +1092,7 @@ var exportPath =
 ※必ずこの階層になるかはファイル階層次第なので
 　Resourcesファイルの中にまた分けるファイルを入れ　るなら下記のように
 
-"Assets/Resources/別階層/"+sheetName+".asset"
+"Assets/Resources/階層名/"+sheetName+".asset"
 
 という感じにする必要がある。
 
