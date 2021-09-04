@@ -882,6 +882,81 @@ https://teratail.com/questions/44869
 
 ------------------------------------------------
 
+<Destroyした敵の座標の上に矢印がでるバグ>--------
+
+Destroyされた敵の座標部分はとばすようにしたい。
+
+EnemySelece.csでつくっているposList_をタプルに変更して、座標情報とbool情報を持たせるようにした。
+
+boolの方はSetPosList関数の中で座標情報分Addした
+後に、全てtrueにしてposList_に代入する。
+
+そして、GetSelectNum関数でreturn selectNum_の前に該当するposList_のboolをfalseにする。
+(リストから削除すると要素が上に詰められて番号が異なるバグがでるため使わないようにした。)
+
+あとは、Update関数でselectNumが加算or減算される時に、「falseになっている座標は飛ばす」ようにしたい
+while文でつくった。
+
+EnemySelect.csにMoveSelectKeyという関数を新規で作成して、そこで飛ばす処理を書いた。
+
+最奥の敵と最手前の敵を倒した時に、while文だけでは
+その敵の位置に矢印を置かないようにする。という処理が実装できなかった。
+(while文を抜ける条件と被るから)
+その為、tmpFlgやforeach文を追加してつくった。
+
+UP処理の方では、foreach文を逆回しする必要があるので、posList_.Item2.Reverse();等を書いている。
+ただし、逆回しにしたまま処理を終わらないように、
+最後にもまたposList_.Item2.Reverse();を書いておくこと！
+
+<Destroy後にSPACEキー押下したら、消された所から
+ 矢印がスタートしてしまうバグ>
+HキーやJキーで切り替える範囲を狭めることは上記の処理で完成したが、消した直後にまたSPACEキーで選択するときは消えた敵のいた頭上からスタートしてしまう。
+
+EnemySelect.csにResetSelectPointという関数を新規で用意し、MoveSelectKey関数のDOWN処理にあるforeach部分と同じ処理をいれる。
+※まったく同じ処理なので、むしろResetSelectPoint　関数の内容を、MoveSelectKey関数のDOWN処理に呼ぶ　ようにした。
+これをCharacterMng.csのStartAttack関数のGetSelectNum関数を読んだあとに入れ込む。
+
+これで矢印のスタート位置をリセットできるようになった。
+
+------------------------------------------------
+
+<キャラが攻撃対象の方を向くようにする>-----------
+
+参照したもの↓
+https://code.hildsoft.com/entry/2017/07/06/060658
+
+CharacterMng.csのStartAttack関数に、
+charMap_[nowTurnChar_].transform.localRotation = Quaternion.LookRotation
+(enePos - charSetting[charNum].buttlePos);
+という一文を追加した。
+
+これにより、方向を変える事ができるようになった。
+------------------------------------------------
+
+<2回目以降敵と遭遇するとEnemyCubeが宙に浮いてる>-
+
+バグですね。
+原因は、矢印用にy軸にoffsetかけた座標が使われてしまっているから。
+
+座標のコピーがうまくいっていないんだと思う。
+
+(対処法)
+CharacterMng.csのSetEnemyNumで、今までは
+buttleEnemySelect_.SetPosList
+(enemyInstancePos_[enemyNum_]);という風に
+直接敵の初期座標を引数に入れていたが、
+
+これをコピーされるように
+List<Vector3> tmpInsPos = 
+new List<Vector3>(enemyInstancePos_[enemyNum_]);
+
+buttleEnemySelect_.SetPosList(tmpInsPos);
+
+上記のように一時変数に入れたものを引数に入れるようにしたら、きちんとコピーされるようになって、
+矢印のy座標が2回目以降使われなくなった。
+
+------------------------------------------------
+
 なにもしないでも敵に遭遇できるアイテムがあったら便利そう。
 
 キャラが攻撃対象を選ぶ時に、

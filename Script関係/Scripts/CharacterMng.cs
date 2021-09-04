@@ -103,7 +103,13 @@ public class CharacterMng : MonoBehaviour
         enemyNum_ = enemyNum;
 
         // 矢印アイコンが表示できるように座標を渡す
-        buttleEnemySelect_.SetPosList(enemyInstancePos_[enemyNum_]);
+        // 一時変数に発生位置をコピーしてそれを代入することで、敵の発生位置の高さが書き換えるのを防ぐ
+        List<Vector3> tmpInsPos = new List<Vector3>(enemyInstancePos_[enemyNum_]);
+        buttleEnemySelect_.SetPosList(tmpInsPos);
+
+        // NGな書き方
+        // この書き方では、元の敵の発生位置座標を書き換える形で矢印アイコンが生成されて、2回目以降敵の発生位置が矢印アイコンの高さになってしまう
+        //buttleEnemySelect_.SetPosList(enemyInstancePos_[enemyNum_]);
     }
 
     // 戦闘開始時に設定される項目(ButtleMng.csで参照)
@@ -118,7 +124,7 @@ public class CharacterMng : MonoBehaviour
 
             // ここで座標を保存しておくことで、メニュー画面での並び替えでも反映できるだろうし、
             // 攻撃エフェクトの発生位置の目安になる
-            charSetting[(int)character.Key].buttlePos = character.Value.gameObject.transform.position;
+            charSetting[(int)character.Key].buttlePos  = character.Value.gameObject.transform.position;
         }
     }
 
@@ -215,6 +221,10 @@ public class CharacterMng : MonoBehaviour
         // 通常攻撃弾の方向の計算
         var dir = (enePos - charSetting[charNum].buttlePos).normalized;
 
+        // 行動中のキャラが、攻撃対象の方向に体を向ける
+        // charMap_の情報を直接変更する必要があるため、charMap_[nowTurnChar_]と記述している
+        charMap_[nowTurnChar_].transform.localRotation = Quaternion.LookRotation(enePos - charSetting[charNum].buttlePos);
+
         // エフェクトの発生位置高さ調整
         var adjustPos = new Vector3(charSetting[charNum].buttlePos.x, charSetting[charNum].buttlePos.y + 0.5f, charSetting[charNum].buttlePos.z);
 
@@ -222,11 +232,15 @@ public class CharacterMng : MonoBehaviour
         //var uniAttackInstance = Instantiate(uniAttackPrefab_, transform.position + transform.forward, Quaternion.identity);
         var uniAttackInstance = Instantiate(uniAttackPrefab_, adjustPos + transform.forward, Quaternion.identity);
 
+        MagicMove magicMove = uniAttackInstance.GetComponent<MagicMove>();
         //　通常攻撃弾の飛んでいく方向を指定
-        //uniAttackInstance.GetComponent<MagicMove>().SetDirection(transform.forward);
-        uniAttackInstance.GetComponent<MagicMove>().SetDirection(dir);
+        //magicMove.SetDirection(transform.forward);
+        magicMove.SetDirection(dir);
 
         // 選択した敵の番号を渡す
-        uniAttackInstance.GetComponent<MagicMove>().SetTargetNum(buttleEnemySelect_.GetSelectNum() + 1);
+        magicMove.SetTargetNum(buttleEnemySelect_.GetSelectNum() + 1);
+
+        // 矢印位置のリセットを行う
+        buttleEnemySelect_.ResetSelectPoint();
     }
 }

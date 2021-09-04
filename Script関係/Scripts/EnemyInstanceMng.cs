@@ -25,7 +25,7 @@ public class EnemyInstanceMng : MonoBehaviour
                 posList.Add(grandChildTransform.gameObject.transform.position);
             }
 
-            // 一次保存していた座標リストを、マップへ代入する
+            // 一時保存していた座標リストを、マップへ代入する
             enemyPosSetMap_[int.Parse(childTransform.name)] = posList;
         }
     }
