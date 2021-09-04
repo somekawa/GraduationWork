@@ -957,6 +957,7 @@ buttleEnemySelect_.SetPosList(tmpInsPos);
 
 ------------------------------------------------
 
+<いろいろメモ欄>
 なにもしないでも敵に遭遇できるアイテムがあったら便利そう。
 
 キャラが攻撃対象を選ぶ時に、
@@ -971,8 +972,128 @@ EnemyInstancePointPackの2つをPrefab化しておいて
 今は、攻撃弾が敵にhitしたと同時に消えてて面白味がないから、改善策を考える
 →衝突後パーティクルとかあるといいかも
 
+------------------------------------------------
 
+************************************************
+ここからは、ストーリー部分の作り方について考える
 
+とりあえず、新しいSceneをつくってから始めよう。
+「conversationdata」というSceneを新規作成した。
+
+必要になりそうな知識
+①会話文を外部データで読み込む
+②会話に合わせて、キャラの表情を変化させる
+順番に、①から頑張ろう！
+
+<Excelファイルを読み込む方法>-------------------
+参照したもの↓
+https://robamemo.hatenablog.com/entry/2017/09/08/100140
+これと、
+https://robamemo.hatenablog.com/entry/2017/09/08/114144
+これ。
+
+①https://github.com/tsubaki/Unity-Excel-Importer-Maker
+上記の場所から、Zipをダウンロード
+
+②Terasurwareフォルダをプロジェクトに加える
+
+③テスト用のExcelを作成する。(拡張子は.xls)
+　名前は[MobList.xls]にした
+　※このとき、保存前に必ずカーソルを左上に戻す
+
+④Unity側に[ExcelData]という新規ファイルを作成し
+　MobList.xlsを入れる
+
+⑤[MobList.xls]を右クリックして、メニューの
+　[XLS Import Settings...]を押す
+
+⑥設定画面で(今回はMobListと)名前を付けて、    　　parameter settingsの型を正しく設定しなおす。
+　そしてcreateを押す。
+
+⑦Assets-Terasurware-Classesに[MobList.cs]
+  Assets-Terasurware-Classes-Editorに
+　[MobList_importer.cs]があるか確認する。
+
+⑧.assetファイルを生成するために、
+　ExcelDataファイルにあるMobListを右クリックして
+　Reimportというのを押す
+
+⑨⑧でつくった.assetファイルを、Resourcesフォルダ
+　に移動させる。
+　Resourcesフォルダがないなら新規ファイルで作成。
+　※スペルミス注意！！
+
+⑩MobList_importer.csのexportPathが⑨でファイル　移動させたことによって、変更が必要になる。
+　"Assets/Resources/MobList.asset"とすること。
+
+⑪データを参照するスクリプトをつくる。
+　新規作成で、[PopMob.cs]と命名。
+　中身は、上記サイトの同盟のスクリプトをコピー。
+
+⑫あとはヒエラルキーに空のオブジェクトを作成して
+　⑪をアタッチするだけ。
+
+この方法以外にも、シート毎に分けて読み込む方式が
+ある。たぶんそっちのほうが便利なので実際に使うときは分けて読み込もう。
+------------------------------------------------
+
+<Excelのシート毎に分けて読み込む方法>------------
+
+①上記で作成したスクリプトを削除する
+　.assetも削除する
+
+②Excelの方にシートを追加する。
+
+③上記の手順の⑤番目でsepalate sheetに
+　チェックを付けてcreateを押す。
+　※このあと、○○_importerでエラーがでる可能性が
+　高い。原因は、パスの途中に\が入っている箇所があ 　るからだ。そこを/に変えればたぶん問題ない。
+　ここでエラーを直しとかないと、.assetの作成が
+　できないから注意！
+
+④上記の手順の⑦⑧⑨を行う。
+　.assetファイルはシートの数だけ増える
+
+⑤MobList_importer.csのパス指定を変更する。      var exportPath ="Assets/Resources/" + sheetName + ".asset";
+  ※だいたい30行目らへんにある。
+　　ここもファイルの階層を変更するなら適時修正
+　　していくころ！
+
+⑥データを参照するスクリプトを作成する。
+　PopMob.csを作成して、サイト内容をコピー
+　(2つめのURLの方)
+　※ただし、PopMob.csのパスが自作したものだと
+　　サイトとは一致せずエラーになると思う
+
+もし、Resourcesフォルダに直接[Chapter0.asset]と
+[Chapter1.asset]を入れているなら、
+MobList mobList = Resources.Load
+           ("Chapter" + chapterNum) as MobList;
+となるのが正しい。ここは適時修正していくこと！
+
+------------------------------------------------
+
+<データ内容を変更したとき>----------------------
+おそらく、Excelの内容を更新したら.assetはつくりなおして、再びResourcesフォルダに入れなおす方法が必要だと思う。
+
+試してみた結果、.assetファイルを一度消して作り直してあげる必要がやっぱりありました。
+
+ただ、作り直した時にまたMobList_importer.csの
+30行目付近のexportPathがおかしくなるのが解せぬ。
+ここがエラーでると.assetが作成できなくなるので
+直してあげないといけない。
+
+<コピー用>
+var exportPath =
+ "Assets/Resources/" + sheetName + ".asset";
+※必ずこの階層になるかはファイル階層次第なので
+　Resourcesファイルの中にまた分けるファイルを入れ　るなら下記のように
+
+"Assets/Resources/別階層/"+sheetName+".asset"
+
+という感じにする必要がある。
+
+-----------------------------------------------
 
 
 
