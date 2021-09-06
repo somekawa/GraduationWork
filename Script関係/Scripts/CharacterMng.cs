@@ -13,7 +13,7 @@ public class CharacterMng : MonoBehaviour
 
     // enumとキャラオブジェクトをセットにしたmapを制作するためのリスト
     // キャラオブジェクトを要素としてアタッチできるようにしておく
-    public List<GameObject> charList;
+    public List<GameObject> charaObjList;
     public GameObject buttleWarpPointPack;  // 戦闘時にフィールド上の戦闘ポイントにキャラをワープさせる
 
     //　通常攻撃弾のプレハブ
@@ -28,27 +28,12 @@ public class CharacterMng : MonoBehaviour
         MAX
     }
 
-    private const string key_isAttack = "isAttack"; // 攻撃モーション(全キャラで名前を揃える必要がある)
-
     CharcterNum nowTurnChar_ = CharcterNum.MAX;     // 現在行動順が回ってきているキャラクター
     private bool selectFlg_ = false;
 
     private const int buttleCharMax_ = 2;           // バトル参加可能キャラ数の最大値(最終的には3にする)
     private Vector3[] buttleWarpPointsPos_ = new Vector3[buttleCharMax_];            // 戦闘時の配置位置を保存しておく変数
     private Quaternion[] buttleWarpPointsRotate_ = new Quaternion[buttleCharMax_];   // 戦闘時の回転角度を保存しておく変数(クォータニオン)
-
-    // それぞれのキャラ用に、必要なものをstructでまとめる
-    // AnimatorとかHPとか
-    public struct CharcterSetting
-    {
-        public Animator animator;   // 各キャラについているAnimatorのコンポーネント
-        public bool isMove;         // Waitモーション時はfalse
-        public float animTime;      // 次のキャラの行動に遷移するまでの間
-        public Vector3 buttlePos;   // 戦闘開始時に設定されるポジション(攻撃エフェクト等のInstance位置に利用)
-    }
-
-    // 上記の構造体を配列にしたもの
-    private CharcterSetting[] charSetting = new CharcterSetting[(int)CharcterNum.MAX];
 
     // キーをキャラ識別enum,値を(キャラ識別に対応した)キャラオブジェクトで作ったmap
     private Dictionary<CharcterNum, GameObject> charMap_;
@@ -59,21 +44,31 @@ public class CharacterMng : MonoBehaviour
     private int enemyNum_ = 0;                                    // バトル時の敵の数
     private Dictionary<int, List<Vector3>> enemyInstancePos_;     // 敵のインスタンス位置の全情報
 
+    private List<Chara> charasList_ = new List<Chara>();          // Chara.csをキャラ毎にリスト化する
+
     void Start()
     {
         // (何かに使えるかもしれないから、)キャラの情報はゲームオブジェクトとして最初に取得しておく
         charMap_ = new Dictionary<CharcterNum, GameObject>(){
-            {CharcterNum.UNI,charList[(int)CharcterNum.UNI]},
-            {CharcterNum.DEMO,charList[(int)CharcterNum.DEMO]},
+            {CharcterNum.UNI,charaObjList[(int)CharcterNum.UNI]},
+            {CharcterNum.DEMO,charaObjList[(int)CharcterNum.DEMO]},
         };
 
         // charMap_でforeachを回して、Animatorを取得する
         foreach (KeyValuePair<CharcterNum, GameObject> anim in charMap_)
         {
-            // 構造体のanimatorに、キャラ毎のAnimatorを代入する
-            charSetting[(int)anim.Key].animator = anim.Value.GetComponent<Animator>();
-            charSetting[(int)anim.Key].isMove = false;
-            charSetting[(int)anim.Key].animTime = 0.0f;
+            CharaBase.CharacterSetting charSetting = new CharaBase.CharacterSetting
+            {
+                // 構造体のanimatorに、キャラ毎のAnimatorを代入する
+                animator = anim.Value.GetComponent<Animator>(),
+                isMove = false,
+                animTime = 0.0f
+            };
+
+            // Charaクラスの生成
+            //charasList_.Add(new Chara("Uni" , CharcterNum.UNI , charSetting[(int)CharcterNum.UNI]));
+            //charasList_.Add(new Chara("Demo", CharcterNum.DEMO, charSetting[(int)CharcterNum.DEMO]));
+            charasList_.Add(new Chara(anim.Value.name, anim.Key, charSetting));
         }
 
         nowTurnChar_ = CharcterNum.UNI;
@@ -127,7 +122,8 @@ public class CharacterMng : MonoBehaviour
 
             // ここで座標を保存しておくことで、メニュー画面での並び替えでも反映できるだろうし、
             // 攻撃エフェクトの発生位置の目安になる
-            charSetting[(int)character.Key].buttlePos  = character.Value.gameObject.transform.position;
+            //charSetting[(int)character.Key].buttlePos  = character.Value.gameObject.transform.position;
+            charasList_[(int)character.Key].SetButtlePos(character.Value.gameObject.transform.position);
         }
     }
 
@@ -148,21 +144,15 @@ public class CharacterMng : MonoBehaviour
             switch(buttleCommandUI_.GetNowCommand())
             {
                 case ImageRotate.COMMAND.ATTACK:
-
                     if(!selectFlg_)
                     {
                         selectFlg_ = true;
                     }
                     else
                     {
-                        Debug.Log("攻撃コマンドが有効コマンドです");
-                        charSetting[(int)nowTurnChar_].animator.SetBool(key_isAttack, true);
-                        // isMoveがfalseのときだけ攻撃エフェクトのInstanceとisMoveのtrue化処理を行うようにして、
-                        // エフェクトがボタン連打で大量発生するのを防ぐ
-                        if (!charSetting[(int)nowTurnChar_].isMove)
+                        if(charasList_[(int)nowTurnChar_].Attack())
                         {
                             AttackStart((int)nowTurnChar_);
-                            charSetting[(int)nowTurnChar_].isMove = true;
                             selectFlg_ = false;
                         }
                     }
@@ -187,29 +177,8 @@ public class CharacterMng : MonoBehaviour
         }
         else
         {
-            charSetting[(int)nowTurnChar_].animator.SetBool(key_isAttack, false);
-
-            if (!charSetting[(int)nowTurnChar_].isMove)
+            if(charasList_[(int)nowTurnChar_].ChangeNextChara())
             {
-                return;
-            }
-
-            // ここから下は、isMoveがtrueの状態
-            // isMoveがtrueなら、さっきまで攻撃モーションだったことがわかる
-            // 再生時間用に間を空ける
-            // キャラ毎に必要な間が違うかもしれないから、1.0fの所は外部データ読み込みで、charSetting[(int)nowTurnChar_].maxAnimTimeとかを用意したほうがいい
-            if (charSetting[(int)nowTurnChar_].animTime < 1.0f)
-            {
-                charSetting[(int)nowTurnChar_].animTime += Time.deltaTime;
-                return;
-            }
-            else
-            {
-                // animTime値が1.0を上回ったとき
-                // animTime値の初期化と、モーションがWaitになった為isMoveをfalseへ戻す
-                charSetting[(int)nowTurnChar_].animTime = 0.0f;
-                charSetting[(int)nowTurnChar_].isMove = false;
-
                 // 次のキャラが行動できるようにする
                 // 最大まで加算されたら、初期値に戻す(前演算子重要)
                 if (++nowTurnChar_ >= CharcterNum.MAX)
@@ -218,25 +187,25 @@ public class CharacterMng : MonoBehaviour
                 }
             }
         }
-
-        //Debug.Log(nowTurnChar_ + "の攻撃");
     }
 
     void AttackStart(int charNum)
     {
+        Vector3 charaPos = charasList_[charNum].GetButtlePos();
+
         // 敵の位置を取得する
-        var enePos = buttleEnemySelect_.GetSelectEnemyPos();
+        Vector3 enePos = buttleEnemySelect_.GetSelectEnemyPos();
         enePos.y = 0.0f;        // ここで0.0fにしないと斜め上方向に飛んでしまう
 
         // 通常攻撃弾の方向の計算
-        var dir = (enePos - charSetting[charNum].buttlePos).normalized;
+        var dir = (enePos - charaPos).normalized;
 
         // 行動中のキャラが、攻撃対象の方向に体を向ける
         // charMap_の情報を直接変更する必要があるため、charMap_[nowTurnChar_]と記述している
-        charMap_[nowTurnChar_].transform.localRotation = Quaternion.LookRotation(enePos - charSetting[charNum].buttlePos);
+        charMap_[nowTurnChar_].transform.localRotation = Quaternion.LookRotation(enePos - charaPos);
 
         // エフェクトの発生位置高さ調整
-        var adjustPos = new Vector3(charSetting[charNum].buttlePos.x, charSetting[charNum].buttlePos.y + 0.5f, charSetting[charNum].buttlePos.z);
+        var adjustPos = new Vector3(charaPos.x, charaPos.y + 0.5f, charaPos.z);
 
         //　通常攻撃弾プレハブをインスタンス化
         //var uniAttackInstance = Instantiate(uniAttackPrefab_, transform.position + transform.forward, Quaternion.identity);

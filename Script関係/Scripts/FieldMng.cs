@@ -23,7 +23,7 @@ public class FieldMng : MonoBehaviour
 
     public static MODE nowMode = MODE.SEARCH;       // 現在のモード
 
-    private float toButtleTime_ = 30.0f;            // 30秒経過でバトルへ遷移する
+    private float toButtleTime_ = 1.0f;            // 30秒経過でバトルへ遷移する
     private float time_ = 0.0f;                     // 現在の経過時間
 
     private UnitychanController player_;            // プレイヤー情報格納用
@@ -31,7 +31,7 @@ public class FieldMng : MonoBehaviour
     void Start()
     {
         //unitychanの情報を取得
-        player_ = GameObject.Find("SD_unitychan_humanoid0").GetComponent<UnitychanController>();
+        player_ = GameObject.Find("Uni").GetComponent<UnitychanController>();
     }
 
     void Update()
@@ -61,7 +61,7 @@ public class FieldMng : MonoBehaviour
             case MODE.BUTTLE:
             if (time_ < toButtleTime_)
             {
-                time_ += Time.deltaTime;
+                //time_ += Time.deltaTime;
             }
             else
             {

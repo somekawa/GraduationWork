@@ -5,7 +5,7 @@ using System.Collections.Generic;
 interface InterfaceButtle
 {
     // Œp³‘¤‚ÅŠÖ”‚ğÀ‘•‚·‚é•K—v‚ª‚ ‚é
-    void Attack();
+    bool Attack();
     void Damage();
     void HP();
 }
