@@ -131,6 +131,13 @@ public class CharacterMng : MonoBehaviour
     // キャラの戦闘中に関する処理(ButtleMng.csで参照)
     public void Buttle()
     {
+        // ATTACKで敵選択中に、特定のキー(今はTキー)を押下されたらコマンド選択に戻る
+        if(selectFlg_ && !buttleEnemySelect_.ReturnSelectCommand())
+        {
+            selectFlg_ = false;
+            buttleCommandUI_.SetRotaFlg(!selectFlg_);   // コマンド回転を有効化
+        }
+
         // キャラ毎のモーションを呼ぶ
         if (Input.GetKeyDown(KeyCode.Space))
         {

@@ -35,9 +35,6 @@ public class EnemySelect : MonoBehaviour
             return;
         }
 
-        // falseになっているposListがあったら飛ばしたい
-        // while文でやったほうがよさそう
-
         if (Input.GetKeyDown(KeyCode.J))
         {
             selectKey_ = SelectKey.UP;
@@ -53,7 +50,7 @@ public class EnemySelect : MonoBehaviour
 
         MoveSelectKey(selectKey_);
 
-        Debug.Log("選択中の敵" + selectNum_);
+        //Debug.Log("選択中の敵" + selectNum_);
 
         // 座標移動
         this.gameObject.transform.position = posList_.Item1[selectNum_];
@@ -88,6 +85,7 @@ public class EnemySelect : MonoBehaviour
         //this.gameObject.transform.position = posList_[selectNum_];
     }
 
+    // falseになっているposListがあったらアイコン設置位置を飛ばす処理
     void MoveSelectKey(SelectKey key)
     {
         if(key == SelectKey.NON)
@@ -249,5 +247,16 @@ public class EnemySelect : MonoBehaviour
             }
             num++;
         }
+    }
+
+    // CharacterMng.cs側から呼び出して、Tキーが押されていたらコマンド選択に戻れるようにする
+    public bool ReturnSelectCommand()
+    {
+        if(Input.GetKeyDown(KeyCode.T))
+        {
+            this.gameObject.SetActive(false);   // 非表示に戻す
+            return false;
+        }
+        return true;
     }
 }

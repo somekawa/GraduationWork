@@ -153,3 +153,81 @@ Element1 → SD_unitychan_humanoid1
 ・ぶつかると弾と敵が消滅する
 ・ヒエラルキーのButtleMngにあるEnemyNumという引数　の値を(1～4)まで変更できるので、全ての数で操作　の確認をお願いします。
 
+<0906更新>
+新規に、「conversationdata」という
+会話中の処理を単体テストしているSceneを追加した。
+
+このSceneについての確認項目を書いていきます。
+
+ヒエラルキー関係
+・ConversationCanvasについて
+子が[Frame_text]と[Frame_name]と[nextMessage_icon]がある。
+→[Frame_text]の子にはMessageがついている
+→[Frame_name]の子にはNameがついている
+→[Message]と[Name]は、
+  どちらもTextMeshProText - Text(UI)が設定
+　FontAssetは[komporebi-gothicSDF]が設定
+→[nextMessage_icon]のSourceImageには
+　nextMessage_iconが設定
+
+・TextMngについて
+→中にはTextMng.csがアタッチされている
+その引数には、
+→Conversation CanvasにはConversationCanvas
+→Character ListにはCharacterList
+→Text Pop Prefab_にはTextPro
+が設定
+
+・CharacterListの子には[Uni]と[Demo]がある
+→Animatorについて
+　ControllerにはSD_unitychan_motion_humanoid
+  AvatarにはSD_unitychan_humanoidAvatar
+　Apply Root Motionにはチェックありのまま
+→FaceUpdate.csについて
+　Animations 19
+　DelayWeight 3
+  IsKeepFaceにはチェックあり
+　IsGUIにはチェックなし
+→Auto Blinkfor SD.csについて
+　初期設定のまま
+※これらの設定が[Uni]と[Demo]のどちらも同じ状態
+
+ファイル関係(新規ファイルについて)
+・ExcelDataファイル
+→中に、Chapter.xlsがある。
+　ここをダブルクリックして開いて、文章を追加とか
+　していく
+
+・Fontファイル
+→中に、komorebi-gothic.ttfがある。
+　新規で文字フォントを増やしていきたいときはまず　ここにいれてから設定をしていく。
+
+・Prefabファイル内のTextPopプレハブについて
+→インスペクターにPopList.csがアタッチされている　か確認する
+
+・Resourcesファイル
+→中に、[Chapter0]と[Chapter1]という.assetファイ　ルがある。
+　これを読み込んで、テキストを表示されるようにし　ている。Excel側を修正したときにはこの.assetファ　イルをExcelデータを右クリックして「Reimport」を　押して作り直し、またResourcesファイルに移動させ　てくる必要がある。
+
+・Terasurwareファイル
+→今回Excel読み込みでお世話になったやつ。
+　該当サイトから.zipを落としてきて追加しました。
+　Excelデータの読み込み過程で、
+  Terasurware-Classesの中にChapterList.csが、
+　Terasurware-Classes-Editorの中に
+　Chapter_importer.csが作成されている。
+　※これらの設定の仕方や使い方は、UnityMemoの
+　conversationdata.txtを読んで下さい。
+
+・TextMesh Proファイル
+→TextMeshProをインポートしたら自動で追加される
+　ファイル
+　この中の、Resources-Fonts & Materialsファイル　に、文字設定の際に生成された
+　[komorebi-gothic SDF.asset]が入っている。
+　このファイルに[komorebi-gothic SDF]をいれること
+　でようやくフォントとして設定して使用可能になる
+
+
+
+
+

@@ -1,0 +1,513 @@
+ストーリー部分の作り方について考える
+
+とりあえず、新しいSceneをつくってから始めよう。
+「conversationdata」というSceneを新規作成した。
+
+必要になりそうな知識
+①会話文を外部データで読み込む
+②会話に合わせて、キャラの表情を変化させる
+順番に、①から頑張ろう！
+
+<Excelファイルを読み込む方法>-------------------
+参照したもの↓
+https://robamemo.hatenablog.com/entry/2017/09/08/100140
+これと、
+https://robamemo.hatenablog.com/entry/2017/09/08/114144
+これ。
+
+①https://github.com/tsubaki/Unity-Excel-Importer-Maker
+上記の場所から、Zipをダウンロード
+
+②Terasurwareフォルダをプロジェクトに加える
+
+③テスト用のExcelを作成する。(拡張子は.xls)
+　名前は[MobList.xls]にした
+　※このとき、保存前に必ずカーソルを左上に戻す
+
+④Unity側に[ExcelData]という新規ファイルを作成し
+　MobList.xlsを入れる
+
+⑤[MobList.xls]を右クリックして、メニューの
+　[XLS Import Settings...]を押す
+
+⑥設定画面で(今回はMobListと)名前を付けて、    　　parameter settingsの型を正しく設定しなおす。
+　そしてcreateを押す。
+
+⑦Assets-Terasurware-Classesに[MobList.cs]
+  Assets-Terasurware-Classes-Editorに
+　[MobList_importer.cs]があるか確認する。
+
+⑧.assetファイルを生成するために、
+　ExcelDataファイルにあるMobListを右クリックして
+　Reimportというのを押す
+
+⑨⑧でつくった.assetファイルを、Resourcesフォルダ
+　に移動させる。
+　Resourcesフォルダがないなら新規ファイルで作成。
+　※スペルミス注意！！
+
+⑩MobList_importer.csのexportPathが⑨でファイル　移動させたことによって、変更が必要になる。
+　"Assets/Resources/MobList.asset"とすること。
+
+⑪データを参照するスクリプトをつくる。
+　新規作成で、[PopMob.cs]と命名。
+　中身は、上記サイトの同名のスクリプトをコピー。
+
+⑫あとはヒエラルキーに空のオブジェクトを作成して
+　⑪をアタッチするだけ。
+
+この方法以外にも、シート毎に分けて読み込む方式が
+ある。たぶんそっちのほうが便利なので実際に使うときは分けて読み込もう。
+------------------------------------------------
+
+<Excelのシート毎に分けて読み込む方法>------------
+
+①上記で作成したスクリプトを削除する
+　.assetも削除する
+
+②Excelの方にシートを追加する。
+　シート名は[Chapter0]と[Chapter1]にした。
+　※ここのシート名の決め方は結構大事
+　　このあとのパスの書き方に影響がでる
+
+③上記の手順の⑤番目でsepalate sheetに
+　チェックを付けてcreateを押す。
+　※このあと、○○_importerでエラーがでる可能性が
+　高い。原因は、パスの途中に\が入っている箇所があ 　るからだ。そこを/に変えればたぶん問題ない。
+　ここでエラーを直しとかないと、.assetの作成が
+　できないから注意！
+
+④上記の手順の⑦⑧⑨を行う。
+　.assetファイルはシートの数だけ増える
+
+⑤MobList_importer.csのパス指定を変更する。      var exportPath ="Assets/Resources/" + sheetName + ".asset";
+  ※だいたい30行目らへんにある。
+　　ここもファイルの階層を変更するなら適時修正
+　　していくこと！
+
+⑥データを参照するスクリプトを作成する。
+　PopMob.csを作成して、サイト内容をコピー
+　(2つめのURLの方)
+　※ただし、PopMob.csのパスが自作したものだと
+　　サイトとは一致せずエラーになると思う
+
+もし、Resourcesフォルダに直接[Chapter0.asset]と
+[Chapter1.asset]を入れているなら、
+MobList mobList = Resources.Load
+           ("Chapter" + chapterNum) as MobList;
+となるのが正しい。ここは適時修正していくこと！
+
+------------------------------------------------
+
+<データ内容を変更したとき>----------------------
+おそらく、Excelの内容を更新したら.assetはつくりなおして、再びResourcesフォルダに入れなおす方法が必要だと思う。
+
+試してみた結果、.assetファイルを一度消して作り直してあげる必要がやっぱりありました。
+
+ただ、作り直した時にまたMobList_importer.csの
+30行目付近のexportPathがおかしくなるのが解せぬ。
+ここがエラーでると.assetが作成できなくなるので
+直してあげないといけない。
+
+<コピー用>
+var exportPath =
+ "Assets/Resources/" + sheetName + ".asset";
+※必ずこの階層になるかはファイル階層次第なので
+　Resourcesファイルの中にまた分けるファイルを入れ　るなら下記のように
+
+"Assets/Resources/階層名/"+sheetName+".asset"
+
+という感じにする必要がある。
+
+-----------------------------------------------
+
+<テキスト表示の準備>----------------------------
+
+<画像の準備>
+テキスト表示UIサイト↓
+http://www.vita-chi.net/message.htm
+これの真ん中らへんのエレガントなやつを使う。
+
+[frame_text]と[frame_name]という名前で、
+AseetsフォルダのPictureフォルダに保存しました。
+
+<Unityに画像を設定>
+ConversationCanvasという、新規キャンバスを追加して、その子供に
+[Frame_text][Frame_name]という2つのImageを追加。
+[frame_text.png]と[frame_name.png]のTexture Type
+をSprite(2DandUI)に変更した後、それぞれのImageに
+アタッチする。
+
+※ただアタッチするだけだと、元画像とサイズ感が変わってしまっているので、Imageのインスペクターの
+[Set Native Size]をクリックするとサイズ感を正しくできる。
+参照したもの↓
+https://qiita.com/planetary_kovo/items/9d0a33c51ee95890e274
+
+[Frame_text]
+Pos X:0 Y:-140 Z:0
+Width:782 Height:198
+Scale X:1 Y:0.7 Z:1
+
+[Frame_name]
+Pos X:-250 Y:-100 Z:0
+Width:260 Height:68
+Scale X:0.7 Y:0.7 Z:1
+
+<文字を入れる場所を設定>
+Frame_nameの子にTextを入れる。名前は[Name]にする
+文字カラーを白にして、サイズを調整する。
+[Name]
+Pos X:0 Y:0 Z:0
+Width:160 Height:30
+Scale X:1.5 Y:1.5 Z:1
+FontSize:20  Alighment:両方とも中央に設定
+
+これで準備は大丈夫かなー。
+------------------------------------------------
+
+<Excelの文字を名前部分に表示させる>-------------
+
+PopMob.csがアタッチされている空のオブジェクトは、ChapterNumを結局外部から設定しないと該当するテキストとかが読み込めない？はずだから、
+
+PopMob.csがアタッチされている空のオブジェクトを、
+[TextPop]という名前にしてからPrefab化してヒエラルキーから削除する。
+プレハブをアタッチする管理クラスで新規に空のオブジェクトを作成して[TextMng]と命名。
+同じく、新規Scriptで[TextMng.cs]と命名してそれにアタッチする。
+
+TextMng.csに先ほどPrefab化したTextPopが外部からアタッチできるように変数を追加する。
+ついでに、nowChapterNum_という変数も追加しとく。
+
+※後々、QuestMngとかが制作されて、メインクエスト　が進むたびに、TextMng.csを呼び出して
+  nowChapterNum_を加算し、新しくテキストを読み込    むようにしていければいいかなと思う。
+
+ConversationCanvasを取得しておいたほうが便利そうなので、public変数で外部からアタッチできるようにする。(表示/非表示が頻繁だから外部アタッチ方式!!)
+
+Start関数内でConversationCanvasの中から[Name]の
+オブジェクトを探すためにFindを使う。
+
+Transform target = ConversationCanvas.transform.Find("Frame_name/Name");
+上記のように書くことで、キャンバスの孫にあたる
+[Name]のテキストオブジェクトを参照する事ができる
+
+あとは、テキストを書き換えるだけなので、
+Text name = target.GetComponent<Text>();
+name.text = popMob_.param[0].name;
+
+これで、dogとかなんかに名前部分が変わりました。
+
+------------------------------------------------
+
+<マウスの左クリックで、名前部分が変わる>---------
+(引き続きTextMng.csの話です)
+
+上のテスト書きでは、Start関数に収めていたので、
+UpDate関数も使ってテキストが進むようにする。
+
+まずは、変数でnowText_というのを作り、これがマウス押下で加算されるようにする。
+
+Input.GetMouseButton(0)で、マウスの左クリックの
+判定をとり、Excelの列の最大数を越えないようにif文をつけてその中にnowText_++をいれる。
+※popMob_.param.Count - 1を列の上限としている
+あとは更新すればいいだけなので、     
+name_.text = popMob_.param[nowText_].name;
+
+これで終了。
+------------------------------------------------
+
+<文字が改行文字で折り返されるようにする>---------
+
+参照したもの↓
+https://teratail.com/questions/161384
+
+TextMng.cs内で文字コードを発見したら改行する。という処理を追加する必要があった。
+
+if (popMob_.param[nowText_].name.
+                               Contains("\\n"))
+{
+   name_.text = popMob_.param                [nowText_].name.Replace("\\n",                 System.Environment.NewLine);
+}
+
+※Contains("\n")ではなく、("\\n")と記述する！
+　Excel側では\nで問題ない。
+
+------------------------------------------------
+
+<キャラの表情を動かすテスト>---------------------
+
+本番用のExcelを作る前に、キャラの表情を動かすテストを行う。
+
+[SD_unitychan_humanoid]をヒエラルキーにおいて、Prefab化を解除しておく。
+※とりあえず、中央配置
+[SD_unitychan_humanoid]
+Position X:0 Y:-0.08 Z:0
+Rotation X:0 Y:180   Z:0
+[MainCamera]
+Position X:0 Y:0.5 Z:-1
+Rotation X:0 Y:0   Z:0
+2人で会話するときには、お互いの方を少し向いて
+左右に分ける寄せるようにしよう。
+
+[SD_unitychan_humanoid]のインスペクターは、
+①Animator
+→SD_unitychan_motion_humanoid
+→SD_unitychan_humanoidAvatar
+②FaceUpdate.cs
+③AutoBlinkforSD.cs
+だけ残しておく。
+
+TextMngでExcel行数を進んだ時に、該当するキャラの
+FaceUpdate.csが呼べるようにしたい。
+
+空のオブジェクトを作成して、[CharacterList]と命名
+この中に、登場する全てのキャラクターを入れてる。
+(※最終的にはPrefab化)
+それをTextMngにアタッチするようにしたら良さそう。
+今は、CharacterListの子に[SD_unitychan_humanoid]を入れて、TextMngにpublic変数を作ってアタッチする
+
+次に、TextMng.csに
+キーをstring(キャラ名),
+値をUnityChan.FaceUpdate(各キャラの)
+にした変数を作る。[charFacesMap_]
+
+Start関数でCharacterListの子の数分for文を回して、
+charFacesMap_に登録していく。
+※このとき、子の名前とExcelの名前が一致するように
+　しておく必要があるため、注意すること。
+
+この段階で、[SD_unitychan_humanoid]の名前を[Uni]
+に変更しました！
+
+あとは、テスト的に
+charFacesMap_["Uni"].OnCallChangeFace("smile@sd_hmd");
+と書いて、顔変更を呼んでみる。
+※このとき、FaceUpdate.cs側の前エラーがでて
+　コメントアウトしていたところを復旧させとくこと
+
+------------------------------------------------
+
+<本番用のExcelを追加しよう>---------------------
+
+必要な情報
+①名前(カタカナ)
+②名前(英語)※CharacterListと同名に！
+③表情の英語[smile@sd_hmd]とか
+④実際のセリフ
+<注意>
+・改行は\n
+・保存時の拡張子は.xls
+・保存するときはカーソルを左上に
+・空白行をつくらない
+・シート名をつけるときはハイフンを使わないで
+　シート名0とかシート名1にして
+・faceに@がついているから、勝手にメアドに変換され
+　てしまう。選択して、右クリックして、
+　ハイパーリンクを削除を選択する
+
+いままでPopMob.csと命名してたクラスを
+PopList.csに名前変更しました。
+また、.nameとかのところもnameが1と2に分かれたので
+修正しました。
+
+顔の表情を変える処理は、
+charFacesMap_[popChapter_.param[nowText_].name2].OnCallChangeFace(popChapter_.param[nowText_].face);
+こんな感じ。
+
+あとは、メッセージの設定もしていくだけ。
+------------------------------------------------
+
+<メッセージの設定>------------------------------
+[Frame_text]の子にTextを入れて、名前を[Message]
+とする。
+TextMng.csにmessage_変数をつくって、Findでみつける方式にする。(Frame_nameのNameの取得と同じ)
+
+[Message]
+Pos X:90 Y:0 Z:0
+Width:160 Height:30
+Scale X:3 Y:4.5 Z:1
+FontSize:9  Alighment:両方とも左側に設定
+
+TextMng.csに、TextAndFaceSetting関数をつくって、
+この中でメッセージの更新や、名前の更新、
+キャラ表情の更新を行う。
+
+------------------------------------------------
+
+<テキストの文字がにじむ>------------------------
+
+TextMeshProを利用したほうがいいかもしれない。
+
+参照したもの↓
+https://gametukurikata.com/ui/textmeshpro
+
+①TextMeshProをインポートする
+　→もともと入ってたわw
+
+②①の後、UnityエディターのメニューのWindowからTextMeshPro→Import TMP Essential Resourcesを選択して、インポートする。
+
+③今回は、UIとしてつかいたいので、
+　UI-Text_TextMeshProを選択すると良い。
+
+④座標やフォントサイズを調整して[Message]と交換
+
+⑤private Text message_の型が、　TMPro.TextMeshProUGUIに変更になる。
+　GetComponent<Text>だったところも上記の型へ。
+
+※ついでに、Frame_nameの子のNameも同じように変更すること！
+
+これで、にじまないできれいな文字が・・・。
+あれ、□しか表示されん！
+日本語フォントないからやん・・・
+
+------------------------------------------------
+
+<日本語フォントを入れる>------------------------
+
+フォントサイト↓
+https://fontfree.me/
+※漢字があるフォントを選ぶように！
+
+テスト用フォントダウンロードサイト↓
+http://modi.jpn.org/font_komorebi-gothic.php
+
+Assetフォルダ内に、[Font]という新規ファイルを作成して、ダウンロードしたフォントを中にいれる。
+※必要なのは.ttfファイルだけらしいので他は削除。
+
+.ttfファイルのフォントをTextMeshPro用の
+アセットフォントに変換する必要があるらしい。
+
+動的フォントアセットの作成を参考にしながら進める
+①フォントを選択した状態で右クリックから　Create→TextMeshPro→Font Assetを選択
+
+②①で作成されたものを、TextMeshProファイルの中にある、Resources-Fonts & Materialというファイルの中につっこむ
+(理由は<テキストがにじむ>に載せたサイトを読んで)
+
+③[Message]と[Name]のインスペクターの
+　Font Assetの項目の中身を②で移動させたフォント　に設定する
+
+これで日本語がちゃんとでるようになった。
+------------------------------------------------
+
+<文字が左から順に表示されるようにする>-----------
+参照したもの↓
+https://note.com/smoug/n/nab5bd5baeac5
+
+どうやら、TextMeshProのプロパティに
+「maxVisibleCharacters」というものがあり、
+この数字が変わる事で画面上に表示される最大文字数を変えることができる。
+これを利用して実装する。
+
+TextMng.csのTextAndFaceSetting関数に
+表示文字数の初期化と表示速度時間の初期化を入れて
+Update関数では、messageTime_が規定値を上回ったら
+表示文字を増やし、文字が全て表示された後に左クリックすると次のテキストに進むようにした。
+
+ただこれだと、「左から順に表示中に、マウスの左クリックで文字をいっぺんに表示する」ができてないので改良していく。
+
+----
+Update関数の先頭に、テキストが切り替わったときにtrueになるフラグのif文を設置して、中で時間を加算していく。
+文字が全て表示しきっていないとき左クリック押下で
+テキストが全表示になる処理をその中で書いているが
+時間的に0.5fのスキップインターバルを設けて連打されてもテキストが変に飛ばないようにした。
+(新規変数)
+// テキストが切り替わるタイミングでtrueになる
+private bool skipFlg_ = false;
+// 文字の全表示に至るまでのインターバル   
+private float skipItv_ = 0.0f;
+----上記の内容をSkip関数にまとめた。   
+
+------------------------------------------------
+
+<表示が終わったら▽がチカチカ点滅する>-----------
+
+ユーザーが次へ進むボタンを押すタイミングがわかるように、文字表示が終わったら点滅するアイコンを出す。
+
+素材サイト↓
+http://yajidesign.com/?p=251
+
+[nextMessage_icon.png]という名前でPictureフォルダに保存した。
+TextureTypeをSprite(2DandUI)に変更して、
+ConversationCanvasに新規でImageを追加。
+名前を[nextMessage_icon]にして画像をアタッチする
+
+SetNativeSizeを押下した後、座標と大きさを調整
+[nextMessage_icon]
+Pos      X:320 Y:-180 Z:0
+Rotation X:0 Y:0 Z:270
+Width:132 Height:148
+Scale    X:0.15 Y:0.15 Z:1
+
+TextMng.csにicon_という変数を用意して、
+必要に応じてSetActiveを切り替えれば良い。
+
+点滅処理をするために変数を追加する
+Image iconColor_というのをつくり、Start関数内で、
+icon_.GetComponent<Image>()までしておく。
+
+そして、Sin曲線を使い、icon_が表示切り替わるところで計算式を入れて、カラー(透過度)を更新する。
+iconColor_.color = new Color(1.0f,1.0f,1.0f, Mathf.Sin(Time.time * 5.0f) / 2 + 0.5f);
+※点滅速度を調整したい場合は、Time.timeに乗算して  いる数値をいじればいい
+
+参照したもの↓
+https://qiita.com/OKsaiyowa/items/f995ad9c0884fb2ced8f
+
+これで点滅処理が完成した。
+------------------------------------------------
+
+<キャラを増やして確認する>----------------------
+[CharacterList]に[Uni]を複製して[Demo]を追加。
+2キャラ同時にカメラに写すために、立ち位置を
+再調整する。
+
+[Uni]
+Position X:-0.6 Y:-0.08 Z:0
+Rotation X: 0   Y:130   Z:0
+
+[Demo]
+Position X:0.6  Y:-0.08 Z:0
+Rotation X:0    Y:230   Z:0
+
+お互いに内側を向くような角度に設定した。
+
+次に、Excelを編集して、Demoがちゃんと表情動くか
+テストする。
+
+いまUnity側からExcelを編集したら、
+エラーがでないで普通に.assetファイルが作れた…。
+Resousesファイルに直接入ってくれるから助かった!
+
+なんかうまく次のテキストに進まない！バグだ！
+skipFlg_がfalseにちゃんと切り替わってないかも
+------------------------------------------------
+
+<テキストが途中で進まなくなるバグ>---------------
+skipFlg_のfalseへの切替タイミングがSkip関数にしかなくて、スキップしたときにしかfalseにならない。という状態になっていた。
+
+Update関数の最初に、
+「テキストが全表示されたら強制的にfalseにする」
+というif文を入れる事で解決。
+
+2体同時の会話ができるのを確認しました！
+
+------------------------------------------------
+
+<いろいろメモ>
+明日は、アセットもらえたら街づくり
+もらえなかったら、unitydataの方にもどって
+キャラの表情とか敵を追加してみる。
+
+コマンドバックをつくったら
+いったんパッケージ化しておく。
+パッケージ化確認のメモもcanversationdataの内容を
+追加しておこう！
+
+
+※後々、QuestMngとかが制作されて、メインクエスト　が進むたびに、TextMng.csを呼び出して
+  nowChapterNum_を加算し、新しくテキストを読み込    むようにしていければいいかなと思う。
+
+[CharacterList]は最終的にPrefab化する
+*重要*
+[CharacterList]とExcelに書くキャラの名前が
+一致するようにしておく
+
+FaceUpdate.csのエラーがでてコメントアウトしていところは、ちゃんと顔を使うならコメントアウトしなくて大丈夫っぽい
+
