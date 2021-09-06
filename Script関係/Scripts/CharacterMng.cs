@@ -4,6 +4,9 @@ using UnityEngine;
 
 // 探索中/戦闘中問わず、キャラクターに関連するものを管理する
 
+// Chara.csをインスタンスするときに外部データのキャラデータをその前に読み込んでおいて、newの引数に入れて渡すようにする
+// そうしたら、各キャラにそれぞれのステータス値を渡せる。はず。たぶん。。。
+
 public class CharacterMng : MonoBehaviour
 {
     public Canvas buttleUICanvas;           // 表示/非表示をこのクラスで管理される
@@ -18,7 +21,7 @@ public class CharacterMng : MonoBehaviour
     private GameObject uniAttackPrefab_;
 
     // キャラ識別用enum
-    enum CharcterNum
+    public enum CharcterNum
     {
         UNI,    // 手前
         DEMO,   // 奥
