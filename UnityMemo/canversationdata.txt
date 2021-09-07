@@ -495,10 +495,26 @@ Update関数の方をDownにした。
 
 ------------------------------------------------
 
+<PopList.csの改良とTextMng.csの修正>------------
+今後、キャラのデータをExcelで読み込んだりするのを考えると、PopList.csを共通で使用出来たほうがいいと考えた。
+そこで、ジェネリック型をつかって汎用性を高めるのを試みた。(以後、ジェネリック型=Tと記載する)
+
+まず、PopList.csではGetDataという関数をTでつくり
+enumを見て、どのデータ型で読み込むかを分けるようにした。
+returnする際には、一度object型へのキャストを通して任意の型にする必要があるらしく、
+return (T)(object)GetChapterList(num);
+などと記載する。
+
+これに伴い、TextMng.cs側では、Start関数でPopListのGetComponentをしていた所を修正する必要がでた。
+popChapter_ = TextPopPrefab_.GetComponent<PopList>().
+GetData<ChapterList>(PopList.NTest.CHAPTER, nowChapterNum_);
+上記のような感じで型を関数名の後に明示的に書いてあげるようにすれば、データの読み込みを行う事ができた。
+
+今後は、PopList.csをアタッチしている空のオブジェクト(TextPop.prefab)はTextMngオブジェクト以外にもアタッチをするようになるとは思うが、同様に型キャストして使いまわすことができる。はず。
+※アタッチ先増えるならプレハブ名変えないと…
+------------------------------------------------
+
 <いろいろメモ>
-明日は、アセットもらえたら街づくり
-もらえなかったら、unitydataの方にもどって
-キャラ別のデータ管理方法を修正する。
 
 ※後々、QuestMngとかが制作されて、メインクエスト　が進むたびに、TextMng.csを呼び出して
   nowChapterNum_を加算し、新しくテキストを読み込    むようにしていければいいかなと思う。
