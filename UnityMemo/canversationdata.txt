@@ -512,6 +512,11 @@ GetData<ChapterList>(PopList.NTest.CHAPTER, nowChapterNum_);
 
 今後は、PopList.csをアタッチしている空のオブジェクト(TextPop.prefab)はTextMngオブジェクト以外にもアタッチをするようになるとは思うが、同様に型キャストして使いまわすことができる。はず。
 ※アタッチ先増えるならプレハブ名変えないと…
+
+TextPop.prefabの保存位置を、Resourcesファイルに移動させました。これにより、TextMng.csでのTextPopの外部アタッチが必要なくなり、代わりにload関数を使うようにします。
+
+ついでにプレハブ名変更
+TextPop.prefab→DataPop.prefab
 ------------------------------------------------
 
 <いろいろメモ>

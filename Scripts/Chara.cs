@@ -1,32 +1,41 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 //　抽象クラス(CharaBase)とインタフェース(InterfaceButtle)を継承してCharaクラスを作成
 public class Chara : CharaBase,InterfaceButtle
 {
     private const string key_isAttack = "isAttack"; // 攻撃モーション(全キャラで名前を揃える必要がある)
-    private CharacterSetting tmpset;                // キャラ毎の情報            
+    private CharacterSetting set_;                  // キャラ毎の情報            
 
     // name,num,animatorは親クラスのコンストラクタを呼び出して設定
     // numは、CharacterNumのenumの取得で使えそうかもだから用意してみた。使わなかったら削除する。
     public Chara(string name, CharacterMng.CharcterNum num, Animator animator) : base(name,num,animator)
     {
-        tmpset = GetSetting();  // CharaBase.csからGet関数で初期設定する
+        set_ = GetSetting();  // CharaBase.csからGet関数で初期設定する
 
-
+        // データ書き出しテスト
+        //StreamWriter swLEyeLog;
+        //FileInfo fiLEyeLog;
+        //fiLEyeLog = new FileInfo(Application.dataPath + "/test.csv");
+        //swLEyeLog = fiLEyeLog.AppendText();
+        //swLEyeLog.Write(set_.HP);   // 書込
+        //swLEyeLog.Write(", ");
+        //swLEyeLog.Flush();
+        //swLEyeLog.Close();
     }
 
     public bool Attack()
     {
         Debug.Log(GetName() + "の攻撃！");
-        tmpset.animator.SetBool(key_isAttack, true);
+        set_.animator.SetBool(key_isAttack, true);
         // isMoveがfalseのときだけ攻撃エフェクトのInstanceとisMoveのtrue化処理を行うようにして、
         // エフェクトがボタン連打で大量発生するのを防ぐ
-        if (!tmpset.isMove)
+        if (!set_.isMove)
         {
             //AttackStart((int)nowTurnChar_); // characterMng.cs側でやる
-            tmpset.isMove = true;
+            set_.isMove = true;
             //selectFlg_ = false; // characterMng.cs側でやる
             return true;
         }
@@ -68,9 +77,9 @@ public class Chara : CharaBase,InterfaceButtle
 
     public override bool ChangeNextChara()
     {
-        tmpset.animator.SetBool(key_isAttack, false);
+        set_.animator.SetBool(key_isAttack, false);
 
-        if (!tmpset.isMove)
+        if (!set_.isMove)
         {
             return false;
         }
@@ -79,17 +88,17 @@ public class Chara : CharaBase,InterfaceButtle
         // isMoveがtrueなら、さっきまで攻撃モーションだったことがわかる
         // 再生時間用に間を空ける
         // キャラ毎に必要な間が違うかもしれないから、1.0fの所は外部データ読み込みで、charSetting[(int)nowTurnChar_].maxAnimTimeとかを用意したほうがいい
-        if (tmpset.animTime < 1.0f)
+        if (set_.animTime < 1.0f)
         {
-            tmpset.animTime += Time.deltaTime;
+            set_.animTime += Time.deltaTime;
             return false;
         }
         else
         {
             // animTime値が1.0を上回ったとき
             // animTime値の初期化と、モーションがWaitになった為isMoveをfalseへ戻す
-            tmpset.animTime = 0.0f;
-            tmpset.isMove = false;
+            set_.animTime = 0.0f;
+            set_.isMove = false;
 
             return true;
 
@@ -107,12 +116,12 @@ public class Chara : CharaBase,InterfaceButtle
 
     public Vector3 GetButtlePos()
     {
-        return tmpset.buttlePos;
+        return set_.buttlePos;
     }
 
     public void SetButtlePos(Vector3 pos)
     {
-        tmpset.buttlePos = pos;
+        set_.buttlePos = pos;
     }
 
 }

@@ -4,10 +4,12 @@ using System.Collections.Generic;
 
 public abstract class CharaBase : object
 {
+    private GameObject DataPopPrefab_;
+
     // 名前
-    private string name;
+    private string name_;
     // 番号
-    private CharacterMng.CharcterNum charNum;
+    private CharacterMng.CharcterNum charNum_;
 
     public struct CharacterSetting
     {
@@ -15,35 +17,60 @@ public abstract class CharaBase : object
         public bool isMove;         // Waitモーション時はfalse
         public float animTime;      // 次のキャラの行動に遷移するまでの間
         public Vector3 buttlePos;   // 戦闘開始時に設定されるポジション(攻撃エフェクト等のInstance位置に利用)
+
+        // Excel読み込みで得るデータ(最終的にはセーブ/ロード用に構造体分けたほうがいいかも)
+        // 構造体分けたら、構造体(CharacterSetting)の中に構造体(新規)を入れる感じにする
+        public int Level;
+        public int HP;
+        public int MP;
+        public int Constitution;    // この値にポイントを振り分けるとHPが増える
+        public int Power;           // この値にポイントを振り分けるとMPが増える
+        public int Attack;          // この値にポイントを振り分けると攻撃力が上がる
+        public int Defence;         // この値にポイントを振り分けると防御力が上がる
+        public int Speed;           // この値にポイントを振り分けると素早さが上がる
+        public int Luck;            // この値にポイントを振り分けると幸運が上がる
     }
 
-    private CharacterSetting setting;
+    private CharacterSetting setting_;
 
     public CharaBase(string name, CharacterMng.CharcterNum num, Animator animator)
     {
-        this.name = name;
-        charNum = num;
+        name_ = name;
 
-        setting.animator  = animator;
-        setting.isMove    = false;
-        setting.animTime  = 0.0f;
-        //setting.buttlePos = set.buttlePos;
+        DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        var popCharacter = DataPopPrefab_.GetComponent<PopList>().GetData<CharacterList>(PopList.ListData.CHARACTER, 0, name);
+        setting_.Level = popCharacter.param[0].Level;
+        setting_.HP = popCharacter.param[0].HP;
+        setting_.MP = popCharacter.param[0].MP;
+        setting_.Constitution = popCharacter.param[0].Constitution;
+        setting_.Power   = popCharacter.param[0].Power;
+        setting_.Attack  = popCharacter.param[0].Attack;
+        setting_.Defence = popCharacter.param[0].Defence;
+        setting_.Speed   = popCharacter.param[0].Speed;
+        setting_.Luck    = popCharacter.param[0].Luck;
+
+        charNum_ = num;
+
+        setting_.animator  = animator;
+        setting_.isMove    = false;
+        setting_.animTime  = 0.0f;
+        //setting.buttlePos = set.buttlePos;    // 設定のタイミングが異なる
     }
 
     // CharaBaseクラス特有の関数(名前を取得）
     public string GetName()
     {
-        return name;
+        return name_;
     }
 
     public CharacterMng.CharcterNum GetNum()
     {
-        return charNum;
+        return charNum_;
     }
 
     public CharacterSetting GetSetting()
     {
-        return setting;
+        return setting_;
     }
 
     // 抽象関数(中身は継承先で実装する必要がある）

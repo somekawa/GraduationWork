@@ -13,9 +13,7 @@ public class TextMng : MonoBehaviour
     public GameObject ConversationCanvas;
     public GameObject CharacterList;
 
-    // TextPopプレハブをアタッチできるようにしている
-    [SerializeField]
-    private GameObject TextPopPrefab_;
+    private GameObject DataPopPrefab_;
 
     private TMPro.TextMeshProUGUI name_;
     private TMPro.TextMeshProUGUI message_;
@@ -46,7 +44,8 @@ public class TextMng : MonoBehaviour
         }
 
         //popChapter_ = TextPopPrefab_.GetComponent<PopList>().GetChapterList(nowChapterNum_);
-        popChapter_ = TextPopPrefab_.GetComponent<PopList>().GetData<ChapterList>(PopList.NTest.CHAPTER, nowChapterNum_);
+        DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        popChapter_ = DataPopPrefab_.GetComponent<PopList>().GetData<ChapterList>(PopList.ListData.CHAPTER, nowChapterNum_);
 
         // Frame_textの子にあるMessageというテキストオブジェクトを探す
         message_ = ConversationCanvas.transform.Find("Frame_text/Message").GetComponent<TMPro.TextMeshProUGUI>();

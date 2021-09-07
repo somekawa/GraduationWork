@@ -5,31 +5,37 @@ using UnityEngine;
 
 public class PopList : MonoBehaviour
 {
-    public enum NTest
+    public enum ListData
     {
         CHAPTER,
-        CHARA,
+        CHARACTER,
         MAX
     }
 
-    private ChapterList GetChapterList(int chapterNum)
+    private T GetList<T>(string dataName)
     {
-        ChapterList chapterList = Resources.Load("Chapter" + chapterNum) as ChapterList;
+        T characterList = (T)(object)Resources.Load(dataName);
 
-        if(chapterList == null)
+        if (characterList == null)
         {
-            Debug.Log("PopMob.csのchapterList情報がnullです");
+            Debug.Log("PopMob.csのcharacterList情報がnullです");
         }
 
-        return chapterList;
+        return characterList;
     }
 
-    public T GetData<T>(NTest nTest, int num)
+    public T GetData<T>(ListData data, int num = 0, string str = "")
     {
-        if (nTest == NTest.CHAPTER)
+        if (data == ListData.CHAPTER)
         {
+            string tmpStr = "Chapter" + num;
             //object(任意のTにキャストできる)にキャストし、そこから別の型にキャストする必要がある
-            return (T)(object)GetChapterList(num);
+            return (T)(object)GetList<ChapterList>(tmpStr);
+        }
+        else if(data == ListData.CHARACTER)
+        {
+            string tmpStr = "Chara" + str;
+            return (T)(object)GetList<CharacterList>(tmpStr);
         }
         return default(T);
     }

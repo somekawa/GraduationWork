@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2321558485526711120}
   - component: {fileID: 2321558485526711123}
   m_Layer: 0
-  m_Name: TextPop
+  m_Name: DataPop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
