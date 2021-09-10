@@ -25,7 +25,7 @@ public class UnitychanController : MonoBehaviour
     {
         // 探索モード以外で自由に動かれたらいけないので、return処理を加える。
         // 町の中でもSEARCHにしておけばいいかな？
-        if(FieldMng.nowMode != FieldMng.MODE.SEARCH)
+        if(FieldMng.nowMode != FieldMng.MODE.SEARCH && FieldMng.nowMode != FieldMng.MODE.NON)
         {
             // ここでRunのアニメーションを変更しておかないと、モードが切り替わる瞬間まで走っていたら
             // 走りモーションが戦闘中に継続してしまう。
@@ -59,13 +59,13 @@ public class UnitychanController : MonoBehaviour
         if (Input.GetKey(keyArray_[0]) || Input.GetKey(keyArray_[1]))
         {
             // 上キー or 下キー
-            movedir.z = Input.GetAxis("Vertical") * 3.0f;
+            movedir.z = Input.GetAxis("Vertical") * 8.0f;
         }
 
         if (Input.GetKey(keyArray_[2]) || Input.GetKey(keyArray_[3]))
         {
             // 左キー or 右キー
-            movedir.x = Input.GetAxis("Horizontal") * 3.0f;
+            movedir.x = Input.GetAxis("Horizontal") * 8.0f;
         }
 
         // グローバル座標に変換すると、キャラの方向転換後に+-がバグが起きた

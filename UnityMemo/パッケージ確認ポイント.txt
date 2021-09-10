@@ -175,8 +175,6 @@ Element1 → SD_unitychan_humanoid1
 その引数には、
 →Conversation CanvasにはConversationCanvas
 →Character ListにはCharacterList
-→Text Pop Prefab_にはTextPro
-が設定
 
 ・CharacterListの子には[Uni]と[Demo]がある
 →Animatorについて
@@ -227,6 +225,19 @@ Element1 → SD_unitychan_humanoid1
 　このファイルに[komorebi-gothic SDF]をいれること
 　でようやくフォントとして設定して使用可能になる
 
+<0910更新>
+新規に、towndataというSceneを作成しました。
+ヒエラルキーの状態はDiscordにスクショがあるので
+確認しておいてください。
+
+新規で作成したスクリプトは[GoThroughCheck.cs]のみ
+これを[GoThroughRight]と[GoThroughLeft]に
+アタッチしている。
+
+いくつかのスクリプトには修正が入っているのでそのへんはGitをみてください。
+
+また、新規ファイルでは[Town]というのを作っており
+そのなかに町作成に使用したアセット類を入れています。ほとんどのアセットは未使用をすでに消していますが、まだ使用する可能性があるものは残しています
 
 
 

@@ -54,8 +54,8 @@ public class MagicMove : MonoBehaviour
 
     void OnTriggerEnter(Collider col)
     {
-        // “G‚É“–‚½‚Á‚½ê‡
-        if (col.tag == "Enemy")
+        // “G‚É“–‚½‚Á‚½ê‡(col.tag == "Enemy"‚Æ‘‚­‚æ‚èAˆ—‚ª‘¬‚¢)
+        if (col.CompareTag("Enemy"))
         {
             // –Ú•W‚Ì“G‚É“–‚½‚Á‚½ê‡
             if(targetNum_ == int.Parse(col.name))

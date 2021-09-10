@@ -2,7 +2,7 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -12,4 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84640bc71e750fc4b87e4d34027d9b82, type: 3}
   m_Name: CharaUni
   m_EditorClassIdentifier: 
-  param: []
+  param:
+  - Name: Uni
+    Level: 1
+    HP: 20
+    MP: 16
+    Constitution: 5
+    Power: 4
+    Attack: 5
+    Defence: 3
+    Speed: 3
+    Luck: 3
