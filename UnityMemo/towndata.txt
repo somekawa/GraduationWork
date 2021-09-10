@@ -1,0 +1,186 @@
+新規に作成した、街をつくるテストのScene
+
+ここに、さきちゃんから受け取った街のアセットを利用して作成していく。
+
+<透過した画像をオブジェクトに貼りつける方法>-----
+
+参照したもの↓
+https://am1tanaka.hatenablog.com/entry/20120131/1328015837
+
+①いつも通り、Pictureの画像のTextureTypeを
+Sprite(2DandUI)にする
+
+②Pictureフォルダ内にMaterialsフォルダを用意して
+そこに新規でマテリアルを作成
+(UnityLogoと命名)
+
+③MaterialのShaderを
+[Legacy Shaders/Transparent/Diffuse]にする
+
+④Selectと書かれているところに、今回適用したい
+　画像をアタッチする
+
+⑤UnityLogoマテリアルを3DObjectのQuadとかに
+　貼り付けたら完成
+
+------------------------------------------------
+
+<Terrainで地面づくり>---------------------------
+参照したもの↓
+①基本操作
+https://qiita.com/yando/items/ef76c200bb50005170d5
+
+②テクスチャの貼り方が変わったらしいので。
+https://teratail.com/questions/173073
+
+③草の生える量の調整について。
+https://unity.moon-bear.com/3d%E3%82%A2%E3%82%AF%E3%82%B7%E3%83%A7%E3%83%B3%E3%82%B2%E3%83%BC%E3%83%A0%E3%80%8C%E3%83%A6%E3%83%8B%E3%83%86%E3%82%A3%E3%81%A1%E3%82%83%E3%82%93%E3%83%91%E3%83%AB%E3%82%AF%E3%83%BC%E3%83%AB%E3%80%8D/terrain%E3%81%A7%E3%82%B9%E3%83%86%E3%83%BC%E3%82%B8%E3%82%92%E4%BD%9C%E3%82%8B/#toc7
+
+------------------------------------------------
+
+<定点カメラ方式の実装>--------------------------
+
+十字路の道で、左右の道に入ったとき、定点カメラに切り替わるようにする。
+もともとCameraMng.csで切替の仕組みを用意しているため、ここを街のカメラも使えるように修正する。
+UnitychanController.csの内容も追加するものが増える。
+
+左右の定点カメラは、Unityちゃんの座標によって移動させれば、1台だけですむはず。
+
+
+※往復してカメラが連続で切り替わるときにも
+　不可視の当たり判定用のボックスを設置しといて、
+　Exit関数通過時にそのボックスより左右どちらに
+　いるかを判定してカメラの切替がありなりを決める
+
+-----------------------------------------------
+
+<街の定点カメラ準備>----------------------------
+CameraMng.csでFindでカメラを探すようにしている所を、アタッチ方式に変更しなおす。
+→どのSceneでも使えるようにするため。
+
+CameraMng.csの、
+buttleCameraという変数名をSubCameraに名前変更する
+
+ヒエラルキーに新規カメラを追加して、
+FixedPointCameraと命名する。
+ヒエラルキーに空のオブジェクトを作成して、
+CameraControllerと命名し、CameraMng.csをアタッチ
+MainCamera→MainCamera
+SubCamera →FixedPointCamera
+
+また、FieldMng.csのnowModeの初期値をNONにし、
+UtnichanController.csでのUpdate関数のreturn処理条件に、　&& nowMode != NONを追加した。
+
+nowModeがNONということは、「街にいる」という
+考え方にする！
+
+[FixedPointCamera]
+Position X:24 Y:3 Z:89
+
+------------------------------------------------
+
+<通過テストを始める>----------------------------
+
+とりあえず、右通路のテストからしよう。
+新規でキャラ通過確認用のCubeを追加する。
+名前は、[GoThroughRight] 
+Position X:19 Y:0.5 Z:95
+Scale    X:2  Y:2   Z:10
+BoxColliderのIsTriggerにチェックを付けておく
+RigidBodyもつけて、IsKinematicにチェックする。
+
+[GoThroughRight]につける新規Scriptを作成する。
+名前は、[GoThroughCheck.cs]
+このスクリプトで、キャラが通過したかを確認して、CameraMng.csにカメラ切り替えの指示を出す。
+
+[GoThroughCheck.cs]で、
+void OnTriggerEnter(Collider col)
+{
+    if(col.CompareTag("Player"))
+    {
+        Debug.Log("カメラ切替");
+        cameraMng_.SetChangeFlg(true);
+    }
+}
+という判定を行い、現在ログを出力しているところに
+CameraMng.csで新規に用意したSetChangeFlg関数を
+呼び出す。
+
+これで右へ通過したときにカメラが切り替わるようになった。
+-----------------------------------------------
+
+<キャラがカメラに映らない位置に来たりする>-------
+
+家のMeshCollider1つ1つは外して、大きいBoxColliderとかを別で用意したほうがよさそう。
+カメラ替えたときに映らないところへは当たり判定で
+移動できないようにしておいたほうがいい。
+ヒエラルキーに追加した[House12-13Collider]という
+のを参考に設定していくこと！
+
+また、キャラのZ座標が、94以下の時には
+95に設定するように[GoThroughCheck.cs]の
+OnTriggerEnterに処理を追加した。
+
+------------------------------------------------
+
+<右の通路カメラから元のカメラに戻れるようにする>-
+GoThroughCheck.csにて。
+
+EnterとExitを使うことで、通り抜けしたときと
+通り抜けずに引き返したときのカメラの処理を正しくできる。
+
+EnterとExitでそれぞれキャラの座標を変数に入れて置き、Exitの方でExitPos - EnterPosのnormalizedの
+X座標をみて、
+1.0なら右への通過
+-1.0なら左への通過と考えるようにした。
+
+ただし、まだ左の住宅街の処理をつくっていないため
+場合によってはまた修正をするかもしれない。
+
+------------------------------------------------
+
+<左の通過テストをする>--------------------------
+
+右と同様に、[GoThroughLeft]という通過確認用の
+Cubeを作成する。
+Rightの方をコピーして、X座標をマイナス値にするだけでいい。
+作ったCubeにGoThroughCheck.csとRigidbodyがあるのを確認しておくこと。
+
+GoThroughCheck.csでOnTriggerExit関数に
+オブジェクトの名前でカメラ位置や、SetChangeFlgの切替を分けるように処理を書いたら終了。
+
+------------------------------------------------
+
+<すり抜けてほしくない箇所に壁を設置していく>-----
+
+当たり判定の精度を高めて、すり抜け防止のために
+UniのRigidbodyにある[CollisionDetection]を
+Continuousに変更した。
+
+詳細は下のサイトで↓
+https://ekulabo.com/rigidbody-collision-detection#outline__3
+
+------------------------------------------------
+
+<噴水の水について>------------------------------
+
+噴水のアセット+StandardAssetsという中にある水のやつが必要らしい。
+バージョンによってはStandardAssetsのインポート後にエラーがでるとのことなので、対処法を記載しているサイトを載せておく↓
+https://nekojara.city/unity2020-standard-assets
+
+噴水以外に水を設置するときに参考にできるサイト↓
+https://xr-hub.com/archives/3452
+
+とくにエラーはでなかった…
+
+------------------------------------------------
+
+噴水の水を付けたところで、一度パッケージ化しておく。
+
+レストランの壁の色合いを白にする。
+町長の家の屋根を町長っぽくする。
+
+*重要*
+タグの判別にはgameObject.tag == “string tag”もあるが、CompareTag()の方が早い
+
+最後に、不使用だったものは消すようにしないと。
