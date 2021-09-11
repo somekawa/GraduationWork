@@ -18,13 +18,13 @@ public class GoThroughCheck : MonoBehaviour
         player_ = GameObject.Find("Uni");
         if(player_ == null)
         {
-            Debug.Log("GoThroughCheckで取得しているPlayer情報がnullです");
+            Debug.Log("GoThroughCheck.csで取得しているPlayer情報がnullです");
         }
 
         cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
         if(cameraMng_ == null)
         {
-            Debug.Log("GoThroughCheckで取得しているCameraMngがnullです");
+            Debug.Log("GoThroughCheck.csで取得しているCameraMngがnullです");
         }
     }
 
@@ -55,15 +55,15 @@ public class GoThroughCheck : MonoBehaviour
                 // 右通路の時(ギルドと魔道具屋方面)
                 if ((ExitPos_ - EnterPos_).normalized.x >= 0.0f)
                 {
-                    // 1.0の時は右への通過の為true
-                    cameraMng_.SetChangeFlg(true);
+                    // 1.0の時は右への通過の為true(サブカメラアクティブ)
+                    cameraMng_.SetChangeCamera(true);
                     // カメラ位置調整
                     cameraMng_.SetSubCameraPos(new Vector3(24.0f, 3.0f, 89.0f));
                 }
                 else
                 {
-                    // -1.0の時は左への通過の為false
-                    cameraMng_.SetChangeFlg(false);
+                    // -1.0の時は左への通過の為false(メインカメラアクティブ)
+                    cameraMng_.SetChangeCamera(false);
                 }
             }
             else
@@ -71,13 +71,13 @@ public class GoThroughCheck : MonoBehaviour
                 // 左通路の時(住宅街)
                 if ((ExitPos_ - EnterPos_).normalized.x >= 0.0f)
                 {
-                    // 1.0の時は左への通過の為false
-                    cameraMng_.SetChangeFlg(false);
+                    // 1.0の時は左への通過の為false(メインカメラアクティブ)
+                    cameraMng_.SetChangeCamera(false);
                 }
                 else
                 {
-                    // -1.0の時は右への通過の為true
-                    cameraMng_.SetChangeFlg(true);
+                    // -1.0の時は右への通過の為true(サブカメラアクティブ)
+                    cameraMng_.SetChangeCamera(true);
                     // カメラ位置調整
                     cameraMng_.SetSubCameraPos(new Vector3(-24.0f, 3.0f, 89.0f));
                 }

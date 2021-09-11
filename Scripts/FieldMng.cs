@@ -6,6 +6,8 @@ using UnityEngine;
 // 探索・戦闘・メニュー画面の切り替わり時にenumで変更を行う
 // 他のMngとかも、このスクリプトにあるnowMode_を参照して変更を行う
 
+// このスクリプトとは別に、SceneMng的なのを用意して、シーンのロード/アンロードとnowModeを切り替えてくれるものをつくったほうがいいと思う。
+
 public class FieldMng : MonoBehaviour
 {
     // 様々なクラスからMODEの状態は見られることになるから、nowMode_はstatic変数にしたほうがいい
@@ -27,11 +29,22 @@ public class FieldMng : MonoBehaviour
     private float time_ = 0.0f;                     // 現在の経過時間
 
     private UnitychanController player_;            // プレイヤー情報格納用
+    private CameraMng cameraMng_;
 
     void Start()
     {
         //unitychanの情報を取得
         player_ = GameObject.Find("Uni").GetComponent<UnitychanController>();
+        if (player_ == null)
+        {
+            Debug.Log("FieldMng.csで取得しているPlayer情報がnullです");
+        }
+
+        cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
+        if (cameraMng_ == null)
+        {
+            Debug.Log("FieldMng.csで取得しているCameraMngがnullです");
+        }
     }
 
     void Update()
@@ -43,6 +56,7 @@ public class FieldMng : MonoBehaviour
         switch (nowMode)
         {
             case MODE.SEARCH :
+            cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
             if (player_.GetMoveFlag() && time_ < toButtleTime_)
             {
                 time_ += Time.deltaTime;
@@ -59,6 +73,8 @@ public class FieldMng : MonoBehaviour
             break;
 
             case MODE.BUTTLE:
+            cameraMng_.SetChangeCamera(true);   // サブカメラアクティブ
+
             if (time_ < toButtleTime_)
             {
                 time_ += Time.deltaTime;
