@@ -24,7 +24,7 @@ public class FieldMng : MonoBehaviour
     }
 
     public static MODE nowMode = MODE.NON;          // 現在のモード
-    public static float charaRunSpeed = 0.0f;
+    public static float charaRunSpeed = 0.0f;       // キャラの移動速度(MODE毎に調整をする)
 
     private float toButtleTime_ = 30.0f;            // 30秒経過でバトルへ遷移する
     private float time_ = 0.0f;                     // 現在の経過時間
@@ -51,7 +51,6 @@ public class FieldMng : MonoBehaviour
     void Update()
     {
         //Debug.Log("現在のMODE" + nowMode_);
-
         //Debug.Log(time_);
 
         switch (nowMode)

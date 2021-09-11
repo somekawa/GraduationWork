@@ -77,14 +77,6 @@ public class CharacterMng : MonoBehaviour
         enemyInstancePos_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().GetEnemyPos();
     }
 
-    void Update()
-    {
-        if (FieldMng.nowMode != FieldMng.MODE.BUTTLE)
-        {
-            nowTurnChar_ = CharcterNum.UNI;
-        }
-    }
-
     // ButtleMng.csから敵の数を受け取る
     public void SetEnemyNum(int enemyNum)
     {
@@ -103,6 +95,9 @@ public class CharacterMng : MonoBehaviour
     // 戦闘開始時に設定される項目(ButtleMng.csで参照)
     public void ButtleSetCallOnce()
     {
+        // 最初の行動キャラを指定する
+        nowTurnChar_ = CharcterNum.UNI;
+
         // 戦闘用座標と回転角度を代入する
         // キャラの角度を変更は、ButtleWarpPointの箱の角度を回転させると可能。(1体1体向きを変えることもできる)
         foreach (KeyValuePair<CharcterNum, GameObject> character in charMap_)

@@ -9,8 +9,8 @@ public class GoThroughCheck : MonoBehaviour
     private CameraMng cameraMng_;
     private GameObject player_;
 
-    private Vector3 EnterPos_;  // 当たり判定内に入った瞬間の座標
-    private Vector3 ExitPos_;   // 当たり判定内を出た瞬間の座標
+    private Vector3 enterPos_;  // 当たり判定内に入った瞬間の座標
+    private Vector3 exitPos_;   // 当たり判定内を出た瞬間の座標
 
     void Start()
     {
@@ -40,7 +40,7 @@ public class GoThroughCheck : MonoBehaviour
                 player_.transform.position = new Vector3(player_.transform.position.x, player_.transform.position.y, 95.0f);
             }
 
-            EnterPos_ = player_.transform.position;
+            enterPos_ = player_.transform.position;
         }
     }
 
@@ -48,12 +48,12 @@ public class GoThroughCheck : MonoBehaviour
     {
         if (col.CompareTag("Player")) //col.tag == "Player"と書くより、処理が速い
         {
-            ExitPos_ = player_.transform.position;
+            exitPos_ = player_.transform.position;
 
             if (this.gameObject.name == "GoThroughRight")
             {
                 // 右通路の時(ギルドと魔道具屋方面)
-                if ((ExitPos_ - EnterPos_).normalized.x >= 0.0f)
+                if ((exitPos_ - enterPos_).normalized.x >= 0.0f)
                 {
                     // 1.0の時は右への通過の為true(サブカメラアクティブ)
                     cameraMng_.SetChangeCamera(true);
@@ -69,7 +69,7 @@ public class GoThroughCheck : MonoBehaviour
             else
             {
                 // 左通路の時(住宅街)
-                if ((ExitPos_ - EnterPos_).normalized.x >= 0.0f)
+                if ((exitPos_ - enterPos_).normalized.x >= 0.0f)
                 {
                     // 1.0の時は左への通過の為false(メインカメラアクティブ)
                     cameraMng_.SetChangeCamera(false);
