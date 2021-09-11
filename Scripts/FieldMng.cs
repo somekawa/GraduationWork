@@ -24,6 +24,7 @@ public class FieldMng : MonoBehaviour
     }
 
     public static MODE nowMode = MODE.NON;          // 現在のモード
+    public static float charaRunSpeed = 0.0f;
 
     private float toButtleTime_ = 30.0f;            // 30秒経過でバトルへ遷移する
     private float time_ = 0.0f;                     // 現在の経過時間
@@ -55,39 +56,46 @@ public class FieldMng : MonoBehaviour
 
         switch (nowMode)
         {
+            case MODE.NON:
+                charaRunSpeed = 8.0f;
+                break;
+
             case MODE.SEARCH :
-            cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
-            if (player_.GetMoveFlag() && time_ < toButtleTime_)
-            {
-                time_ += Time.deltaTime;
-            }
-            else if(time_ >= toButtleTime_)
-            {
-                nowMode = MODE.BUTTLE;
-                time_ = 0.0f;
-            }
-            else
-            {
-                // 何も処理を行わない
-            }
+                cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
+                charaRunSpeed = 4.0f;
+
+                if (player_.GetMoveFlag() && time_ < toButtleTime_)
+                {
+                    time_ += Time.deltaTime;
+                }
+                else if(time_ >= toButtleTime_)
+                {
+                    nowMode = MODE.BUTTLE;
+                    time_ = 0.0f;
+                }
+                else
+                {
+                    // 何も処理を行わない
+                }
             break;
 
             case MODE.BUTTLE:
-            cameraMng_.SetChangeCamera(true);   // サブカメラアクティブ
+                cameraMng_.SetChangeCamera(true);   // サブカメラアクティブ
+                charaRunSpeed = 0.0f;
 
-            if (time_ < toButtleTime_)
-            {
-                time_ += Time.deltaTime;
-            }
-            else
-            {
-                nowMode = MODE.SEARCH;
-                time_ = 0.0f;
-            }
+                if (time_ < toButtleTime_)
+                {
+                    time_ += Time.deltaTime;
+                }
+                else
+                {
+                    nowMode = MODE.SEARCH;
+                    time_ = 0.0f;
+                }
             break;
 
             default:
-            Debug.Log("画面状態一覧でエラーです");
+                Debug.Log("画面状態一覧でエラーです");
             break;
         }
     }

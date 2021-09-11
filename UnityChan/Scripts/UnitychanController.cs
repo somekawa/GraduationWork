@@ -59,13 +59,13 @@ public class UnitychanController : MonoBehaviour
         if (Input.GetKey(keyArray_[0]) || Input.GetKey(keyArray_[1]))
         {
             // 上キー or 下キー
-            movedir.z = Input.GetAxis("Vertical") * 8.0f;
+            movedir.z = Input.GetAxis("Vertical") * FieldMng.charaRunSpeed;
         }
 
         if (Input.GetKey(keyArray_[2]) || Input.GetKey(keyArray_[3]))
         {
             // 左キー or 右キー
-            movedir.x = Input.GetAxis("Horizontal") * 8.0f;
+            movedir.x = Input.GetAxis("Horizontal") * FieldMng.charaRunSpeed;
         }
 
         // グローバル座標に変換すると、キャラの方向転換後に+-がバグが起きた
