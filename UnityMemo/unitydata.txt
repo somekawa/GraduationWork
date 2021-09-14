@@ -1207,7 +1207,8 @@ nowTurnChar_ = CharcterNum.UNI;
 <いろいろメモ欄>
 FieldMng.csとは別に、SceneMng的なのを用意して、シーンのロード/アンロードとnowModeを切り替えてくれるものをつくったほうがいいと思う
 
-Update関数は極力減らす
+Update関数は極力減らす(↓はupdateの解説サイト)
+https://qiita.com/ChurappsWatatani/items/73f0c38f0cd18620a580
 
 敵を全て倒したら、カメラを戻して移動可能にする。
 
