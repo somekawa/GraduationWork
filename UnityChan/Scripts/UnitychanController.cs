@@ -54,46 +54,18 @@ public class UnitychanController : MonoBehaviour
         }
 
         Vector3 movedir = Vector3.zero;
-        bool tmpa = false;
-        bool tmpb = false;
 
         // 矢印下ボタンを押下している
         if (Input.GetKey(keyArray_[0]) || Input.GetKey(keyArray_[1]))
         {
             // 上キー or 下キー
-            //movedir.z = Input.GetAxis("Vertical") * FieldMng.charaRunSpeed;
-            tmpa = true;
+            movedir.z = Input.GetAxis("Vertical");
         }
 
         if (Input.GetKey(keyArray_[2]) || Input.GetKey(keyArray_[3]))
         {
             // 左キー or 右キー
-            //movedir.x = Input.GetAxis("Horizontal") * FieldMng.charaRunSpeed;
-            tmpb = true;
-        }
-
-        if(tmpa && !tmpb)
-        {
-            // 上下キーのみ
-            Debug.Log("上下キーのみ");
-            movedir.z = Input.GetAxis("Vertical") * FieldMng.charaRunSpeed;
-        }
-        else if(!tmpa && tmpb)
-        {
-            // 左右キーのみ
-            Debug.Log("左右キーのみ");
-            movedir.x = Input.GetAxis("Horizontal") * FieldMng.charaRunSpeed;
-        }
-        else if(tmpa && tmpb)
-        {
-            // 上or下 + 左or右
-            Debug.Log("上or下 + 左or右");
-            movedir.z = Input.GetAxis("Vertical") * FieldMng.charaRunSpeed / 2;
-            movedir.x = Input.GetAxis("Horizontal") * FieldMng.charaRunSpeed / 2;
-        }
-        else
-        {
-            // 移動なし
+            movedir.x = Input.GetAxis("Horizontal");
         }
 
         // グローバル座標に変換すると、キャラの方向転換後に+-がバグが起きた
@@ -102,9 +74,14 @@ public class UnitychanController : MonoBehaviour
 
         if (movedir != Vector3.zero)
         {
+            // 速度ベクトルを作成（3次元用）Y座標は0.0fで必ず固定する
+            var speed = new Vector3(movedir.x, 0.0f, movedir.z);
+            // 速度に正規化したベクトルに、移動速度をかけて代入する
+            rigid.velocity = speed.normalized * FieldMng.charaRunSpeed;
+
             // 座標更新
             // キャラクターを移動させる処理
-            rigid.MovePosition(rigid.position + movedir * Time.deltaTime);
+            rigid.MovePosition(rigid.position + rigid.velocity * Time.deltaTime);
             // キャラ方向転換
             transform.rotation = Quaternion.LookRotation(movedir);
         }

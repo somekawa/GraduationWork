@@ -187,8 +187,24 @@ https://xr-hub.com/archives/3452
 <キャラの移動速度について>----------------------
 
 斜め移動時に、速度が速くなりすぎておかしくなっていたため、UnitychanController.csに修正をいれた。
-ボタン押下状態をフラグで取得して、斜め移動時には
-値を調整するようにした。
+
+参照したもの↓
+https://unity-senpai.hatenablog.com/entry/2020/10/13/010845#%E4%B8%89%E5%B9%B3%E6%96%B9%E3%81%AE%E5%AE%9A%E7%90%86%E3%81%AE%E5%BE%A9%E7%BF%92
+
+上記のサイトで正規化して値をつくって使用する方法が書かれている。これと、もともと書いていた処理を組み合わせて
+
+// 速度ベクトルを作成（3次元用）
+var speed = new Vector3(movedir.x, 0.0f, movedir.z);
+
+// 速度に正規化したベクトルに、移動速度をかけて代入する
+rigid.velocity = speed.normalized * FieldMng.charaRunSpeed;
+
+// 座標更新
+// キャラクターを移動させる処理
+rigid.MovePosition(rigid.position + rigid.velocity * Time.deltaTime);
+
+最初のベクトル作成時にY座標を0.0fにしておかないと
+障害物と当たったときに天高くunityちゃんが舞い上がってしまうから注意！
 
 -----------------------------------------------
 
