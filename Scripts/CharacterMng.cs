@@ -40,7 +40,9 @@ public class CharacterMng : MonoBehaviour
     // キーをキャラ識別enum,値を(キャラ識別に対応した)キャラオブジェクトで作ったmap
     private Dictionary<CharcterNum, GameObject> charMap_;
 
-    private TMPro.TextMeshProUGUI buttleAnounceText_;                              // バトル中の案内
+    private TMPro.TextMeshProUGUI buttleAnounceText_;             // バトル中の案内
+    private readonly string[] announceText_ = new string[2]{ "左シフトキー：\n戦闘から逃げる", "Tキー：\nコマンド選択へ戻る" };
+
     private Transform buttleCommandUI_;                           // 金の大枠を含めた情報を取得
     private ImageRotate buttleCommandRotate_;                     // バトル中のコマンドUIを取得して、保存しておく変数
     private EnemySelect buttleEnemySelect_;                       // バトル中の選択アイコン情報
@@ -102,7 +104,7 @@ public class CharacterMng : MonoBehaviour
     // 戦闘開始時に設定される項目(ButtleMng.csで参照)
     public void ButtleSetCallOnce()
     {
-        buttleAnounceText_.text = "左シフトキー：\n戦闘から逃げる";
+        buttleAnounceText_.text = announceText_[0];
 
         // 最初の行動キャラを指定する
         nowTurnChar_ = CharcterNum.UNI;
@@ -148,7 +150,7 @@ public class CharacterMng : MonoBehaviour
             selectFlg_ = false;
             buttleCommandRotate_.SetRotaFlg(!selectFlg_);   // コマンド回転を有効化
             buttleCommandUI_.gameObject.SetActive(!selectFlg_);
-            buttleAnounceText_.text = "左シフトキー：\n戦闘から逃げる";
+            buttleAnounceText_.text = announceText_[0];
         }
 
         // キャラ毎のモーションを呼ぶ
@@ -161,7 +163,7 @@ public class CharacterMng : MonoBehaviour
                     if(!selectFlg_)
                     {
                         selectFlg_ = true;
-                        buttleAnounceText_.text = "Tキー：\nコマンド選択へ戻る";
+                        buttleAnounceText_.text = announceText_[1];
                     }
                     else
                     {
@@ -195,7 +197,7 @@ public class CharacterMng : MonoBehaviour
         {
             if (charasList_[(int)nowTurnChar_].ChangeNextChara())
             {
-                buttleAnounceText_.text = "左シフトキー：\n戦闘から逃げる";
+                buttleAnounceText_.text = announceText_[0];
 
                 // 次のキャラが行動できるようにする
                 // 最大まで加算されたら、初期値に戻す(前演算子重要)
