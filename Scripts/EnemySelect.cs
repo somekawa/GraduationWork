@@ -233,7 +233,7 @@ public class EnemySelect : MonoBehaviour
 
     // CharacterMng.cs側からGetSelectNum関数の後に呼び出してもらい、矢印位置を再設定する
     // この処理がないと、次のキャラの行動時にDestroyした敵の頭上から矢印がスタートしてしまう。
-    public void ResetSelectPoint()
+    public bool ResetSelectPoint()
     {
         // 0から順に調べて、trueのところで止まる
         int num = 0;
@@ -243,10 +243,13 @@ public class EnemySelect : MonoBehaviour
             {
                 // trueの敵で矢印の移動がストップするように、値を代入する必要がある
                 selectNum_ = num;
-                break;
+                return true;
             }
             num++;
         }
+
+        // ここまで到達したら(=breakで引っかからなかったら、戦闘モード終了の合図に出来そう)
+        return false;
     }
 
     // CharacterMng.cs側から呼び出して、Tキーが押されていたらコマンド選択に戻れるようにする

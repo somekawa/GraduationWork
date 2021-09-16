@@ -29,7 +29,8 @@ public class CharacterMng : MonoBehaviour
     }
 
     CharcterNum nowTurnChar_ = CharcterNum.MAX;     // 現在行動順が回ってきているキャラクター
-    private bool selectFlg_ = false;
+    private bool selectFlg_ = false;                // 敵を選択中かのフラグ
+    private bool lastEnemytoAttackFlg_ = false;        // キャラの攻撃対象が最後の敵であるか     
 
     private const int buttleCharMax_ = 2;           // バトル参加可能キャラ数の最大値(最終的には3にする)
     private Vector3[] buttleWarpPointsPos_ = new Vector3[buttleCharMax_];            // 戦闘時の配置位置を保存しておく変数
@@ -97,6 +98,9 @@ public class CharacterMng : MonoBehaviour
     {
         // 最初の行動キャラを指定する
         nowTurnChar_ = CharcterNum.UNI;
+
+        // フラグの初期化を行う
+        lastEnemytoAttackFlg_ = false;
 
         // 戦闘用座標と回転角度を代入する
         // キャラの角度を変更は、ButtleWarpPointの箱の角度を回転させると可能。(1体1体向きを変えることもできる)
@@ -204,7 +208,13 @@ public class CharacterMng : MonoBehaviour
         // 選択した敵の番号を渡す
         magicMove.SetTargetNum(buttleEnemySelect_.GetSelectNum() + 1);
 
-        // 矢印位置のリセットを行う
-        buttleEnemySelect_.ResetSelectPoint();
+        // 矢印位置のリセットを行う(falseなら、敵を全て倒したということなのでフラグを切り替える)
+        lastEnemytoAttackFlg_ = !buttleEnemySelect_.ResetSelectPoint();
+    }
+
+    // ButtleMng.csで参照
+    public bool GetLastEnemyToAttackFlg()
+    {
+        return lastEnemytoAttackFlg_;
     }
 }

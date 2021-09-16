@@ -1204,6 +1204,47 @@ nowTurnChar_ = CharcterNum.UNI;
 
 -----------------------------------------------
 
+<敵を全て倒したら、カメラを戻して移動可能にする>-
+
+EnemySelect.csのResetSelectPointの返り値をboolに
+して、敵が0体ならforeach文の下にくるのでfalseを
+返すようにする。
+
+あとは、CharacterMng.csのAttackStart関数で
+ResetSelectPoint関数を呼び出している所でif文を入れてfalseなら、nowModeをSEARCHにするように書く。
+
+ただし、これだと敵に攻撃を始めた瞬間にMODEが切り替わってしまうので対処が必要。
+
+<敵を倒した後に切り替わるように修正する>
+(方針)
+CharacterMng.csのAttackStart関数では戦闘終了フラグを立てるだけにしておいて、
+ButtleMng.csで上記のフラグを参照して
+フラグがtrueなら定期的にタグで敵の数を調べるようにする
+
+(実装)
+CharacterMng.csにlastEnemytoAttackFlg_という
+変数を追加し、AttackStart関数の中で
+ResetSelectPoint関数の返り値の内容によって
+フラグが切り替わるように処理を書く。
+※戦闘のはじめに毎回初期化されるように、　　ButtleSetCallOnce関数ではfalseにする
+そして、GetLastEnemyToAttackFlgという関数を用意しておく。
+
+ButtleMng.csのUpdate関数内で、
+GetLastEnemyToAttackFlg関数を呼び出し、
+trueの時に"Enemy"というタグが付いたオブジェクトを
+探すようにし、該当しない時にnowModeをSEARCHに
+するように記述する。
+
+敵の処理を追加したらまた修正が必要になるが、
+仮作成は完了した。
+------------------------------------------------
+
+<0916やる事>※全てunitydataScene
+・敵選択中は、コマンドを消す
+・コマンド選択に戻るボタンを案内だす
+・にげるコマンドの代わりに、防御コマンドをおく
+・にげるコマンドは回転コマンドとは別の場所に案内
+
 <いろいろメモ欄>
 FieldMng.csとは別に、SceneMng的なのを用意して、シーンのロード/アンロードとnowModeを切り替えてくれるものをつくったほうがいいと思う
 
@@ -1216,7 +1257,8 @@ https://qiita.com/ChurappsWatatani/items/73f0c38f0cd18620a580
 そのかわり、選択ボタンの操作方法とか
 コマンド選択に戻るボタンが何かを案内だしとくといいと思う。
 
-セーブをするときはキャラのステータスの保存はCharacterMng.csでやったらうまくいきそうだとおもった。
+セーブをするときはキャラのステータスの保存を
+どのスクリプトでするか考えたほうがいい
 
 キャラクターのステータスはポイントを振り分けられるようなシステムにしたい。
 
@@ -1224,7 +1266,6 @@ https://qiita.com/ChurappsWatatani/items/73f0c38f0cd18620a580
 いれるようにする。
 →にげるを選択するのにコマンドをぐるぐる回すのは　手間というか、面倒くさい。
 
-なにもしないでも敵に遭遇できるアイテムがあったら便利そう。
 
 キャラが攻撃対象を選ぶ時に、
 矢印が敵の頭の上に浮いててフワフワくるくるしてて

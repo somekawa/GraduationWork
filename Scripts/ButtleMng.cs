@@ -61,5 +61,15 @@ public class ButtleMng : MonoBehaviour
         }
 
         characterMng_.Buttle();
+
+        // キャラクターの攻撃対象が最後の敵だった時
+        if(characterMng_.GetLastEnemyToAttackFlg())
+        {
+            // Enemyタグの数を見て該当する物がない(= 0)なら、MODEを探索に切り替える
+            if (GameObject.FindGameObjectsWithTag("Enemy").Length == 0)
+            {
+                FieldMng.nowMode = FieldMng.MODE.SEARCH;
+            }
+        }
     }
 }
