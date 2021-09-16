@@ -1256,7 +1256,6 @@ foreach文内で呼び出し、値を初期化すればよい。
 ------------------------------------------------
 
 <戦闘で敵の数が変わるとエラーがでる>-------------
-
 (原因)
 EnemySelect.csのselectNum_を戦闘開始時に初期化
 していなかったから。
@@ -1268,10 +1267,37 @@ selectNum_ = 0;としておく。
 
 ------------------------------------------------
 
+<逃走コマンドを防御コマンドに変更>---------------
+ImageRotate.csにあるenum COMMANDの
+ESCAPEをBARRIERに変更した。
+これにより、CharacterMng.csのswitch文も一部変更
+が行われた。
+
+------------------------------------------------
+
+<敵選択中は、コマンドを消す>---------------------
+ImageRotate.csのSetRotaFlg関数に
+this.gameObject.SetActive(flag);という処理を
+追加する。
+
+ヒエラルキーのButtleUICanvasを修正する。
+空のオブジェクトで子に[Command]と追加し、
+それの子に[Frame]と[Image]を入れる。
+
+もともとbuttleCommandUI_変数と命名していたものを
+[buttleCommandRotate_]に変更する。
+※CharacterMng.csとButtleMng.csで設定変更
+
+CharacterMng.csでは、
+新規に[buttleCommandUI_]変数をつくって
+[Command]をFindするようにしておく。
+あとは、[buttleCommandRotate_]と同じタイミングで
+SetActiveを切り替えるように処理を書き加えれば修正できる。
+
+------------------------------------------------
+
 <0916やる事>※全てunitydataScene
-・敵選択中は、コマンドを消す
 ・コマンド選択に戻るボタンを案内だす
-・にげるコマンドの代わりに、防御コマンドをおく
 ・にげるコマンドは回転コマンドとは別の場所に案内
 
 <いろいろメモ欄>

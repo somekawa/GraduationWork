@@ -14,7 +14,7 @@ public class ButtleMng : MonoBehaviour
 
     private bool setCallOnce_ = false;      // 戦闘モードに切り替わった最初のタイミングだけ切り替わる
 
-    private ImageRotate buttleCommandUI_;   // バトル中のコマンドUIを取得して、保存しておく変数
+    private ImageRotate buttleCommandRotate_;   // バトル中のコマンドUIを取得して、保存しておく変数
 
     private CharacterMng characterMng_;         // キャラクター管理クラスの情報
     private EnemyInstanceMng enemyInstanceMng_; // 敵インスタンス管理クラスの情報
@@ -24,7 +24,7 @@ public class ButtleMng : MonoBehaviour
         characterMng_ = GameObject.Find("CharacterMng").GetComponent<CharacterMng>();
         enemyInstanceMng_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>();
 
-        buttleCommandUI_ = buttleUICanvas.transform.Find("Image").GetComponent<ImageRotate>();
+        buttleCommandRotate_ = buttleUICanvas.transform.Find("Command").transform.Find("Image").GetComponent<ImageRotate>();
         buttleUICanvas.gameObject.SetActive(false);
     }
 
@@ -37,7 +37,7 @@ public class ButtleMng : MonoBehaviour
 
             if(buttleUICanvas.gameObject.activeSelf)
             {
-                buttleCommandUI_.ResetRotate();   // UIの回転を一番最初に戻す
+                buttleCommandRotate_.ResetRotate();   // UIの回転を一番最初に戻す
             }
             buttleUICanvas.gameObject.SetActive(false);
             fieldUICanvas.gameObject.SetActive(true);

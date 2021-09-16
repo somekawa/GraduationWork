@@ -23,7 +23,7 @@ public class ImageRotate : MonoBehaviour
         ATTACK, // 攻撃コマンド(初期コマンド)
         MAGIC,  // 魔法コマンド
         ITEM,   // アイテムコマンド
-        ESCAPE, // 逃走コマンド
+        BARRIER,// 防御コマンド
         MAX     
     }
 
@@ -42,7 +42,7 @@ public class ImageRotate : MonoBehaviour
         commandMap_ = new Dictionary<int, COMMAND>(){
             {0,COMMAND.ATTACK},
             {90,COMMAND.MAGIC},
-            {180,COMMAND.ESCAPE},
+            {180,COMMAND.BARRIER},
             {270,COMMAND.ITEM},
         };
     }
@@ -142,5 +142,6 @@ public class ImageRotate : MonoBehaviour
     public void SetRotaFlg(bool flag)
     {
         rotaFlg_ = flag;
+        this.gameObject.SetActive(flag);
     }
 }
