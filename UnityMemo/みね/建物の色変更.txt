@@ -1,0 +1,13 @@
+・Material		・Texture
+RestaurantPillar		House1のmap6
+RestaurantRoofEdge	なし
+RestaurantWall		RestaurantTexture
+MayorRoof		MayorRoofTexture
+
+・入替え場所
+〇MayorHouseオブジェクト
+Element6ーーMayorRoof
+〇Restaurantオブジェクト
+Element1ーーRestaurantWall
+Element4ーーRestaurantPillar
+Element9ーーRestaurantRoofEdge
