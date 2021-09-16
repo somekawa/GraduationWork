@@ -8,6 +8,6 @@ MayorRoof		MayorRoofTexture
 〇MayorHouseオブジェクト
 Element6ーーMayorRoof
 〇Restaurantオブジェクト
-Element1ーーRestaurantWall
+Element0ーーRestaurantWall
 Element4ーーRestaurantPillar
 Element9ーーRestaurantRoofEdge
