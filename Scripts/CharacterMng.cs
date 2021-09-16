@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 // 探索中/戦闘中問わず、キャラクターに関連するものを管理する
 
@@ -39,7 +40,8 @@ public class CharacterMng : MonoBehaviour
     // キーをキャラ識別enum,値を(キャラ識別に対応した)キャラオブジェクトで作ったmap
     private Dictionary<CharcterNum, GameObject> charMap_;
 
-    private Transform buttleCommandUI_;
+    private TMPro.TextMeshProUGUI buttleAnounceText_;                              // バトル中の案内
+    private Transform buttleCommandUI_;                           // 金の大枠を含めた情報を取得
     private ImageRotate buttleCommandRotate_;                     // バトル中のコマンドUIを取得して、保存しておく変数
     private EnemySelect buttleEnemySelect_;                       // バトル中の選択アイコン情報
 
@@ -73,6 +75,8 @@ public class CharacterMng : MonoBehaviour
             buttleWarpPointsRotate_[i] = buttleWarpPointPack.transform.GetChild(i).gameObject.transform.rotation;
         }
 
+        buttleAnounceText_ = buttleUICanvas.transform.Find("AnnounceText").GetComponent<TMPro.TextMeshProUGUI>();
+
         buttleCommandUI_ = buttleUICanvas.transform.Find("Command");
         buttleCommandRotate_ = buttleCommandUI_.transform.Find("Image").GetComponent<ImageRotate>();
         buttleEnemySelect_ = buttleUICanvas.transform.Find("EnemySelectObj").GetComponent<EnemySelect>();
@@ -98,6 +102,8 @@ public class CharacterMng : MonoBehaviour
     // 戦闘開始時に設定される項目(ButtleMng.csで参照)
     public void ButtleSetCallOnce()
     {
+        buttleAnounceText_.text = "左シフトキー：\n戦闘から逃げる";
+
         // 最初の行動キャラを指定する
         nowTurnChar_ = CharcterNum.UNI;
 
@@ -124,12 +130,25 @@ public class CharacterMng : MonoBehaviour
     // キャラの戦闘中に関する処理(ButtleMng.csで参照)
     public void Buttle()
     {
+        // 戦闘から逃げる
+        if(!selectFlg_ && Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            // 敵オブジェクトを削除する(タグ検索)
+            foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Enemy"))
+            {
+                Destroy(obj);
+            }
+            FieldMng.nowMode = FieldMng.MODE.SEARCH;
+            Debug.Log("Uniは逃げ出した");
+        }
+
         // ATTACKで敵選択中に、特定のキー(今はTキー)を押下されたらコマンド選択に戻る
-        if(selectFlg_ && !buttleEnemySelect_.ReturnSelectCommand())
+        if (selectFlg_ && !buttleEnemySelect_.ReturnSelectCommand())
         {
             selectFlg_ = false;
             buttleCommandRotate_.SetRotaFlg(!selectFlg_);   // コマンド回転を有効化
             buttleCommandUI_.gameObject.SetActive(!selectFlg_);
+            buttleAnounceText_.text = "左シフトキー：\n戦闘から逃げる";
         }
 
         // キャラ毎のモーションを呼ぶ
@@ -142,6 +161,7 @@ public class CharacterMng : MonoBehaviour
                     if(!selectFlg_)
                     {
                         selectFlg_ = true;
+                        buttleAnounceText_.text = "Tキー：\nコマンド選択へ戻る";
                     }
                     else
                     {
@@ -173,7 +193,7 @@ public class CharacterMng : MonoBehaviour
         }
         else
         {
-            if(charasList_[(int)nowTurnChar_].ChangeNextChara())
+            if (charasList_[(int)nowTurnChar_].ChangeNextChara())
             {
                 // 次のキャラが行動できるようにする
                 // 最大まで加算されたら、初期値に戻す(前演算子重要)

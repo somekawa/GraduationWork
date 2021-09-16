@@ -1293,14 +1293,69 @@ CharacterMng.csでは、
 [Command]をFindするようにしておく。
 あとは、[buttleCommandRotate_]と同じタイミングで
 SetActiveを切り替えるように処理を書き加えれば修正できる。
+※CharacterMng.csで表示管理するのが気に食わない
+　から変更するかも
 
 ------------------------------------------------
 
-<0916やる事>※全てunitydataScene
-・コマンド選択に戻るボタンを案内だす
-・にげるコマンドは回転コマンドとは別の場所に案内
+<にげるボタンとコマンド選択へ戻るボタンの案内>---
+案内の文章がでるように処理を追加していく。
+ヒエラルキーのButtleUICanvasの中に
+[AnoounceImage(Image)]と
+[AnnounceText(TextMeshPro)]を
+追加する。
+
+[AnnounceText(TextMeshPro)]は
+フォントを[komorebi-gothic]に変更する。
+
+2つの案内は、表示位置を変えずに文字だけ変えるようにする。
+
+CharacterMng.csにTMPro.TextMeshProUGUI
+buttleAnounceText_変数を用意して、
+Start関数で 
+buttleAnounceText_ = buttleUICanvas.transform.Find("AnnounceText").GetComponent<TMPro.TextMeshProUGUI>();
+という風に読み取りをする。
+あとは、この文字を状態に合わせて変更する。
+
+buttleAnounceText_.textの内容を、
+ButtleSetCallOnce関数やButtle関数で呼びだすようにする。
+
+[AnnounceImage]
+Pos X:300 Y:-165 Z:0
+Width:260 Height:68
+Image画像は[frame_name.png]を使用
+
+[AnnounceText]
+Pos X:350 Y:-170 Z:0
+Width:200 Height:50
+テキスト内容はCharacterMng.csで状況によって変更
+
+-----------------------------------------------
+
+<逃げるコマンドの実装>--------------------------
+戦闘時に、左シフトキーを押したら戦闘から逃げられるようにする。
+
+CharacterMng.csのButtle関数内で処理を追加する。
+// 戦闘から逃げる
+if(!selectFlg_ && Input.GetKeyDown(KeyCode.LeftShift))
+{
+    // 敵オブジェクトを削除する(タグ検索)
+    foreach (GameObject obj in     GameObject.FindGameObjectsWithTag("Enemy"))
+    {
+        Destroy(obj);
+    }
+ FieldMng.nowMode = FieldMng.MODE.SEARCH;
+            Debug.Log("Uniは逃げ出した");
+}
+
+上記のように、タグで敵を検索して残っている敵を
+削除する必要がある。
+
+-----------------------------------------------
 
 <いろいろメモ欄>
+CharacterMng.csでコマンドの表示非表示管理があるのもなんかおかしいから、ButtleMng.csで一括管理できるように直したほうがいい。
+
 FieldMng.csとは別に、SceneMng的なのを用意して、シーンのロード/アンロードとnowModeを切り替えてくれるものをつくったほうがいいと思う
 
 Update関数は極力減らす(↓はupdateの解説サイト)
