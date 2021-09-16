@@ -195,6 +195,8 @@ public class CharacterMng : MonoBehaviour
         {
             if (charasList_[(int)nowTurnChar_].ChangeNextChara())
             {
+                buttleAnounceText_.text = "左シフトキー：\n戦闘から逃げる";
+
                 // 次のキャラが行動できるようにする
                 // 最大まで加算されたら、初期値に戻す(前演算子重要)
                 if (++nowTurnChar_ >= CharcterNum.MAX)
