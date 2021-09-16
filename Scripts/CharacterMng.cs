@@ -113,6 +113,9 @@ public class CharacterMng : MonoBehaviour
             // 攻撃エフェクトの発生位置の目安になる
             //charSetting[(int)character.Key].buttlePos  = character.Value.gameObject.transform.position;
             charasList_[(int)character.Key].SetButtlePos(character.Value.gameObject.transform.position);
+
+            // 行動順に関連する値を初期化する
+            charasList_[(int)character.Key].SetTurnInit();
         }
     }
 

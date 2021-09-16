@@ -170,14 +170,14 @@ public class EnemySelect : MonoBehaviour
     public void SetPosList(List<Vector3> list)
     {
         // 受け取ったlistの数分、trueにしたboolのリストを用意する
-        var test = new List<bool>();
+        var tmpList = new List<bool>();
         for(int i = 0; i < list.Count(); i++)
         {
-            test.Add(true);
+            tmpList.Add(true);
         }
 
         // 代入する
-        posList_ = new System.Tuple<List<Vector3>, List<bool>>(list, test);
+        posList_ = new System.Tuple<List<Vector3>, List<bool>>(list, tmpList);
 
         // 受け取った値のY座標にoffsetが必要
         for (int i = 0; i < posList_.Item1.Count; i++)
@@ -189,7 +189,8 @@ public class EnemySelect : MonoBehaviour
         }
 
         // 矢印の初期位置
-        this.gameObject.transform.position = posList_.Item1[0];
+        selectNum_ = 0;
+        this.gameObject.transform.position = posList_.Item1[selectNum_];
 
         // タプル変更前
         //posList_ = list;

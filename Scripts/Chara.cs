@@ -124,4 +124,11 @@ public class Chara : CharaBase,InterfaceButtle
         set_.buttlePos = pos;
     }
 
+    // í“¬‚Ìn‚ß‚É‰Šú‰»‚·‚é
+    public void SetTurnInit()
+    {
+        set_.isMove = false;
+        set_.animTime = 0.0f;
+    }
+
 }
