@@ -24,8 +24,7 @@ public class UnitychanController : MonoBehaviour
     void Update()
     {
         // 探索モード以外で自由に動かれたらいけないので、return処理を加える。
-        // 町の中でもSEARCHにしておけばいいかな？
-        if(FieldMng.nowMode != FieldMng.MODE.SEARCH && FieldMng.nowMode != FieldMng.MODE.NON)
+        if(FieldMng.nowMode != FieldMng.MODE.SEARCH)
         {
             // ここでRunのアニメーションを変更しておかないと、モードが切り替わる瞬間まで走っていたら
             // 走りモーションが戦闘中に継続してしまう。
@@ -77,7 +76,7 @@ public class UnitychanController : MonoBehaviour
             // 速度ベクトルを作成（3次元用）Y座標は0.0fで必ず固定する
             var speed = new Vector3(movedir.x, 0.0f, movedir.z);
             // 速度に正規化したベクトルに、移動速度をかけて代入する
-            rigid.velocity = speed.normalized * FieldMng.charaRunSpeed;
+            rigid.velocity = speed.normalized * SceneMng.charaRunSpeed;
 
             // 座標更新
             // キャラクターを移動させる処理

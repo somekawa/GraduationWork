@@ -41,7 +41,7 @@ public class CharacterMng : MonoBehaviour
     private Dictionary<CharcterNum, GameObject> charMap_;
 
     private TMPro.TextMeshProUGUI buttleAnounceText_;             // バトル中の案内
-    private readonly string[] announceText_ = new string[2]{ " 左シフトキー：\n 戦闘から逃げる", " Tキー：\nコマンド選択へ戻る" };
+    private readonly string[] announceText_ = new string[2]{ " 左シフトキー：\n 戦闘から逃げる", " Tキー：\n コマンドへ戻る" };
 
     private Transform buttleCommandUI_;                           // 金の大枠を含めた情報を取得
     private ImageRotate buttleCommandRotate_;                     // バトル中のコマンドUIを取得して、保存しておく変数

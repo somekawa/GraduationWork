@@ -1367,7 +1367,124 @@ if(!selectFlg_ && Input.GetKeyDown(KeyCode.LeftShift))
 
 -----------------------------------------------
 
+<フィールドを作成する>--------------------------
+LowPolyEnvironmentPackを使って作成する。
+中にDemoSceneが3つあったので、その3番目を丸コピ
+してきたあとに、terrainだけ削除して作り直す。
+
+terrainのデータに[unitydataField]と命名して
+Field-Mapフォルダ内に入れておく。
+
+まずはterrainのサイズを100*100に修正して、
+PosをX:-50 Y:0 Z:-25
+にする。
+
+[1つ目の地面]
+　Assets-Field-Map-ADG_Textures-ground_vol1-
+  ground6にある[ground6_Diffuse.tga]にする
+[2つ目の地面]
+　Assets-Field-Map-ADG_Textures-ground_vol1-
+  ground1にある[ground1_Diffuse.tga]
+
+※それぞれ、同じファイル内にあるNormalMapも入れる
+
+<変更した画像のサイズが1024*1024なので小さくする>
+画像サイズが大きすぎると容量が大きくなる。
+なので、対策が必要
+
+テクスチャをクリックすると、
+Defaultという項目の中に[MaxSize]というのがある
+これが1024→32にしてApplyボタンを押すと小さく
+できる。しかし画質が荒くなる。
+ここは見栄えで考えること
+
+①→32に変更
+②→64に変更
+
+Terrainに草を追加する
+街に使用していたのと同じものを使用する
+[GrassLow]と[GrassTall]
+
+岩2つと落ちてる木の枝1つに個別でコライダーつけた
+
+メモ：
+①MainCameraのposとrotation変更あり
+Pos  X:0  Y:3 Z:1
+Rota X:30 Y:0 Z:0
+
+②ButtleCameraのposとrotation変更あり
+Pos  X:4  Y:2 Z:7.5
+Rota X:15 Y:-60 Z:0
+
+③Uniの初期座標変更あり
+Pos  X:0  Y:0 Z:4
+
+④ButtleWarpPointPack初期座標変更あり
+Pos  X:0  Y:0 Z:8
+
+⑤EnemyInstancePointPack初期座標変更あり
+Pos  X:0  Y:0 Z:11
+-----------------------------------------------
+
+<SceneMngを作成する>---------------------------
+シーンを跨いで情報を残すためには、空のオブジェクトにアタッチしたSceneMng.csを残し続ける必要がある
+
+参照したもの↓
+https://gametukurikata.com/program/data
+上記サイトのゲームオブジェクトを次のシーンに残す
+という項目を参考にする。
+
+[SceneMng]という空のオブジェクトを作成し、
+新規Scriptで[SceneMng.cs]をつくってこれにアタッチ
+
+[SceneMng.cs]に
+void Awake () 
+{
+	DontDestroyOnLoad(gameObject);
+}
+という処理を追加して、Scene移動時に破棄されないようにする。
+
+publicのenumで、SCENEというのを作成して
+NON,TITLE,TOWN,FIELD,MAXを用意する。
+staticのnowScene変数を用意して、外部から切替られるようにしておく。
+
+<FieldMng.csでの処理を移植してくる>
+キャラの移動速度の設定をSceneMng.cs側でやるように
+変更する。
+これに伴い、UnitychanController.csも
+ * SceneMng.charaRunSpeedに変更する
+
+SceneMng.csにSetNowScene関数を作成して、
+これを外部で呼んで現在のシーンを切り替えるようにする。
+
+towndataにTownMngオブジェクトを作って
+TownMng.csを新規作成する
+
+TownMng.csとFieldMng.csのStart関数内で
+SetNowScene関数を呼び出すようにした。
+
+また、SceneLoadUnLoad関数も作ったから
+これでシーンの切替ができる
+
+※キャラクター初期座標設定にも使えるかも
+　
+------------------------------------------------
+
+・戦闘終了後に、歩いていたところまで戻してあげる
+・敵を豆腐から通常の敵にする
+
+
+<土日にやること>
+・SceneMngを用意する
+→これはどのSceneにも持ち越しされるやつ
+　キャラクター移動速度とかはSceneMngで調整する
+　ようにならないとおかしい
+
+・CharacterMng.csでコマンドの表示非表示管理がある　のもなんかおかしいから、ButtleMng.csで一括管理　できるように直す。
+
 <いろいろメモ欄>
+towndataも建物や木をstaticにしたほうがいいかも
+
 CharacterMng.csでコマンドの表示非表示管理があるのもなんかおかしいから、ButtleMng.csで一括管理できるように直したほうがいい。
 
 FieldMng.csとは別に、SceneMng的なのを用意して、シーンのロード/アンロードとnowModeを切り替えてくれるものをつくったほうがいいと思う

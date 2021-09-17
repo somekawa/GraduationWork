@@ -78,7 +78,7 @@ public class Warp : MonoBehaviour
         for (int i = (int)warp.NON; i < (int)warp.MAX - 1; i++)
         {
             warpChildren_[i] = this.transform.GetChild(i).gameObject;
-            Debug.Log("Warp先" + i + ";" + this.transform.GetChild(i).gameObject);
+            //Debug.Log("Warp先" + i + ";" + this.transform.GetChild(i).gameObject);
         }
 
         // 街の外の移動先を保存
@@ -86,7 +86,7 @@ public class Warp : MonoBehaviour
         for (int i = (int)field.NON; i < (int)field.MAX; i++)
         {
             choiceField_[i] = fieldCanvas.transform.GetChild(i).GetComponent<Image>();
-            Debug.Log("町の外移動先" + i + ";" + fieldCanvas.transform.GetChild(i).GetComponent<Image>());
+            //Debug.Log("町の外移動先" + i + ";" + fieldCanvas.transform.GetChild(i).GetComponent<Image>());
         }
     }
 
@@ -96,7 +96,7 @@ public class Warp : MonoBehaviour
         if (fieldCanvas.enabled == true)
         {
             ChoiceFiledLocation();
-            Debug.Log("フィールド移動先表示中");
+            //Debug.Log("フィールド移動先表示中");
             return;
         }
 
@@ -133,7 +133,7 @@ public class Warp : MonoBehaviour
             {
                 warpNum++;            // 長針右に移動
             }
-            Debug.Log("右移動カウント" + warpNum);
+            //Debug.Log("右移動カウント" + warpNum);
         }
         else if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
@@ -141,7 +141,7 @@ public class Warp : MonoBehaviour
             {
                 warpNum--;            // 長針左に移動
             }
-            Debug.Log("左移動カウント" + warpNum);
+            //Debug.Log("左移動カウント" + warpNum);
         }
 
         for (int i = (int)warp.HOUSE; i < (int)warp.MAX; i++)
@@ -188,7 +188,7 @@ public class Warp : MonoBehaviour
 
     private void ChoiceFiledLocation()
     {
-        Debug.Log(choiceNum_);
+        //Debug.Log(choiceNum_);
         moveNeedle_ = false;// 長針を動かないようにする
 
         for (int i = (int)field.NON + 1; i < (int)field.MAX; i++)
@@ -217,7 +217,7 @@ public class Warp : MonoBehaviour
             {
                 choiceNum_++;      // 下に移動
             }
-            Debug.Log("下に移動" + choiceNum_);
+            //Debug.Log("下に移動" + choiceNum_);
         }
         else if (Input.GetKeyDown(KeyCode.UpArrow))
         {
@@ -225,7 +225,7 @@ public class Warp : MonoBehaviour
             {
                 choiceNum_--;    // 上に移動
             }
-            Debug.Log("上に移動" + choiceNum_);
+            //Debug.Log("上に移動" + choiceNum_);
         }
 
         if (Input.GetKey(KeyCode.Space))

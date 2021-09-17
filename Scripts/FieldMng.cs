@@ -24,9 +24,6 @@ public class FieldMng : MonoBehaviour
     }
 
     public static MODE nowMode = MODE.SEARCH;          // 現在のモード
-    // towndataスタートの時、8.0fに初期値をしておかないと走れなくなる
-    // charaRunSpeedは、将来的にどのSceneにも共有されるSceneMngとかに持たせたほうがいい
-    public static float charaRunSpeed = 0.0f;       // キャラの移動速度(MODE毎に調整をする)
 
     private float toButtleTime_ = 1.0f;            // 30秒経過でバトルへ遷移する
     private float time_ = 0.0f;                     // 現在の経過時間
@@ -48,6 +45,9 @@ public class FieldMng : MonoBehaviour
         {
             Debug.Log("FieldMng.csで取得しているCameraMngがnullです");
         }
+
+        // 現在のシーンをFIELDとする
+        SceneMng.SetNowScene(SceneMng.SCENE.FIELD);
     }
 
     void Update()
@@ -58,12 +58,10 @@ public class FieldMng : MonoBehaviour
         switch (nowMode)
         {
             case MODE.NON:
-                charaRunSpeed = 8.0f;
                 break;
 
             case MODE.SEARCH :
                 cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
-                charaRunSpeed = 1.0f;
 
                 if (player_.GetMoveFlag() && time_ < toButtleTime_)
                 {
@@ -82,7 +80,6 @@ public class FieldMng : MonoBehaviour
 
             case MODE.BUTTLE:
                 cameraMng_.SetChangeCamera(true);   // サブカメラアクティブ
-                charaRunSpeed = 0.0f;
             break;
 
             default:
