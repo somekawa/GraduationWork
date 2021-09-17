@@ -10,9 +10,10 @@ public class SceneMng : MonoBehaviour
     {
         TOWN,   // 街シーン
         FIELD,  // フィールドシーン
+        MAX
     }
 
-    public static SCENE nowScene;               // 現在のシーン
+    public static SCENE nowScene=SCENE.MAX;               // 現在のシーン
     public static float charaRunSpeed = 0.0f;   // キャラの移動速度(MODE毎に調整をする)
 
     void Awake()
