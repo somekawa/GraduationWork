@@ -58,7 +58,7 @@ public class GoThroughCheck : MonoBehaviour
                     // 1.0の時は右への通過の為true(サブカメラアクティブ)
                     cameraMng_.SetChangeCamera(true);
                     // カメラ位置調整
-                    cameraMng_.SetSubCameraPos(new Vector3(24.0f, 3.0f, 89.0f));
+                    cameraMng_.SetSubCameraPos(new Vector3(28.0f, 3.0f, 89.0f));
                 }
                 else
                 {
@@ -79,7 +79,7 @@ public class GoThroughCheck : MonoBehaviour
                     // -1.0の時は右への通過の為true(サブカメラアクティブ)
                     cameraMng_.SetChangeCamera(true);
                     // カメラ位置調整
-                    cameraMng_.SetSubCameraPos(new Vector3(-24.0f, 3.0f, 89.0f));
+                    cameraMng_.SetSubCameraPos(new Vector3(-28.0f, 3.0f, 89.0f));
                 }
             }
         }
