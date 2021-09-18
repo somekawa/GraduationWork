@@ -29,6 +29,7 @@ public class CharacterMng : MonoBehaviour
         MAX
     }
 
+    CharcterNum oldTurnChar_ = CharcterNum.UNI;     // 前に行動順が回ってきていたキャラクター
     CharcterNum nowTurnChar_ = CharcterNum.MAX;     // 現在行動順が回ってきているキャラクター
     private bool selectFlg_ = false;                // 敵を選択中かのフラグ
     private bool lastEnemytoAttackFlg_ = false;     // キャラの攻撃対象が最後の敵であるか     
@@ -170,8 +171,19 @@ public class CharacterMng : MonoBehaviour
                 case ImageRotate.COMMAND.ATTACK:
                     if(!selectFlg_)
                     {
-                        selectFlg_ = true;
-                        buttleAnounceText_.text = announceText_[1];
+                        // 自分の行動の前の人が動作終わっているか調べる
+                        if (!charasList_[(int)oldTurnChar_].GetIsMove())
+                        {
+                            oldTurnChar_ = nowTurnChar_;
+
+                            Debug.Log("前のキャラが行動終了");
+                            selectFlg_ = true;
+                            buttleAnounceText_.text = announceText_[1];
+                        }
+                        else
+                        {
+                            Debug.Log("前のキャラがアニメーション中");
+                        }
                     }
                     else
                     {

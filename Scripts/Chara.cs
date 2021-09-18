@@ -131,4 +131,9 @@ public class Chara : CharaBase,InterfaceButtle
         set_.animTime = 0.0f;
     }
 
+    public bool GetIsMove()
+    {
+        return set_.isMove;
+    }
+
 }
