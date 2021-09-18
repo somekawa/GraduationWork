@@ -31,8 +31,9 @@ public class CharacterMng : MonoBehaviour
 
     CharcterNum nowTurnChar_ = CharcterNum.MAX;     // 現在行動順が回ってきているキャラクター
     private bool selectFlg_ = false;                // 敵を選択中かのフラグ
-    private bool lastEnemytoAttackFlg_ = false;        // キャラの攻撃対象が最後の敵であるか     
+    private bool lastEnemytoAttackFlg_ = false;     // キャラの攻撃対象が最後の敵であるか     
 
+    private Vector3 keepFieldPos_;                  // 戦闘に入る直前のキャラの座標を保存しておく 
     private const int buttleCharMax_ = 2;           // バトル参加可能キャラ数の最大値(最終的には3にする)
     private Vector3[] buttleWarpPointsPos_ = new Vector3[buttleCharMax_];            // 戦闘時の配置位置を保存しておく変数
     private Quaternion[] buttleWarpPointsRotate_ = new Quaternion[buttleCharMax_];   // 戦闘時の回転角度を保存しておく変数(クォータニオン)
@@ -43,7 +44,6 @@ public class CharacterMng : MonoBehaviour
     private TMPro.TextMeshProUGUI buttleAnounceText_;             // バトル中の案内
     private readonly string[] announceText_ = new string[2]{ " 左シフトキー：\n 戦闘から逃げる", " Tキー：\n コマンドへ戻る" };
 
-    private Transform buttleCommandUI_;                           // 金の大枠を含めた情報を取得
     private ImageRotate buttleCommandRotate_;                     // バトル中のコマンドUIを取得して、保存しておく変数
     private EnemySelect buttleEnemySelect_;                       // バトル中の選択アイコン情報
 
@@ -79,8 +79,7 @@ public class CharacterMng : MonoBehaviour
 
         buttleAnounceText_ = buttleUICanvas.transform.Find("AnnounceText").GetComponent<TMPro.TextMeshProUGUI>();
 
-        buttleCommandUI_ = buttleUICanvas.transform.Find("Command");
-        buttleCommandRotate_ = buttleCommandUI_.transform.Find("Image").GetComponent<ImageRotate>();
+        buttleCommandRotate_ = buttleUICanvas.transform.Find("Command").transform.Find("Image").GetComponent<ImageRotate>();
         buttleEnemySelect_ = buttleUICanvas.transform.Find("EnemySelectObj").GetComponent<EnemySelect>();
 
         enemyInstancePos_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().GetEnemyPos();
@@ -104,6 +103,11 @@ public class CharacterMng : MonoBehaviour
     // 戦闘開始時に設定される項目(ButtleMng.csで参照)
     public void ButtleSetCallOnce()
     {
+        if (buttleUICanvas.gameObject.activeSelf)
+        {
+            buttleCommandRotate_.ResetRotate();   // UIの回転を一番最初に戻す
+        }
+
         buttleAnounceText_.text = announceText_[0];
 
         // 最初の行動キャラを指定する
@@ -111,6 +115,9 @@ public class CharacterMng : MonoBehaviour
 
         // フラグの初期化を行う
         lastEnemytoAttackFlg_ = false;
+
+        // 戦闘前の座標を保存しておく
+        keepFieldPos_ = charMap_[CharcterNum.UNI].gameObject.transform.position;
 
         // 戦闘用座標と回転角度を代入する
         // キャラの角度を変更は、ButtleWarpPointの箱の角度を回転させると可能。(1体1体向きを変えることもできる)
@@ -133,7 +140,7 @@ public class CharacterMng : MonoBehaviour
     public void Buttle()
     {
         // 戦闘から逃げる
-        if(!selectFlg_ && Input.GetKeyDown(KeyCode.LeftShift))
+        if (!selectFlg_ && Input.GetKeyDown(KeyCode.LeftShift))
         {
             // 敵オブジェクトを削除する(タグ検索)
             foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Enemy"))
@@ -141,6 +148,8 @@ public class CharacterMng : MonoBehaviour
                 Destroy(obj);
             }
             FieldMng.nowMode = FieldMng.MODE.SEARCH;
+            charMap_[CharcterNum.UNI].gameObject.transform.position = keepFieldPos_;
+
             Debug.Log("Uniは逃げ出した");
         }
 
@@ -149,7 +158,6 @@ public class CharacterMng : MonoBehaviour
         {
             selectFlg_ = false;
             buttleCommandRotate_.SetRotaFlg(!selectFlg_);   // コマンド回転を有効化
-            buttleCommandUI_.gameObject.SetActive(!selectFlg_);
             buttleAnounceText_.text = announceText_[0];
         }
 
@@ -174,7 +182,6 @@ public class CharacterMng : MonoBehaviour
                         }
                     }
 
-                    buttleCommandUI_.gameObject.SetActive(!selectFlg_);
                     buttleCommandRotate_.SetRotaFlg(!selectFlg_);
                     buttleEnemySelect_.SetActive(selectFlg_);
 
@@ -247,5 +254,16 @@ public class CharacterMng : MonoBehaviour
     public bool GetLastEnemyToAttackFlg()
     {
         return lastEnemytoAttackFlg_;
+    }
+
+    // ButtleMng.csで参照
+    public bool GetSelectFlg()
+    {
+        return selectFlg_;
+    }
+
+    public void SetCharaFieldPos()
+    {
+        charMap_[CharcterNum.UNI].gameObject.transform.position = keepFieldPos_;
     }
 }

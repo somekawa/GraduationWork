@@ -14,7 +14,7 @@ public class ButtleMng : MonoBehaviour
 
     private bool setCallOnce_ = false;      // 戦闘モードに切り替わった最初のタイミングだけ切り替わる
 
-    private ImageRotate buttleCommandRotate_;   // バトル中のコマンドUIを取得して、保存しておく変数
+    private Transform buttleCommandUI_;         // 金の大枠を含めた情報を取得
 
     private CharacterMng characterMng_;         // キャラクター管理クラスの情報
     private EnemyInstanceMng enemyInstanceMng_; // 敵インスタンス管理クラスの情報
@@ -24,7 +24,7 @@ public class ButtleMng : MonoBehaviour
         characterMng_ = GameObject.Find("CharacterMng").GetComponent<CharacterMng>();
         enemyInstanceMng_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>();
 
-        buttleCommandRotate_ = buttleUICanvas.transform.Find("Command").transform.Find("Image").GetComponent<ImageRotate>();
+        buttleCommandUI_ = buttleUICanvas.transform.Find("Command");
         buttleUICanvas.gameObject.SetActive(false);
     }
 
@@ -35,10 +35,6 @@ public class ButtleMng : MonoBehaviour
         {
             setCallOnce_ = false;
 
-            if(buttleUICanvas.gameObject.activeSelf)
-            {
-                buttleCommandRotate_.ResetRotate();   // UIの回転を一番最初に戻す
-            }
             buttleUICanvas.gameObject.SetActive(false);
             fieldUICanvas.gameObject.SetActive(true);
             return;
@@ -60,15 +56,19 @@ public class ButtleMng : MonoBehaviour
             characterMng_.SetEnemyNum(debugEnemyNum);
         }
 
+        // キャラクターの行動
         characterMng_.Buttle();
+        // コマンド状態の表示/非表示切替
+        buttleCommandUI_.gameObject.SetActive(!characterMng_.GetSelectFlg());
 
         // キャラクターの攻撃対象が最後の敵だった時
-        if(characterMng_.GetLastEnemyToAttackFlg())
+        if (characterMng_.GetLastEnemyToAttackFlg())
         {
             // Enemyタグの数を見て該当する物がない(= 0)なら、MODEを探索に切り替える
             if (GameObject.FindGameObjectsWithTag("Enemy").Length == 0)
             {
                 FieldMng.nowMode = FieldMng.MODE.SEARCH;
+                characterMng_.SetCharaFieldPos();
             }
         }
     }

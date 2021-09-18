@@ -1427,25 +1427,14 @@ Pos  X:0  Y:0 Z:11
 -----------------------------------------------
 
 <SceneMngを作成する>---------------------------
-シーンを跨いで情報を残すためには、空のオブジェクトにアタッチしたSceneMng.csを残し続ける必要がある
-
 参照したもの↓
 https://gametukurikata.com/program/data
-上記サイトのゲームオブジェクトを次のシーンに残す
-という項目を参考にする。
 
-[SceneMng]という空のオブジェクトを作成し、
 新規Scriptで[SceneMng.cs]をつくってこれにアタッチ
 
 [SceneMng.cs]に
-void Awake () 
-{
-	DontDestroyOnLoad(gameObject);
-}
-という処理を追加して、Scene移動時に破棄されないようにする。
-
 publicのenumで、SCENEというのを作成して
-NON,TITLE,TOWN,FIELD,MAXを用意する。
+TOWN,FIELD,MAXを用意する。
 staticのnowScene変数を用意して、外部から切替られるようにしておく。
 
 <FieldMng.csでの処理を移植してくる>
@@ -1470,24 +1459,69 @@ SetNowScene関数を呼び出すようにした。
 　
 ------------------------------------------------
 
-・戦闘終了後に、歩いていたところまで戻してあげる
-・敵を豆腐から通常の敵にする
+<コマンドの表示非表示管理をButtleMng.csに統一>--
+CharacterMng.cs側にGetSelectFlg関数を用意し、
+ButtleMng.csでbuttleCommandUI_変数を用意した後に
+Update関数内でフラグ状態を受け取ってSetActiveを
+設定するように変更。
 
+※ついでに、ImageRotateはCharacterMng.cs側で
+　完全に管理するようにButtleMng.csから移植した
+
+------------------------------------------------
+
+<戦闘終了後に、歩いていたところまで戻す>---------
+CharacterMng.csに新規でkeepFieldPos_変数を作成し
+ButtleSetCallOnce関数で座標を一時保存する。
+
+その後、
+①戦闘から逃げたとき
+②敵を全て倒した時
+に一時保存していた座標を入れてあげるようにする。
+
+①についてはButtle関数内で戦闘から逃げるという
+処理のなかに
+charMap_[CharcterNum.UNI].gameObject.transform.position = keepFieldPos_;
+という一文を追加する
+
+②についてはpublicでSetCharaFieldPos関数を用意し
+ButtleMng.csのFieldMng.nowModeをSEARCHに変更している下の行で呼びだすようにする。
+
+これで①,②の場合にキャラを移動していた位置まで
+戻してあげる事が出来た
+------------------------------------------------
+
+<戦闘前にキャラがスーーッと移動してしまう>-------
+参照したもの↓
+https://teratail.com/questions/105824
+
+(原因)
+RigidBodyの慣性が働いていたから
+
+(対処法)
+上記のサイトに書いてある通り、
+ピタッと止めたい位置に
+rigid.velocity = Vector3.zero;
+rigid.angularVelocity = Vector3.zero;
+という処理を入れる。
+
+今回は、UnitychanController.csのUpdate関数にある
+if(FieldMng.nowMode != FieldMng.MODE.SEARCH)
+の中に記述するのが正しい。
+
+これでスーーと移動するのを止められた。
+
+------------------------------------------------
 
 <土日にやること>
-・SceneMngを用意する
-→これはどのSceneにも持ち越しされるやつ
-　キャラクター移動速度とかはSceneMngで調整する
-　ようにならないとおかしい
-
-・CharacterMng.csでコマンドの表示非表示管理がある　のもなんかおかしいから、ButtleMng.csで一括管理　できるように直す。
+・戦闘時にキャラ移動がスーーッと残ってしまう
+・敵を豆腐から通常の敵にする
 
 <いろいろメモ欄>
+シーンのロード/アンロードについて↓
+https://dolphinetech.com/unity/scene-road-unload/
+
 towndataも建物や木をstaticにしたほうがいいかも
-
-CharacterMng.csでコマンドの表示非表示管理があるのもなんかおかしいから、ButtleMng.csで一括管理できるように直したほうがいい。
-
-FieldMng.csとは別に、SceneMng的なのを用意して、シーンのロード/アンロードとnowModeを切り替えてくれるものをつくったほうがいいと思う
 
 Update関数は極力減らす(↓はupdateの解説サイト)
 https://qiita.com/ChurappsWatatani/items/73f0c38f0cd18620a580

@@ -16,10 +16,9 @@ public class WarpTown : MonoBehaviour
         MAX
     }
 
-    public SceneMng sceneMng;
     public CameraMng cameraMng;     // メインカメラとサブカメラの切り替え
     public GameObject UniChan;      // ユニちゃん
-    public Canvas selectLocationCanvas;      // フィールドに出たいときのキャンバス
+    public Canvas LocationSelCanvas;      // フィールドに出たいときのキャンバス
     public Canvas warpCanvas;
 
     private bool decisionFlag_ = false;// ワープ先が決まったかどうか
@@ -85,7 +84,7 @@ public class WarpTown : MonoBehaviour
         needleImage.transform.rotation = Quaternion.Euler(0.0f, 0.0f, needleRotate[(int)warp.HOUSE]);
 
         // フィールドに出たいときのキャンバスは非表示
-        selectLocationCanvas.enabled = false;
+        LocationSelCanvas.enabled = false;
 
         // 街中のワープ先を保存 フィールドを含まない
         warpChildren_ = new GameObject[(int)warp.MAX - 1];
@@ -99,8 +98,8 @@ public class WarpTown : MonoBehaviour
         choiceField_ = new Image[(int)field.MAX];
         for (int i = (int)field.NON; i < (int)field.MAX; i++)
         {
-            choiceField_[i] = selectLocationCanvas.transform.GetChild(i).GetComponent<Image>();
-            Debug.Log("町の外移動先" + i + ";" + selectLocationCanvas.transform.GetChild(i).GetComponent<Image>());
+            choiceField_[i] = LocationSelCanvas.transform.GetChild(i).GetComponent<Image>();
+            Debug.Log("町の外移動先" + i + ";" + LocationSelCanvas.transform.GetChild(i).GetComponent<Image>());
         }
     }
 
@@ -113,7 +112,7 @@ public class WarpTown : MonoBehaviour
         }
 
         // フィールドキャンバスがアクティブの時
-        if (selectLocationCanvas.enabled == true)
+        if (LocationSelCanvas.enabled == true)
         {
             ChoiceFiledLocation();
             Debug.Log("フィールド移動先表示中");
@@ -162,7 +161,7 @@ public class WarpTown : MonoBehaviour
         {
             if (warpNum_ == (int)warp.FIELD)
             {
-                selectLocationCanvas.enabled = true;         // フィールドの移動先を表示
+                LocationSelCanvas.enabled = true;         // フィールドの移動先を表示
                 warpActive.color = choiceColor_;    // ワープしないとき（青
                 return;
             }
@@ -237,7 +236,7 @@ public class WarpTown : MonoBehaviour
                 }
                 CommonWarpCansel();             // ワープをキャンセル
                 choiceNum_ = (int)field.FIELD1; // フィールドの行き先をリセット
-                selectLocationCanvas.enabled = false;    // フィールド選択キャンバス非表示
+                LocationSelCanvas.enabled = false;    // フィールド選択キャンバス非表示
             }
             else
             {
@@ -284,7 +283,7 @@ public class WarpTown : MonoBehaviour
 
     private void FadeOutAndIn()
     {
-        if (selectLocationCanvas.enabled == true)
+        if (LocationSelCanvas.enabled == true)
         {
             // 町から出る場合
             if (alphaCnt_ <= 0.5f)
@@ -295,7 +294,7 @@ public class WarpTown : MonoBehaviour
             {
                 alphaCnt_ = 0.0f;
                 decisionFlag_ = false;
-                sceneMng.SceneLoadUnLoad((int)SceneMng.SCENE.FIELD, (int)SceneMng.SCENE.TOWN);
+                SceneMng.SceneLoadUnLoad((int)SceneMng.SCENE.FIELD, (int)SceneMng.SCENE.TOWN);
             }
         }
         else
@@ -348,7 +347,7 @@ public class WarpTown : MonoBehaviour
             if (other.tag == "Player")
             {
                 //  UniCtl.enabled = false;// ユニの動きを止める
-                selectLocationCanvas.enabled = true;         // フィールドの移動先を表示
+                LocationSelCanvas.enabled = true;         // フィールドの移動先を表示
                 warpBoxHit_ = true;
                 warpCheck_ = true;
                 saveUniRotateY_ = UniChan.transform.rotation.y;

@@ -16,11 +16,11 @@ public class SceneMng : MonoBehaviour
     public static SCENE nowScene=SCENE.MAX;               // 現在のシーン
     public static float charaRunSpeed = 0.0f;   // キャラの移動速度(MODE毎に調整をする)
 
-    void Awake()
-    {
-        // シーンを跨いでも消えないオブジェクトに設定する
-        DontDestroyOnLoad(gameObject);
-    }
+    //void Awake()
+    //{
+    //    // シーンを跨いでも消えないオブジェクトに設定する
+    //    DontDestroyOnLoad(gameObject);
+    //}
 
     // 外部から設定されるシーン状態遷移
     public static void SetNowScene(SCENE scene)
@@ -48,7 +48,7 @@ public class SceneMng : MonoBehaviour
     }
 
     // シーンのロード/アンロード
-    public void SceneLoadUnLoad(int load , int unload)
+    public static void SceneLoadUnLoad(int load , int unload)
     {
         // int番号は、ビルド設定の数値
         SceneManager.LoadScene(load);

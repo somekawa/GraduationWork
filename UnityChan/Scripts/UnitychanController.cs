@@ -26,6 +26,9 @@ public class UnitychanController : MonoBehaviour
         // 探索モード以外で自由に動かれたらいけないので、return処理を加える。
         if(FieldMng.nowMode != FieldMng.MODE.SEARCH)
         {
+            rigid.velocity = Vector3.zero;
+            rigid.angularVelocity = Vector3.zero;
+
             // ここでRunのアニメーションを変更しておかないと、モードが切り替わる瞬間まで走っていたら
             // 走りモーションが戦闘中に継続してしまう。
             this.animator_.SetBool(key_isRun, false);

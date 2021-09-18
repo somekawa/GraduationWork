@@ -67,7 +67,7 @@ public class FieldMng : MonoBehaviour
                 {
                     time_ += Time.deltaTime;
                 }
-                else if(time_ >= toButtleTime_)
+                else if (time_ >= toButtleTime_)
                 {
                     nowMode = MODE.BUTTLE;
                     time_ = 0.0f;
@@ -76,7 +76,7 @@ public class FieldMng : MonoBehaviour
                 {
                     // 何も処理を行わない
                 }
-            break;
+                break;
 
             case MODE.BUTTLE:
                 cameraMng_.SetChangeCamera(true);   // サブカメラアクティブ
