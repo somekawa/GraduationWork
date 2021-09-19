@@ -62,6 +62,11 @@ public class CharacterMng : MonoBehaviour
         charMap_ = SceneMng.charMap_;
         charasList_ = SceneMng.charasList_;
 
+        // テスト用
+        //charasList_[0].sethp(charasList_[0].HP() - 10);
+        //Debug.Log("HHHPPP"+charasList_[0].HP());
+        //SceneMng.SceneLoad((int)SceneMng.SCENE.TOWN);
+
         nowTurnChar_ = CharcterNum.UNI;
 
         // ワープポイントの数ぶん、for文を回す
@@ -78,6 +83,8 @@ public class CharacterMng : MonoBehaviour
         buttleEnemySelect_ = buttleUICanvas.transform.Find("EnemySelectObj").GetComponent<EnemySelect>();
 
         enemyInstancePos_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().GetEnemyPos();
+
+
     }
 
     // ButtleMng.csから敵の数を受け取る

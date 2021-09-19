@@ -41,8 +41,6 @@ public class SceneMng : MonoBehaviour
         {
             // シーンを跨いでも消えないオブジェクトに設定する
             DontDestroyOnLoad(gameObject);
-
-            singleton = this;
         }
         else
         {
@@ -78,7 +76,19 @@ public class SceneMng : MonoBehaviour
         {
             // Charaクラスの生成
             charasList_.Add(new Chara(anim.Value.name, anim.Key, anim.Value.GetComponent<Animator>()));
+
+            //@ ここでcharasDataのステータス値をcharasList_に代入？
         }
+
+        // 初回のみキャラステータスを初期値で登録
+        if(singleton == null)
+        {
+            CharaData.SetCharaData(charasList_[0].GetCharaSetting());
+            singleton = this;
+        }
+
+        // ステータス値代入テスト
+        charasList_[0].SetCharaSetting(CharaData.GetCharaData());
 
     }
 
@@ -116,6 +126,9 @@ public class SceneMng : MonoBehaviour
     // シーンのロード/アンロード
     public static void SceneLoad(int load)
     {
+        //@ ここでcharasList_のステータス値をcharasDataに避難させる？ 
+        CharaData.SetCharaData(charasList_[0].GetCharaSetting());
+
         // int番号は、ビルド設定の数値
         SceneManager.LoadScene(load);
     }

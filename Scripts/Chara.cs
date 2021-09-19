@@ -41,6 +41,12 @@ public class Chara : CharaBase,InterfaceButtle
         return set_.HP;
     }
 
+    // テスト用
+    public void sethp(int hp)
+    {
+        set_.HP = hp;
+    }
+
     // CharaBaseクラスの抽象メソッドを実装する
     public override void LevelUp()
     {
@@ -129,6 +135,12 @@ public class Chara : CharaBase,InterfaceButtle
     public CharacterSetting GetCharaSetting()
     {
         return set_;
+    }
+
+    // SceneMng.csから呼び出す
+    public void SetCharaSetting(CharacterSetting set)
+    {
+        set_ = set;
     }
 
 }

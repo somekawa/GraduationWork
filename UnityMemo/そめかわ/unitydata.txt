@@ -1742,8 +1742,47 @@ else
 
 ------------------------------------------------
 
+<キャラステータス値を別スクリプトで管理する>-----
+(SceneMng.csで管理できない理由)
+オブジェクト情報がMissingになり、キャラデータの
+保存がうまくいかない。
+※キャラ生成はできるけど、中のデータがない感じ
+
+(対処法)
+CharaData.csという新規Scriptを作成し、
+SceneMng.csで毎回キャラデータが初期化されてしまう
+前に、データを避難させられるようにする
+
+(具体的な方法)
+①CharaData.csにSetCharaDataとGetCharaData関数
+　を用意しておく
+
+②SceneMng.csで、singletonがnullのときは
+　初回登録なのでSetCharaDataに初期値を入れる
+
+③②の2回目以降はChara.csにSetCharaSetting関数
+　を用意しておき、CharaData.GetCharaData関数の
+　値を引き渡すようにする
+
+④SceneMng.csのロード処理時に遷移する前に
+　CharaData.SetCharaData関数を呼び出し、
+　ステータス値を避難させておく
+　※これのおかげでSceneが切り替わった後に
+　また同じ値が引き継げるようになる
+
+-----------------------------------------------
+
 <月にやること>
-・敵を豆腐から通常の敵にする
+キャラのステータスが毎回消えてしまうので、
+どこか別のScriptで保存しておける場所を作らないと
+いけない
+→SceneMng.csのcharasList_を持ちこそうとしたけど
+　失敗した
+理想としては、charasList_.Addの後に
+現在のキャラステータスを別で保持していたものを
+上書きしたい
+また、Load関数でcharasList_の情報を別のScriptで
+保持したい
 
 <いろいろメモ欄>
 static変数をprivate変数に代入して、private変数の
