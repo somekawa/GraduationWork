@@ -59,8 +59,8 @@ public class CharacterMng : MonoBehaviour
     void Start()
     {
         // SceneMng‚©‚çƒLƒƒƒ‰‚Ìî•ñ‚ğ‚à‚ç‚¤(charMap_‚ÆcharasList_)
-        charMap_ = GetCharMap();
-        charasList_ = GetCharasList();
+        charMap_ = SceneMng.charMap_;
+        charasList_ = SceneMng.charasList_;
 
         nowTurnChar_ = CharcterNum.UNI;
 

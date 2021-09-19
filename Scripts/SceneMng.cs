@@ -21,27 +21,57 @@ public class SceneMng : MonoBehaviour
         MAX
     }
 
+    public static SceneMng singleton;
+
     // enumとキャラオブジェクトをセットにしたmapを制作するためのリスト
     // キャラオブジェクトを要素としてアタッチできるようにしておく
     public List<GameObject> charaObjList;
 
     // キーをキャラ識別enum,値を(キャラ識別に対応した)キャラオブジェクトで作ったmap
-    private static Dictionary<CharcterNum, GameObject> charMap_;
-    private static List<Chara> charasList_ = new List<Chara>();          // Chara.csをキャラ毎にリスト化する
+    public static Dictionary<CharcterNum, GameObject> charMap_;
+    public static List<Chara> charasList_ = new List<Chara>();          // Chara.csをキャラ毎にリスト化する
 
     public static SCENE nowScene = SCENE.MAX;   // 現在のシーン
     public static float charaRunSpeed = 0.0f;   // キャラの移動速度(MODE毎に調整をする)
 
     void Awake()
     {
-        // シーンを跨いでも消えないオブジェクトに設定する
-        DontDestroyOnLoad(gameObject);
+        //　スクリプトが設定されていなければゲームオブジェクトを残しつつスクリプトを設定
+        if (singleton == null)
+        {
+            // シーンを跨いでも消えないオブジェクトに設定する
+            DontDestroyOnLoad(gameObject);
+
+            singleton = this;
+        }
+        else
+        {
+            //　既にGameStartスクリプトがあればこのシーンの同じゲームオブジェクトを削除
+            Destroy(gameObject);
+        }
+
+        // キャラのゲームオブジェクト情報がシーンを跨ぐとMissingになる関係で、Scene毎に一度情報を消す必要がある
+        if(charMap_ != null)
+        {
+            charMap_.Clear();
+        }
+        if(charasList_ != null)
+        {
+            charasList_.Clear();
+        }
+
+        // 要素が入っていない時はreturnする
+        if(charaObjList.Count <= 0)
+        {
+            Debug.Log("SceneMngの引数に要素が設定されていないのでreturnします");
+            return;
+        }
 
         // キャラクターの情報をゲームオブジェクトとして最初に取得しておく
         charMap_ = new Dictionary<CharcterNum, GameObject>(){
-            {CharcterNum.UNI,charaObjList[(int)CharcterNum.UNI]},
-            {CharcterNum.DEMO,charaObjList[(int)CharcterNum.DEMO]},
-        };
+                {CharcterNum.UNI,charaObjList[(int)CharcterNum.UNI]},
+                {CharcterNum.DEMO,charaObjList[(int)CharcterNum.DEMO]},
+            };
 
         // charMap_でforeachを回して、キャラクターのリストを作成
         foreach (KeyValuePair<CharcterNum, GameObject> anim in charMap_)
@@ -49,18 +79,7 @@ public class SceneMng : MonoBehaviour
             // Charaクラスの生成
             charasList_.Add(new Chara(anim.Value.name, anim.Key, anim.Value.GetComponent<Animator>()));
         }
-    }
 
-    // CharacterMng.csのStart関数で呼ばれる
-    public static Dictionary<CharcterNum, GameObject> GetCharMap()
-    {
-        return charMap_;
-    }
-
-    // CharacterMng.csのStart関数で呼ばれる
-    public static List<Chara> GetCharasList()
-    {
-        return charasList_;
     }
 
     // MenuMng.csで呼び出す
@@ -95,10 +114,9 @@ public class SceneMng : MonoBehaviour
     }
 
     // シーンのロード/アンロード
-    public static void SceneLoadUnLoad(int load , int unload)
+    public static void SceneLoad(int load)
     {
         // int番号は、ビルド設定の数値
         SceneManager.LoadScene(load);
-        SceneManager.UnloadSceneAsync(unload);
     }
 }

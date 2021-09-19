@@ -294,7 +294,7 @@ public class WarpTown : MonoBehaviour
             {
                 alphaCnt_ = 0.0f;
                 decisionFlag_ = false;
-                SceneMng.SceneLoadUnLoad((int)SceneMng.SCENE.FIELD, (int)SceneMng.SCENE.TOWN);
+                SceneMng.SceneLoad((int)SceneMng.SCENE.FIELD);
             }
         }
         else
