@@ -7,5 +7,5 @@ interface InterfaceButtle
     // Œp³‘¤‚ÅŠÖ”‚ğÀ‘•‚·‚é•K—v‚ª‚ ‚é
     bool Attack();
     void Damage();
-    void HP();
+    int HP();
 }

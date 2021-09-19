@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static SceneMng;
 
 // 探索中/戦闘中問わず、キャラクターに関連するものを管理する
 
@@ -14,7 +15,8 @@ public class CharacterMng : MonoBehaviour
 
     // enumとキャラオブジェクトをセットにしたmapを制作するためのリスト
     // キャラオブジェクトを要素としてアタッチできるようにしておく
-    public List<GameObject> charaObjList;
+    //public List<GameObject> charaObjList;
+
     public GameObject buttleWarpPointPack;  // 戦闘時にフィールド上の戦闘ポイントにキャラをワープさせる
 
     //　通常攻撃弾のプレハブ
@@ -22,12 +24,12 @@ public class CharacterMng : MonoBehaviour
     private GameObject uniAttackPrefab_;
 
     // キャラ識別用enum
-    public enum CharcterNum
-    {
-        UNI,    // 手前
-        DEMO,   // 奥
-        MAX
-    }
+    //public enum CharcterNum
+    //{
+    //    UNI,    // 手前
+    //    DEMO,   // 奥
+    //    MAX
+    //}
 
     CharcterNum oldTurnChar_ = CharcterNum.UNI;     // 前に行動順が回ってきていたキャラクター
     CharcterNum nowTurnChar_ = CharcterNum.MAX;     // 現在行動順が回ってきているキャラクター
@@ -41,6 +43,8 @@ public class CharacterMng : MonoBehaviour
 
     // キーをキャラ識別enum,値を(キャラ識別に対応した)キャラオブジェクトで作ったmap
     private Dictionary<CharcterNum, GameObject> charMap_;
+    // Chara.csをキャラ毎にリスト化する
+    private List<Chara> charasList_ = new List<Chara>();          
 
     private TMPro.TextMeshProUGUI buttleAnounceText_;             // バトル中の案内
     private readonly string[] announceText_ = new string[2]{ " 左シフトキー：\n 戦闘から逃げる", " Tキー：\n コマンドへ戻る" };
@@ -51,22 +55,12 @@ public class CharacterMng : MonoBehaviour
     private int enemyNum_ = 0;                                    // バトル時の敵の数
     private Dictionary<int, List<Vector3>> enemyInstancePos_;     // 敵のインスタンス位置の全情報
 
-    private List<Chara> charasList_ = new List<Chara>();          // Chara.csをキャラ毎にリスト化する
 
     void Start()
     {
-        // (何かに使えるかもしれないから、)キャラの情報はゲームオブジェクトとして最初に取得しておく
-        charMap_ = new Dictionary<CharcterNum, GameObject>(){
-            {CharcterNum.UNI,charaObjList[(int)CharcterNum.UNI]},
-            {CharcterNum.DEMO,charaObjList[(int)CharcterNum.DEMO]},
-        };
-
-        // charMap_でforeachを回して、Animatorを取得する
-        foreach (KeyValuePair<CharcterNum, GameObject> anim in charMap_)
-        {
-            // Charaクラスの生成
-            charasList_.Add(new Chara(anim.Value.name, anim.Key, anim.Value.GetComponent<Animator>()));
-        }
+        // SceneMngからキャラの情報をもらう(charMap_とcharasList_)
+        charMap_ = GetCharMap();
+        charasList_ = GetCharasList();
 
         nowTurnChar_ = CharcterNum.UNI;
 

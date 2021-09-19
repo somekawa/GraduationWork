@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 
 //　抽象クラス(CharaBase)とインタフェース(InterfaceButtle)を継承してCharaクラスを作成
@@ -11,24 +10,14 @@ public class Chara : CharaBase,InterfaceButtle
 
     // name,num,animatorは親クラスのコンストラクタを呼び出して設定
     // numは、CharacterNumのenumの取得で使えそうかもだから用意してみた。使わなかったら削除する。
-    public Chara(string name, CharacterMng.CharcterNum num, Animator animator) : base(name,num,animator)
+    public Chara(string name, SceneMng.CharcterNum num, Animator animator) : base(name,num,animator)
     {
         set_ = GetSetting();  // CharaBase.csからGet関数で初期設定する
-
-        // データ書き出しテスト
-        //StreamWriter swLEyeLog;
-        //FileInfo fiLEyeLog;
-        //fiLEyeLog = new FileInfo(Application.dataPath + "/test.csv");
-        //swLEyeLog = fiLEyeLog.AppendText();
-        //swLEyeLog.Write(set_.HP);   // 書込
-        //swLEyeLog.Write(", ");
-        //swLEyeLog.Flush();
-        //swLEyeLog.Close();
     }
 
     public bool Attack()
     {
-        Debug.Log(GetName() + "の攻撃！");
+        Debug.Log(set_.name + "の攻撃！");
         set_.animator.SetBool(key_isAttack, true);
         // isMoveがfalseのときだけ攻撃エフェクトのInstanceとisMoveのtrue化処理を行うようにして、
         // エフェクトがボタン連打で大量発生するのを防ぐ
@@ -47,9 +36,9 @@ public class Chara : CharaBase,InterfaceButtle
         Debug.Log("ダメージ受けた！");
     }
 
-    public void HP()
+    public int HP()
     {
-        Debug.Log("HP！");
+        return set_.HP;
     }
 
     // CharaBaseクラスの抽象メソッドを実装する
@@ -134,6 +123,12 @@ public class Chara : CharaBase,InterfaceButtle
     public bool GetIsMove()
     {
         return set_.isMove;
+    }
+
+    // SceneMng.csから呼び出す
+    public CharacterSetting GetCharaSetting()
+    {
+        return set_;
     }
 
 }

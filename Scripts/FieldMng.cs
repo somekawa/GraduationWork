@@ -103,6 +103,7 @@ public class FieldMng : MonoBehaviour
 
             case MODE.SEARCH:
                 cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
+                menuUICanvas.gameObject.SetActive(false);
                 break;
 
             case MODE.BUTTLE:

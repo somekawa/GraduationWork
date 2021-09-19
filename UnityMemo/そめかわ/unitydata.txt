@@ -1533,7 +1533,7 @@ CharacterMng.csに新規にoldTurnChar_という変数を
 
 ------------------------------------------------
 
-<フィールドで探索中にキー押下でメニュー画面表示>-
+<フィールドで探索中にキー押下でメニュー画面切替>-
 探索中に指定キーの押下でメニュー画面が出るように
 設定する。
 
@@ -1564,6 +1564,9 @@ public変数でmenuUICanvasを作り、ヒエラルキー上のFieldMngに外部
 falseにしておき、TABキーを押下時にtrueにする。
 ※trueにするのはswitch文内
 
+※将来的にBackPanelは撤去して、
+　ちゃんとメニュー背景画像を用意する
+
 ------------------------------------------------
 
 <FieldMng.csのUpdate関数を修正する>-------------
@@ -1586,14 +1589,123 @@ BittleWarpPointPackのZ座標をずらした影響なのか
 
 ------------------------------------------------
 
-<土日にやること>
-・フィールドで探索中に指定キー押下でメニュー画面　をだす
-・メニュー画面にセーブボタンと、ステータス確認ボ　タンを用意する
-・ステータス確認ボタン押下でキャラのステータスを　表示する
-・セーブボタン押下でキャラの現在ステータスをCSV形　式で保存する
+<メニュー画面にセーブとステータス確認ボタン配置>-
+MenuUICanvasに[SaveButton(Button)]と[StatusButton(Button)]を用意する。
+
+ボタン押下時の処理をつくるために、[MenuMng.cs]を作り、[MenuUICanvas]にアタッチする
+
+[MenuMng.cs]にはOnClickStatus関数と、OnClickSave
+関数を用意した。
+
+[SaveButton(Button)]と[StatusButton(Button)]の
+OnClick()の＋ボタンを押して、[MenuUICanvas]を
+引っ張って中にいれる。
+NoFunctionのタブからMenuMng.csを選択して、
+それぞれ用意した関数を中にいれたら終了。
+
+------------------------------------------------
+
+<MenuMng.csでキャラステータスを表示するにあたり、 情報の作成と引っ張り方を修正していく>-----------
+
+(設計予定)
+SceneMngでキャラ情報を初期作成して、
+CharacterMngとMenuMngに情報引っ張る
+情報の更新があったらSceneMngに渡す。
+
+<CharacterMng.csとSceneMng.cs修正>
+①SceneMngは、空のオブジェクトとしてヒエラルキー
+　に配置し、アタッチでキャラクターを入れる。
+  Awake関数でシーンを跨いでも消えないものにする。
+→いままでCharacterMngにしていたアタッチ
+
+②SceneMng.csのAwake内でcharMap_とcharasList_の
+　設定をして、Get関数をそれぞれreturnできるように
+　用意し、CharacterMng.csのStart関数で呼び出す
+　仕組みに変更
+
+これで、いままで通りのキャラ操作状態に戻る。
+
+------------------------------------------------
+
+<ステータスボタンでキャラステータスを表示する>---
+情報はSceneMng.csから引っ張ってくるようにする。
+①Chara.csにGetCharaSetting関数を作り、
+　returnでset_を返す
+②SceneMng.csにGetCharasSettings関数を作り、
+　returnでcharasList_[num].GetCharaSetting()と
+　する
+③MenuMng.csで②を呼び出し、引数に読み込みたい
+　キャラの番号を入れたらよい
+
+つぎに、画面上に取得した情報を表示させる。
+[MenuUICanvas]に[StatusInfo(TextMeshPro)]を
+追加する。
+※フォントは木漏れ日ゴシックにする！
+
+MenuMng.csにprivate変数でstatusInfo_を作成し、
+Start関数でFindを使いテキスト部分を取得しておく。
+
+OnClickStatus関数で
+SceneMng.GetCharasSettings((int)SceneMng.CharcterNum.UNI);というSceneMng.cs側の関数を呼び出し、情報をもらってきたらstringにその情報をまとめて表示する文字を作る。
+※今はUNIの情報を指定して取り出すようにしている
+
+あとはstatusInfo_.textにstringを代入するだけ。
+
+------------------------------------------------
+
+<メニュー画面のボタン表示/非表示を制御する>------
+今のままでは、ボタンを押してもずっとボタンが残り続けてしまうので、修正していく。
+
+[StatusButton]と[SaveButton]の親として、
+[Buttons]という空のオブジェクトを用意する。
+
+MenuMng.csにprivate変数でbuttons_を用意し、
+Start関数でFind取得しておく。
+あとはこのbuttons_をOnClickStatus関数でSetActiveをfalseにし、
+
+キャンセルボタンでtrueにする。
+
+------------------------------------------------
+
+<メニュー画面にキャンセルボタンを作成>-----------
+Buttonsの中には含めない[CancelButton(Button)]
+を新規につくる。
+
+キャンセルボタンは、
+・ステータス画面内ならボタン選択に戻る
+・ボタン選択画面ならフィールド画面に戻る
+というように、場合によって用途を分ける。
+
+OnClickCancel関数を作成し、[CancelButton]に
+アタッチする。
+OnClickCancel関数ではbuttons_のアクティブ状態で
+if文の処理を行う。
+※フィールドに戻すときはFieldMng.csのSEARCHの
+　switch文でMenuUICanvasを非表示に切り替える
+
+------------------------------------------------
+
+<セーブボタン押下でステータスをCSV形式で保存>----
+MenuMng.csに
+using System.IO;
+を追加して、OnClickSave関数でデータの書き込み
+テストを追加した。
+※現在は、設定上Assetsフォルダの直下に
+　[saveData.csv]というテキストが作成される
+
+------------------------------------------------
+
+<月にやること>
 ・敵を豆腐から通常の敵にする
 
 <いろいろメモ欄>
+static変数をprivate変数に代入して、private変数の
+数値が変わるだけで代入前の大元のstatic変数の数値も変化した(テストで実験してみた結果です)
+
+towndata側でもTownMngにenum追加してMENUいれて
+TABでCanvas表示にしたほうがいいかも
+
+
 シーンのロード/アンロードについて↓
 https://dolphinetech.com/unity/scene-road-unload/
 

@@ -6,10 +6,8 @@ public abstract class CharaBase : object
 {
     private GameObject DataPopPrefab_;
 
-    // 名前
-    private string name_;
     // 番号
-    private CharacterMng.CharcterNum charNum_;
+    private SceneMng.CharcterNum charNum_;
 
     public struct CharacterSetting
     {
@@ -17,6 +15,8 @@ public abstract class CharaBase : object
         public bool isMove;         // Waitモーション時はfalse
         public float animTime;      // 次のキャラの行動に遷移するまでの間
         public Vector3 buttlePos;   // 戦闘開始時に設定されるポジション(攻撃エフェクト等のInstance位置に利用)
+
+        public string name;
 
         // Excel読み込みで得るデータ(最終的にはセーブ/ロード用に構造体分けたほうがいいかも)
         // 構造体分けたら、構造体(CharacterSetting)の中に構造体(新規)を入れる感じにする
@@ -33,9 +33,9 @@ public abstract class CharaBase : object
 
     private CharacterSetting setting_;
 
-    public CharaBase(string name, CharacterMng.CharcterNum num, Animator animator)
+    public CharaBase(string name, SceneMng.CharcterNum num, Animator animator)
     {
-        name_ = name;
+        setting_.name = name;
 
         DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
         var popCharacter = DataPopPrefab_.GetComponent<PopList>().GetData<CharacterList>(PopList.ListData.CHARACTER, 0, name);
@@ -57,13 +57,7 @@ public abstract class CharaBase : object
         //setting.buttlePos = set.buttlePos;    // 設定のタイミングが異なる
     }
 
-    // CharaBaseクラス特有の関数(名前を取得）
-    public string GetName()
-    {
-        return name_;
-    }
-
-    public CharacterMng.CharcterNum GetNum()
+    public SceneMng.CharcterNum GetNum()
     {
         return charNum_;
     }
