@@ -1533,7 +1533,64 @@ CharacterMng.csに新規にoldTurnChar_という変数を
 
 ------------------------------------------------
 
+<フィールドで探索中にキー押下でメニュー画面表示>-
+探索中に指定キーの押下でメニュー画面が出るように
+設定する。
+
+FieldMng.csのUpdate関数にあるswitch文に
+MODE.MENUのcase文を追加する。
+
+(テスト)
+同じUpdate関数内でTABキーを押した時に
+nowModeをMENUにしてみる。
+→成功
+
+次に、メニュー画面用のCanvasを用意する。
+ヒエラルキーに[MenuUICanvas(Canvas)]を作成する。
+今作成した[MenuUICanvas]に[BackPanel(Panel)]を
+子として作成。
+[BackPanel(Panel)]
+色→黒
+透過度→0.5
+
+ただし、このままではFieldUICanvasがMenuUICanvasの上に来てしまう
+→[MenuUICanvas]のCanvas設定にあるSortOrderを
+  [1]にすることで解決
+
+再びFieldMng.csの処理の追加に戻る。
+public変数でmenuUICanvasを作り、ヒエラルキー上のFieldMngに外部からmenuUICanvasをアタッチできるようにする。
+
+あとは、Start関数でmenuUICanvasのSetActiveを
+falseにしておき、TABキーを押下時にtrueにする。
+※trueにするのはswitch文内
+
+------------------------------------------------
+
+<FieldMng.csのUpdate関数を修正する>-------------
+
+Switch文が毎フレーム呼ばれる意味をあんまり感じないので修正する。ボタン押下と、時間の加算との処理だけ毎フレーム呼ばれるようにしておきたい。
+
+変数でoldModeを作成して、前回のModeと不一致の時に
+ChangeMode関数を呼び出すようにした。
+ChangeMode関数では、Switch文処理を入れている。
+
+このままでは時間加算処理がうまくいかないため、
+Update関数内にSEARCHモード中にTABキーを押したら
+MenuUICanvasを表示させるif文内に、時間加算処理も
+まとめていれてあげる。
+
+また、ChangeMode関数のBUTTLEのcase文にSetSubCameraPosで座標を設定するようにしておく。
+BittleWarpPointPackのZ座標をずらした影響なのか
+(new Vector3(4.0f,2.0f,11.5f))としないとうまく
+いかなかった。
+
+------------------------------------------------
+
 <土日にやること>
+・フィールドで探索中に指定キー押下でメニュー画面　をだす
+・メニュー画面にセーブボタンと、ステータス確認ボ　タンを用意する
+・ステータス確認ボタン押下でキャラのステータスを　表示する
+・セーブボタン押下でキャラの現在ステータスをCSV形　式で保存する
 ・敵を豆腐から通常の敵にする
 
 <いろいろメモ欄>

@@ -16,7 +16,7 @@ public class CameraMng : MonoBehaviour
         subCamera.SetActive(false);
     }
 
-    // 街のサブカメラ位置を変更するときに呼ばれる
+    // 街や戦闘時のサブカメラ位置を変更するときに呼ばれる
     public void SetSubCameraPos(Vector3 pos)
     {
         subCamera.transform.position = pos;
