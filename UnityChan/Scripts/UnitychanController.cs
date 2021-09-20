@@ -7,6 +7,7 @@ using UnityEngine;
 
 public class UnitychanController : MonoBehaviour
 {
+    public WarpField warpField;
     private Rigidbody rigid;      // Rigidbodyコンポーネント
     private Animator animator_;   // Animator コンポーネント
 
@@ -23,8 +24,16 @@ public class UnitychanController : MonoBehaviour
 
     void Update()
     {
+        // ワープ選択中の時は動かないようにする
+        if (warpField.GetWarpNowFlag() == true)
+        {
+            this.animator_.SetBool(key_isRun, false);
+            return;
+
+        }
+        
         // 探索モード以外で自由に動かれたらいけないので、return処理を加える。
-        if(FieldMng.nowMode != FieldMng.MODE.SEARCH)
+        if (FieldMng.nowMode != FieldMng.MODE.SEARCH)
         {
             rigid.velocity = Vector3.zero;
             rigid.angularVelocity = Vector3.zero;
