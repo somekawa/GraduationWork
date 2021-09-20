@@ -140,7 +140,20 @@ public class Chara : CharaBase,InterfaceButtle
     // SceneMng.csから呼び出す
     public void SetCharaSetting(CharacterSetting set)
     {
-        set_ = set;
+        set_.name = set.name;
+        set_.Level = set.Level;
+        set_.HP = set.HP;
+        set_.MP = set.MP;
+        set_.Constitution = set.Constitution;
+        set_.Power = set.Power;
+        set_.Attack = set.Attack;
+        set_.Defence = set.Defence;
+        set_.Speed = set.Speed;
+        set_.Luck = set.Luck;
+
+        SetTurnInit();
+        // アニメーターはセットしてはいけない
+        //setting_.animator = animator;
     }
 
 }

@@ -16,9 +16,9 @@ public class SceneMng : MonoBehaviour
     // シーンの種類
     public enum SCENE
     {
+        NON = -1,
         TOWN,   // 街シーン
         FIELD,  // フィールドシーン
-        MAX
     }
 
     public static SceneMng singleton;
@@ -31,7 +31,7 @@ public class SceneMng : MonoBehaviour
     public static Dictionary<CharcterNum, GameObject> charMap_;
     public static List<Chara> charasList_ = new List<Chara>();          // Chara.csをキャラ毎にリスト化する
 
-    public static SCENE nowScene = SCENE.MAX;   // 現在のシーン
+    public static SCENE nowScene = SCENE.NON;   // 現在のシーン
     public static float charaRunSpeed = 0.0f;   // キャラの移動速度(MODE毎に調整をする)
 
     void Awake()
@@ -76,8 +76,6 @@ public class SceneMng : MonoBehaviour
         {
             // Charaクラスの生成
             charasList_.Add(new Chara(anim.Value.name, anim.Key, anim.Value.GetComponent<Animator>()));
-
-            //@ ここでcharasDataのステータス値をcharasList_に代入？
         }
 
         // 初回のみキャラステータスを初期値で登録
@@ -87,6 +85,7 @@ public class SceneMng : MonoBehaviour
             singleton = this;
         }
 
+        //@ ここでcharasDataのステータス値をcharasList_に代入？
         // ステータス値代入テスト
         charasList_[0].SetCharaSetting(CharaData.GetCharaData());
 
@@ -123,7 +122,7 @@ public class SceneMng : MonoBehaviour
         }
     }
 
-    // シーンのロード/アンロード
+    // シーンのロード
     public static void SceneLoad(int load)
     {
         //@ ここでcharasList_のステータス値をcharasDataに避難させる？ 

@@ -1,0 +1,21 @@
+LoadScene処理を行うと、
+ライトの色が変わるバグが発生する
+→Unityにもともと発生しているバグらしい
+
+(対処法)
+自分でライトの設定を行う
+
+参照サイト↓
+https://teratail.com/questions/119631
+
+Window-Rendering-Lightingのタブを開き、
+[NewLighting Settings]を押すと
+AssetsフォルダにNewLighting Settingsというのが
+作成され、内部設定ができるようになる。
+
+MaxLightmapSizeの設定を[512]にした後
+Generateボタンを押す
+※だいたい30分ぐらいかかる
+※途中で他のSceneに遷移してはいけない
+
+これを、新規で作るSceneでは必ず行わないといけない

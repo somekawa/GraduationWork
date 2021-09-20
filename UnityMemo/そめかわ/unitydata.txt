@@ -1751,7 +1751,8 @@ else
 (対処法)
 CharaData.csという新規Scriptを作成し、
 SceneMng.csで毎回キャラデータが初期化されてしまう
-前に、データを避難させられるようにする
+前に、データを避難させられるようにする。
+そして、初期化の値が入った後に正式な引継ぎデータを代入するように処理を書く。
 
 (具体的な方法)
 ①CharaData.csにSetCharaDataとGetCharaData関数
@@ -1770,19 +1771,69 @@ SceneMng.csで毎回キャラデータが初期化されてしまう
 　※これのおかげでSceneが切り替わった後に
 　また同じ値が引き継げるようになる
 
+※今は直値でUniのステータス値しか引き継げないけど
+　ここを他のキャラも含められるようにする
+
 -----------------------------------------------
 
-<月にやること>
-キャラのステータスが毎回消えてしまうので、
-どこか別のScriptで保存しておける場所を作らないと
-いけない
-→SceneMng.csのcharasList_を持ちこそうとしたけど
-　失敗した
-理想としては、charasList_.Addの後に
-現在のキャラステータスを別で保持していたものを
-上書きしたい
-また、Load関数でcharasList_の情報を別のScriptで
-保持したい
+<戦闘中のキャラアイコン枠を作成>----------------
+素材サイト↓
+https://azukichi.net/frame_elegant.html
+
+ButtlUICanvasの子に[CharaStatusFrame(Image)]
+を作成し、
+[CharaStatusFrame(Image)]の子に
+[FrameBackPanel(Panel)]をアタッチする。
+
+[CharaStatusFrame(Image)]には
+[ButtleCharaFrame]をアタッチして、
+画質を[128]まで落とす。
+→画像のDefaultにあるMaxSizeの話
+
+[FrameBackPanel(Panel)]は
+ImageTypeをSlicedにしておき、
+FillCenterにチェックありで、PixelsPerUnlitMultipilerを[0.15]にする。
+
+[CharaStatusFrame(Image)]の設定
+AncerPoint 左下
+Pos   X:100 Y:40  Z:0
+Scale X:1.5 Y:0.7 Z:1
+画質[128]
+
+次に
+ButtlUICanvasの子に[CharaIconFrame(Image)]
+を作成し、[CharaIconFrame(Image)]の子に
+[FrameBackPanel(Panel)]をアタッチする。
+
+[CharaIconFrame(Image)]には
+[frame_command]をアタッチする。
+
+[CharaIconFrame(Image)]の設定
+AncerPoint 左下
+Pos   X:40  Y:40  Z:0
+Scale X:0.8 Y:0.8 Z:1
+
+これで、あとは[CharaIconFrame(Image)]の中に
+キャラの画像を入れれば良い。
+※[CharaIconFrame(Image)]につけているBackPanelは
+　最終的にキャラ画像と丸っと入れ替える予定。
+
+------------------------------------------------
+
+<街からフィールド入り、戦闘になるとアニメーターで エラーがでる>----------------------------------
+
+(原因)
+SceneMng.csで
+charasList_[0].SetCharaSetting(CharaData.GetCharaData());
+と書いているときにアニメーターを代入してnullに
+なってしまっていた。
+→アニメーターは引継ぎデータに含めてないから
+
+(対処法)
+Chara.csのSetCharaSetting関数で
+アニメーターだけ設定しないように修正
+
+------------------------------------------------
 
 <いろいろメモ欄>
 static変数をprivate変数に代入して、private変数の

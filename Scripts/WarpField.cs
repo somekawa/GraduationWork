@@ -23,7 +23,7 @@ public class WarpField : MonoBehaviour
     // フィールド上でワープ先選択時
     enum kindsField
     {
-        //  NON,
+        NON = -1,
         TOWN,       // 町
         unitydata,  // フィールド1
         FIELD_2,    // フィールド2
@@ -255,7 +255,7 @@ public class WarpField : MonoBehaviour
             else
             {
                 Debug.Log(selectFieldNum_+ "を選択中。Sceneを移動します");
-                //  SceneMng.SceneLoadUnLoad(selectFieldNum_, saveNowField_);
+                SceneMng.SceneLoad(selectFieldNum_);
             }
             nowTownFlag_ = false;
             warpNowFlag_ = false;
