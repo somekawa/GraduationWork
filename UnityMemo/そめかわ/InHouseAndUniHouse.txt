@@ -1,0 +1,49 @@
+Uniちゃんの家に関するScene
+
+<家の周りを作成する>----------------------------
+新規でテラインを作成し、Assets-Town-Terrainの
+フォルダに[UniHouseData]として保存する。
+
+地面に模様と色を付ける際は
+Terrainの[AddLayer]でAssets-Town-Terrainにある
+NewLayerを使用する
+※CreateLayerは基本しなくてよさそう
+
+<家の配置>
+BakerHouseから持ってきてUnPackし、
+[UniHouse]と名前を付ける
+Pos    X:17.5 Y:0 Z:25
+Rotate X:-90  Y:0 Z:0
+
+家のテクスチャのMaxSize[128]
+
+<MainCameraの位置>
+Pos    X:6  Y:20 Z:7.5
+Rotate X:55 Y:65 Z:0
+
+SceneMngを配置し、
+UniとDemoを引数にアタッチする・
+※Uniはサイズを2倍にする
+
+WarpOutとLocationSelCanvasを設置
+
+また、新規の空のオブジェクトで
+[UniHouseMng]を作成し、[UniHouseMng.cs]を
+作ってアタッチする。
+
+UniHouseMng.csには
+void Start()
+{
+    // 現在のシーンをTOWNとする
+    SceneMng.SetNowScene(SceneMng.SCENE.UNIHOUSE);
+}
+
+をいれる。
+
+------------------------------------------------
+
+このSceneの同じ座標にいろんな家の内装をつくる
+どの家の中に入ったかを見て
+SetActiveを切り替える
+
+
