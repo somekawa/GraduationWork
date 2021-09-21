@@ -36,7 +36,7 @@ public class WarpTown : MonoBehaviour
         };
     // 長針の回転先を保存
     private bool moveNeedle_ = false;       // 長針が回転しても良い状態かチェック 
-    private int warpNum_ = (int)warp.HOUSE; // 長針がどこを指しているか（1スタート
+    public static int warpNum_ = (int)warp.HOUSE; // 長針がどこを指しているか（1スタート
 
     // 町から出るとき関連
     private GameObject warpOutObj_;     // warpField.csがアタッチされてるオブジェクト
@@ -52,9 +52,12 @@ public class WarpTown : MonoBehaviour
     private Image fadePanel;         // warpCanvasの子のフェードアウト用パネルを取得
     private float alphaCnt_ = 0.0f;  // panelのアルファ値
 
+    // 家の前にいる場合
+    private Vector3 houseFrontPos_ = new Vector3(20.0f, 0.0f, 10.0f);
 
     void Start()
     {
+
         // ワープする座標を入れるため
         UniChan = GameObject.Find("Uni");
 
@@ -73,7 +76,7 @@ public class WarpTown : MonoBehaviour
         // 長針の初期位置
         needleImage.transform.rotation = Quaternion.Euler(0.0f, 0.0f, needleRotate[(int)warp.HOUSE]);
 
-        if (SceneManager.GetActiveScene().name == "towndata")
+        if (SceneManager.GetActiveScene().name == "Town")
         {
             // オブジェクト経由でCameraMngScriptを取得
             cameraCtl_ = GameObject.Find("CameraController");
@@ -92,6 +95,26 @@ public class WarpTown : MonoBehaviour
             // 親からワープ先の子どもを順に代入
             warpChildren_[i] = warpInTown_.transform.GetChild(i).gameObject;
         }
+
+
+        if (warpNum_ != (int)warp.HOUSE)
+        {
+            needleImage.transform.rotation = Quaternion.Euler(0.0f, 0.0f, needleRotate[warpNum_]);
+
+            if (SceneManager.GetActiveScene().name == "Town")
+            {
+                UniChan.transform.position = warpChildren_[warpNum_].transform.position;
+                // 初期座標の差でカメラが追従しているため
+                cameraMng.mainCamera.transform.position =
+                 UniChan.transform.position + starMainCameraPos_;
+            }
+            else
+            {
+                UniChan.transform.position = houseFrontPos_;
+            }
+        }
+
+      //  Debug.Log("保存された番号" + saveTownWarpNum_);
     }
 
     void Update()
@@ -204,11 +227,14 @@ public class WarpTown : MonoBehaviour
             alphaCnt_ = 0.0f;
             decisionFlag_ = false;
 
-            // 街中ワープ後のユニちゃんの座標
-            UniChan.transform.position = warpChildren_[warpNum_].transform.position;
-
-            if (SceneManager.GetActiveScene().name == "towndata")
+            if (SceneManager.GetActiveScene().name != "Town")
             {
+                SceneMng.SceneLoad(0);
+            }
+            else
+            {
+                // 街中ワープ後のユニちゃんの座標
+                UniChan.transform.position = warpChildren_[warpNum_].transform.position;
                 // サブカメラに切り替わっていたら
                 if (cameraMng.mainCamera.activeSelf == false)
                 {
@@ -219,6 +245,10 @@ public class WarpTown : MonoBehaviour
                          UniChan.transform.position + starMainCameraPos_;
                 }
             }
+        }
+        else
+        {
+            // 何もしない
         }
         fadePanel.color = new Color(1.0f, 1.0f, 1.0f, alphaCnt_);
         //  Debug.Log(alphaCnt_);
@@ -236,10 +266,18 @@ public class WarpTown : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            Debug.Log("ユニの家の前のコライダーに接触");
-            // ユニの家の中にワープ
-            UniChan.transform.position = new Vector3(0.0f, 0.0f, -7.0f);
-            UniChan.transform.rotation = Quaternion.Euler(0.0f, 180, 0.0f);
+            if (SceneManager.GetActiveScene().name == "Town")
+            {
+                Debug.Log("ユニの家の前のコライダーに接触");
+                SceneMng.SceneLoad(2);
+                // ユニの家の中にワープ
+            }
+            else
+            {
+                // ユニの家から街に出る
+                warpNum_ = (int)warp.HOUSE;
+                SceneMng.SceneLoad(0);
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
-2021/09/21　更新メモ
-ーーーーーーーーーーーーーーーーーーー
 WarpTown.cs
+ーーーーーーーーーーーーーーーーーーー
+2021/09/21　更新メモ
+
 
 ・街中ワープ専用
 WarpInTownにアタッチしてください
@@ -9,6 +10,10 @@ WarpInTownにアタッチしてください
 WarpCanvas（Canvas）
 WarpInTown（Object）
 WarpOut（Object）
+
+・static変数
+saveNum_：街中ワープ先を保存
+TownシーンとInHouseAndUniHouseシーンを行き来するために
 
 ーーーーーーーーーーーーーーーーーーー
 
@@ -119,7 +124,16 @@ MainCameraの初期座標を保存し
 
 ・ユニ、ゴーホーム
 ユニ家の前に家に入る用の当たり判定を設置
-Colliderに前後があるのか、UniHouseCollider-RotateYが90だと当たり判定を行わないため
-RotateYが『-90』になっているかを確認する。
+接触したらInHouseAndUniHouseシーンに移動
 
-！！！！！！！！！現在は座標指定だがシーン移動に変更する。！！！！！！！！！！
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+・InHouseAndUniHouseシーン中
+サブカメラがないため処理が入らないようにシーン名で確認。
+座標は固定のためユニに初期値座標のhouseFrontPos_を代入
+
+InHouseAndUniHouseシーンからTownシーンに移動の際
+接触ワープなら (int)warp.HOUSEに出る
+街中ワープの場合はstatic変数をユニにオブジェクト位置を代入、それに合わせてメインカメラの座標も移動させる
+
+
