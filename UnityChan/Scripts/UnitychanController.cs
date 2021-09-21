@@ -7,7 +7,9 @@ using UnityEngine;
 
 public class UnitychanController : MonoBehaviour
 {
-    public WarpField warpField;
+    private GameObject warpOutObj_;
+    private WarpField warpField_;
+
     private Rigidbody rigid;      // Rigidbodyコンポーネント
     private Animator animator_;   // Animator コンポーネント
 
@@ -18,6 +20,8 @@ public class UnitychanController : MonoBehaviour
 
     void Start()
     {
+        warpOutObj_ = GameObject.Find("WarpOut");
+        warpField_ = warpOutObj_.transform.GetComponent<WarpField>();
         rigid = GetComponent<Rigidbody>();
         animator_= GetComponent<Animator>();
     }
@@ -25,11 +29,10 @@ public class UnitychanController : MonoBehaviour
     void Update()
     {
         // ワープ選択中の時は動かないようにする
-        if (warpField.GetWarpNowFlag() == true)
+        if (warpField_.GetWarpNowFlag() == true)
         {
             this.animator_.SetBool(key_isRun, false);
             return;
-
         }
         
         // 探索モード以外で自由に動かれたらいけないので、return処理を加える。
