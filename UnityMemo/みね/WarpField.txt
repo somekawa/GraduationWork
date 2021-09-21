@@ -1,0 +1,85 @@
+2021/09/21　更新メモ
+ーーーーーーーーーーーーーーーーーーー
+WarpField.cs
+
+・フィールド選択時
+WarpOutにアタッチしてください。
+WarpOutオブジェクトはほぼ全シーンでフィールド外に出るときに、
+ユニが物理的に接触した際に呼ばれるScriptです。
+街中限定でマップ端に接触しないでもFieldを選択したら表示できるようになってます
+
+・関連オブジェクト
+LocationSelCanvas（Canvas）
+WarpOut（Object）
+ーーーーーーーーーーーーーーーーーーー
+Updataではなくコールチンで動かす
+現在いるシーンの背景は灰色
+選択中は青色
+選択してないものは白色
+
+選択中の画像の1つ下か1つ上が現在シーンの場合
+2つずらしにする。
+ただしシーンが(int)kindsField.TOWN（0の位置のシーン）の場合は
+上の上にいかないように1つずらしにする
+（UpArrowだが内部の値はマイナス））
+
+・ワープ先を選ぶ
+マップ端のWarpOutの子オブジェクト接触したら表示
+ユニちゃんを移動不可にする
+キャンセルした際にユニを押し返すようにしている
+
+上下キーで移動先を選択、Spaceキーで押下で決定。
+Cansel選択中にSpaceキー押下でキャンセル
+
+・街中ワープ経由の場合
+WarpTownでFieldを選んだら表示
+上下キーで移動先を選択、Spaceキーで押下で決定。
+Cansel選択中にSpaceキー押下でキャンセル
+ーーーーーーーーーーーーーーーーーーー
+
+・押し返し
+WarpOutの子オブジェクトと接触時に
+ユニの座標と向きを保存
+向きからどの方向を見ているかは
+private int[] checkRot_ = new int[6] { 0, 45, 135, 225, 315, 360 };
+をつかってどの範囲内にいるかで確認する
+    private enum rotate
+    {
+        UP,     // 0 上 315<=360&&0<45
+        RIGHT,  // 1 右 45<=135
+        DOWN,   // 2 下 135<=225
+        LEFT,   // 3 左 225<=315
+        MAX
+    }
+CheckUniTransfoem()の中で
+向きを確認
+        if ((checkRot_[4] < saveUniRot_.y && saveUniRot_.y < checkRot_[5])
+         || (checkRot_[0] <= saveUniRot_.y && saveUniRot_.y < checkRot_[1]))
+        {
+            nowRotate_ = rotate.UP;            // 上側
+        }
+        else
+        {
+            // 上側以外の方向の時
+            for (int i = 1; i < (int)rotate.MAX; i++)
+            {
+                if (checkRot_[i] <= saveUniRot_.y && saveUniRot_.y < checkRot_[i + 1])
+                {
+                    nowRotate_ = (rotate)i;
+                }
+            }
+        }
+
+向きの方向にnormalizedで得たXかZを代入し1以下の値かどうかを見る
+ーーーーーーーーーーーーーーーーーーー
+・nowTownFlag_
+街中ワープ経由のフィールドワープか
+・warpNowFlag_
+現在ワープ処理中か
+ーーーーーーーーーーーーーーーーーーー
+・街中ワープからフィールドを選択した場合
+
+分けたい処理に
+ if (saveNowField_ == (int)kindsField.TOWN) 
+のif分を追加してチェック。
+
