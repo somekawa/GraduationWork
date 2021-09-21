@@ -11,8 +11,11 @@ WarpInTown（Object）
 WarpOut（Object）
 
 ーーーーーーーーーーーーーーーーーーー
+
 public Canvas warpCanvasにはWarpCanvasをアタッチ
+
 ーーーーーーーーーーーーーーーーーーー
+
 ・public変数を減らすためにGameObject.Find()を使い
 オブジェクト、スクリプトを名前で探す
 ※Findは重いため1変数につき1回しか処理が入らないようにしたほうが良い
