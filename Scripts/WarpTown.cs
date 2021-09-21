@@ -8,19 +8,20 @@ public class WarpTown : MonoBehaviour
 {
     private enum warp
     {
-        NON,
-        HOUSE,      // ユニの家
-        FOUNTAIN,   // 噴水前
-        CROSS,      // 十字路
-        FIELD,      // フィールド
-        MAX
+        NON=-1,     // -1
+        HOUSE,      // 0 ユニの家
+        FOUNTAIN,   // 1 噴水前
+        CROSS,      // 2 十字路
+        FIELD,      // 3 フィールド
+        MAX         // 
     }
 
-    private WarpField warpFieldScript;
+    private GameObject warpOutObj_;// warpFieldScriptがアタッチされてるオブジェクト
+    private WarpField warpFieldScript;// warpFieldScript
+
     public CameraMng cameraMng;     // メインカメラとサブカメラの切り替え
     public GameObject UniChan;      // ユニちゃん
-    //public Canvas locationSelCanvas;      // フィールドに出たいときのキャンバス
-    public Canvas warpCanvas;
+    public Canvas warpCanvas;// 街中のワープ先を表示するキャンバス
 
     private bool decisionFlag_ = false;// ワープ先が決まったかどうか
     private float alphaCnt_ = 0.0f;// panelのアルファ値
@@ -34,19 +35,18 @@ public class WarpTown : MonoBehaviour
     private GameObject[] warpChildren_; // 街中のワープ先
     private Image needleImage;               // 長針画像
     private Image warpActive;        // ワープ選択中か（白：選択中
-    private Image fadePanel;
+    private Image fadePanel; // フェードアウト用パネル
 
     private Color choiceColor_;                 // 選択中の色（青）
     private Color resetColor_;                  // 選択外の色（白）
 
-    // 押下状態を確認したいキーをまとめたもの
-    private KeyCode[] keyArray_ = new KeyCode[4] { KeyCode.UpArrow, KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow };
 
     void Start()
     {
-        warpFieldScript= transform.GetComponent<WarpField>();
+        warpOutObj_ = GameObject.Find("WarpOut");
+           warpFieldScript = warpOutObj_.transform.GetComponent<WarpField>();
         warpActive = warpCanvas.transform.GetChild(0).GetComponent<Image>();
-
+        
         fadePanel = warpCanvas.transform.GetChild(1).GetComponent<Image>();
 
         // 長針画像取得
@@ -61,18 +61,15 @@ public class WarpTown : MonoBehaviour
 
         // 長針の回転先
         needleRotate = new float[(int)warp.MAX] {
-            0.0f,  32.0f, 12.0f,  -12.0f, -32.0f
+            32.0f, 12.0f,  -12.0f, -32.0f
         };
 
         // 長針の初期位置
         needleImage.transform.rotation = Quaternion.Euler(0.0f, 0.0f, needleRotate[(int)warp.HOUSE]);
 
-        // フィールドに出たいときのキャンバスは非表示
-      //  locationSelCanvas.enabled = false;
-
         // 街中のワープ先を保存 フィールドを含まない
         warpChildren_ = new GameObject[(int)warp.MAX - 1];
-        for (int i = (int)warp.NON; i < (int)warp.MAX - 1; i++)
+        for (int i = (int)warp.HOUSE; i < (int)warp.MAX - 1; i++)
         {
             var inTwon = GameObject.Find("WarpInTown");
             warpChildren_[i] = inTwon.transform.GetChild(i).gameObject;
@@ -85,55 +82,47 @@ public class WarpTown : MonoBehaviour
     {
        // Debug.Log("ユニが向いてる方向" + UniChan.transform.localEulerAngles.y);
 
-        //if(warpFieldScript.GetWarpFieldFlag()==true)
-        //{
-        //    warpFieldScript.SetWarpFieldFlag(true);
-        //    return;
-        //}
-
         if (decisionFlag_ == true)
         {
             FadeOutAndIn();
         }
 
-
         // フィールドキャンバスがアクティブの時
         if (warpFieldScript.GetLocationSelActive() == true)
         {
             warpActive.color = choiceColor_;
+            moveNeedle_ = false;
             return;
-        }
-
-        // 長針が動かない＝ワープ先を選べない
-        if (moveNeedle_ == false)
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                // ワープ準備
-                moveNeedle_ = true;
-                warpFieldScript.SetWarpNowFlag(true);
-
-                // warpNowFlag_=true;
-            }
         }
         else
         {
-            if (changeCnt_ < 0.5f)
+            // 長針が動かない＝ワープ先を選べない
+            if (moveNeedle_ == false)
             {
-                // ワープ処理に入る時のSpaceキー処理が入らないようにするため
-                changeCnt_ += Time.deltaTime;
-                return;
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    // ワープ準備
+                    moveNeedle_ = true;
+                    warpFieldScript.SetWarpNowFlag(true);
+                }
             }
+            else
+            {
+                if (changeCnt_ < 0.5f)
+                {
+                    // ワープ処理に入る時のSpaceキー処理が入らないようにするため
+                    changeCnt_ += Time.deltaTime;
+                    return;
+                }
 
-            ChoiceWarpLocation();            // ワープ先選択処理
+                ChoiceWarpLocation();            // ワープ先選択処理
+            }
         }
     }
 
     private void ChoiceWarpLocation()
     {
         warpActive.color = resetColor_;     // ワープ先を選べる（白
-
-     //   CommonSelMove(warpNum_, 3, 2, (int)warp.FIELD, (int)warp.HOUSE);
 
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
@@ -184,82 +173,6 @@ public class WarpTown : MonoBehaviour
         }
     }
 
-    //private void ChoiceFiledLocation()
-    //{
-    //    Debug.Log(choiceNum_);
-    //    moveNeedle_ = false;// 長針を動かないようにする
-
-    //    for (int i = (int)field.NON + 1; i < (int)field.MAX; i++)
-    //    {
-    //        if (choiceNum_ == i)
-    //        {
-    //            choiceField_[choiceNum_].color = choiceColor_;  // 選択中は青
-    //        }
-    //        else
-    //        {
-    //            choiceField_[i].color = resetColor_;            // それ以外は白
-    //        }
-    //    }
-
-    //    // warp→field順のためwarpの時の2倍
-    //    if (changeCnt_ < 1.0f)
-    //    {
-    //        // フィールド選択中にSpaceキー処理が入らないようにするため
-    //        changeCnt_ += Time.deltaTime;
-    //        return;
-    //    }
-
-    //    CommonSelMove(choiceNum_, 1, 0, (int)field.CANCEL, (int)field.FIELD1);
-
-    //    if (Input.GetKey(KeyCode.Space))
-    //    {
-    //        // キャンセル選択時
-    //        if (choiceNum_ == (int)field.CANCEL)
-    //        {
-    //            if (warpBoxHit_ == true)
-    //            {
-
-    //                for (int i = 0; i < this.transform.childCount; i++)
-    //                {
-    //                    uniNormalized_ = (enterPos_ - townEnds_[i].transform.position).normalized;
-
-    //                    //Debug.Log(townEnds_[i].name + "との正規化" + uniNormalized_+"    X加算値"+addPos_);
-    //                    Debug.Log("ワープボックスの座標" + townEnds_[i].transform.position+ "    ユニの座標"+ enterPos_);
-    //                }
-
-    //                if (0.0f < uniNormalized_.x)
-    //                {
-    //                    // 右から出ようとしていたら
-    //                    UniChan.transform.rotation = Quaternion.Euler(0.0f, 270.0f, 0.0f);
-    //                    addPos_ = -0.5f;
-    //                }
-    //                else
-    //                {
-    //                    // 左から出ようとしていたら
-    //                    UniChan.transform.rotation = Quaternion.Euler(0.0f, 90.0f, 0.0f);
-    //                    addPos_ = 0.5f;
-    //                }
-    //                UniChan.transform.position = new Vector3(
-    //                                 enterPos_.x + addPos_,
-    //                                 enterPos_.y,
-    //                                 enterPos_.z);
-
-    //                warpBoxHit_ = false;
-                 
-    //                //   warpCheck_ = false;
-    //                warpFieldScript.SetWarpFieldFlag(false);
-    //            }
-    //            CommonWarpCansel();             // ワープをキャンセル
-    //            choiceNum_ = (int)field.FIELD1; // フィールドの行き先をリセット
-    //            locationSelCanvas.enabled = false;    // フィールド選択キャンバス非表示
-    //        }
-    //        else
-    //        {
-    //            decisionFlag_ = true;
-    //        }
-    //    }
-    //}
-
     private void FadeOutAndIn()
     {
         // 町中をワープする場合
@@ -286,15 +199,7 @@ public class WarpTown : MonoBehaviour
                 cameraMng.mainCamera.transform.position =
                      UniChan.transform.position + starMainCameraPos_;
             }
-
-            // フィールドに出る場合
-            //if (locationSelCanvas.enabled == true)
-            //{
-            //    SceneMng.SceneLoadUnLoad((int)SceneMng.SCENE.FIELD, (int)SceneMng.SCENE.TOWN);
-            //}
         }
-
-
         fadePanel.color = new Color(1.0f, 1.0f, 1.0f, alphaCnt_);
       //  Debug.Log(alphaCnt_);
     }
@@ -303,12 +208,22 @@ public class WarpTown : MonoBehaviour
     {
         // 移動Cancelの場合
         moveNeedle_ = false;    // 長針が動かないように
-
-        //warpFieldScript.SetWarpFieldFlag(false);
-
         warpFieldScript.SetWarpNowFlag(false);
 
         changeCnt_ = 0.0f;      // ワープに入るためのSpaceキー処理が入るように
         warpActive.color = choiceColor_;    // ワープ先を選べない状態（青
+    }
+
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            Debug.Log("ユニの家の前のコライダーに接触");
+            // ユニの家の中にワープ
+            UniChan.transform.position = new Vector3(0.0f,0.0f,-7.0f);
+            UniChan.transform.rotation = Quaternion.Euler(0.0f, 180, 0.0f);
+
+        }
     }
 }

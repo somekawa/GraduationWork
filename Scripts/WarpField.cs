@@ -8,27 +8,26 @@ public class WarpField : MonoBehaviour
 {
     enum rotate
     {
-        UP,// 上
-        DOWN,// 下
-        LEFT,// 左
-        RIGHT,// 右
+        UP,     // 0 上 315<=360&&0<45
+        RIGHT,  // 1 右 45<=135
+        DOWN,   // 2 下 135<=225
+        LEFT,   // 3 左 225<=315
         MAX
     }
     private rotate nowRotate_;// 上下左右度の方向を向いているか
-    private float nowUniRotate_;// 向いてる方向の正規化を保存
-    // up315~360 0~45 down135~225 left225~315 right15~135
-    private int[] checkRot_ = new int[6] { 0, 45, 135, 225, 315, 360 };// ユニが向いてる方向出すための範囲
     private Vector3 saveUniRot_;// ユニが向いてる方向を保存
+    private float rotateNormalized_;// 向いてる方向の正規化を保存
+    private int[] checkRot_ = new int[6] { 0, 45, 135, 225, 315, 360 };// ユニが向いてる方向出すための範囲
 
-    // フィールド上でワープ先選択時
+    // フィールドにワープする時
     enum kindsField
     {
-        NON = -1,
-        TOWN,       // 町
-        unitydata,  // フィールド1
-        FIELD_2,    // フィールド2
-        CANCEL,     // 選択キャンセル
-        MAX
+        NON = -1,     // -1
+        TOWN,       // 0 町
+        unitydata,  // 1 フィールド1
+        FIELD_2,    // 2 フィールド2
+        CANCEL,     // 3 選択キャンセル
+        MAX         // 4
     }
 
     // 表示関連
@@ -37,13 +36,12 @@ public class WarpField : MonoBehaviour
     private Transform[] canvasChild_;       // 選択できるフィールド(locationSelCanvasの子
     private Image[] selectFieldImage_ = new Image[(int)kindsField.MAX];      // 選択できるフィールドの背景（locationSelCanvasの孫
     private Text[] selectFieldText_ = new Text[(int)kindsField.MAX];        // 選択できるフィールドの文字（locationSelCanvasの孫
-    private string[] fieldShowName_;            // 選択できるフィールドの名前(Textに代入
-    private string[] sceneName_;            // 現在のscene名を確認
+ 
+    private string[,] sceneName_; // [現在のscene名を確認、表示するフィールド名]
 
     private float changeSelectCnt_ = 0.0f;  // 連続でSpaceキーの処理に入らないようにするため
-    private bool fieldEndHit = false;       // ワープオブジェクトに接触したかどうか
 
-    private int saveNowField_ ;    // 現在いるフィールドを保存
+    private int saveNowField_;    // 現在いるフィールドを保存
     private int selectFieldNum_; // どのフィールドを選んでいるか（1スタート
 
     private Color nowImageColor_;               // 選択中の色（青）
@@ -52,15 +50,14 @@ public class WarpField : MonoBehaviour
     // ワープオブジェクト関連
     private GameObject UniChan;         // ユニちゃん
     private GameObject[] warpObject_;   // ワープオブジェを保存
-    private Vector3[] saveObjPos_;
 
-    private int maxWarpObjNum_ = 0;     // ワープオブジェクトの最大個数
-    private Vector3 uniNormalized_;     // （ユニ座標ーワープオブジェ）を正規化
-    private Vector3 enterPos_;          // 当たり判定内に入った瞬間の座標
+    private Vector3 uniNormalized_ = new Vector3(0.0f, 0.0f, 0.0f);     // （ユニ座標ーワープオブジェ）を正規化
+    private Vector3 enterPos_ = new Vector3(0.0f, 0.0f, 0.0f);           // 当たり判定内に入った瞬間の座標
     private Vector3 addPos_ = new Vector3(0.0f, 0.0f, 0.0f);       // キャンセルを押した際に反対方向にはじく
 
-    private bool nowTownFlag_ = false;
-    private bool warpNowFlag_ = false;
+    private bool fieldEndHit = false;       // ワープオブジェクトに接触したかどうか
+    private bool nowTownFlag_ = false;// 町ワープからのフィールドワープか
+    private bool warpNowFlag_ = false;// フィールドワープを選択中の時
 
     void Start()
     {
@@ -69,15 +66,12 @@ public class WarpField : MonoBehaviour
 
         nowImageColor_ = new Color(0.0f, 0.0f, 1.0f, 1.0f); // 青
         resetColor_ = new Color(1.0f, 1.0f, 1.0f, 1.0f);    // 白
-        locationSelCanvas.enabled = false;// フィールド選択キャンバスを非表示
+        // フィールド選択キャンバスを非表示
+        locationSelCanvas.gameObject.SetActive(false);
 
-        sceneName_ = new string[(int)kindsField.MAX] {
-            //"non",
-            "towndata","unitydata","TestField","cansel"
-        };
-        fieldShowName_ = new string[(int)kindsField.MAX] {
-            //"non",
-            "Town","Field01","Field02","cansel"
+        sceneName_ = new string[2, (int)kindsField.MAX] {
+            { "towndata","unitydata","TestField","cansel" },
+            { "Town","Field01","Field02","cansel" }
         };
 
         // 表示する背景と文字の親を入れておく
@@ -87,23 +81,20 @@ public class WarpField : MonoBehaviour
 
         for (int i = (int)kindsField.TOWN; i < (int)kindsField.MAX; i++)
         {
-
             selectFieldImage_[i] = canvasChild_[0].transform.GetChild(i).GetComponent<Image>();
             selectFieldText_[i] = canvasChild_[1].transform.GetChild(i).GetComponent<Text>();
+            selectFieldText_[i].text = sceneName_[1,i];// Textに文字を入れる
 
-            selectFieldText_[i].text = fieldShowName_[i];// Textに文字を入れる
-
-
-            //Debug.Log("fieldName_：" + sceneName_[i]);
-            //Debug.Log("フィールドの外移動先" + i + ";" + canvasChild_[0].transform.GetChild(i).GetComponent<Image>());
-
-            if (SceneManager.GetActiveScene().name == sceneName_[i])
+            if (SceneManager.GetActiveScene().name == sceneName_[0,i])
             {
                 saveNowField_ = i;
             }
         }
+        // 現在いるシーンは選べない色にする
         selectFieldImage_[saveNowField_].color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
-        if(saveNowField_==(int)kindsField.TOWN)
+
+        // 選択中の初期場所を決める
+        if (saveNowField_ == (int)kindsField.TOWN)
         {
             selectFieldNum_ = (int)kindsField.unitydata;
         }
@@ -112,70 +103,50 @@ public class WarpField : MonoBehaviour
             selectFieldNum_ = (int)kindsField.TOWN;
         }
 
-
-        //Debug.Log("SceneName：" + SceneManager.GetActiveScene().name);
-
-
-
-        maxWarpObjNum_ = this.transform.childCount;
-        warpObject_ = new GameObject[maxWarpObjNum_];
-        saveObjPos_ = new Vector3[maxWarpObjNum_];
-        for (int i = 0; i < maxWarpObjNum_; i++)
+        warpObject_ = new GameObject[this.transform.childCount];
+        for (int i = 0; i < this.transform.childCount; i++)
         {
             warpObject_[i] = this.transform.GetChild(i).gameObject;
-            saveObjPos_[i] = warpObject_[i].transform.position;
             //Debug.Log(warpObject_[i].name + "側のワープ座表" + warpObject_[i].transform.position);
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    // コルーチン  
+    private IEnumerator Select()
     {
-        if(nowTownFlag_==true)
+        // コルーチンの処理(返り値がtrueなら処理を続行する)  
+        while (SelectGoToFiled())
         {
-            SelectGoToFiled();
-            return;
-        }
-
-        //  Debug.Log("選択中のフィールド" + selectFieldNum_);
-        if (fieldEndHit == true)
-        {
-            SelectGoToFiled();
+            yield return null;
         }
     }
 
-    private void TownFieldSelect()
+
+    private bool SelectGoToFiled()
     {
-
-    }
-
-    private void SelectGoToFiled()
-    {
-        // Debug.Log(choiceFieldNum_);
-
+        // 選択中の画像の色を変更
         for (int i = (int)kindsField.TOWN; i < (int)kindsField.MAX; i++)
         {
             if (saveNowField_ == i)
             {
-                continue;
+                continue;  // 現在いるSceneの色はStartで指定した色。変化しない
             }
 
             if (selectFieldNum_ == i)
             {
-                selectFieldImage_[selectFieldNum_].color = nowImageColor_;  // 選択中は青
+                selectFieldImage_[selectFieldNum_].color = nowImageColor_;  // 現在選択中の時（青
             }
             else
             {
-                selectFieldImage_[i].color = resetColor_;            // それ以外は白
+                selectFieldImage_[i].color = resetColor_; // 選択されてない時（白
             }
         }
 
-        // warp→field順のためwarpの時の2倍
+        // フィールド選択中にSpaceキー処理が入らないようにするため
         if (changeSelectCnt_ < 0.5f)
         {
-            // フィールド選択中にSpaceキー処理が入らないようにするため
             changeSelectCnt_ += Time.deltaTime;
-            return;
+            return true;
         }
 
         if (Input.GetKeyDown(KeyCode.DownArrow))
@@ -186,61 +157,59 @@ public class WarpField : MonoBehaviour
             }
             if (selectFieldNum_ == saveNowField_)
             {
-                selectFieldNum_++;
+                selectFieldNum_++;// 現在シーンの場合はもう一度加算
             }
-
-            Debug.Log("下に移動" + selectFieldNum_);
+            return true;
+            //Debug.Log("下に移動" + selectFieldNum_);
         }
         else if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            if ((int)kindsField.TOWN < selectFieldNum_)
+            if (saveNowField_ != (int)kindsField.TOWN)
             {
-                selectFieldNum_--;    // 上に移動
+                if ((int)kindsField.TOWN < selectFieldNum_)
+                {
+                    selectFieldNum_--;    // 上に移動
+                }
+                if (selectFieldNum_ == saveNowField_)
+                {
+                    selectFieldNum_--;
+                }
             }
-            if (selectFieldNum_ == saveNowField_)
+            else
             {
-                selectFieldNum_--;
+                // 町にいるときは町が一番上のため減算してほしくない
+                if ((int)kindsField.TOWN + 1 < selectFieldNum_)
+                {
+                    selectFieldNum_--;    // 上に移動
+                }
             }
+            return true;
+        }
+        else
+        {
+            // 何も処理を行わない
         }
 
+        // 行先決定
         if (Input.GetKey(KeyCode.Space))
         {
-            // キャンセル選択時
-            if (selectFieldNum_ == (int)kindsField.CANCEL)
+            // キャンセル以外の時＝シーン遷移をする
+            if (selectFieldNum_ != (int)kindsField.CANCEL)
             {
-                // フィールド端に接触した際
+                Debug.Log("コルーチンストップ");
+                StopCoroutine(Select());                // コルーチンストップ
+                //Debug.Log(selectFieldNum_+ "を選択中。Sceneを移動します");
+                SceneMng.SceneLoad(selectFieldNum_);
+            }
+            else
+            {
+                // フィールド端に接触した際はユニを回転させて押し返す必要がある
                 if (fieldEndHit == true)
                 {
-                    RotateCheck();
-                    for (int i = 0; i < maxWarpObjNum_; i++)
-                    {
-                        uniNormalized_ = (enterPos_ - warpObject_[i].transform.position).normalized;
-                        //Debug.Log(warpObject_[i].name + "との正規化" + uniNormalized_);
-                        if (nowRotate_ == rotate.UP || nowRotate_ == rotate.DOWN)
-                        {
-                            nowUniRotate_ = uniNormalized_.z;
-                            addPos_ = new Vector3(0.0f, 0.0f, 0.5f);
-                        }
-                        else
-                        {
-                            nowUniRotate_ = uniNormalized_.x;
-                            addPos_ = new Vector3(-0.5f, 0.0f, 0.0f);
-                        }
-                    }
-                    if (nowUniRotate_ < 0.0f)
-                    {
-                        // 出ようとした方向の反対側に加算
-                        addPos_ = -addPos_;
-                    }
-                    UniChan.transform.rotation = Quaternion.Euler(0.0f, UniChan.transform.rotation.y*180, 0.0f);
-                    UniChan.transform.position = new Vector3(
-                                enterPos_.x + addPos_.x,
-                                enterPos_.y,
-                                enterPos_.z + addPos_.z);
-
-                    fieldEndHit = false;
+                    UniPushBack();
                 }
 
+                // 選択中の位置を初期化
                 if (saveNowField_ == (int)kindsField.TOWN)
                 {
                     selectFieldNum_ = (int)kindsField.unitydata; // フィールドの行き先をリセット
@@ -249,71 +218,91 @@ public class WarpField : MonoBehaviour
                 {
                     selectFieldNum_ = (int)kindsField.TOWN; // フィールドの行き先をリセット
                 }
-                locationSelCanvas.enabled = false;    // フィールド選択キャンバス非表示
+
+                // フィールド選択キャンバス非表示
+                locationSelCanvas.gameObject.SetActive(false);
                 changeSelectCnt_ = 0.0f;
-            }
-            else
-            {
-                Debug.Log(selectFieldNum_+ "を選択中。Sceneを移動します");
-                SceneMng.SceneLoad(selectFieldNum_);
+
+                Debug.Log("コルーチンストップ");
+                StopCoroutine(Select());                // コルーチンストップ
             }
             nowTownFlag_ = false;
             warpNowFlag_ = false;
         }
+        return nowTownFlag_;
     }
 
-    private void RotateCheck()
+
+    private void UniPushBack()
     {
-        if (checkRot_[1] <= saveUniRot_.y && saveUniRot_.y < checkRot_[2])
+        for (int i = 0; i < this.transform.childCount; i++)
         {
-            // 右側
-            nowRotate_ = rotate.RIGHT;
+            uniNormalized_ = (enterPos_ - warpObject_[i].transform.position).normalized;
+            //Debug.Log(warpObject_[i].name + "との正規化" + uniNormalized_);
+            if (nowRotate_ == rotate.UP || nowRotate_ == rotate.DOWN)
+            {
+                rotateNormalized_ = uniNormalized_.z;
+                addPos_ = new Vector3(0.0f, 0.0f, 0.5f);
+                Debug.Log("上か下から接触");
+            }
+            else
+            {
+                rotateNormalized_ = uniNormalized_.x;
+                addPos_ = new Vector3(-0.5f, 0.0f, 0.0f);
+                Debug.Log("右か左から接触");
+            }
         }
-        else if (checkRot_[2] <= saveUniRot_.y && saveUniRot_.y < checkRot_[3])
+
+        if (rotateNormalized_ < 0.0f)
         {
-            // 下側
-            nowRotate_ = rotate.DOWN;
+            // 出ようとした方向の反対側に加算
+            addPos_ = -addPos_;
         }
-        else if (checkRot_[3] <= saveUniRot_.y && saveUniRot_.y < checkRot_[4])
+        UniChan.transform.rotation = Quaternion.Euler(0.0f, saveUniRot_.y + 180, 0.0f);
+        UniChan.transform.position = enterPos_ + addPos_;
+        fieldEndHit = false;
+
+    }
+
+    private void CheckUniTransfoem()
+    {
+        enterPos_ = UniChan.transform.position;// 端と接触した時、ユニの座標を保存
+        saveUniRot_ = UniChan.transform.localEulerAngles;
+
+        if ((checkRot_[4] < saveUniRot_.y && saveUniRot_.y < checkRot_[5])
+         || (checkRot_[0] <= saveUniRot_.y && saveUniRot_.y < checkRot_[1]))
         {
-            // 左側
-            nowRotate_ = rotate.LEFT;
+            nowRotate_ = rotate.UP;            // 上側
         }
-        else if ((checkRot_[4] < saveUniRot_.y && saveUniRot_.y < checkRot_[5])
-            || (checkRot_[0] <= saveUniRot_.y && saveUniRot_.y < checkRot_[1]))
+        else
         {
-            // 上側
-            nowRotate_ = rotate.UP;
+            // 上側以外の方向の時
+            for (int i = 1; i < (int)rotate.MAX; i++)
+            {
+                if (checkRot_[i] <= saveUniRot_.y && saveUniRot_.y < checkRot_[i + 1])
+                {
+                    nowRotate_ = (rotate)i;
+                    Debug.Log(saveUniRot_.y+"   向いてる方向" + nowRotate_);
+                }
+            }
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (fieldEndHit == false)
+        // プレイヤーがフィールド端に接触したかどうか
+        if (other.CompareTag("Player"))
         {
-            if (other.CompareTag("Player"))
-            {
-                locationSelCanvas.enabled = true;         // フィールドの移動先を表示
-                fieldEndHit = true;
-                enterPos_ = UniChan.transform.position;// 端と接触した時、ユニの座標を保存
-                saveUniRot_ = UniChan.transform.localEulerAngles;
-
-
-                warpNowFlag_ = true;
-            }
+            // フィールドの移動先を表示
+            locationSelCanvas.gameObject.SetActive(true);
+            fieldEndHit = true;
+            warpNowFlag_ = true;
+            CheckUniTransfoem();// ユニが向いてる方向を確定
+            SetNowTownFlag(true);            // フィールド端に接触した時用のワープ
         }
     }
 
-    //public void SetWarpFieldFlag(bool flag)
-    //{
-    //    fieldEndHit = flag;
-    //}
-
-    //public bool GetWarpFieldFlag()
-    //{
-    //    return fieldEndHit;
-    //}
-
+    // ワープ選択中かどうか
     public void SetWarpNowFlag(bool flag)
     {
         warpNowFlag_ = flag;
@@ -324,21 +313,28 @@ public class WarpField : MonoBehaviour
         return warpNowFlag_;
     }
 
+    // 街中でフィールドに行くためのキャンバスを表示するかどうか
+    public bool GetLocationSelActive()
+    {
+        return locationSelCanvas.gameObject.activeSelf;
+    }
+
+    public void SetLocationSelActive(bool flag)
+    {
+        locationSelCanvas.gameObject.SetActive(flag);
+    }
 
     // 街中でフィールドにワープする時用
     public void SetNowTownFlag(bool flag)
     {
         nowTownFlag_ = flag;
+
+        if (flag)
+        {
+            Debug.Log("コルーチンスタート");
+            // コルーチンスタート
+            StartCoroutine(Select());
+        }
     }
 
-
-    public bool GetLocationSelActive()
-    {
-        return locationSelCanvas.enabled;
-    }
-
-    public void SetLocationSelActive(bool flag)
-    {
-        locationSelCanvas.enabled = flag;
-    }
 }
