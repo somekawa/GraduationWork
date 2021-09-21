@@ -17,8 +17,9 @@ public class SceneMng : MonoBehaviour
     public enum SCENE
     {
         NON = -1,
-        TOWN,   // 街シーン
-        FIELD,  // フィールドシーン
+        TOWN,     // 街シーン
+        FIELD,    // フィールドシーン
+        UNIHOUSE  // ユニちゃんの家
     }
 
     public static SceneMng singleton;
@@ -112,6 +113,11 @@ public class SceneMng : MonoBehaviour
 
                 case SCENE.FIELD:
                     charaRunSpeed = 4.0f;
+                    Debug.Log("移動速度変更" + charaRunSpeed);
+                    break;
+
+                case SCENE.UNIHOUSE:
+                    charaRunSpeed = 8.0f;
                     Debug.Log("移動速度変更" + charaRunSpeed);
                     break;
 
