@@ -1582,11 +1582,6 @@ Update関数内にSEARCHモード中にTABキーを押したら
 MenuUICanvasを表示させるif文内に、時間加算処理も
 まとめていれてあげる。
 
-また、ChangeMode関数のBUTTLEのcase文にSetSubCameraPosで座標を設定するようにしておく。
-BittleWarpPointPackのZ座標をずらした影響なのか
-(new Vector3(4.0f,2.0f,11.5f))としないとうまく
-いかなかった。
-
 ------------------------------------------------
 
 <メニュー画面にセーブとステータス確認ボタン配置>-

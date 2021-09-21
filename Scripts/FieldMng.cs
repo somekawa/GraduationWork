@@ -107,7 +107,6 @@ public class FieldMng : MonoBehaviour
                 break;
 
             case MODE.BUTTLE:
-                cameraMng_.SetSubCameraPos(new Vector3(4.0f,2.0f,11.5f));
                 cameraMng_.SetChangeCamera(true);   // サブカメラアクティブ
                 break;
 
