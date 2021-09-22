@@ -22,6 +22,11 @@ public class CameraMng : MonoBehaviour
         subCamera.transform.position = pos;
     }
 
+    public void SetSubCameraRota(Quaternion rota)
+    {
+        subCamera.transform.rotation = rota;
+    }
+
     // ŠO•”‚©‚çƒJƒƒ‰ó‘Ô‚ÌØ‘Ö‚ğs‚¦‚é‚æ‚¤‚É‚·‚é
     public void SetChangeCamera(bool flag)
     {

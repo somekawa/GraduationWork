@@ -31,7 +31,9 @@ public class InHouseCheck : MonoBehaviour
             // 家のアクティブ/非アクティブの切替
             interiorMng_.SetHouseVisible(this.gameObject.name);
 
-            cameraMng_.SetSubCameraPos(new Vector3(100.0f, 0.0f, 0.0f));
+            cameraMng_.SetSubCameraPos(new Vector3(100.0f, 0.3f, 0.0f));
+            cameraMng_.SetSubCameraRota(Quaternion.Euler(new Vector3(13.5f, 0.0f, 0.0f)));
+
             cameraMng_.SetChangeCamera(true);
             Debug.Log(this.gameObject.name + "とPlayerが接触");
         }

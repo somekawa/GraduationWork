@@ -145,13 +145,91 @@ Scale: X:4   Y:4  Z:4
 　名前のオブジェクトを[MayorHouse]に変更する
 　→名前変更した場所に[InHouseCheck.cs]をつける
 
+※SetActive側は、オブジェクトの親名をそれぞれの
+　家と同じ名前にしないといけない
+------------------------------------------------
+
+<Uniの家の内装を作成する>-----------------------
+DarkFantasyKiy[Free]から部屋の全てをInHouseの
+シーンにもってきて、サブカメラの前に配置する
+
+[HouseInterior]の子の[UniHouse]の子として
+ヒエラルキーに置く。
+
+[UniHouse]
+Pos  X:0 Y:-1.5 Z:5
+Rota X:0 Y:-90  Z:0
+
+<壁と天井のマテリアルを変更する>
+新規で[UniHouseRoof]というマテリアルを作成
+
+[UniHouseRoof.mat]
+Shader     → Standard
+色         → R:0.36 G:0.15 B:0.1
+Metalic    → 0.4
+Smoothness → 0
+NormalMap  → Assets/Furniture/RunemarkStudio/
+              DarkFantasyKit[Free]/Meshes/
+              Steps,Floor,Celling/Materials/
+              Dfk_ceiling_wood_normal
+
+※このマテリアルを[CEILING]と[WALLS]につける
+
+<床のマテリアルを変更する>
+新規で[UniHouseFloor]というマテリアルを作成
+
+[UniHouseFloor.mat]
+Shader     → Standard
+Albedo→Assets/Furniture/PollyPrivateers/
+        SeamlessMaterials/Roof/Roof_Albedo.tga
+
+Metalic    → 0.3
+Smoothness → 0.5
+
+Normal→Assets/Furniture/PollyPrivateers/
+  Map   SeamlessMaterials/Roof/Roof_Normal.tga
+   
+<机の上に本を設置する>
+Assets/Furniture/Books/Prefabsにある
+Bookを3冊配置する。
+
+上の方の棚にはAssts/Furniture/QA_Books/Prefabsに
+あるBooks_15を設置する
+
+<棚を設置する>
+Assets/Furniture/InteriorAsset/Prefabにある
+Sehlfを配置する。
+※Prefabは後で削除する
+棚の中身は頑張る
+
+棚の上に、地球儀でも置いとくか
+※地球儀の色はすこし変更している
+
+<植物を吊るす>
+なんか、おしゃれな家って植物吊るしてるよね
+がんばってつくってみた
+
+<窓をつける>
+そういえば窓がない…
+PollyPrivattersにある窓をはめ込んでみる
+テクスチャは棚と同じやつにする
+
+<その他>
+右の壁がさみしいからInteriorAssetの絵画を配置
+PollyPrivattersにある大き目の観葉植物を右側に置く
+何か天井もさみしいからボックスで囲んでみる
+[UniHouseCeiling]という新規マテリアルを追加
+→UniHouseFloorの色を変えただけのやつ
+　色 → R:0.36 G:0.15 B:0.1
+
+<SubCameraの画角変更>
+Pos  X:100  Y:0.3 Z:0
+Rota X:13.5 Y:0   Z:0
+※これにより、InHouseCheck.csでのSetSubCameraPos
+　が変更になる。
+　また、カメラのRotateの調整も必要になる。
 
 ------------------------------------------------
 
-このSceneの同じ座標にいろんな家の内装をつくる
-どの家の中に入ったかを見て
-SetActiveを切り替える
-
-
-※SetActive側は、オブジェクトの親名をそれぞれの
-　家と同じ名前にしないといけない
+最後にPrefab類やSceneは全て削除すること
+テクスチャのサイズ調整も行うこと
