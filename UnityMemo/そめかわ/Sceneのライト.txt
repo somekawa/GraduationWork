@@ -19,3 +19,11 @@ Generateボタンを押す
 ※途中で他のSceneに遷移してはいけない
 
 これを、新規で作るSceneでは必ず行わないといけない
+
+(追記)
+Lightingタブの左から2番目にあるEnvironmentタブのSourceの下の項目にIntensity Multiplierがある。
+この値は0に設定すること。
+→1にすると白飛びしてしまう。
+
+追記内容の書かれていたサイト↓
+https://teratail.com/questions/144263
