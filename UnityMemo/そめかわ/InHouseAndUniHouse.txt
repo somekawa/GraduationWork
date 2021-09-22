@@ -42,8 +42,116 @@ void Start()
 
 ------------------------------------------------
 
+<ユニちゃんが自分の家と当たり判定したとき、
+ ユニちゃん家の室内にカメラを切り替える>---------
+
+SubCameraとCameraControllerを作成する
+CameraControllerにMainとSubをアタッチしておく。
+
+[SubCamera]
+Pos X:100 Y:0 Z:0
+※AudioLisenerはRemoveしておく
+
+<当たり判定ボックスの作成>
+UniHouseにBoxColliderを付ける
+Center X:2.3 Y:0  Z:4.5
+Size   X:10  Y:10 Z:10
+IsTriggerのチェック なし
+
+家に新規ScriptでInHouseCheck.csを作成して
+アタッチする。
+※このスクリプトは他の家にも付けれる汎用性の
+　あるものにする
+
+<InHouseCheck.cs>
+コライダーでの当たり判定を行う。
+※UniのTagが[Player]になっているか確認しておく
+
+void OnCollisionEnter(Collision collision)
+{
+    if(collision.transform.tag == "Player")
+    {
+　　　cameraMng_.SetChangeCamera(true);
+      Debug.Log("当たった!");
+    }
+}
+
+Collisionでの当たり判定では、CompareTagでの
+タグ確認ができなかったので、仕方なく == で
+判定を取っている。
+※CameraMngの取得方法はFieldMng.csと同じ
+
+------------------------------------------------
+
+<室内オブジェクトのSetActive切替テスト>----------
+次に、InHouseCheck.cs自身がどの家に
+アタッチされているかを取得できるようにする。
+→室内オブジェクトのSetActiveの切替に使えるように
+
+※SetActive側は、オブジェクトの親名をそれぞれの
+　家と同じ名前にしないといけない
+
+<テスト用のオブジェクトをサブカメラ前に配置>
+空のオブジェクトで[HouseInterior]を作成
+Pos X:100 Y:0 Z:0
+※サブカメラと座標を同位置にする
+
+その子として空のオブジェクトで[UniHouse]と
+[Guild]を作成
+それぞれの子として、さらに適当にオブジェクト設置
+
+[HouseInterior]に、新規Scriptで
+[HouseInteriorMng.cs]を作成してアタッチする。
+
+<HouseInteriorMng.cs>
+SetHouseVisible関数で、
+自分の子の名前と、関数の引数名と一致しているものはActiveをtrueに、それ以外はfalseになるようにする
+→for文で子オブジェクトの名前を取得していき、
+　一致しない家はSetActiveをfalseにする
+
+あとはこの関数をInHouseCheck側から呼び出す。
+
+<InHouseCheck.cs>
+HouseInteriorMng.csをprivate変数で取得する。
+
+Start関数でFindした後OnCollisionEnterで、
+interiorMng_.SetHouseVisible(this.gameObject.name);
+と記述する。
+
+これでテストした結果、うまくSetActiveが動いているのを確認できた。
+これをUniちゃんの家以外は、Townシーンで行う
+必要がある。
+
+<Townシーンでの変更点>
+①Restaurantの子のBoxColliderという名前の
+　オブジェクトを[Restaurant]に変更する
+　→名前変更した場所に[InHouseCheck.cs]をつける
+
+②BookStoreの子のBoxColliderという名前の
+　オブジェクトを[BookStore]に変更する
+　→名前変更した場所に[InHouseCheck.cs]をつける
+
+③Guildの子にCubeを作成して[Guild]と名前をつける
+　→つけたCubeに[InHouseCheck.cs]をつける
+Pos X:-1.4 Y:-1.0 Z:0
+
+④ItemStoreの子にCubeを作成して[ItemStore]と
+  名前をつける
+　→つけたCubeに[InHouseCheck.cs]をつける
+Pos    X:1.5 Y:0  Z:3
+Scale: X:4   Y:4  Z:4
+
+⑤SomeColliderにある[MayorHouseCollider]という
+　名前のオブジェクトを[MayorHouse]に変更する
+　→名前変更した場所に[InHouseCheck.cs]をつける
+
+
+------------------------------------------------
+
 このSceneの同じ座標にいろんな家の内装をつくる
 どの家の中に入ったかを見て
 SetActiveを切り替える
 
 
+※SetActive側は、オブジェクトの親名をそれぞれの
+　家と同じ名前にしないといけない
