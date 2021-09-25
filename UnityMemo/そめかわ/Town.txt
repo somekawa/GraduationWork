@@ -208,8 +208,51 @@ rigid.MovePosition(rigid.position + rigid.velocity * Time.deltaTime);
 
 -----------------------------------------------
 
-レストランの壁の色合いを白にする。
-町長の家の屋根を町長っぽくする。
+<Guildの室内を作成する>-------------------------
+Assets/Furniture/PollyPrivattersのサンプルシーン
+を一回丸コピしてきて、設置する。
+カメラの角度的に映らない部分のオブジェクトを
+取り除き、コライダー類を全てはずしてstaticに
+すれば終了。
+※ここのPrefabは魔道具屋にも使えそうなもの多い
+
+------------------------------------------------
+
+<Restaurantの室内を作成する>--------------------
+Assets/Furniture/DiningSetのサンプルを引っ張って
+くる。
+
+壁が無いので、DarkFantasyの方から窓があるものを
+持ってきてマテリアルを新規で作る
+[RestauranWall]
+Shader→Standard
+Albedo→真っ白
+NormalMap→DarkFantasiKitの、
+           Steps,Floor,Ceiling/Materials/
+           dfk_floor_01_normal.png
+
+-----------------------------------------------
+
+<BookStoreの室内を作成する>---------------------
+壁のマテリアルとして、Assets/Furniture/BarChair/
+Objects/Materials/Floor.mat
+を利用した。
+
+床のマテリアルとして新規に[BookStoreFloor]をつくり、Assets/Furniture/BarChair/
+Objects/Materials/Floor.matをコピーして、内部の数値を調整したもの適用した。
+
+-----------------------------------------------
+
+<ItemStoreの室内を作成する>---------------------
+
+ItemStoreWallというマテリアルを新規作成しました。
+ワインボトル関連の棚のマテリアルの色を変更
+[RusticWood]
+R→0.56
+G→0.37
+B→0.2
+
+------------------------------------------------
 
 *重要*
 タグの判別にはgameObject.tag == “string tag”もあるが、CompareTag()の方が早い
