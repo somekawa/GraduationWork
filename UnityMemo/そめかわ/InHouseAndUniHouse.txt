@@ -145,6 +145,8 @@ Scale: X:4   Y:4  Z:4
 　名前のオブジェクトを[MayorHouse]に変更する
 　→名前変更した場所に[InHouseCheck.cs]をつける
 
+⑥SomeColliderのCollider6のScale:Zを20→25にする
+
 ※SetActive側は、オブジェクトの親名をそれぞれの
 　家と同じ名前にしないといけない
 ------------------------------------------------
@@ -231,9 +233,109 @@ Rota X:13.5 Y:0   Z:0
 
 ------------------------------------------------
 
+<家と接触時に、家に入るかを確認するテロップ表示>-
+
+[HouseInterior]のオブジェクトの子としてCanvasを
+作成する。
+そのCanvasにImageとText(TMP)を3つつける。
+①[HouseInfo]
+  Image　　 → frame_name.png
+  Text内容　→ ○○の家に入りますか？という文章
+②Yes
+  Image　　 → none
+  Text内容　→ 選択肢の「はい」
+③No
+  Image　　 → none
+  Text内容　→ 選択肢の「いいえ」
+
+次に、このCanvasが家と接触したときにActiveに
+なるようにする。
+
+<HouseInteriorMng.cs>
+privateでGameObject変数を作り、
+Findで"Canvas"を探す。
+
+InHouseCheck.cs側でそのFindしたオブジェクトの
+アクティブ状態を切り替えるようにする。
+→[SetActiveCanvas]という関数を呼び出す
+
+これで接触時にキャンバスが表示されるようになった
+
+------------------------------------------------
+
+<コルーチンを使って選択肢のキー操作を実装>-------
+
+(仕様)
+「はい」「いいえ」の選択をできるようにする
+操作は矢印キーの左右、決定はスペースキーにする。
+
+(実装方法)
+<HouseInteriorMng.cs>
+①SetActiveCanvas関数でコルーチンをスタートする
+　→SelectInHouseというコルーチン関数を呼び出す
+
+②SelectInHouse関数ではwhile文を回す
+　flagがtrueである間は1フレーム毎に処理が
+　呼ばれる仕組みにする
+　スペースキー押下でflagをfalseにするとwhileを
+　抜けられる(ストップ処理がいらなくなる)
+※参考サイト
+https://qiita.com/kwst/items/ce04abce7c1e2c72e023
+
+これでキー押下での操作ができるようになった。
+次はこのキー押下時の処理を書いていく。
+
+private変数でboolのinHouseFlg_というのを作成し、
+キー操作でtrue/falseが変わるようにする。
+
+・trueでスペースキー→cameraMng_からサブカメラの
+　切替処理を呼びだす
+
+・falseでスペースキー→SetActiveCanvas関数を
+　呼び出して、flagの引数をfalseにする
+　※これでキャンバスを非表示に切り替える
+
+このキー処理を作成するにあたって、いままで
+InHouseCheck.csでcameraMng_処理をしていたものを
+HouseInteriorMng.csに移植することになった。
+(むしろこのほうが処理がきれいに書けた)
+
+※SetActiveCanvasをfalseにするとき
+　引数でnameがあるが、そこは[""]にし、
+　関数内で[""]だったときはコルーチンスタート処理
+　をしないように、キャンバスだけ非表示にして
+　returnするようにした
+
+------------------------------------------------
+
+<建物接触時のキャンバス表示中はキャラ移動停止>---
+
+UniのUnitychanControllerのenableをfalseにする。
+
+HouseInteriorMng.csでfindでUnitychanControllerを
+取得し、必要なところでenabledをfalseにする。
+
+また、enabledをした際にアニメーションを止める
+必要があるため、UnitychanController側にStopUniRunAnimという関数をつくり、
+外部からアニメーションを止められるようにしておく
+
+→これでWarpField.csからもアニメーションが止められるようになったから、一部書き換えました。
+
+playerController_.StopUniRunAnim();
+というのを適切な箇所で呼び出せば終了。
+
+-----------------------------------------------
+
+Updateとコルーチンの違い↓
+https://zenn.dev/torisoup/articles/coroutine_01
+
+基本的なコルーチンの使い方↓
+https://qiita.com/kwst/items/ce04abce7c1e2c72e023
+
 <Directional Lightの設定を変更>
 Intensity    → 1.2
 影のStrength → 0.6
 
 最後にPrefab類やSceneは全て削除すること
 テクスチャのサイズ調整も行うこと
+

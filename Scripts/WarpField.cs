@@ -22,9 +22,9 @@ public class WarpField : MonoBehaviour
     private GameObject[] warpObject_;   // マップ端のワープオブジェを保存
 
     // Canvas-Image,Text。それに連なる孫0Image 1Text;  
-    private Transform[] canvasChild_ = new Transform[2];     // 選択できるフィールド(locationSelCanvasの子
-    private Image[] selectFieldImage_ = new Image[(int)kindsField.MAX];      // 選択できるフィールドの背景（locationSelCanvasの孫
-    private Text[] selectFieldText_ = new Text[(int)kindsField.MAX];        // 選択できるフィールドの文字（locationSelCanvasの孫
+    private Transform[] canvasChild_  = new Transform[2];                // 選択できるフィールド(locationSelCanvasの子
+    private Image[] selectFieldImage_ = new Image[(int)kindsField.MAX];  // 選択できるフィールドの背景（locationSelCanvasの孫
+    private Text[] selectFieldText_   = new Text[(int)kindsField.MAX];   // 選択できるフィールドの文字（locationSelCanvasの孫
 
     // [現在のscene名を確認、表示するフィールド名]
     private string[,] sceneName_ = new string[2, (int)kindsField.MAX]{
@@ -57,7 +57,8 @@ public class WarpField : MonoBehaviour
     // ユニが向いてる方向出すための範囲
     private int[] checkRot_ = new int[6] { 0, 45, 135, 225, 315, 360 };
 
-    private GameObject UniChan;         // ユニ
+    private GameObject UniChan_;         // ユニ
+    private UnitychanController UniChanController_;                 // ユニのコントローラー情報
     private Vector3 saveUniRot_ = new Vector3(0.0f, 0.0f, 0.0f);    // ユニが向いてる方向を保存
     private Vector3 enterPos_ = new Vector3(0.0f, 0.0f, 0.0f);      // 接触した瞬間の座標を保存
     private Vector3 addPos_ = new Vector3(0.0f, 0.0f, 0.0f);        // キャンセル時に反対方向に弾く
@@ -70,7 +71,8 @@ public class WarpField : MonoBehaviour
     void Start()
     {
         // 座標と回転を変える可能性があるためユニを取得
-        UniChan = GameObject.Find("Uni");
+        UniChan_ = GameObject.Find("Uni");
+        UniChanController_ = UniChan_.GetComponent<UnitychanController>();
 
         // フィールド選択キャンバスを非表示
         locationSelCanvas.gameObject.SetActive(false);
@@ -233,7 +235,7 @@ public class WarpField : MonoBehaviour
                 StopCoroutine(Select());                // コルーチンストップ
             }
             nowTownFlag_ = false;
-            warpNowFlag_ = false;
+            SetWarpNowFlag(false);
         }
         return nowTownFlag_;
     }
@@ -265,8 +267,8 @@ public class WarpField : MonoBehaviour
             addPos_ = -addPos_;
         }
         // +180度で反対方向をむかせる
-        UniChan.transform.rotation = Quaternion.Euler(0.0f, saveUniRot_.y + 180, 0.0f);
-        UniChan.transform.position = enterPos_ + addPos_;
+        UniChan_.transform.rotation = Quaternion.Euler(0.0f, saveUniRot_.y + 180, 0.0f);
+        UniChan_.transform.position = enterPos_ + addPos_;
         fieldEndHit = false;
 
     }
@@ -274,8 +276,8 @@ public class WarpField : MonoBehaviour
     private void CheckUniTransfoem()
     {
         // ユニの座標と向いてる方向を保存
-        enterPos_ = UniChan.transform.position;
-        saveUniRot_ = UniChan.transform.localEulerAngles;
+        enterPos_ = UniChan_.transform.position;
+        saveUniRot_ = UniChan_.transform.localEulerAngles;
 
         if ((checkRot_[4] < saveUniRot_.y && saveUniRot_.y < checkRot_[5])
          || (checkRot_[0] <= saveUniRot_.y && saveUniRot_.y < checkRot_[1]))
@@ -304,21 +306,29 @@ public class WarpField : MonoBehaviour
             // フィールドの移動先を表示
             locationSelCanvas.gameObject.SetActive(true);
             fieldEndHit = true;
-            warpNowFlag_ = true;
+            SetWarpNowFlag(true);
             CheckUniTransfoem();// ユニが向いてる方向を確定
             SetNowTownFlag(true);            // フィールド端に接触した時用のワープ
         }
     }
 
     // ワープ選択中かどうか
+    // ユニちゃんのアニメーションを止められるように、あえて同じスクリプト内でもここからフラグを変更するようにしている
     public void SetWarpNowFlag(bool flag)
     {
         warpNowFlag_ = flag;
-    }
 
-    public bool GetWarpNowFlag()
-    {
-        return warpNowFlag_;
+        if(warpNowFlag_)
+        {
+            // ワープ選択中はユニちゃんのアニメーションを止めて、移動操作不可
+            UniChanController_.StopUniRunAnim();
+            UniChanController_.enabled = false;
+        }
+        else
+        {
+            // 移動操作可能
+            UniChanController_.enabled = true;
+        }
     }
 
     // 街中でフィールドに行くためのキャンバスを表示するかどうか
