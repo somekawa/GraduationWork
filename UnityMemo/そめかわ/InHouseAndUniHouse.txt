@@ -326,6 +326,110 @@ playerController_.StopUniRunAnim();
 
 -----------------------------------------------
 
+<[○○(の家)に入りますか]という文章を表示する>---
+
+建物との当たり判定時に、建物の名前をテロップとして出すようにする。
+→表示先は、HouseInfoのText(TMP)
+
+文字表示を作るのはHouseInteriorMng.csの
+SelectInHouse関数内
+
+まず、private変数でTMPro.TextMeshProUGUI text_を
+用意し、Start関数内でFindしておく
+→ヒエラルキーのText(TMP)はTextという名前に変更
+　しておくこと
+
+そして、SelectInHouse関数のwhile文前で
+text_.text = "ユニの家に入る？";
+というテスト文章を入れて実行する
+→文字サイズを[20]にしてちょうど良さそうだった。
+→文字表示位置は中央にすること
+
+あとは、この"ユニの家"とかを建物毎に変わるようにしておき、それに +"に入る？"をくっつける。
+
+<建物毎に表示名を変える>
+mapで[キー:英語建物名,値:日本語建物名]を
+Start関数で作るようにする。
+
+readonly変数で英語建物と日本語建物の
+string配列を用意する
+※建物名の順番をそろえておく
+
+そして、mapをつかってキーと値にした後、
+SelectInHouse関数内で
+text_.text = buildNameMap_[name] + "に入る？";
+と呼び出せば名前を建物毎に変更できる
+
+(問題発生)
+町長、魔道具屋、という言葉がフォントにない
+→新規フォントで対応する
+
+https://mplusfonts.github.io/
+上記のサイトのGithubからMplus1-Medium.ttfを
+使うようにした。
+→このフォントは現在案内表記で使用予定
+※フォントの追加の仕方や設定方法は
+　canversationdata.txtで確認しながら行う。
+
+------------------------------------------------
+
+<[はい][いいえ]がわかるように矢印アイコンを表示>-
+現在自分がどちらの選択肢を選んでいるかわかるように矢印アイコンを描画するようにする。
+
+矢印アイコンには、nextMessage_iconを使用する。
+HouseInterior内のCanvasの子に[Icon(Image)]を追加
+
+[Icon(Image)]
+Pos
+はい   X:-140 Y:-70 Z:0
+いいえ X:  40 Y:-70 Z:0
+
+Scale　X:0.2  Y:0.2 Z:0
+
+この矢印アイコンがHouseInteriorMng.csの
+SelectInHouse関数にある左右キー操作で
+左右に動くようにしたい
+
+<矢印アイコンを左右に動かす>
+private変数でGameObject iconImage_を作成し、
+Start関数でfindする。
+
+SelectInHouseのwhile文で、キー処理をするときに
+「はい」                iconImage_.transform.localPosition =
+new Vector3(-140.0f, -70.0f, 0.0f);
+
+「いいえ」
+iconImage_.transform.localPosition =
+new Vector3(40.0f, -70.0f, 0.0f);
+
+という座標移動処理を追加する。
+→このとき、localPositionを利用したほうが
+　座標指定がしやすい。
+※普通のPositionだとCanvas経由で計算するため
+　複雑になり、考えづらい。
+
+これで、選択中の方にアイコンが動くようになり
+わかりやすくなった。
+
+------------------------------------------------
+
+<選択肢中は、ワープ処理を不可能にする>-----------
+
+①WarpCanvasを非表示にする
+HouseInteriorMng.csに、publicでwarpCanvasを
+取得するようにして、適切なタイミングSetActiveの
+true/falseを切り替える
+
+②「いいえ」を選択したときにワープが同じスペース　キーで反応してしまうのを止める
+HouseInteriorMng.csに、publicでwarpTownを取得し
+て、適切なタイミングでenableのtrue/falseを
+切り替える
+
+これでワープ処理が同キーで発生してしまうバグを
+修正できた。
+
+------------------------------------------------
+
 Updateとコルーチンの違い↓
 https://zenn.dev/torisoup/articles/coroutine_01
 
