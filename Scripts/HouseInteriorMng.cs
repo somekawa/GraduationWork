@@ -5,18 +5,21 @@ using UnityEngine.UI;
 
 public class HouseInteriorMng : MonoBehaviour
 {
-    public Canvas warpCanvas;       //  ワープ先を示すキャンバス(表示/非表示を切り替えるために使用)
-    public WarpTown warpTown;
+    public Canvas warpCanvas;       // ワープ先を示すキャンバス(表示/非表示を切り替えるために使用)
+    public WarpTown warpTown;       // ワープ処理の切替(enableで使用)
 
-    private CameraMng cameraMng_;
-    private UnitychanController playerController_;
+    private CameraMng cameraMng_;   // カメラ関係
+    private UnitychanController playerController_;  // キャラ操作の切替
 
-    private GameObject inHouseInfoCanvas_;
-    private GameObject iconImage_;
-    private TMPro.TextMeshProUGUI text_;
+    private GameObject inHouseInfoCanvas_;  // 建物に入るかの案内を出す
+    private GameObject iconImage_;          // [はい][いいえ]の現在選択中の方に矢印アイコンを出す
+    private TMPro.TextMeshProUGUI text_;    // 建物名を入れる
+
+    private GameObject inHouseCanvas_;      // 室内の選択肢
 
     private bool inHouseFlg_ = true;        // 入室するか(true:入る , false:入らない)
 
+    private string nowInHouseName = "";     // 今いる建物の名前を一時的に保存する
     private readonly string[] buildNameEng_ = { "UniHouse","MayorHouse","BookStore","ItemStore", "Guild" , "Restaurant" };  // 建物名(ヒエラルキーと同じ英語)
     private readonly string[] buildNameJpn_ = { "ユニの家", "町長の家" , "書店"    , "魔道具屋", "ギルド", "レストラン" };  // 建物名(表示用日本語)
     private Dictionary<string, string> buildNameMap_ = new Dictionary<string, string>();    // キー:英語建物名,値:日本語建物名
@@ -29,6 +32,8 @@ public class HouseInteriorMng : MonoBehaviour
         inHouseInfoCanvas_ = this.transform.Find("Canvas").gameObject;
         iconImage_ = inHouseInfoCanvas_.transform.Find("Icon").gameObject;
         text_ = inHouseInfoCanvas_.transform.Find("HouseInfo/Text").GetComponent<TMPro.TextMeshProUGUI>();
+
+        inHouseCanvas_ = this.transform.Find("InHouseCanvas").gameObject;
 
         // 英語建物名と日本語建物名を組み合わせる
         for (int i = 0; i < buildNameEng_.Length; i++)
@@ -61,19 +66,8 @@ public class HouseInteriorMng : MonoBehaviour
             return false;
         }
 
-        // 一致したオブジェクト以外を非アクティブ
-        for (int i = 0; i < this.gameObject.transform.childCount; i++)
-        {
-            var child = this.transform.GetChild(i);
-            if (child.name != name)
-            {
-                child.gameObject.SetActive(false);
-            }
-            else
-            {
-                child.gameObject.SetActive(true);
-            }
-        }
+        // 建物オブジェクトの表示/非表示切り替え
+        ChangeObjectActive(this.gameObject.transform.childCount, this.transform,name);
 
         return true;
     }
@@ -140,12 +134,73 @@ public class HouseInteriorMng : MonoBehaviour
 
         Debug.Log("コルーチンの終了");
 
-        // 家のアクティブ/非アクティブの切替
+        // 家のアクティブ/非アクティブの切り替え
         if (SetHouseVisible(name))
         {
+            // 現在いる建物名を保存しておく
+            nowInHouseName = name;
+
             cameraMng_.SetSubCameraPos(new Vector3(100.0f, 0.3f, 0.0f));
             cameraMng_.SetSubCameraRota(Quaternion.Euler(new Vector3(13.5f, 0.0f, 0.0f)));
             cameraMng_.SetChangeCamera(true);
+
+            // 室内キャンバスの表示
+            inHouseCanvas_.SetActive(true);
+
+            // 室内用キャンバスの表示/非表示切り替え
+            ChangeObjectActive(inHouseCanvas_.gameObject.transform.childCount, inHouseCanvas_.transform, name);
         }
+    }
+
+    // オブジェクトの表示/非表示の処理
+    private void ChangeObjectActive(int childNum, Transform trans, string buildName)
+    {
+        // 子の数でfor文を回して、建物の名前一致は表示、名前不一致は非表示にする
+        for (int i = 0; i < childNum; i++)
+        {
+            var child = trans.GetChild(i);
+            if (child.name != buildName)
+            {
+                child.gameObject.SetActive(false);
+            }
+            else
+            {
+                child.gameObject.SetActive(true);
+            }
+        }
+    }
+
+    // 建物からの出口処理テスト
+    public void ExitButton()
+    {
+        Debug.Log("外へ出るボタンが押されました");
+
+        // 室内用キャンバスの非表示
+        inHouseCanvas_.SetActive(false);
+
+        // ワープ先キャンバスの表示
+        warpCanvas.gameObject.SetActive(true);
+
+        // ワープ処理を可能にするためにtrueに戻す
+        warpTown.enabled = true;
+
+        // キャラ操作を再開する
+        playerController_.enabled = true;
+
+        // 建物の名前で処理を分ける
+        if(nowInHouseName == "Guild" || nowInHouseName == "ItemStore")
+        {
+            // 右通路位置にカメラを戻す
+            cameraMng_.SetSubCameraRota(Quaternion.Euler(new Vector3(0.0f, 0.0f, 0.0f)));
+            cameraMng_.SetSubCameraPos(new Vector3(28.0f, 3.0f, 89.0f));
+        }
+        else
+        {
+            // メインカメラに戻す
+            cameraMng_.SetChangeCamera(false);
+        }
+
+        // 現在の建物名を初期化
+        nowInHouseName = "";
     }
 }

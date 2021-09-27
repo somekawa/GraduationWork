@@ -133,7 +133,7 @@ interiorMng_.SetHouseVisible(this.gameObject.name);
 
 ③Guildの子にCubeを作成して[Guild]と名前をつける
 　→つけたCubeに[InHouseCheck.cs]をつける
-Pos X:-1.4 Y:-1.0 Z:0
+Pos X:-1.4 Y:-1.0 Z:-0.35
 
 ④ItemStoreの子にCubeを作成して[ItemStore]と
   名前をつける
@@ -429,6 +429,66 @@ HouseInteriorMng.csに、publicでwarpTownを取得し
 修正できた。
 
 ------------------------------------------------
+
+<室内で出る選択肢のキャンバスを表示する>---------
+
+大元のキャンバスは共通にしておき、
+その中に空のオブジェクトを建物と同じ名前にする。
+その空のオブジェクトを、SetActiveで切り替える仕組みにする。
+
+HouseInteriorの子として[InHouseCanvas]を作成
+その子として、空のオブジェクトで
+[BookStore][MayorHouse]等々、建物名と同じものを
+用意する。
+
+HouseInteriorMng.csにprivate変数でGameObjectのinHouseCanvas_を準備し、Start関数内でfindする。
+
+コルーチン処理の最後のif文
+(SetHouseVisible(name))というやつの中で、
+inHouseCanvas_をSetActive(true)にした後に
+該当しない子オブジェクトを名前で判定してfalseへ。
+
+※親を表示にしてから、該当しない子を非表示にする
+　という流れにしないと、子だけ表示はできないので
+　注意が必要
+
+------------------------------------------------
+
+<建物からの出口処理>----------------------------
+
+処理内容はどの建物も共通の為、HouseInteriorMng.csに記述する。
+
+ボタン位置などは調整がしやすいように、各オブジェクト毎に出口ボタンを用意したほうがいい。
+
+①各、空のオブジェクトに[ExitButton(Button)]を
+  作成し、座標はテストとしてX:0 Y:-100 Z:0にする
+
+②HouseInteriorMng.csに新規関数で[ExitButton]を
+　作る。
+
+③②の処理内容として、とりあえずログを出すように
+　しておき、①のOnClick()にHouseInteriorを
+　アタッチして、ExitButton関数を呼ぶ。
+
+→ログが正常にでたことを確認
+
+(ExitButton関数の処理内容)
+①退出時には、ワープキャンバスを表示にする。
+②室内用キャンバスを非表示にする。
+③キャラ操作を可能にする。
+④建物毎にカメラの調整をする。
+→今いる建物を把握するために、nowInHouseNameと
+　いう変数を用意し、SetHouseVisible(name)の
+　if文内でnameから=で貰うようにした。
+
+これで、退出ボタン処理ができた。
+※TownSceneでも同様に設定する。
+
+------------------------------------------------
+
+出口処理はhouseinteriormng.csで共通にしたほうが
+キャラ操作の可能やワープ表示とかしやすい。
+それいがいの各建物の処理は、それぞれの空のオブジェクトにそれぞれのScriptを新規作成したほうがいい
 
 Updateとコルーチンの違い↓
 https://zenn.dev/torisoup/articles/coroutine_01
