@@ -519,6 +519,331 @@ TextPop.prefabの保存位置を、Resourcesファイルに移動させました
 TextPop.prefab→DataPop.prefab
 ------------------------------------------------
 
+<ConversationCanvasの調整>----------------------
+画面を16:9にしたことで座標の調整が必要になった。
+同時に、アンカーポイントも必要なものは変える。
+
+[Frame_text]
+アンカーポイント:下中央
+Pos   X:0    Y:70  Z:0
+Scale X:0.95 Y:0.7 Z:1
+
+[Frame_name]
+アンカーポイント:下中央
+Pos   X:-247 Y:109  Z:0
+Scale X:0.7  Y:0.7   Z:1
+
+[NextMessage_icon]
+アンカーポイント:下中央
+Pos   X:312  Y:30    Z:0
+Scale X:0.15 Y:0.15  Z:1
+
+※[Message]のFontAssetを、Mplus-1-Mediumにする
+　また、FontSizeを[7]に変更する
+
+※[Name]のFontAssetを、Mplus-1-Mediumにする
+　FontSizeは[20]のままで良い
+
+------------------------------------------------
+
+<チャプター0のExcelを作成する>------------------
+すでにテストで書いているものを修正していく。
+とりあえず、一通り書き終わったら文字化けが
+ないか確認する事
+
+<ユニの母>とか<手紙>とかは、
+name2とfaceを[Mob]と書いて登録している。
+これで、読み込むときにTextMng.csでは
+TextAndFaceSetting関数内で顔の表情を更新する際に
+
+if(popChapter_.param[nowText_].face != "Mob")
+と条件分を追加する事で、バグを防ぐようにする。
+
+------------------------------------------------
+
+<フォントのCreateをする>------------------------
+やっぱり日本語が抜けすぎてて文章が構成できないので、TextMeshProの機能を使ってフォントを生成する
+
+フォント生成方法↓
+https://futabazemi.net/unity/textmeshpro_font_asset/
+
+常用漢字全て含んだサイト↓
+https://qiita.com/kgsi/items/08a1c78b3bee71136156
+
+生成するときに常用漢字をコピペしてcreateし、
+Assets/TextMeshPro/Resources/Fonts&Materials
+に[NewMplus1-MediumSDF]という.assetをつくる。
+これを、MessageとNameに設定する。
+
+------------------------------------------------
+
+<会話中の背景をつける>--------------------------
+話の冒頭はユニちゃんの部屋の設定なので、
+背景に部屋の画像をいれる。
+
+まずは画像を用意する。
+[UniChapter0House.png]と名前を付けて、
+Assets/Picture/ChapterBackというフォルダを
+新規作成して、そこに画像を入れる。
+
+つぎにこの画像を貼る場所をヒエラルキーに作成する
+
+背景作成時の参考サイト↓
+https://www.sejuku.net/blog/83708
+
+[BackCanvas]を新規作成して、上記のサイトの通りに設定する。その子として[BackImage]をつくり、
+ScaleをX:8 Y:4.5 Z:1とする。
+
+あとはこのBackImageに[UniChapter0House.png]の
+TextureTypeをSprite(2D and UI)にしたものを
+アタッチすれば終了。
+※UniChapter0House.pngのMaxSizeを[128]にする！
+  →あえてぼやけさせてるんやで
+
+-----------------------------------------------
+
+<Excelから背景画像を読み込めるようにする>-------
+画像名を入れて、BackImageが動的に切り替えられる
+ようにする。
+
+まずはExcelで
+name1　　　　→　Image
+name2　　　　→　Back
+face　　　　 →　Mob
+message　　　→　画像名(.pngはつけない)
+
+という風に設定する。
+今回はユニちゃん実家の背景を入れたいから
+messageのところにはUniChapter0Houseと入力する。
+
+つぎに、TextMng.csに処理を加える。
+private Image backImage_という変数をつくり、
+Start関数でBackImageまでのfindを行う。
+
+新規でChangeBackImageという関数を作成し、
+中で、name1 == "Image"で、name2 == "Back"
+のときに、
+
+// 背景画像を読み込み
+string str = "Assets/Picture/ChapterBack/" + popChapter_.param[nowText_].message + ".png";
+            
+// 画像差し替え
+backImage_.sprite = UnityEditor.AssetDatabase.LoadAssetAtPath
+<Sprite>(str);
+
+// Excelの行を進める
+nowText_++;
+
+という処理を行うようにする。
+これで、動的に背景画像を差し替えられるようになる
+
+-----------------------------------------------
+
+<手紙の画像とかを、動的に出せるようにする>-------
+背景画像を動的に変えるのと似た感じで、
+画像を出せるようにする。
+
+まずAssets/Picture/ChapterObjectというフォルダを
+新規作成して、その中に[Letter.png]を入れとく。
+
+次にExcelで
+name1　　　　→　Image
+name2　　　　→　Object
+face　　　　 →　Mob
+message　　　→　画像名(.pngはつけない)
+
+という風に設定する。
+今回は手紙の画像を入れたいから
+messageのところにはLetterと入力する。
+
+オブジェクト画像を出すために、ConversationCanvas
+に新規Imageを追加して[ObjectImage]と命名する。
+→ヒエラルキーでは、
+　Frame_textとFrema_nameより上にする
+
+あとは、ChangeBackImage関数でname2が"Object"の
+時に画像を出すようにする。
+
+描画しないときはSetActiveをfalseにしないといけない。画像がセットされていないときはfalseになるようにしよう。
+
+<画像がNoneのときはSetActiveをfalseにする>
+ChangeBackImage関数内で、
+if(objectImage_.sprite == null)
+{
+   objectImage_.gameObject.SetActive(false);
+}
+という風に、null(=画像がNone)のときは非表示に
+する処理を追加する。
+
+反対に、画像を設定したときはtrueにする。
+
+→これを利用して、非表示にしたいときは
+name1　　　　→　Image
+name2　　　　→　Object
+face　　　　 →　Mob
+message　　　→　空白
+
+とすればいい。
+
+------------------------------------------------
+
+<会話文終了時にトランジションを入れる>-----------
+
+参考サイト↓
+https://bibinbaleo.hatenablog.com/entry/2017/10/08/161733
+
+ここで、FadeCameraとルール画像というのを
+ダウンロードして実装してみることにした。
+
+ルール画像をダウンロードして、
+Assets/Picture/Ruleというフォルダを作成し、
+テスト画像を入れる。
+※残りの画像は、[アトリエ風ゲーム]フォルダで保管
+
+ルール画像は読み込んだらAlpha SourceをFrom Gray Scaleにして、Alpha Is Transparencyにチェックを入れてApply
+※ついでに、MaxSizeを[32]に変更する
+
+FadeCameraをインポートすると、Assets/Fadeという
+フォルダが自動で生成された。
+まずはヒエラルキーにFadeCanvasを置く。
+※UnPackしておく
+次に、FadeImageのMaskTextureにルール画像を入れる
+→先ほど読み込んだAssets/Picture/Rule/219.png
+  の画像
+
+あとはCutoutRangeの値を0から1まで動かしてみると、
+あら不思議、フェードアウトしていくんです！
+
+雰囲気的に、ColorをR:1 G:1 B:1で白にしたら
+いい感じになりました。
+
+→MaterialはAlphaとCutoutの2種類があるみたい。
+今回はAlphaを使用する。
+
+今度は、CutoutRangeを0から1にする方法を考える。
+
+<FadeImage.csのCutoutRangeを0から1にする>
+FadeCanvasに付属していたScriptに、
+Fade.csというのがある。
+このなかにfadeOutとfadeInという関数があり、
+それぞれで秒数を決めてコールチンを呼びだして
+画像を表示する仕組みになっているみたいだった。
+
+そのため、TextMng.csで
+private Fade fade_　という変数を用意し、
+Start関数でFadeCanvasをfindする。
+
+あとは今回はだんだんと画面を白くしていきたいので
+Update関数内の、会話終了ですのログを出している所で、fadein関数を呼び出し、時間を設定すれば終了。
+→今回、時間は[3.0f]に設定しました。
+
+※ほかのトランジションでは白ではなくて黒のほうが
+　よさそうだから、FadeImage.csの
+　Colorがいじれるようにしておいたほうがいいかも
+
+※fadeinとfadeoutタイミングをExcelから読み込んだ
+　ほうがよさそう
+
+------------------------------------------------
+
+<Excelでfadein/fadeoutを管理する>---------------
+
+Excel側で、
+name1　　　　→　Fade
+name2　　　　→　In(もしくは、Out)
+face　　　　 →　Mob
+message　　　→　空白
+
+としておく。
+
+TextMng.csに新規でCheckTransitionという関数を用意して、name1と2で処理を判断するようにしておく。
+また、フェード処理ということもあり、チャプターの
+最終行になる可能性が高いので、
+
+// 最終行では無いときは行を進める
+if (nowText_ < popChapter_.param.Count - 1)
+{
+        // Excelの行を進める
+        nowText_++;
+}
+
+というように、if文で行判定をしといたほうがいい。
+→このif文がないと、Excelの行を超えて加算するから
+　エラーがでる。
+
+------------------------------------------------
+
+<ビルドしたときに、Excel読み込み過程でエラー>----
+
+(原因)
+UnityEditor.AssetDatabase.LoadAssetAtPathを
+使用していたから。
+→そもそもこれは、エディタ上でしか使用できない
+　らしく、ビルドする際にはエラーになるものらしい
+
+(対処方法)
+読み込み方を変えて、Texture2DからSpriteを生成する
+方法にする。
+
+参考サイト↓
+①https://qiita.com/k7a/items/df6dd8ea66cbc5a1e21d
+②https://ugcj.com/png%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%92%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%82%93%E3%81%A7texture%E3%81%A8%E3%81%97%E3%81%A6%E4%BD%BF%E3%81%86%E6%96%B9%E6%B3%95/
+
+以下、修正した詳細を書いていく。
+
+①新規で[StreamingAssets]というフォルダを作成する
+→この中にExcelから読み込む画像を入れておく。
+
+②ファイルパスをstringで作成する(Chapterの例)
+string str = Application.streamingAssetsPath + "/Chapter" + path + "/"+ popChapter_.param[nowText_].message + ".png";
+
+③ファイルパスを読み込む
+byte[] bytes = File.ReadAllBytes(str);
+
+④Texture2Dとして画像作成
+Texture2D texture = new Texture2D(2, 2);
+texture.LoadImage(bytes);
+
+⑤Texture2DからSpriteへ変換
+Rect rect = new Rect(0.0f, 0.0f, texture.width, texture.height);
+Sprite sprite = Sprite.Create(texture, rect, Vector2.zero);
+
+これをCreateSprite関数としてTextMng.csでは
+扱っている。
+
+破棄の参照サイト↓
+https://alien-program.hatenablog.com/entry/2017/11/12/131331
+
+あとは、Createしたものは動的に破棄しないと
+いけなかったので、
+private List<Texture2D> texture2dList = new List<Texture2D>();
+private List<Sprite> spriteList = new List<Sprite>();
+というリストを用意しておく。
+
+すぐには破棄が出来ないので、後から破棄できるようにリストに一時保存し、
+texture2dList.Add(texture);
+spriteList.Add(sprite);
+
+Scene遷移時などに関数を呼び出して破棄する
+
+private void DestroyTexture2D()
+{
+    foreach (var tex in texture2dList)
+    {
+        Destroy(tex);
+    }
+    foreach (var spr in spriteList)
+    {
+        Destroy(spr);
+    }
+}
+
+これでビルドしたあともきちんと画像が読み込めているというのが確認できた。
+
+------------------------------------------------
+
+遷移後のところから作成する
+
 <いろいろメモ>
 
 ※後々、QuestMngとかが制作されて、メインクエスト　が進むたびに、TextMng.csを呼び出して
@@ -530,4 +855,6 @@ TextPop.prefab→DataPop.prefab
 一致するようにしておく
 
 FaceUpdate.csのエラーがでてコメントアウトしていところは、ちゃんと顔を使うならコメントアウトしなくて大丈夫っぽい
+
+
 

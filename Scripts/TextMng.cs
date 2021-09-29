@@ -1,12 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
 // 後々、QuestMngとかが制作されて、メインクエストが進むたびに、このスクリプトを呼び出して
 // nowChapterNum_を加算し、新しくテキストを読み込むようにしていければいいかなと思う。
-
-// テキストをスキップしたときにうまくいかない・・・
 
 public class TextMng : MonoBehaviour
 {
@@ -30,8 +29,16 @@ public class TextMng : MonoBehaviour
     private bool skipFlg_  = false;  // テキストが切り替わるタイミングでtrueになる
     private float skipItv_ = 0.0f;   // 文字の全表示に至るまでのインターバル
 
+    private Image backImage_;        // 会話中の背景画像(Excelから画像名を読み込んで動的に差し替える)
+    private Image objectImage_;      // 会話中に登場する画像(Excelから画像名を読み込んで動的に差し替える)
+
+    private Fade fade_;              // トランジション関連(fadeoutとfadein関数を呼び出すために必要)
+
     // キーがキャラ名,値が各キャラの顔を切り替えるクラスのマップ
     private Dictionary<string, UnityChan.FaceUpdate> charFacesMap_ = new Dictionary<string, UnityChan.FaceUpdate>();
+
+    private List<Texture2D> texture2dList = new List<Texture2D>();
+    private List<Sprite> spriteList = new List<Sprite>();
 
     void Start()
     {
@@ -52,8 +59,17 @@ public class TextMng : MonoBehaviour
         // Frame_nameの子にあるNameというテキストオブジェクトを探す
         name_ = ConversationCanvas.transform.Find("Frame_name/Name").GetComponent<TMPro.TextMeshProUGUI>();
         // nextMessage_iconというオブジェクトを探す
-        icon_ = ConversationCanvas.transform.Find("nextMessage_icon").gameObject;
+        icon_ = ConversationCanvas.transform.Find("NextMessage_icon").gameObject;
         iconColor_ = icon_.GetComponent<Image>();
+
+        // 背景画像
+        backImage_ = GameObject.Find("BackCanvas/BackImage").GetComponent<Image>();
+        // 通常画像
+        objectImage_ = ConversationCanvas.transform.Find("ObjectImage").GetComponent<Image>();
+
+        // トランジション
+        fade_ = GameObject.Find("FadeCanvas").GetComponent<Fade>();
+
         TextAndFaceSetting();
     }
 
@@ -104,17 +120,94 @@ public class TextMng : MonoBehaviour
                     }
                     else
                     {
-                        Debug.Log("会話終了です");
                         // 越えたら話の終了の合図として使える
+                        Debug.Log("会話終了です");
+
+                        // そのチャプターで使った画像をまとめて破棄する
+                        // シーン遷移する直前が正しいが、テストとしてここに書いています
+                        DestroyTexture2D();
                     }
                 }
             }
         }
     }
 
-    // 名前,メッセージ,キャラの表情を設定する
-    void TextAndFaceSetting()
+    // 背景画像の読み込みと差し替え
+    void ChangeBackImage()
     {
+        if (popChapter_.param[nowText_].name1 == "Image")
+        {
+            if(popChapter_.param[nowText_].name2 == "Back")
+            {
+                // 画像差し替え
+                backImage_.sprite = CreateSprite(popChapter_.param[nowText_].name2);
+            }
+            else if(popChapter_.param[nowText_].name2 == "Object")
+            {
+                // 手紙画像
+                objectImage_.sprite = CreateSprite(popChapter_.param[nowText_].name2);
+                // 描画する画像があるときは表示にする
+                objectImage_.gameObject.SetActive(true);
+            }
+            else
+            {
+                // 何も処理を行わない
+            }
+
+            // Excelの行を進める
+            nowText_++;
+        }
+
+        // 描画する画像がないときは非表示にする
+        if(objectImage_.sprite == null)
+        {
+            objectImage_.gameObject.SetActive(false);
+        }
+    }
+
+    // トランジション処理があるか確認する
+    private void CheckTransition()
+    {
+        if (popChapter_.param[nowText_].name1 == "Fade")
+        {
+            // フェード時には、テキストを出す場所を非表示にする
+            ConversationCanvas.SetActive(false);
+
+            if (popChapter_.param[nowText_].name2 == "Out")
+            {
+                // フェードアウト処理
+                fade_.FadeOut(3.0f);
+            }
+            else if(popChapter_.param[nowText_].name2 == "In")
+            {
+                // フェードイン処理
+                fade_.FadeIn(3.0f);
+            }
+            else
+            {
+                // 何も処理を行わない
+            }
+
+            // 最終行では無いときは行を進める
+            if (nowText_ < popChapter_.param.Count - 1)
+            {
+                // Excelの行を進める
+                nowText_++;
+            }
+        }
+        else
+        {
+            // フェード時以外はキャンバスを表示にする
+            ConversationCanvas.SetActive(true);
+        }
+    }
+
+    // 名前,メッセージ,キャラの表情を設定する
+    private void TextAndFaceSetting()
+    {
+        ChangeBackImage();
+        CheckTransition();
+
         // Excel内に改行文字[\n]があったら、改行して表示する
         // メッセージ更新
         if (popChapter_.param[nowText_].message.Contains("\\n"))
@@ -129,8 +222,12 @@ public class TextMng : MonoBehaviour
         // 名前更新
         name_.text = popChapter_.param[nowText_].name1;
 
-        // 顔の表情を変更する
-        charFacesMap_[popChapter_.param[nowText_].name2].OnCallChangeFace(popChapter_.param[nowText_].face);
+        // キャラ以外をExcel側で"Mob"と登録しているため、"Mob"なら顔の表情を変更しないようにする
+        if(popChapter_.param[nowText_].face != "Mob")
+        {
+            // 顔の表情を変更する
+            charFacesMap_[popChapter_.param[nowText_].name2].OnCallChangeFace(popChapter_.param[nowText_].face);
+        }
 
         // 表示文字数の初期化
         // maxVisibleCharacters：最大表示文字数
@@ -164,6 +261,42 @@ public class TextMng : MonoBehaviour
                 skipItv_ = 0.0f;
                 message_.maxVisibleCharacters = message_.text.Length;
             }
+        }
+    }
+
+    // スプライトの生成
+    private Sprite CreateSprite(string path)
+    {
+        // ファイルパス作成
+        string str = Application.streamingAssetsPath + "/Chapter" + path + "/"+ popChapter_.param[nowText_].message + ".png";
+        // ファイルパス読み込み
+        byte[] bytes = File.ReadAllBytes(str);
+
+        // Texture2Dとして作成(Texture2D(2, 2)としているが、LoadImage実行後にサイズも更新されるので問題ない)
+        Texture2D texture = new Texture2D(2, 2);
+        texture.LoadImage(bytes);
+        // Texture2DからSpriteへ変換
+        Rect rect = new Rect(0.0f, 0.0f, texture.width, texture.height);
+        Sprite sprite = Sprite.Create(texture, rect, Vector2.zero);
+
+        // すぐには破棄が出来ないので、後から破棄できるようにリストに入れておく
+        texture2dList.Add(texture);
+        spriteList.Add(sprite);
+
+        return sprite;
+    }
+
+    // Texture2DとSpriteの画像破棄処理
+    private void DestroyTexture2D()
+    {
+        foreach (var tex in texture2dList)
+        {
+            Destroy(tex);
+        }
+
+        foreach (var spr in spriteList)
+        {
+            Destroy(spr);
         }
     }
 }
