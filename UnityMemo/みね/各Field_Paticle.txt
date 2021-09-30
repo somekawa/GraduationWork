@@ -1,0 +1,42 @@
+2021/09/30更新
+
+ParticleCheck.cs
+ImtePointsオブジェクトにアタッチ
+実際に処理されているオブジェクトは
+各素材オブジェクトの子についているMaterialParticle
+MaterialParticleのRenderに
+MaterialParticle.matでShaderはAdditive(soft)
+MaterialParticle.matにはMaterialParticle.pngを使用
+
+ItemPoints
+ーItem0
+　ーMaterialParticle0
+ーItem1
+　ーMaterialParticle1
+ーItem2
+　ーMaterialParticle2
+ーItem3
+　ーMaterialParticle3
+ーItem4
+　ーMaterialParticle4
+
+
+素材オブジェクト座標と現在のユニとの座標を見て
+再生可能距離と見比べる。           
+distance_ = (uniChan_.transform.position - obj_[i].transform.position).sqrMagnitude;
+if (distance_ < targetDistance_ * targetDistance_)
+ {
+                // 近い位置なら
+                if (objParicle_[i].isPlaying == false)
+	{
+                    // Particleが再生されてなければ再生
+                    objParicle_[i].Play();
+	}
+}
+else
+{
+                if (objParicle_[i].isPlaying == true)
+                {
+                    objParicle_[i].Stop();// Particle再生中なら停止
+                }
+}
