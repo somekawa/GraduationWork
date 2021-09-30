@@ -17,9 +17,10 @@ public class SceneMng : MonoBehaviour
     public enum SCENE
     {
         NON = -1,
-        TOWN,     // 街シーン
-        FIELD,    // フィールドシーン
-        UNIHOUSE  // ユニちゃんの家
+        CONVERSATION,   // 会話シーン
+        TOWN,           // 街シーン
+        FIELD,          // フィールドシーン
+        UNIHOUSE        // ユニちゃんの家
     }
 
     public static SceneMng singleton;
@@ -131,6 +132,12 @@ public class SceneMng : MonoBehaviour
     // シーンのロード
     public static void SceneLoad(int load)
     {
+        // NONが入っていたらreturnする
+        if(load == -1)
+        {
+            return;
+        }
+
         //@ ここでcharasList_のステータス値をcharasDataに避難させる？ 
         CharaData.SetCharaData(charasList_[0].GetCharaSetting());
 

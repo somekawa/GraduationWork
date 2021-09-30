@@ -63,7 +63,7 @@ public class TextMng : MonoBehaviour
         }
 
         DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
-        popChapter_ = DataPopPrefab_.GetComponent<PopList>().GetData<ChapterList>(PopList.ListData.CHAPTER, EventMng.chapterNum);
+        popChapter_ = DataPopPrefab_.GetComponent<PopList>().GetData<ChapterList>(PopList.ListData.CHAPTER, EventMng.GetChapterNum());
 
         // Frame_textの子にあるMessageというテキストオブジェクトを探す
         message_ = ConversationCanvas.transform.Find("Frame_text/Message").GetComponent<TMPro.TextMeshProUGUI>();
