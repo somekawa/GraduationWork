@@ -6,9 +6,6 @@ using UnityEngine.SceneManagement;
 
 public class WarpField : MonoBehaviour
 {
-    // 表示関連
-    private Canvas locationSelCanvas_;        // ワープ先を出すCanvas（親）
-
     // フィールドにワープする時
     private enum kindsField
     {
@@ -21,8 +18,8 @@ public class WarpField : MonoBehaviour
     }
     private GameObject[] warpObject_;   // マップ端のワープオブジェを保存
 
-    // Canvas-Image,Text。それに連なる孫0Image 1Text;  
-    private Transform[] canvasChild_  = new Transform[2];                // 選択できるフィールド(locationSelCanvasの子
+    // 表示関連
+    private Canvas locationSelCanvas_;        // ワープ先を出すCanvas（親）
     private Image[] selectFieldImage_ = new Image[(int)kindsField.MAX];  // 選択できるフィールドの背景（locationSelCanvasの孫
     private Text[] selectFieldText_   = new Text[(int)kindsField.MAX];   // 選択できるフィールドの文字（locationSelCanvasの孫
 
@@ -77,19 +74,16 @@ public class WarpField : MonoBehaviour
         locationSelCanvas_ = GameObject.Find("LocationSelCanvas").GetComponent<Canvas>();
         // フィールド選択キャンバスを非表示
         locationSelCanvas_.gameObject.SetActive(false);
-        // 表示する背景と文字の親を入れておく
-        canvasChild_[0] = locationSelCanvas_.gameObject.transform.Find("Images").GetComponent<Transform>();
-        canvasChild_[1] = locationSelCanvas_.gameObject.transform.Find("Texts").GetComponent<Transform>();
 
-        if(SceneManager.GetActiveScene().name=="InHouseAndUniHouse")
+        if (SceneManager.GetActiveScene().name=="InHouseAndUniHouse")
         {
             sceneName_[0, 0] = "InHouseAndUniHouse";
         }
 
         for (int i = (int)kindsField.TOWN; i < (int)kindsField.MAX; i++)
         {
-            selectFieldImage_[i] = canvasChild_[0].transform.GetChild(i).GetComponent<Image>();
-            selectFieldText_[i] = canvasChild_[1].transform.GetChild(i).GetComponent<Text>();
+            selectFieldImage_[i] = locationSelCanvas_.transform.GetChild(i).GetComponent<Image>();
+            selectFieldText_[i] = selectFieldImage_[i].transform.GetChild(0).GetComponent<Text>();
             selectFieldText_[i].text = sceneName_[1, i];// Textに文字を入れる
 
             if (SceneManager.GetActiveScene().name == sceneName_[0, i])
@@ -270,7 +264,6 @@ public class WarpField : MonoBehaviour
         UniChan_.transform.rotation = Quaternion.Euler(0.0f, saveUniRot_.y + 180, 0.0f);
         UniChan_.transform.position = enterPos_ + addPos_;
         fieldEndHit = false;
-
     }
 
     private void CheckUniTransfoem()
