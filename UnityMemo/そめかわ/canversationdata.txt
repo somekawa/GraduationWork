@@ -994,9 +994,54 @@ SelectInHouseのコルーチン関数内のSetHouseVisible
 
 ------------------------------------------------
 
+<MayoHouse.csの変更>----------------------------
+全部の建物にイベント発生確認関数とか、金銭の
+やりとり関数を持たせといたほうが楽なので、
+[HouseBase.cs]という新規関数を作成する。
+
+[HouseBase.cs]
+中にはpublicのvirtual関数を用意している。
+※建物類の継承元
+
+[MayorHouse.cs]
+public override bool CheckEvent()という関数に
+変更して、内部処理はCheckEventMayorHouseの時と
+同じ。
+
+[HouseInteriorMng.cs]
+private Dictionary<string, Func<bool>> func_ = new Dictionary<string, Func<bool>>();
+キー:英語建物名,
+値:イベント発生確認用のoverride関数
+
+という変数を用意しておき、Start関数内で
+func_.Add
+("MayorHouse", new MayorHouse().CheckEvent);
+と記述する
+→ここに全ての建物のCheckEventを登録予定。
+
+そして、コルーチンのCheckEventMayorHouseを
+呼び出していたif文の条件に
+if(!func_[name]())と記述すればよい。
+
+これで該当する建物のイベント発生確認関数が
+呼ばれるようになった。
+※といっても、まだMayorHouse.csしか作ってないよ
+
+Functionの参考サイト↓
+https://qiita.com/toRisouP/items/98cc4966d392b7f21c30
+
+上記のサイトのちょうど中央らへんにFuncについて
+記載があった。他の処理も読みやすかった。
+
+------------------------------------------------
+
+動的にnewしたクラスは、deleteみたいなのしなくて
+大丈夫なのか心配
+
 <いろいろメモ>
-Sceneの遷移時に一瞬普通の室内処理がでるところを
-対処しないといけない。
+Functionの参考サイト↓
+https://qiita.com/toRisouP/items/98cc4966d392b7f21c30
+
 
 町長家へ向かうときとかに他のお店に寄れないように
 するとか、処理を作る為にもEventMngを用意。

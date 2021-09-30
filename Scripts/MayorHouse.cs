@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
-public class MayorHouse : MonoBehaviour
+// HouseBaseを継承している町長の家を管理するクラス
+public class MayorHouse : HouseBase
 {
-    public bool CheckEventMayorHouse()
+    public override bool CheckEvent()
     {
         // イベント発生
         if (EventMng.GetChapterNum() == 0)
