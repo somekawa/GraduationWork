@@ -7,7 +7,7 @@ public class ParticleCheck : MonoBehaviour
 {
     private int maxChildCnt_ = 0;// オブジェクトの個数
     private float distance_ = 0.0f;// オブジェとユニの距離を見る
-    private float targetDistance_ = 5.0f;// 再生距離条件
+    private float targetDistance_ = 25.0f;// 再生距離条件
   
     private GameObject uniChan_;// ユニの座標確認のため
     private GameObject[] obj_;// 配置されてるオブジェクト

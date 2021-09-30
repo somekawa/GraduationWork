@@ -24,6 +24,8 @@ public class HouseInteriorMng : MonoBehaviour
     private readonly string[] buildNameJpn_ = { "ユニの家", "町長の家" , "書店"    , "魔道具屋", "ギルド", "レストラン" };  // 建物名(表示用日本語)
     private Dictionary<string, string> buildNameMap_ = new Dictionary<string, string>();    // キー:英語建物名,値:日本語建物名
 
+    private MayorHouse mayorHouse_;
+
     void Start()
     {
         cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
@@ -40,6 +42,8 @@ public class HouseInteriorMng : MonoBehaviour
         {
             buildNameMap_.Add(buildNameEng_[i], buildNameJpn_[i]);
         }
+
+        mayorHouse_ = this.transform.Find("MayorHouse").GetComponent<MayorHouse>();
     }
 
     public bool SetHouseVisible(string name)
@@ -140,15 +144,19 @@ public class HouseInteriorMng : MonoBehaviour
             // 現在いる建物名を保存しておく
             nowInHouseName = name;
 
-            cameraMng_.SetSubCameraPos(new Vector3(100.0f, 0.3f, 0.0f));
-            cameraMng_.SetSubCameraRota(Quaternion.Euler(new Vector3(13.5f, 0.0f, 0.0f)));
-            cameraMng_.SetChangeCamera(true);
+            //@ どのスクリプトでも対応できるように、mayorHouse_の部分を将来的にはmapにする
+            if (!mayorHouse_.CheckEventMayorHouse())
+            {
+                cameraMng_.SetSubCameraPos(new Vector3(100.0f, 0.3f, 0.0f));
+                cameraMng_.SetSubCameraRota(Quaternion.Euler(new Vector3(13.5f, 0.0f, 0.0f)));
+                cameraMng_.SetChangeCamera(true);
 
-            // 室内キャンバスの表示
-            inHouseCanvas_.SetActive(true);
+                // 室内キャンバスの表示
+                inHouseCanvas_.SetActive(true);
 
-            // 室内用キャンバスの表示/非表示切り替え
-            ChangeObjectActive(inHouseCanvas_.gameObject.transform.childCount, inHouseCanvas_.transform, name);
+                // 室内用キャンバスの表示/非表示切り替え
+                ChangeObjectActive(inHouseCanvas_.gameObject.transform.childCount, inHouseCanvas_.transform, name);
+            }
         }
     }
 

@@ -13,14 +13,10 @@ MonoBehaviour:
   m_Name: Chapter1
   m_EditorClassIdentifier: 
   param:
-  - name1: Fade
-    name2: In
-    face: Mob
-    message: 
   - name1: Image
     name2: Back
     face: Mob
-    message: UniChapter0House
+    message: MayorHouse
   - name1: "\u30E6\u30CB"
     name2: Uni
     face: smile@sd_hmd
