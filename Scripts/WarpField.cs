@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class WarpField : MonoBehaviour
 {
     // 表示関連
-    public Canvas locationSelCanvas;        // ワープ先を出すCanvas（親）
+    private Canvas locationSelCanvas_;        // ワープ先を出すCanvas（親）
 
     // フィールドにワープする時
     private enum kindsField
@@ -74,12 +74,12 @@ public class WarpField : MonoBehaviour
         UniChan_ = GameObject.Find("Uni");
         UniChanController_ = UniChan_.GetComponent<UnitychanController>();
 
+        locationSelCanvas_ = GameObject.Find("LocationSelCanvas").GetComponent<Canvas>();
         // フィールド選択キャンバスを非表示
-        locationSelCanvas.gameObject.SetActive(false);
-
+        locationSelCanvas_.gameObject.SetActive(false);
         // 表示する背景と文字の親を入れておく
-        canvasChild_[0] = locationSelCanvas.transform.GetChild(0).GetComponent<Transform>();
-        canvasChild_[1] = locationSelCanvas.transform.GetChild(1).GetComponent<Transform>();
+        canvasChild_[0] = locationSelCanvas_.gameObject.transform.Find("Images").GetComponent<Transform>();
+        canvasChild_[1] = locationSelCanvas_.gameObject.transform.Find("Texts").GetComponent<Transform>();
 
         if(SceneManager.GetActiveScene().name=="InHouseAndUniHouse")
         {
@@ -228,7 +228,7 @@ public class WarpField : MonoBehaviour
                 }
 
                 // フィールド選択キャンバス非表示
-                locationSelCanvas.gameObject.SetActive(false);
+                locationSelCanvas_.gameObject.SetActive(false);
                 changeSelectCnt_ = 0.0f;
 
                 Debug.Log("コルーチンストップ");
@@ -304,7 +304,7 @@ public class WarpField : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             // フィールドの移動先を表示
-            locationSelCanvas.gameObject.SetActive(true);
+            locationSelCanvas_.gameObject.SetActive(true);
             fieldEndHit = true;
             SetWarpNowFlag(true);
             CheckUniTransfoem();// ユニが向いてる方向を確定
@@ -334,12 +334,12 @@ public class WarpField : MonoBehaviour
     // 街中でフィールドに行くためのキャンバスを表示するかどうか
     public bool GetLocationSelActive()
     {
-        return locationSelCanvas.gameObject.activeSelf;
+        return locationSelCanvas_.gameObject.activeSelf;
     }
 
     public void SetLocationSelActive(bool flag)
     {
-        locationSelCanvas.gameObject.SetActive(flag);
+        locationSelCanvas_.gameObject.SetActive(flag);
     }
 
     public void SetNowTownFlag(bool flag)
