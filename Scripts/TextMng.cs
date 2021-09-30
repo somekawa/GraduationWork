@@ -12,6 +12,14 @@ public class TextMng : MonoBehaviour
     public GameObject ConversationCanvas;
     public GameObject CharacterList;
 
+    enum FADE
+    {
+        NON,
+        IN,
+        OUT,
+        MAX
+    }
+
     private GameObject DataPopPrefab_;
 
     private TMPro.TextMeshProUGUI name_;
@@ -33,12 +41,17 @@ public class TextMng : MonoBehaviour
     private Image objectImage_;      // 会話中に登場する画像(Excelから画像名を読み込んで動的に差し替える)
 
     private Fade fade_;              // トランジション関連(fadeoutとfadein関数を呼び出すために必要)
+    private readonly float fadeTimeMax_ = 3.0f;
+    private float nowFadeTime_ = 0.0f;
 
     // キーがキャラ名,値が各キャラの顔を切り替えるクラスのマップ
     private Dictionary<string, UnityChan.FaceUpdate> charFacesMap_ = new Dictionary<string, UnityChan.FaceUpdate>();
 
     private List<Texture2D> texture2dList = new List<Texture2D>();
     private List<Sprite> spriteList = new List<Sprite>();
+
+    private SceneMng.SCENE sceneLoadNum_;   // Excelから読み込んだ次の切替予定シーンを保存する変数
+    private bool clickLock_ = false;        // マウスの押下を許可するか(true:マウスクリック不可,false:マウスクリック可)
 
     void Start()
     {
@@ -106,7 +119,7 @@ public class TextMng : MonoBehaviour
                 iconColor_.color = new Color(1.0f, 1.0f, 1.0f, Mathf.Sin(Time.time * 5.0f) / 2 + 0.5f);
 
                 // マウスの左クリック押下時
-                if (Input.GetMouseButtonDown(0) && !skipFlg_)
+                if (Input.GetMouseButtonDown(0) && !skipFlg_ && !clickLock_)
                 {
                     // Excelの列の最大数を越えないようにする(Countに-1をつけないとエラーになる)
                     if (nowText_ < popChapter_.param.Count - 1)
@@ -126,6 +139,7 @@ public class TextMng : MonoBehaviour
                         // そのチャプターで使った画像をまとめて破棄する
                         // シーン遷移する直前が正しいが、テストとしてここに書いています
                         DestroyTexture2D();
+                        SceneMng.SceneLoad((int)sceneLoadNum_);
                     }
                 }
             }
@@ -135,7 +149,7 @@ public class TextMng : MonoBehaviour
     // 背景画像の読み込みと差し替え
     void ChangeBackImage()
     {
-        if (popChapter_.param[nowText_].name1 == "Image")
+        while (popChapter_.param[nowText_].name1 == "Image")
         {
             if(popChapter_.param[nowText_].name2 == "Back")
             {
@@ -144,22 +158,37 @@ public class TextMng : MonoBehaviour
             }
             else if(popChapter_.param[nowText_].name2 == "Object")
             {
-                // 手紙画像
-                objectImage_.sprite = CreateSprite(popChapter_.param[nowText_].name2);
-                // 描画する画像があるときは表示にする
-                objectImage_.gameObject.SetActive(true);
+                if (popChapter_.param[nowText_].message == "")
+                {
+                    objectImage_.sprite = null;
+                }
+                else
+                {
+                    // 手紙画像
+                    objectImage_.sprite = CreateSprite(popChapter_.param[nowText_].name2);
+                    // 描画する画像があるときは表示にする
+                    objectImage_.gameObject.SetActive(true);
+                }
             }
             else
             {
                 // 何も処理を行わない
             }
 
-            // Excelの行を進める
-            nowText_++;
+            if (nowText_ < popChapter_.param.Count - 1)
+            {
+                // Excelの行を進める
+                nowText_++;
+            }
+            else
+            {
+                // while文で永久ループにならないように、最後の行ならbreakする
+                break;
+            }
         }
 
         // 描画する画像がないときは非表示にする
-        if(objectImage_.sprite == null)
+        if (objectImage_.sprite == null)
         {
             objectImage_.gameObject.SetActive(false);
         }
@@ -176,23 +205,22 @@ public class TextMng : MonoBehaviour
             if (popChapter_.param[nowText_].name2 == "Out")
             {
                 // フェードアウト処理
-                fade_.FadeOut(3.0f);
+                fade_.FadeOut(fadeTimeMax_);
+                nowFadeTime_ = fadeTimeMax_;
+                // ここでコルーチンを呼ぶ
+                StartCoroutine(Transition(FADE.OUT));
             }
             else if(popChapter_.param[nowText_].name2 == "In")
             {
                 // フェードイン処理
-                fade_.FadeIn(3.0f);
+                fade_.FadeIn(fadeTimeMax_);
+                nowFadeTime_ = fadeTimeMax_;
+                // ここでコルーチンを呼ぶ
+                StartCoroutine(Transition(FADE.IN));
             }
             else
             {
                 // 何も処理を行わない
-            }
-
-            // 最終行では無いときは行を進める
-            if (nowText_ < popChapter_.param.Count - 1)
-            {
-                // Excelの行を進める
-                nowText_++;
             }
         }
         else
@@ -202,11 +230,74 @@ public class TextMng : MonoBehaviour
         }
     }
 
+    // トランジションのコルーチン  
+    private IEnumerator Transition(FADE fade)
+    {
+        clickLock_ = true;
+
+        while (fade != FADE.NON)
+        {
+            yield return null;
+
+            if (nowFadeTime_ > 0.0f)
+            {
+                nowFadeTime_ -= Time.deltaTime;
+            }
+            else
+            {
+                if(fade != FADE.MAX)
+                {
+                    nowFadeTime_ = fadeTimeMax_;
+
+                    // 最終行では無いときは行を進める
+                    if (nowText_ < popChapter_.param.Count - 1)
+                    {
+                        // Excelの行を進める
+                        nowText_++;
+                        // 次の表示をするために、関数を呼び出す
+                        TextAndFaceSetting();
+                    }
+                }
+
+                if (fade == FADE.IN)
+                {
+                    fade_.FadeOut(fadeTimeMax_);    // 次のフェード処理
+                    fade = FADE.MAX;
+                }
+                else if (fade == FADE.OUT)
+                {
+                    fade_.FadeIn(fadeTimeMax_);     // 次のフェード処理
+                    fade = FADE.MAX;
+                }
+                else
+                {
+                    // フェード時以外はキャンバスを表示にする
+                    ConversationCanvas.SetActive(true);
+                    fade = FADE.NON;
+                }
+            }
+        }
+
+        clickLock_ = false;
+    }
+
+    // シーン切り替え準備
+    private void ChangeScene()
+    {
+        // シーンを読み込んだ場合は、変数に一時保存しておく
+        if (popChapter_.param[nowText_].name1 == "Scene")
+        {
+            // 文字列をenumに変換する処理
+            sceneLoadNum_ = (SceneMng.SCENE)System.Enum.Parse(typeof(SceneMng.SCENE), popChapter_.param[nowText_].name2);
+        }
+    }
+
     // 名前,メッセージ,キャラの表情を設定する
     private void TextAndFaceSetting()
     {
         ChangeBackImage();
         CheckTransition();
+        ChangeScene();
 
         // Excel内に改行文字[\n]があったら、改行して表示する
         // メッセージ更新
@@ -220,10 +311,13 @@ public class TextMng : MonoBehaviour
         }
 
         // 名前更新
-        name_.text = popChapter_.param[nowText_].name1;
+        if(popChapter_.param[nowText_].name1 != "Fade" && popChapter_.param[nowText_].name1 != "Scene")
+        {
+            name_.text = popChapter_.param[nowText_].name1;
+        }
 
         // キャラ以外をExcel側で"Mob"と登録しているため、"Mob"なら顔の表情を変更しないようにする
-        if(popChapter_.param[nowText_].face != "Mob")
+        if (popChapter_.param[nowText_].face != "Mob")
         {
             // 顔の表情を変更する
             charFacesMap_[popChapter_.param[nowText_].name2].OnCallChangeFace(popChapter_.param[nowText_].face);
