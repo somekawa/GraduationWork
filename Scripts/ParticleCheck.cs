@@ -5,98 +5,53 @@ using UnityEngine.UI;
 
 public class ParticleCheck : MonoBehaviour
 {
-    private GameObject uniChan_;
-    private Vector3 viewUniPos_;
-    private ParticleSystem testPS_;
-    public GameObject itemPoints_;
-    private GameObject[] obj_;
+    private int maxChildCnt_ = 0;// オブジェクトの個数
+    private float distance_ = 0.0f;// オブジェとユニの距離を見る
+    private float targetDistance_ = 5.0f;// 再生距離条件
   
-    private Camera mainCamera_;      // 座標空間変更時に使用
-    private Vector3 lb; // 左下の座標
-    private Vector3 rt; // 右上の座標
-    
-    
-    
-    private float distance_ = 0.0f;
-    private float targetDistance = 5.0f;
+    private GameObject uniChan_;// ユニの座標確認のため
+    private GameObject[] obj_;// 配置されてるオブジェクト
+    private ParticleSystem[] objParicle_;// オブジェクトについているパーティクル
+
     void Start()
     {
         uniChan_ = GameObject.Find("Uni");
 
-        mainCamera_ = GameObject.Find("MainCamera").GetComponent<Camera>();
+        maxChildCnt_ = this.transform.childCount;
 
-        viewUniPos_ = mainCamera_.WorldToViewportPoint(uniChan_.transform.position);
-
-
-        itemPoints_ = GameObject.Find("ItemPoints");
-        obj_ = new GameObject[itemPoints_.transform.childCount];
-        for (int i = 0; i < itemPoints_.transform.childCount; i++)
+        obj_ = new GameObject[maxChildCnt_];
+        objParicle_ = new ParticleSystem[maxChildCnt_];
+        for (int i = 0; i < maxChildCnt_; i++)
         {
-            obj_[i] = itemPoints_.transform.GetChild(i).gameObject;
-            testPS_ = obj_[i].transform.GetChild(0).GetComponent<ParticleSystem>();
-        }
-        //  testPS_.gameObject.SetActive(false);
+            obj_[i] = this.transform.GetChild(i).gameObject;
 
+            // 各オブジェクトの子にパーティクルがついている
+            objParicle_[i] = obj_[i].transform.GetChild(0).GetComponent<ParticleSystem>();
+        }
     }
 
-
-    // Update is called once per frame
     void Update()
     {
-
-
-        for (int i = 0; i < itemPoints_.transform.childCount; i++)
+        for (int i = 0; i < maxChildCnt_; i++)
         {
+            // ユニとオブジェクトの距離を見る
             distance_ = (uniChan_.transform.position - obj_[i].transform.position).sqrMagnitude;
-            if (distance_ < targetDistance * targetDistance)
+            if (distance_ < targetDistance_ * targetDistance_)
             {
-                //if (uniChan_.transform.position.x < (obj_[i].transform.position.x)
-                //             || (uniChan_.transform.position.z < obj_[i].transform.position.z))
-                //{
-
-                    testPS_ = obj_[i].transform.GetChild(0).GetComponent<ParticleSystem>();
-                    testPS_.Play();
-
-                    Debug.Log("ユニから一番近い距離のは" + obj_[i].name);
-              //  }
-            }
-        }
-
-        Ray ray = mainCamera_.ViewportPointToRay(new Vector3(0.5F, 0.5F, 0));
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit))
-        {
-            for (int i = 0; i < itemPoints_.transform.childCount; i++)
-            {
-                if (hit.transform.name == obj_[i].name)
+                // 近い位置なら
+                if (objParicle_[i].isPlaying == false)
                 {
-                    //    if (hit.transform.name == "Item2")
-                    //    {
-                    print("I'm looking at " + hit.transform.name);
-                    print("I'm looking at " + hit.transform.position);
-
-                    //}
+                    // Particleが再生されてなければ再生
+                    objParicle_[i].Play();
+                }
+            }
+            else
+            {
+                if (objParicle_[i].isPlaying == true)
+                {
+                    objParicle_[i].Stop();// Particle再生中なら停止
                 }
             }
         }
-    }
-    
-
-
-    void OnBecameInvisible()
-    {
-        // 可視範囲外
-        enabled = false;
-        Debug.Log("可視範囲外");
-
-
-    }
-
-    void OnBecameVisible()
-    {
-        // 可視範囲
-        enabled = true;
-        Debug.Log("可視範囲");
-
     }
 }
