@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b369e72604e75aa41be3a0e34828ce78, type: 3}
+  m_Name: Field4
+  m_EditorClassIdentifier: 
+  param:
+  - ItemName: "\u9F8D\u306E\u3046\u308D\u3053"
+    ImageName: Material_Field4
+  - ItemName: "\u6728\u70AD"
+    ImageName: 
+  - ItemName: "\u708E\u306E\u676F"
+    ImageName: 
+  - ItemName: "\u70AC\u9727\uFF08\u30AD\u30E7\u30E0\uFF09"
+    ImageName: 
+  - ItemName: "\u878D\u3051\u306A\u3044\u516D\u82B1"
+    ImageName: 
