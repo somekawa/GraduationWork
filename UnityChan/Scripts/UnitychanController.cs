@@ -7,8 +7,6 @@ using UnityEngine;
 
 public class UnitychanController : MonoBehaviour
 {
-    private GameObject warpOutObj_;
-
     private Rigidbody rigid;      // Rigidbodyコンポーネント
     private Animator animator_;   // Animator コンポーネント
 
@@ -17,28 +15,16 @@ public class UnitychanController : MonoBehaviour
     // 押下状態を確認したいキーをまとめたもの
     private KeyCode[] keyArray_ = new KeyCode[4] { KeyCode.UpArrow, KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow };
 
+    private Vector3 moveDir_ = Vector3.zero;
+
     void Start()
     {
-        warpOutObj_ = GameObject.Find("WarpOut");
         rigid = GetComponent<Rigidbody>();
         animator_= GetComponent<Animator>();
     }
 
     void Update()
     {        
-        // 探索モード以外で自由に動かれたらいけないので、return処理を加える。
-        if (FieldMng.nowMode != FieldMng.MODE.SEARCH)
-        {
-            // キャラにかかっている慣性を一時的に止める
-            rigid.velocity = Vector3.zero;
-            rigid.angularVelocity = Vector3.zero;
-
-            // ここでRunのアニメーションを変更しておかないと、モードが切り替わる瞬間まで走っていたら
-            // 走りモーションが戦闘中に継続してしまう。
-            this.animator_.SetBool(key_isRun, false);
-            return;
-        }
-
         bool tmpFlg = false;       // 座標移動のボタン押下時にtrueになる
         foreach (KeyCode i in keyArray_)
         {
@@ -59,29 +45,44 @@ public class UnitychanController : MonoBehaviour
             return; // 待機アニメーションということは下の座標移動処理を行う必要がないため、returnする
         }
 
-        Vector3 movedir = Vector3.zero;
-
         // 矢印下ボタンを押下している
         if (Input.GetKey(keyArray_[0]) || Input.GetKey(keyArray_[1]))
         {
             // 上キー or 下キー
-            movedir.z = Input.GetAxis("Vertical");
+            moveDir_.z = Input.GetAxis("Vertical");
         }
 
         if (Input.GetKey(keyArray_[2]) || Input.GetKey(keyArray_[3]))
         {
             // 左キー or 右キー
-            movedir.x = Input.GetAxis("Horizontal");
+            moveDir_.x = Input.GetAxis("Horizontal");
+        }
+    }
+
+    // rigidbodyを使用する移動計算は、FixedUpdateを利用して一定周期でおこなうようにする
+    void FixedUpdate()
+    {
+        // 探索モード以外で自由に動かれたらいけないので、return処理を加える。
+        if (FieldMng.nowMode != FieldMng.MODE.SEARCH)
+        {
+            // キャラにかかっている慣性を一時的に止める
+            rigid.velocity = Vector3.zero;
+            rigid.angularVelocity = Vector3.zero;
+
+            // ここでRunのアニメーションを変更しておかないと、モードが切り替わる瞬間まで走っていたら
+            // 走りモーションが戦闘中に継続してしまう。
+            this.animator_.SetBool(key_isRun, false);
+            return;
         }
 
         // グローバル座標に変換すると、キャラの方向転換後に+-がバグが起きた
         //Vector3 globaldir = transform.TransformDirection(movedir);
         //controller_.Move(globaldir * Time.deltaTime);
 
-        if (movedir != Vector3.zero)
+        if (moveDir_ != Vector3.zero)
         {
             // 速度ベクトルを作成（3次元用）Y座標は0.0fで必ず固定する
-            var speed = new Vector3(movedir.x, 0.0f, movedir.z);
+            var speed = new Vector3(moveDir_.x, 0.0f, moveDir_.z);
             // 速度に正規化したベクトルに、移動速度をかけて代入する
             rigid.velocity = speed.normalized * SceneMng.charaRunSpeed;
 
@@ -89,8 +90,11 @@ public class UnitychanController : MonoBehaviour
             // キャラクターを移動させる処理
             rigid.MovePosition(rigid.position + rigid.velocity * Time.deltaTime);
             // キャラ方向転換
-            transform.rotation = Quaternion.LookRotation(movedir);
+            transform.rotation = Quaternion.LookRotation(moveDir_);
         }
+
+        moveDir_ = Vector3.zero;
+        rigid.velocity = Vector3.zero;
     }
 
     // キャラが移動中か

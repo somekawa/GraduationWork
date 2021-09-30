@@ -31,7 +31,6 @@ public class TextMng : MonoBehaviour
     private Image iconColor_;        // 点滅処理で使用する
 
     private ChapterList popChapter_; // 現在必要なテキスト部分だけ取得する
-    private int nowChapterNum_ = 0;  // 現在のチャプター進行度(実際は0からスタート)
     private int nowText_ = 0;        // 現在のテキスト(チャプター進行度が切り替わったら0に初期化すること)
 
     private bool skipFlg_  = false;  // テキストが切り替わるタイミングでtrueになる
@@ -63,9 +62,8 @@ public class TextMng : MonoBehaviour
             charFacesMap_.Add(childName, tmpt.Find(childName).GetComponent<UnityChan.FaceUpdate>());    // 登録
         }
 
-        //popChapter_ = TextPopPrefab_.GetComponent<PopList>().GetChapterList(nowChapterNum_);
         DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
-        popChapter_ = DataPopPrefab_.GetComponent<PopList>().GetData<ChapterList>(PopList.ListData.CHAPTER, nowChapterNum_);
+        popChapter_ = DataPopPrefab_.GetComponent<PopList>().GetData<ChapterList>(PopList.ListData.CHAPTER, EventMng.chapterNum);
 
         // Frame_textの子にあるMessageというテキストオブジェクトを探す
         message_ = ConversationCanvas.transform.Find("Frame_text/Message").GetComponent<TMPro.TextMeshProUGUI>();
@@ -137,8 +135,8 @@ public class TextMng : MonoBehaviour
                         Debug.Log("会話終了です");
 
                         // そのチャプターで使った画像をまとめて破棄する
-                        // シーン遷移する直前が正しいが、テストとしてここに書いています
                         DestroyTexture2D();
+                        // 一時保存してた番号でシーン遷移する
                         SceneMng.SceneLoad((int)sceneLoadNum_);
                     }
                 }
