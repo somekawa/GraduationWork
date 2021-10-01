@@ -75,5 +75,5 @@ MonoBehaviour:
     message: "\u3042\u308A\u304C\u3068\u3046\u3054\u3056\u3044\u307E\u3059\u3002\u884C\u3063\u3066\u307F\u307E\u3059\uFF01"
   - name1: Scene
     name2: TOWN
-    face: Mob
+    face: MayorHouse
     message: "<Chapter1 \u753A\u9577\u3055\u3093\u3078\u6328\u62F6 \u5B8C>"

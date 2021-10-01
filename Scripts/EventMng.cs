@@ -18,4 +18,21 @@ public static class EventMng
     {
         return chapterNum;
     }
+
+    // 進行上、その建物に入ってもいいか判断する
+    // string hitName : ユニちゃんと当たり判定した建物
+    public static string CheckEventHouse(string hitName)
+    {
+        if (hitName != "MayorHouse" && chapterNum == 0)
+        {
+            // チャプター0のときに、町長の家以外に当たった時の処理
+            return "MayorHouse";
+        }
+        else if(hitName != "Guild" && chapterNum == 1)
+        {
+            // チャプター1のときに、ギルド以外に当たった時の処理
+            return "Guild";
+        }
+        return "";      // イベント発生の建物なら空白を返す
+    }
 }

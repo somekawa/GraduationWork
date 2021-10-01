@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InHouseCheck : MonoBehaviour
@@ -9,10 +7,6 @@ public class InHouseCheck : MonoBehaviour
     void Start()
     {
         interiorMng_ = GameObject.Find("HouseInterior").GetComponent<HouseInteriorMng>();
-        if (interiorMng_ == null)
-        {
-            Debug.Log("InHouseCheck.cs‚ÅŽæ“¾‚µ‚Ä‚¢‚éHouseInteriorMng‚ªnull‚Å‚·");
-        }
     }
 
     void OnCollisionEnter(Collision collision)

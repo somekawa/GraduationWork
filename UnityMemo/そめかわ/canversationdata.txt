@@ -1133,6 +1133,64 @@ new Vector3(-0.6f, tmp.y, tmp.z);
 
 ------------------------------------------------
 
+<今は○○へ向かおうって案内表記の方法改善>-------
+
+チャプター0の時は町長の家へ
+チャプター1の時はギルドへ
+と、今後も何回か使いそうなので処理をまとめたほうがよさそう。
+
+[EventMng.cs]
+CheckEventHouse関数を作成し、
+HouseInteriorMng.csから受け取った引数と
+現在のチャプター番号を見て、その建物に入っていいか確認する。
+→入っていいときは""という空白文字を返す
+
+[HouseInteriorMng.cs]
+SelectInHouse関数内でCheckEventHouse関数を呼び出す。引数には、キャラと当たり判定を行う建物名を入れる。
+空白文字なら建物に入る処理を、それ以外なら
+入れないようにする。
+
+------------------------------------------------
+
+<会話後に、任意の建物の前にキャラを遷移させる>---
+
+[Excel]
+チャプター1の最後の行にあるfaceの項目に
+"MayorHouse"と入れる。
+
+[TextMng.cs]
+ChangeScene関数内で、SetHouseName関数を呼び出し
+SceneMng.csで文字列を保存しておくようにする。
+→ChangeScene関数の返り値をboolにして、
+　TextAndFaceSetting関数でfaceのところの条件を、
+if (popChapter_.param[nowText_].face != "Mob"
+　  && !tmpflg)
+とする。
+
+
+[SceneMng.cs]
+GetHouseName関数とSetHouseName関数を新規で
+作成する。
+→TextMng.csとTownMng.csの橋渡しの役割を持つ
+※変数houseName_の初期値を"Mob"にしておく
+
+[TownMng.cs]
+GetHouseName関数の返り値をつかって、
+返り値が"Mob"でないときはユニちゃんに
+建物前の座標を代入する。
+
+-----------------------------------------------
+
+canversationdataからどうやってギルド内に遷移させたらいいんだろう。。。
+SetActiveCanvas関数を呼べたらいいんかな？
+どこから？
+SceneMngを経由してTownMngかな・・・
+GetSetでどうにかなるやろ。うん。
+ついでにキャラ座標も飛ばしたい。
+キャラ座標は建物の名前と飛ばす座標をあらかじめtownmngで設定しとこ。
+とりあえず、キャラ座標のところからやるか。
+町長の家出た後に任意の座標に飛ばす。
+
 動的にnewしたクラスは、deleteみたいなのしなくて
 大丈夫なのか心配
 

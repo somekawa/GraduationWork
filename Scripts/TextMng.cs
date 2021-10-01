@@ -292,14 +292,20 @@ public class TextMng : MonoBehaviour
     }
 
     // シーン切り替え準備
-    private void ChangeScene()
+    private bool ChangeScene()
     {
         // シーンを読み込んだ場合は、変数に一時保存しておく
         if (popChapter_.param[nowText_].name1 == "Scene")
         {
             // 文字列をenumに変換する処理
             sceneLoadNum_ = (SceneMng.SCENE)System.Enum.Parse(typeof(SceneMng.SCENE), popChapter_.param[nowText_].name2);
+
+            // SceneMngに建物名を保存しておく
+            SceneMng.SetHouseName(popChapter_.param[nowText_].face);
+            return true;
         }
+
+        return false;
     }
 
     // 名前,メッセージ,キャラの表情を設定する
@@ -307,7 +313,7 @@ public class TextMng : MonoBehaviour
     {
         ChangeBackImage();
         CheckTransition();
-        ChangeScene();
+        bool tmpflg = ChangeScene();
 
         // CharacterList内にある名前で、次に話すのにキャラを画面外から設定座標までスライドさせる
         for (int i = 0; i < charaName_.Length; i++)
@@ -344,7 +350,7 @@ public class TextMng : MonoBehaviour
         }
 
         // キャラ以外をExcel側で"Mob"と登録しているため、"Mob"なら顔の表情を変更しないようにする
-        if (popChapter_.param[nowText_].face != "Mob")
+        if (popChapter_.param[nowText_].face != "Mob" && !tmpflg)
         {
             // 顔の表情を変更する
             charFacesMap_[popChapter_.param[nowText_].name2].OnCallChangeFace(popChapter_.param[nowText_].face);

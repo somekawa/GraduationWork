@@ -36,6 +36,8 @@ public class SceneMng : MonoBehaviour
     public static SCENE nowScene = SCENE.NON;   // 現在のシーン
     public static float charaRunSpeed = 0.0f;   // キャラの移動速度(MODE毎に調整をする)
 
+    public static string houseName_ = "Mob";    // Excelから読み込んだ建物名
+
     void Awake()
     {
         //　スクリプトが設定されていなければゲームオブジェクトを残しつつスクリプトを設定
@@ -143,5 +145,17 @@ public class SceneMng : MonoBehaviour
 
         // int番号は、ビルド設定の数値
         SceneManager.LoadScene(load);
+    }
+
+    // Excelから読み込んだ建物名を保存しておく
+    public static void SetHouseName(string name)
+    {
+        houseName_ = name;
+    }
+
+    // Excelから読み込んだ建物名を渡す
+    public static string GetHouseName()
+    {
+        return houseName_;
     }
 }

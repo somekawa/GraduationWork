@@ -105,16 +105,16 @@ public class HouseInteriorMng : MonoBehaviour
         // キャラ操作を止める
         playerController_.enabled = false;
 
-        // 現在のチャプター番号
-        int tmpEventNum = EventMng.GetChapterNum();
-
-        if (name != buildNameEng_[1] && tmpEventNum == 0)
+        // イベント状態の確認
+        string  tmpstr = "";
+        tmpstr = EventMng.CheckEventHouse(name);
+        if (tmpstr == "")
         {
-            text_.text = "今は、町長の家へ向かおう！";
+            text_.text = buildNameMap_[name] + "に入る？";
         }
         else
         {
-            text_.text = buildNameMap_[name] + "に入る？";
+            text_.text = "今は、"+ buildNameMap_[tmpstr] + "へ向かおう！";
         }
 
         // キャンバスが表示中の間はコルーチン処理を行う
@@ -142,7 +142,7 @@ public class HouseInteriorMng : MonoBehaviour
             // スペースキーで選択肢を決定し、flagをfalseにすることでwhile文から抜けるようにする
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                if (name != buildNameEng_[1] && tmpEventNum == 0)
+                if (tmpstr != "")
                 {
                     inHouseFlg_ = false;
                 }
