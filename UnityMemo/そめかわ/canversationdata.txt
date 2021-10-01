@@ -956,7 +956,7 @@ Get関数から呼んできて変数の値を使うようにする。
 行えるようにする。
 
 また、他Scriptからチャプター番号を設定できるようにSetChapterNum関数を作成。
-引数にnumを入れておいて、その数値分+nとする。
+引数にnumを入れておいて、その数に置き換わるようにする。
 
 ------------------------------------------------
 
@@ -974,10 +974,7 @@ load == -1ならreturnするようにしておく。
 HouseInteriorの子の[MayorHouse]にアタッチする。
 そこのStart関数でGet関数を呼び出し、
 現在がチャプター0だったら
-SetChapterNum関数を呼び出すようにする。
-
-Sceneの遷移時に一瞬普通の室内処理がでるところは
-たぶんフェード処理で隠せると思う。
+SetChapterNum関数を呼び出して値を1にする。
 
 ------------------------------------------------
 
@@ -989,8 +986,6 @@ Start関数を消して、CheckEventMayorHouse関数を
 SelectInHouseのコルーチン関数内のSetHouseVisible
 のif文内で呼び出す。
 →mayorHouse_という変数を新規で作成してfindしてる
-
-※将来的にどのスクリプトでも対応できるように、mayorHouse_の部分を将来的にはmapにする
 
 ------------------------------------------------
 
@@ -1032,6 +1027,109 @@ https://qiita.com/toRisouP/items/98cc4966d392b7f21c30
 
 上記のサイトのちょうど中央らへんにFuncについて
 記載があった。他の処理も読みやすかった。
+
+------------------------------------------------
+
+<Chapter0～1の間は町長の家以外入れなくする>------
+
+HouseInterior-Canvas-HouseInfo-Textの
+FontAssetをNewMplus1-Mediumに変更する。
+
+町長の家以外は
+「今は、町長の家へ向かおう！」と表示したい。
+
+HouseInteriorMng.csのコルーチン関数内で、
+if (name != buildNameEng_[1] 　　&&　EventMng.GetChapterNum() == 0)
+{
+  text_.text = "今は、町長の家へ向かおう！";
+}
+else
+{
+  text_.text = buildNameMap_[name] + "に入る？";
+}
+
+という表示文章のif文分けと、
+
+スペースキー処理のなかにも
+if (name != buildNameEng_[1] 　　&&　EventMng.GetChapterNum() == 0)
+{
+  inHouseFlg_ = false;
+}
+
+と記述する。
+
+※2回もGetChapterNum()と呼び出しているので、
+  int tmpEventNum = EventMng.GetChapterNum();
+  という感じでローカル変数に代入して使いまわす。
+
+これで、「はい」「いいえ」のどちらを選んでも
+町長の家以外に入らないで済むようになった
+→チャプターが進んだらちゃんと入れるか確認する
+
+------------------------------------------------
+
+<CharacterListに町長を追加する>-----------------
+公式サイトからキャラクターのパッケージを落として
+インポート処理をすると、
+自動で[UnityChan]フォルダに入ることがわかった。
+
+[SD_EL-Birds]というファイルがあればok
+
+あとはCharacterListの子として画面上に配置するだけ
+
+だと思ったんだけど、、、違いました。
+なんか普通に立ってるだけなのが気持ち悪い
+腕組みとかさせたい。
+
+モーションを新しく追加して、腕組みさせたい。
+
+新規でアニメーションを落としてきて、町長に設定
+[Animator/Idle MoCap/Animations/Idle controller]
+このなかの、[Cold_Idle_04]以外全て削除する。
+※使わないから
+
+Animatorで[Entry]と[Cold_Idle_04]がつながっていることを確認しておく。
+
+このままでは[Cold_Idle_04]の腕組み以外のMotionが
+邪魔になるので、Cold_Idle_04_MB_v02.fbxの
+Animationタブを開き、再生のところをみて
+Start[874]
+End　[875]
+と設定し、
+LoopPose,BakeUntoPose(RotationもPositionも)に
+チェックを入れる。
+→これにチェックしないと、モデルがス～～～と
+　スライドしていくアハ体験が発生する。
+
+あとは、まばたきの設定が必要になる。
+autoBlinkSD.csを町長にアタッチしておき、
+引数のRef_faceに[yuji_face]をアタッチする。
+町長にアタッチしているAnimationに新規Layerで
+faceを作成。
+そこにuniちゃんのLayerのfaceをコピペする。
+これでまばたきok!
+
+-----------------------------------------------
+
+<キャラを画面外と画面内で管理する>--------------
+表示/非表示でキャラを切り替えてみたら
+顔の表情の切替でエラーをはくことがわかったので
+画面外と内でキャラ座標をずらすことにした。
+
+<TextMng.cs>
+TextAndFaceSetting関数でCharacterList内にある名前をfor文で回して、"Uni"とかのキャラ名が次にテキストにでてくる場合は関数を呼び出す
+
+[CharacterSlide関数]
+キャラオブジェクトの座標を直接書き換える必要が
+あるのか、
+GameObject.Find
+("CharacterList/" + charaName).gameObject.
+transform.localPosition =
+new Vector3(-0.6f, tmp.y, tmp.z);
+
+と書かないといけなくなった。
+※現状は、ユニちゃんを左固定
+　その他キャラは右固定
 
 ------------------------------------------------
 

@@ -12,12 +12,20 @@ public class TextMng : MonoBehaviour
     public GameObject ConversationCanvas;
     public GameObject CharacterList;
 
+    // フェード
     enum FADE
     {
         NON,
         IN,
         OUT,
         MAX
+    }
+
+    // キャラの立ち位置
+    enum SLIDE
+    {
+        LEFT,
+        RIGHT
     }
 
     private GameObject DataPopPrefab_;
@@ -45,6 +53,7 @@ public class TextMng : MonoBehaviour
 
     // キーがキャラ名,値が各キャラの顔を切り替えるクラスのマップ
     private Dictionary<string, UnityChan.FaceUpdate> charFacesMap_ = new Dictionary<string, UnityChan.FaceUpdate>();
+    private string[] charaName_;     // CharacterListの子オブジェクトになっているモデルにつけられている名前を保存する
 
     private List<Texture2D> texture2dList = new List<Texture2D>();
     private List<Sprite> spriteList = new List<Sprite>();
@@ -56,10 +65,13 @@ public class TextMng : MonoBehaviour
     {
         // CharacterListの子供を順番に取得していき、charFacesMap_に登録する
         Transform tmpt = CharacterList.gameObject.transform;
+        // 子の数で配列初期化
+        charaName_ = new string[tmpt.childCount];
+
         for (int i = 0; i < tmpt.childCount; i++)
         {
-            var childName = tmpt.GetChild(i).name;  // 子の名前を見る
-            charFacesMap_.Add(childName, tmpt.Find(childName).GetComponent<UnityChan.FaceUpdate>());    // 登録
+            charaName_[i] = tmpt.GetChild(i).name;  // 子の名前を見る
+            charFacesMap_.Add(charaName_[i], tmpt.Find(charaName_[i]).GetComponent<UnityChan.FaceUpdate>());    // 登録
         }
 
         DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
@@ -297,6 +309,23 @@ public class TextMng : MonoBehaviour
         CheckTransition();
         ChangeScene();
 
+        // CharacterList内にある名前で、次に話すのにキャラを画面外から設定座標までスライドさせる
+        for (int i = 0; i < charaName_.Length; i++)
+        {
+            if (charaName_[i] == popChapter_.param[nowText_].name2)
+            {
+                if(charaName_[i] == "Uni")
+                {
+                    CharacterSlide(SLIDE.LEFT, charaName_[i]);
+                }
+                else
+                {
+                    CharacterSlide(SLIDE.RIGHT, charaName_[i]);
+                }
+            }
+        }
+
+
         // Excel内に改行文字[\n]があったら、改行して表示する
         // メッセージ更新
         if (popChapter_.param[nowText_].message.Contains("\\n"))
@@ -328,6 +357,26 @@ public class TextMng : MonoBehaviour
         messageTime_ = 0.0f;
         // アイコンの非表示
         icon_.SetActive(false);
+    }
+
+    // 画面外から画面内にキャラクターをスライドさせるコルーチン
+    // bool  flag : falseでwhileを終了
+    // SLIDE slide: LEFT→キャラ左配置,キャラ右配置
+    // string charaName : 移動させたいキャラの名前
+    private void CharacterSlide(SLIDE slide, string charaName)
+    {
+        var tmp = GameObject.Find("CharacterList/" + charaName).gameObject.transform.localPosition;
+
+        if (slide == SLIDE.LEFT)
+        {
+            // 左側に配置するとき(直接findしないと値変更ができない?)
+            GameObject.Find("CharacterList/" + charaName).gameObject.transform.localPosition = new Vector3(-0.6f, tmp.y, tmp.z);
+        }
+        else
+        {
+            // 右側に配置するとき(直接findしないと値変更ができない?)
+            GameObject.Find("CharacterList/" + charaName).gameObject.transform.localPosition = new Vector3(0.6f, tmp.y, tmp.z);
+        }
     }
 
     // 1文字ずつ文字を表示している間に行う処理

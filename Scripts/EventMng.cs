@@ -10,7 +10,7 @@ public static class EventMng
     // 読み返し機能を作成するときには引数部分に該当するチャプター番号を入れるようにする
     public static void SetChapterNum(int num ,SceneMng.SCENE scene)
     {
-        chapterNum += num;
+        chapterNum = num;
         SceneMng.SceneLoad((int)scene);
     }
 
