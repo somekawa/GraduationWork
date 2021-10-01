@@ -1,5 +1,41 @@
 WarpTown.cs
 ーーーーーーーーーーーーーーーーーーー
+2021/10/01　更新メモ
+
+ワープ用キャンバスの構成を変更
+WarpCanvas
+ーWarpImageMask
+　ーHouse
+　ーFountain
+　ーCross
+　ーField
+　ーNeedle
+ーFrameImage
+ーFadePanel
+
+・FrameImage（Spriteはframe_command）
+Pos（50，-50，0）
+Width300　Height300
+Scale（1，1，1）
+
+・WarpImageMask（SpriteはwhiteFrameMask）
+Pos（50，-50，0）
+Width256　Height256（フレームと同じだとはみ出してしまうため少し小さく）
+Scale（1，1，1）
+
+FrameImageとMaskは同じ動きをするが
+FrameImageだけ回転するため別々にしている
+ワープ選択中は左回転、選択していないときは右回転
+
+◆Maskの作り方
+Mask用Image（MaskImageとする）をImageで作成
+ComponentでMask（Show Mask Graphic）だけがあるものを追加
+Show Mask Graphicにチェックを知れないとMask画像として仕事をしないので注意
+↓
+Mask画像内に収めたいものをMaskImageの子にする。
+Mask画像内にしか出なくなるのを確認したら終わり
+※Mask範囲外だけ描画はできないので注意
+ーーーーーーーーーーーーーーーーーーー
 2021/09/21　更新メモ
 
 

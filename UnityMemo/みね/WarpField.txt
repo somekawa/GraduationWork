@@ -1,6 +1,30 @@
-2021/09/21　更新メモ
-ーーーーーーーーーーーーーーーーーーー
 WarpField.cs
+ーーーーーーーーーーーーーーーーーーー
+2021/10/01　更新メモ
+
+新しいFieldが追加された際に変更しにくかったので
+Imageの子にTextを追加、ほとんどのシーンで使うためにPrefab化
+LocationSelCanvasの子を
+ImagesとTextに分けてたぶんを統合
+ーTownImage
+　ーTownText
+ーField0Image
+　ーField0Text
+ーField1Image
+　ーField1Text
+ーCansellImage
+　ーCansellText
+
+これに合わせてprivateで取得していたものを変更
+Canvas取得
+　ー各Image取得
+　　ーImageの子（GetChild（0））を取得
+ImageとTextたちの親にあたる部分を削除。
+
+
+ーーーーーーーーーーーーーーーーーーー
+2021/09/21　更新メモ
+
 
 ・フィールド選択時
 WarpOutにアタッチしてください。

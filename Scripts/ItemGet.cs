@@ -57,9 +57,9 @@ public class ItemGet : MonoBehaviour
         mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
         parentCanvas_ = GameObject.Find("ItemCanvas").GetComponent<RectTransform>();
 
-        materiaImage_ = parentCanvas_.gameObject.transform.Find("MaterialImage").GetComponent<Image>();
+        materiaImage_ = parentCanvas_.transform.Find("MaterialImage").GetComponent<Image>();
 
-        telopImage_ = parentCanvas_.gameObject.transform.Find("TelopBackImage").GetComponent<Image>();
+        telopImage_ = parentCanvas_.transform.Find("TelopBackImage").GetComponent<Image>();
         telopImage_.color = new Color(1.0f, 1.0f, 1.0f, telopAlpha_);
         telopImage_.gameObject.SetActive(false);
 

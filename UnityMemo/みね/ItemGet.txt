@@ -1,0 +1,39 @@
+更新：2021/09/27
+ーーーーーーーーーーーーーーーーーーー
+OtherCollision.cs
+
+Uniに新しくFrontColliderという子を作る。
+・Uni
+　ーFrontCollider　	Position（ 0 , 0.5 , 0.7 ）
+		Scale( 1 , 0.5 , 1 )
+		MeshRenderを非アクティブに。
+		OtherCollisionをアタッチ
+
+素材オブジェクトと接触中にSpaceキーを押下すると素材をゲットできる
+ItemGet.csを呼び出す
+
+ーーーーーーーーーーーーーーーーーーー
+ItemGet.cs
+
+各素材オブジェクトを置いている親の『ItemPoints』オブジェクトにアタッチして下さい。
+（全フィールド同じオブジェクト名にする予定）
+
+・ImageとRectTransformに同じものが入っている
+アンカーを使用したい、がImageの変数も使用したい場合のみ作成
+（materiaImage_とmateriaRect_、telopImage_とtelopRect_）
+materiaImage_は画像変更の必要があったため
+telopImage_はアルファ値の変更の必要があるため
+
+ーーーーーーーーーーーーーーーーーーー
+画像はResourceではなくAssetDatabase.LoadAssetAtPathで取得
+またTexture2Dを使用していないためAssetDatabase.LoadAssetAtPathで全体画像を取得し
+その後、指定サイズに分割
+
+※「1,2,4,8,16,32,64,128,256,512,1024,2048」の
+　どれかに画像サイズを縦横どっちも揃えないといけない（by.染川）（まじありがとう……）
+
+今のところ1024*128の画像を128*128で8個分取得
+前5つ（0,1,2,3,4番）は素材画像、残りは空白（未定）
+
+0house
+1town

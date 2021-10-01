@@ -25,9 +25,12 @@ public class WarpTown : MonoBehaviour
     private bool decisionFlag_ = false;     // ワープ先が決まったかどうか
 
     // ワープ選択画像背景
+    private Image frameImage_;
+    private Vector2 saveHandlePos_;
+    private Vector2 maxHandlePos_;
+    private float handleSpeed_ = 8.0f;
+    private float handleRotate_ = 1.0f;
     private Image warpActive_;   // warpCanvasの子の背景画像を取得
-    private Color selectColor_ = new Color(0.0f, 0.0f, 1.0f, 1.0f);     // 選択中の色（青）
-    private Color resetColor_ = new Color(1.0f, 1.0f, 1.0f, 1.0f);      // 選択外の色（白）
 
     // 長針関連
     private Image needleImage_;              // warpActive(背景の子)から長針画像を取得
@@ -55,7 +58,7 @@ public class WarpTown : MonoBehaviour
     private Vector3 houseFrontPos_ = new Vector3(20.0f, 0.0f, 10.0f);
     private Collider houseWarpColl_;
     private int count_ = 0;
-    
+
     void Start()
     {
         // ワープする座標を入れるため
@@ -65,11 +68,16 @@ public class WarpTown : MonoBehaviour
         warpFieldScript_ = GameObject.Find("WarpOut").transform.GetComponent<WarpField>();
 
         warpCanvas_ = GameObject.Find("WarpCanvas").GetComponent<Canvas>();
-        // 0 ワープ先が子についている空のオブジェクト
-        warpActive_ = warpCanvas_.transform.GetChild(0).GetComponent<Image>();
-        warpActive_.color = selectColor_;                    // ワープしないとき（青                                                          
-        // 1 フェードアウト用のImageのみ
-        fadePanel = warpCanvas_.transform.GetChild(1).GetComponent<Image>();
+        warpActive_ = warpCanvas_.transform.Find("WarpImageMask").GetComponent<Image>();
+        // フェードアウトするためのパネル
+        fadePanel = warpCanvas_.transform.Find("FadePanel").GetComponent<Image>();
+
+        // ワープイメージのフレーム
+        frameImage_ = warpCanvas_.transform.Find("FrameImage").GetComponent<Image>();
+        saveHandlePos_ = new Vector2(frameImage_.transform.localPosition.x, frameImage_.transform.localPosition.y);
+        maxHandlePos_ = new Vector2(saveHandlePos_.x - 200, saveHandlePos_.y + 200);
+        Debug.Log("Max座標" + maxHandlePos_ + "  初期値" + saveHandlePos_);
+
 
         // 長針画像取得
         needleImage_ = warpActive_.transform.Find("Needle").GetComponent<Image>();
@@ -114,15 +122,13 @@ public class WarpTown : MonoBehaviour
                 uniChan_.transform.position = houseFrontPos_;
             }
         }
-
-        //  Debug.Log("保存された番号" + saveTownWarpNum_);
     }
 
     void Update()
     {
         if (houseWarpColl_.isTrigger == false)
         {
-            if (count_ < 10)
+            if (count_ < 60)
             {
                 count_++;
             }
@@ -138,9 +144,13 @@ public class WarpTown : MonoBehaviour
             FadeOutAndIn();
         }
 
+
         // フィールドキャンバスがアクティブの時
         if (warpFieldScript_.GetLocationSelActive() == true)
         {
+            // 常に回転させる
+            handleRotate_ += 30.0f * Time.deltaTime;
+            frameImage_.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, handleRotate_);
             return;   // 町中のワープは選択できないように
         }
         else
@@ -148,6 +158,9 @@ public class WarpTown : MonoBehaviour
             // 長針が動かない＝ワープ先を選べない
             if (moveNeedle_ == false)
             {
+                // 常に回転させる
+                handleRotate_ += 30.0f * Time.deltaTime;
+                frameImage_.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, handleRotate_);
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
                     // ワープ準備
@@ -171,12 +184,27 @@ public class WarpTown : MonoBehaviour
 
     private void ChoiceWarpLocation()
     {
-        warpActive_.color = resetColor_;     // ワープ先を選べる（白
+        if (maxHandlePos_.x < frameImage_.transform.localPosition.x
+            && frameImage_.transform.localPosition.y < maxHandlePos_.y)
+        {
+            handleSpeed_ += 1.0f * Time.deltaTime;
+            frameImage_.transform.localPosition -= new Vector3(handleSpeed_, -handleSpeed_, 0.0f);
+            warpActive_.transform.localPosition -= new Vector3(handleSpeed_, -handleSpeed_, 0.0f);
+            //Debug.Log(maxHandlePos_ + "    <   " + frameImage_.transform.localPosition.x);
+        }
+        else
+        {
+            // スピードが変わるため初期化
+            handleSpeed_ = 8.0f;
+        }
+        // ワープ先選択中は反対周りにする
+        handleRotate_ -= 30.0f * Time.deltaTime;
+        frameImage_.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, handleRotate_);
 
         // 選択先を変更
         if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow))
         {
-            CommonWarpCansel();            // ワープキャンセルの場合
+            StartCoroutine(WarpCansel(true));            // ワープキャンセルの場合
             warpFieldScript_.SetWarpNowFlag(false);
         }
         else if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -220,10 +248,9 @@ public class WarpTown : MonoBehaviour
             else
             {                // フィールド選択時
                 warpFieldScript_.SetLocationSelActive(true);         // フィールドの移動先を表示
-                warpActive_.color = selectColor_;    // フィールド選択中に選べないように
                 warpFieldScript_.SetNowTownFlag(true);// 町からのワープだとFlagをtrueにする
             }
-            CommonWarpCansel();    // ワープ処理リセット
+            StartCoroutine(WarpCansel(true));            // ワープ処理リセット
         }
     }
 
@@ -265,15 +292,34 @@ public class WarpTown : MonoBehaviour
             // 何もしない
         }
         fadePanel.color = new Color(1.0f, 1.0f, 1.0f, alphaCnt_);
-        //  Debug.Log(alphaCnt_);
     }
 
-    private void CommonWarpCansel()
+    private IEnumerator WarpCansel(bool flag)
     {
         // 移動Cancelの場合
         moveNeedle_ = false;             // 長針が動かないように
         changeCnt_ = 0.0f;               // ワープに入るためのSpaceキー処理が入るように
-        warpActive_.color = selectColor_; // ワープ先を選べない状態（青
+        while (flag)
+        {
+            if (frameImage_.transform.localPosition.x < saveHandlePos_.x
+                  && saveHandlePos_.y < frameImage_.transform.localPosition.y)
+            {
+                handleSpeed_ += 1.0f * Time.deltaTime;
+                frameImage_.transform.localPosition += new Vector3(handleSpeed_, -handleSpeed_, 0.0f);
+                warpActive_.transform.localPosition += new Vector3(handleSpeed_, -handleSpeed_, 0.0f);
+                //Debug.Log(maxHandlePos_ + "    <   " + frameImage_.transform.localPosition.x);
+            }
+            else
+            {
+                // スピードが変わるため初期化
+                handleSpeed_ = 8.0f;
+                handleRotate_ = 0.0f;
+                frameImage_.transform.localPosition = saveHandlePos_;
+                warpActive_.transform.localPosition = saveHandlePos_;
+                flag = false;
+            }
+            yield return null;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
