@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 // 街の中の定点カメラや戦闘時のバトルカメラはサブカメラとして管理している
@@ -10,11 +8,12 @@ public class CameraMng : MonoBehaviour
     public GameObject mainCamera;      // メインカメラ格納用
     public GameObject subCamera;       // フィールドならバトルカメラ格納,街なら定点カメラ格納
 
-    void Start()
-    {
-        //サブカメラを非アクティブにする
-        subCamera.SetActive(false);
-    }
+    // 各Scene名のついたMngからSetChangeCamera関数を呼んで、最初にサブカメラの非アクティブを行うようにする
+    //void Start()
+    //{
+    //    //サブカメラを非アクティブにする
+    //    subCamera.SetActive(false);
+    //}
 
     // 街や戦闘時のサブカメラ位置を変更するときに呼ばれる
     public void SetSubCameraPos(Vector3 pos)

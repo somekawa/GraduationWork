@@ -59,7 +59,8 @@ public class WarpTown : MonoBehaviour
     private Collider houseWarpColl_;
     private int count_ = 0;
 
-    void Start()
+    // Start関数から名称を変更し、TownMng.csのStart関数で呼び出されるように修正
+    public void Init()
     {
         // ワープする座標を入れるため
         uniChan_ = GameObject.Find("Uni");

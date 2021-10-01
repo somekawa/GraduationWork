@@ -56,18 +56,12 @@ public class HouseInteriorMng : MonoBehaviour
             // アイコン位置を「はい」に戻す
             iconImage_.transform.localPosition = new Vector3(-140.0f, -70.0f, 0.0f);
 
-            // ワープ先キャンバスの表示
-            warpCanvas.gameObject.SetActive(true);
-
-            // ワープ処理を可能にするためにtrueに戻す
-            warpTown.enabled = true;
+            SetWarpCanvasAndCharaController(true);
 
             // 入室処理時に必ずこの関数は呼ばれるが、
             // inHouseFlg_がfalseなら必要な処理をしてreturnする
             SetActiveCanvas(false, "");
 
-            // キャラ操作を再開する
-            playerController_.enabled = true;
             return false;
         }
 
@@ -94,16 +88,7 @@ public class HouseInteriorMng : MonoBehaviour
     // コルーチン  
     private IEnumerator SelectInHouse(bool flag,string name)
     {
-        // ワープ先キャンバスの非表示
-        warpCanvas.gameObject.SetActive(false);
-        // ワープ処理のスペースキーを止めるためにfalse
-        warpTown.enabled = false;
-
-        // キャラアニメーションを止める
-        playerController_.StopUniRunAnim();
-
-        // キャラ操作を止める
-        playerController_.enabled = false;
+        SetWarpCanvasAndCharaController(false);
 
         // イベント状態の確認
         string  tmpstr = "";
@@ -177,7 +162,7 @@ public class HouseInteriorMng : MonoBehaviour
     }
 
     // オブジェクトの表示/非表示の処理
-    private void ChangeObjectActive(int childNum, Transform trans, string buildName)
+    public void ChangeObjectActive(int childNum, Transform trans, string buildName)
     {
         // 子の数でfor文を回して、建物の名前一致は表示、名前不一致は非表示にする
         for (int i = 0; i < childNum; i++)
@@ -192,6 +177,26 @@ public class HouseInteriorMng : MonoBehaviour
                 child.gameObject.SetActive(true);
             }
         }
+    }
+
+    // ワープキャンバスとキャラコントローラーの設定ができるようにする
+    public void SetWarpCanvasAndCharaController(bool allFlg)
+    {
+        // ワープ先キャンバスの表示切替
+        warpCanvas.gameObject.SetActive(allFlg);
+
+        // ワープ処理を止めるかどうか
+        warpTown.enabled = allFlg;
+
+        if(!allFlg)
+        {
+            // キャラアニメーションを止める
+            playerController_.StopUniRunAnim();
+        }
+
+        // キャラ操作を止めるかどうか
+        playerController_.enabled = allFlg;
+
     }
 
     // 建物からの出口処理テスト

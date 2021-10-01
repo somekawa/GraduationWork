@@ -254,6 +254,56 @@ B→0.2
 
 ------------------------------------------------
 
+<TownMng.csを主軸とした修正>--------------------
+
+会話文の終了後にその建物の中に画面遷移させるようにする関係で、広範囲のScriptに変更がでたので記載しておく。
+
+[TownMng.cs]
+①inHouseCanvasという外部アタッチ変数を用意した
+　→HouseInteriorの子のInHouseCanvasをアタッチ
+
+②①を使って該当する建物の室内キャンバスの表示を
+　行うようにしている
+
+③TownMng.csで該当する建物の前にキャラを飛ばす
+　ようにしているが、Start関数のタイミングが、
+　TownMng.cs→WarpTown.csとなっていて
+　結果として直前につかったワープ座標が入るように
+　なっていた。
+
+　(解決方法)
+　WarpTown.csのStart関数をInit関数と命名しなおし
+　TownMng.csのStart関数内でInit関数を呼び出す
+　ように修正した。
+　→呼ばれるタイミングは、建物前に飛ばす処理より
+　　前に必ずする必要がある
+
+④建物内のカメラに最初からする必要があったので
+　SetChangeCamera関数を呼び出すようにしていたが
+　これも③と同じで、Start関数のタイミングが
+　TownMng.cs→CameraMng.csとなっていた。
+
+　(解決方法)
+　そもそもCameraMng.csのStart関数を削除し、
+　すべてSetChangeCamera関数を呼び出すようにした。
+　※この関係で、UniHouseMng.csでも
+　　cameraMng_.SetChangeCamera(false);
+　　を呼び出すように修正した。
+
+⑤室内カメラに遷移するときは、ワープ系の処理と
+　キャラクター移動処理を切る必要があったため、
+　HouseInteriorMng.csで新規に
+　SetWarpCanvasAndCharaController関数を作成し
+　これをTownMng.csでも呼び出せるようにした。
+　※ただ、キャラアニメーションがnullでエラーに
+　　なったため、UnitychanController.csの
+　　StopUniRunAnim関数でthis.animetor_がnullかの
+　　チェックをするif文をいれた。
+
+これで会話終了後にそれまで話をしていた建物の中からスタートできるようになった。
+
+------------------------------------------------
+
 *重要*
 タグの判別にはgameObject.tag == “string tag”もあるが、CompareTag()の方が早い
 

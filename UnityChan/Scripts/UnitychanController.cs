@@ -106,7 +106,11 @@ public class UnitychanController : MonoBehaviour
     // キャラの走りアニメーションを止める
     public void StopUniRunAnim()
     {
-        this.animator_.SetBool(key_isRun, false);
+        // アニメーションがあるかnullチェックを行う
+        if(this.animator_ != null)
+        {
+            this.animator_.SetBool(key_isRun, false);
+        }
     }
 
 }
