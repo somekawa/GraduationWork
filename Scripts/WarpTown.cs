@@ -271,7 +271,7 @@ public class WarpTown : MonoBehaviour
 
             if (SceneManager.GetActiveScene().name != "Town")
             {
-                SceneMng.SceneLoad(0);
+                SceneMng.SceneLoad((int)SceneMng.SCENE.TOWN);
             }
             else
             {
@@ -330,7 +330,7 @@ public class WarpTown : MonoBehaviour
             if (SceneManager.GetActiveScene().name == "Town")
             {
                 Debug.Log("ユニの家の前のコライダーに接触");
-                SceneMng.SceneLoad(3);
+                SceneMng.SceneLoad((int)SceneMng.SCENE.UNIHOUSE);
                 // ユニの家の中にワープ
             }
             else
@@ -339,7 +339,7 @@ public class WarpTown : MonoBehaviour
                 warpNum_ = (int)warp.HOUSE;
                 //  UniChan.transform.position = warpChildren_[(int)warp.HOUSE].transform.localPosition;
                 Debug.Log("ユニの家からタウンに出現" + uniChan_.transform.position);
-                SceneMng.SceneLoad(0);
+                SceneMng.SceneLoad((int)SceneMng.SCENE.TOWN);
             }
         }
     }
