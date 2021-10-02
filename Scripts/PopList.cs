@@ -28,7 +28,7 @@ public class PopList : MonoBehaviour
     {
         if (data == ListData.CHAPTER)
         {
-            string tmpStr = "Chapter" + num;
+            string tmpStr = "Chapter/Chapter" + num;
             //object(任意のTにキャストできる)にキャストし、そこから別の型にキャストする必要がある
             return (T)(object)GetList<ChapterList>(tmpStr);
         }

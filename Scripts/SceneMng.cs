@@ -110,7 +110,7 @@ public class SceneMng : MonoBehaviour
             switch (scene)
             {
                 case SCENE.TOWN:
-                    charaRunSpeed = 12.0f;
+                    charaRunSpeed = 10.0f;
                     Debug.Log("ˆÚ“®‘¬“x•ÏX" + charaRunSpeed);
                     break;
 

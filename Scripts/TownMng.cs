@@ -8,7 +8,11 @@ public class TownMng : MonoBehaviour
     private Canvas inHouseCanvas;
 
     private readonly string[] buildNameEng_ = { "MayorHouse", "BookStore", "ItemStore", "Guild", "Restaurant" };  // 建物名(ヒエラルキーと同じ英語)
-    private readonly Vector3[] buildPos_ = { new Vector3(0.0f,0.0f,110.0f)};
+    private readonly Vector3[] buildPos_ = { new Vector3(0.0f, 0.0f, 110.0f),   
+                                             new Vector3(0.0f, 0.0f, 110.0f),
+                                             new Vector3(0.0f, 0.0f, 110.0f),
+                                             new Vector3(23.0f, 0.0f, 96.0f),
+                                             new Vector3(0.0f, 0.0f, 110.0f) };
     private Dictionary<string, Vector3> uniPosMap_ = new Dictionary<string, Vector3>();    // キー:英語建物名,値:ユニちゃん表示座標
 
     void Start()
@@ -17,7 +21,10 @@ public class TownMng : MonoBehaviour
         SceneMng.SetNowScene(SceneMng.SCENE.TOWN);
 
         // 建物と座標を一致させる
-        uniPosMap_.Add(buildNameEng_[0], buildPos_[0]);
+        for(int i = 0; i < buildNameEng_.Length; i++)
+        {
+            uniPosMap_.Add(buildNameEng_[i], buildPos_[i]);
+        }
 
         // SceneMngから飛ばす建物名を受けとる(飛ばさなくていいときは処理しないように注意)
         string str = SceneMng.GetHouseName();
@@ -49,6 +56,9 @@ public class TownMng : MonoBehaviour
             temp.ChangeObjectActive(inHouseCanvas.gameObject.transform.childCount, inHouseCanvas.transform, str);
 
             temp.SetWarpCanvasAndCharaController(false);
+
+            // 現在の建物名を保存(カメラ位置調整に必要)
+            temp.SetInHouseName(str);
         }
         else
         {

@@ -1184,8 +1184,75 @@ GetHouseName関数の返り値をつかって、
 
 -----------------------------------------------
 
-動的にnewしたクラスは、deleteみたいなのしなくて
-大丈夫なのか心配
+<ExcelにChapter2を追加し、読み込めるようにする>--
+Chapter.xlsのタブで新規に[Chapter2]を追加。
+中に背景画像だけ入れとく。
+
+Chapter_importer.csのsheetNamesに
+Chapter2を追加する。
+
+そして、Chapter.xlsを右クリックし、reimportを
+押す。
+
+<ついでにResourcesファイルにChapterファイル作成>
+階層を分けたほうがよさそうだから、
+
+Chapter_importer.csの33行目のパスを、
+var exportPath =
+ "Assets/Resources/Chapter/" + sheetName + ".asset";
+
+に変更する。
+
+あと、PopList.csのstring tmpStrも
+"Chapter/Chapter" + num;に変更しておく。
+
+今後は上記のパスの中にチャプター情報が入る。
+
+あとはChapter2に考えた文章を打ち込んでおく。
+
+[Guild.csの作成]
+新規ScriptでGuild.csを作成し、内容はMayorHouse.csと似たようなかんじにする。
+※イベントの発生タイミングの数値を変える。
+
+// イベント発生
+if (EventMng.GetChapterNum() == 1)
+{
+    EventMng.SetChapterNum(2, 　　　　(int)SceneMng.SCENE.CONVERSATION);
+    return true;
+}
+
+つぎにHouseInteriorMng.csのStart関数に、
+func_.Add("Guild", new Guild().CheckEvent);
+を追加する。
+
+あとは、TownMng.csに店前の座標を登録する。
+new Vector3(23.0f, 0.0f, 96.0f)
+
+------------------------------------------------
+
+<ギルド退出後に右通路カメラにならないバグを修正>-
+
+(原因)
+HouseInteriorMng.csのnowInHouseNameが
+会話シーンからボタンを押す処理に入ると空白文字に
+なるから。
+
+(対処法)
+TownMng.csから変数に名前を入れられるようにpublicのSetInHouseName関数をHouseInteriorMng.csに追加する。
+
+[TownMng.cs]
+// 現在の建物名を保存
+temp.SetInHouseName(str);
+
+という処理を追加する。
+
+------------------------------------------------
+
+<任意のチャプターからデバッグするには>-----------
+チャプター管理はEventMng.csの
+chapterNum変数で管理しているから、数値を書き換えたらよい。
+
+------------------------------------------------
 
 <いろいろメモ>
 Functionの参考サイト↓

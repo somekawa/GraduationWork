@@ -45,6 +45,7 @@ public class HouseInteriorMng : MonoBehaviour
 
         //@ ここに全部の建物のイベント発生確認関数を登録していく
         func_.Add("MayorHouse", new MayorHouse().CheckEvent);
+        func_.Add("Guild"     , new Guild().CheckEvent);
     }
 
     public bool SetHouseVisible(string name)
@@ -197,6 +198,12 @@ public class HouseInteriorMng : MonoBehaviour
         // キャラ操作を止めるかどうか
         playerController_.enabled = allFlg;
 
+    }
+
+    // 外部から現在いる建物名を設定できるようにする
+    public void SetInHouseName(string name)
+    {
+        nowInHouseName = name;
     }
 
     // 建物からの出口処理テスト
