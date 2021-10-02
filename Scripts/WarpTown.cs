@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 
 public class WarpTown : MonoBehaviour
 {
@@ -85,7 +84,7 @@ public class WarpTown : MonoBehaviour
         // 長針の初期位置
         needleImage_.transform.rotation = Quaternion.Euler(0.0f, 0.0f, needleRotate_[(int)warp.HOUSE]);
 
-        if (SceneManager.GetActiveScene().name == "Town")
+        if (SceneMng.nowScene == SceneMng.SCENE.TOWN)
         {
             // オブジェクト経由でCameraMngScriptを取得
             cameraCtl_ = GameObject.Find("CameraController");
@@ -111,7 +110,7 @@ public class WarpTown : MonoBehaviour
         {
             needleImage_.transform.rotation = Quaternion.Euler(0.0f, 0.0f, needleRotate_[warpNum_]);
 
-            if (SceneManager.GetActiveScene().name == "Town")
+            if (SceneMng.nowScene == SceneMng.SCENE.TOWN)
             {
                 uniChan_.transform.position = warpChildren_[warpNum_].transform.position;
                 // 初期座標の差でカメラが追従しているため
@@ -269,7 +268,7 @@ public class WarpTown : MonoBehaviour
             alphaCnt_ = 0.0f;
             decisionFlag_ = false;
 
-            if (SceneManager.GetActiveScene().name != "Town")
+            if (SceneMng.nowScene != SceneMng.SCENE.TOWN)
             {
                 SceneMng.SceneLoad((int)SceneMng.SCENE.TOWN);
             }
@@ -327,7 +326,7 @@ public class WarpTown : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            if (SceneManager.GetActiveScene().name == "Town")
+            if (SceneMng.nowScene == SceneMng.SCENE.TOWN)
             {
                 Debug.Log("ユニの家の前のコライダーに接触");
                 SceneMng.SceneLoad((int)SceneMng.SCENE.UNIHOUSE);
