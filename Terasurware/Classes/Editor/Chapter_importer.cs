@@ -10,7 +10,7 @@ using NPOI.SS.UserModel;
 public class Chapter_importer : AssetPostprocessor
 {
     private static readonly string filePath = "Assets/ExcelData/Chapter.xls";
-    private static readonly string[] sheetNames = { "Chapter0","Chapter1", };
+    private static readonly string[] sheetNames = { "Chapter0","Chapter1", "Chapter2" };
     
     static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
     {
@@ -30,7 +30,7 @@ public class Chapter_importer : AssetPostprocessor
 
                 foreach (string sheetName in sheetNames)
                 {
-                    var exportPath = "Assets/Resources/" + sheetName + ".asset";
+                    var exportPath = "Assets/Resources/Chapter/" + sheetName + ".asset";
 
                     // check scriptable object
                     var data = (ChapterList)AssetDatabase.LoadAssetAtPath(exportPath, typeof(ChapterList));
