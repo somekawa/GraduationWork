@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraSample : MonoBehaviour
@@ -12,8 +10,11 @@ public class CameraSample : MonoBehaviour
         //unitychan‚Ìî•ñ‚ğæ“¾
         this.player_ = GameObject.Find("Uni");
 
-        // MainCamera(©•ª©g)‚Æplayer‚Æ‚Ì‘Š‘Î‹——£‚ğ‹‚ß‚é
-        offset_ = transform.position - player_.transform.position;
+        //// MainCamera(©•ª©g)‚Æplayer‚Æ‚Ì‘Š‘Î‹——£‚ğ‹‚ß‚é
+        //offset_ = transform.position - player_.transform.position;
+
+        offset_ = new Vector3(0.0f, 3.0f, -3.0f);
+
     }
 
     void Update()
