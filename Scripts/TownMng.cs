@@ -31,6 +31,8 @@ public class TownMng : MonoBehaviour
 
         // WarpTown.cs‚Ì‰Šú‰»ŠÖ”‚ğæ‚ÉŒÄ‚Ô
         GameObject.Find("WarpInTown").GetComponent<WarpTown>().Init();
+        // WarpField.cs‚Ì‰Šú‰»ŠÖ”‚ğæ‚ÉŒÄ‚Ô
+        GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
 
         var cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
 
