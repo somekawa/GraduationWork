@@ -221,6 +221,9 @@ public class HouseInteriorMng : MonoBehaviour
     {
         Debug.Log("外へ出るボタンが押されました");
 
+        // 建物オブジェクトの非表示(名前部分を""にすることで、全て非表示にできる)
+        ChangeObjectActive(this.gameObject.transform.childCount, this.transform, "");
+
         // 室内用キャンバスの非表示
         inHouseCanvas_.SetActive(false);
 
@@ -245,6 +248,9 @@ public class HouseInteriorMng : MonoBehaviour
             // メインカメラに戻す
             cameraMng_.SetChangeCamera(false);
         }
+
+
+        //@ 新規Scriptで名前取得Setを呼び出す場所
 
         // 現在の建物名を初期化
         nowInHouseName = "";

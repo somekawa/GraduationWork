@@ -5,7 +5,7 @@ public class UniHouseMng : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // 現在のシーンをTOWNとする
+        // 現在のシーンをUNIHOUSEとする
         SceneMng.SetNowScene(SceneMng.SCENE.UNIHOUSE);
 
         // WarpTown.csの初期化関数を呼ぶ

@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 public static class EventMng
 {
-    private static int chapterNum = 0;   // 現在のチャプター進行度(0からスタート)
+    // 自由に店に出入りできるように現在は-1に設定している。本来は0
+    private static int chapterNum = -1;   // 現在のチャプター進行度(0からスタート)
 
     // チャプター進行度の更新
     // 読み返し機能を作成するときには引数部分に該当するチャプター番号を入れるようにする
@@ -31,6 +29,11 @@ public static class EventMng
         else if(hitName != "Guild" && chapterNum == 1)
         {
             // チャプター1のときに、ギルド以外に当たった時の処理
+            return "Guild";
+        }
+        else if(hitName != "Guild" && chapterNum == 2)
+        {
+            // チャプター2のときに、ギルド以外に当たった時の処理
             return "Guild";
         }
         return "";      // イベント発生の建物なら空白を返す

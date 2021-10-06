@@ -1,42 +1,48 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PopList : MonoBehaviour
 {
     public enum ListData
     {
-        CHAPTER,
-        CHARACTER,
+        CHAPTER,        // ストーリー
+        CHARACTER,      // キャラクター初期情報(あとで、すべてCSV形式からの読み込み書き出しに変えるかも)
+        QUESTINFO,      // クエスト情報
         MAX
     }
 
     private T GetList<T>(string dataName)
     {
-        T characterList = (T)(object)Resources.Load(dataName);
+        T list = (T)(object)Resources.Load(dataName);
 
-        if (characterList == null)
+        if (list == null)
         {
-            Debug.Log("PopMob.csのcharacterList情報がnullです");
+            Debug.Log("PopMob.csのlist情報がnullです");
         }
 
-        return characterList;
+        return list;
     }
 
     public T GetData<T>(ListData data, int num = 0, string str = "")
     {
-        if (data == ListData.CHAPTER)
+        string tmpStr;
+
+        switch (data)
         {
-            string tmpStr = "Chapter/Chapter" + num;
-            //object(任意のTにキャストできる)にキャストし、そこから別の型にキャストする必要がある
-            return (T)(object)GetList<ChapterList>(tmpStr);
+            case ListData.CHAPTER:
+                tmpStr = "Chapter/Chapter" + num;
+                //object(任意のTにキャストできる)にキャストし、そこから別の型にキャストする必要がある
+                return (T)(object)GetList<ChapterList>(tmpStr);
+
+            case ListData.CHARACTER:
+                tmpStr = "Chara" + str;
+                return (T)(object)GetList<CharacterList>(tmpStr);
+
+            case ListData.QUESTINFO:
+                tmpStr = "Quest" + num;
+                return (T)(object)GetList<QuestInfo>(tmpStr);
+
+            default:
+                return default(T);
         }
-        else if(data == ListData.CHARACTER)
-        {
-            string tmpStr = "Chara" + str;
-            return (T)(object)GetList<CharacterList>(tmpStr);
-        }
-        return default(T);
     }
 }

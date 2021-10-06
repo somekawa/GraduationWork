@@ -304,6 +304,270 @@ B→0.2
 
 ------------------------------------------------
 
+<ギルドのクエスト受注処理を作成する>-------------
+
+参考サイト↓
+https://gametukurikata.com/program/quest
+
+上記サイトのように実装してから改良していく。
+
+ギルド内に、「クエストを見る」のボタンを作成する
+ヒエラルキーのHouseInterior/Guildの子に
+[QuestCanvas(Canvas)]を新規作成し、更にその子として[LookQuest(Button)]を作る。※フォント変えとく
+
+次に、プレハブにしておいた[QuestMng]も[Guild]の
+子にする。(Unpackしておくこと)
+
+<サイトからの変更点>
+①ボタン操作でクエスト一覧がでるように、
+<QuestMng.cs>にClickLookQuest関数を追加して
+それを[LookQuest(Button)]のOnClickから呼び出すようにした。
+
+②[QusetMng]にアタッチされている<QuestMng.cs>で
+まだ非表示の[QuestUI]を取得しようとしてエラーに
+なったため、外部アタッチで取得するようにした。
+
+
+あとは、表示位置の座標とかをいろいろいじる。
+
+スライドバー動かんやんけ。と思ったけど、
+ちゃんとギルド内なら動く
+
+------------------------------------------------
+
+<ユニちゃんコントローラーの修正>-----------------
+
+Animatorのパラメータ指定にはStringToHashしたものを使ったほうが良い。と書かれていたので、
+
+private readonly int runParamHash = Animator.StringToHash("isRun");
+という変数を用意しておき、
+切り替えるときには
+// WaitからRunに遷移する
+this.animator_.SetBool(runParamHash, true);
+みたいに書くように変更した。
+
+------------------------------------------------
+
+<HouseInterorMng.csの修正>----------------------
+
+Start関数の呼び出し順序の関係で、TownMng.csから
+SetWarpCanvasAndCharaController関数を呼び出した時にまだplayerController_情報がfindされてない事
+があるらしい。
+
+そのため、関数内でplayerController_のnull確認をして、nullならその場でfindするように修正した。
+
+また、そのあとにStart関数が呼ばれると、
+もう一度コントローラー情報をfindしようとするので
+こっちにもnull確認を追加した。
+
+<会話シーンから建物内を映してて、退出すると
+ 建物が非表示にならないバグ>
+
+(原因)
+HouseInteriorMng.csのExitButtonに、
+全ての建物の内装を非表示にする処理が書かれていなかった。
+
+(対処法)
+// 建物オブジェクトの非表示(名前部分を""にすることで、全て非表示にできる)
+ChangeObjectActive(this.gameObject.transform.childCount, this.transform, "");
+
+上の文章を追加すれば解決した。
+
+------------------------------------------------
+
+<Toggleチェック時にクエストの説明を画面に出す>---
+
+画面右側には最初からパネルを用意しておき、
+そこに書き出す情報はトグルにチェックが入ったもの
+みたいな感じにしたほうが、それぞれにパネルをつける必要もなくなるからいいかもしれない。
+
+<QuestPrefabの変更点>
+[InfomationPanel]を削除する。
+→かわりにQuestUIの子として[InfomationPanel]を
+　設置するから
+
+[QuestToggle.cs]を新規作成し、[QuestPrefab]に
+アタッチする。
+(引数)
+Toggle→Toggle
+
+ToggleのOnValueChangedに[QuestPrefab]のアタッチ
+をしてQuestToggle.OnToggleChanged関数を設定する
+
+<QuestToggle.csの内容>
+public変数でトグルの情報を持つようにする。
+OnToggleChanged関数でトグルの状態を確認して
+OnならQuestMng.csのSetSelectQuest関数に
+自分の番号を渡す。
+
+<QuestMng.cs>
+[QuestPrefab]をインスタンス時に、[QuestPrefab]にクエスト番号を持たせるようにする。
+// クエスト番号を設定する
+questUIInstance.GetComponent<QuestToggle>().SetQuestNum(i);
+
+private Text questInfoText;
+という変数を新規で用意して、questUIからfindで読み込むようにstart関数に記載した。
+
+SetSelectQuest関数で受けとったら、Excelから読み込んでおいた情報からクエスト情報をInfomationPanelのTextに書き込むようにする。
+
+※ここまで、Excelからの読み込み以外は終了。
+
+------------------------------------------------
+
+<クエスト情報をExcelで作成する>-----------------
+新規でExcelを作成し、
+[Sheet1]を[Quest0]に変更する。
+
+1行目に、num(int),info(string),clear(int)
+というのを作成する。
+今回はテストとして
+num  →0,1,2
+info →表示メッセージを3つ用意する
+clear→すべて0にする
+
+このExcelを[QuestInfo.xls]としてExcelDataファイルに保存する。
+unity側でExcelをインポートするときに
+class nameを[QuestInfo]にして他設定を行いcreate
+
+いつもの\→/にするエラーを直してからreinportを
+おして.assetファイルを作成。Resourcesファイルに
+いれる。
+
+※あとで追加で必要になるタブ[報酬][進行度]
+　進行度は、画面にそもそも表示させるかとかの
+　判定に必要になる
+
+<QuestMng.cs>
+TextMng.csを参考にしながらExcelデータを読み込めるようにStart関数に処理を追加する。
+
+SetSelectQuest関数では、        questInfoText.text = popQuestInfo_.param[num].info;
+という処理を行うように修正する。
+※受け取ったExcelのinfo情報を代入する
+
+<PopList.cs>
+enumの数が増えてきたのでswitch文に変更
+クエスト情報が来ても対応できるように追加変更
+
+※現状では2番以降のボタンを押されるとエラー
+
+------------------------------------------------
+
+<トグルからボタンに変更する>---------------------
+何かとトグルだと不便だったので、ボタンに変更する
+
+[QuestPrefab]のトグル部分をButtonに変更。
+また、[QuestToggle.cs]も[QuestButton.cs]に
+名称変更
+→これに伴い、他スクリプトでQuestToggleと
+　書いているところやfindの書き方も変更すること
+
+[QuestButton.cs]の内容もボタン用に修正する。
+外部アタッチも[Button]をつけるようにする。
+ButtonのOnClick()はQuestPrefabをヒエラルキーから
+アタッチして、OnClickButton関数を入れる。
+
+------------------------------------------------
+
+<受注するボタンを用意する>----------------------
+クエストを選択したあとなら受注ボタンを出現させて
+クエスト受注できるようにする。
+
+[QuestUI]の子に、[OrderButton(ボタン)]を作成。
+画面右下にでてくるように調整する。
+
+<QuestMng.cs>
+questOrderButton変数を作成し、start関数から
+findするように設定する。
+
+ClickLookQuest関数に
+questOrderButton.SetActive(false);
+をつけたして、クエストを選択するまでは受注ボタンを非表示にしておく。
+
+SetSelectQuest関数内でquestOrderButtonのアクティブをtrueにする。
+
+※挨拶クエストを受けたら進行度を進める。
+　受けないで他の建物に入ろうとしたら
+　「今はギルドへ向かおう」と出す。
+　(進行度2でギルド以外の建物に以降としたら。)
+
+------------------------------------------------
+
+<受注～クエストクリアまでの流れ>-----------------
+
+とりあえず、ノートに書いた図の通りにやってみよ…
+
+①空のゲームオブジェクトに、CompleteQuest.csを
+　アタッチして、プレハブ化する。
+　(ヒエラルキーからは削除)
+  [CompleteQuestPrefab]
+
+②受注ボタン押下時に①をインスタンスする。
+　処理はQuestMng.csに記述する。
+　ClickOrderQuest関数を作成し、中でインスタンス
+　処理を書いてみる。
+　
+　ClickOrderQuest関数は、OrderButtonのOnClickに
+　設定する。
+　CompleteQuestPrefabを外部アタッチする
+
+③CompleteQuest.csを書き換えて、
+　Sceneを跨いでも消えないオブジェクトにする。
+　(Awake関数内にDontDestroyOnLoad(this);と記述)
+
+④受注ボタン押下時にインスタンスしたプレハブに
+　クエスト番号を渡すようにする。
+
+　CompleteQuest.csにSetMyNum関数を作成。
+　QuestMng.csでインスタンスされた後に呼び出す。
+　
+　選択中のクエスト番号を保存する変数を
+　QuestMng.csに作成しておく。
+
+⑤[CompleteQuestPrefab]のタグを
+　[Quest]にする。(新規作成)
+
+⑥CompleteQuest.cs内で④の番号を使って、
+　自分自身のプレハブの名前を番号に変更させる。
+
+⑦QuestClearCheck.csを新規で作成する。
+　中にリストを用意しておき、QuestMng.csで
+　インスタンスしたものをそのままリストにいれる。
+
+⑧QuestClearCheck.csに現在の受注中のクエストが
+　何個あるかを確認する関数を用意する。
+　受注ボタンを押したときに、その数が2以下なら
+　新規受注を受け付けるようにする。
+
+⑨Update関数で常にクリアフラグの立っているものが
+　ないかを検索する(QuestClearCheck.cs)
+　そのためにListをtuppleにしてboolを持てるように
+　する。
+　フラグがtrueならデバッグログを出力する。
+
+-----------------------------------------------
+
+<同じクエストが受けられないようにする>-----------
+QuestClearCheck.csのCanOrderNewQuest関数に
+引数を追加して、現在選択中のクエスト番号を取得する。
+
+そして、foreach文でリスト内にあるものと同じ番号のクエストを受けようとしたらreturn falseを
+返すように処理を追加した。
+これで同じ数値のプレハブが複数個できることはない
+
+------------------------------------------------
+
+
+<チュートリアルクエストのクリア条件を設定する>---
+
+
+
+
+------------------------------------------------
+
+※あとで追加で必要になるタブ[報酬][進行度]
+　進行度は、画面にそもそも表示させるかとかの
+　判定に必要になる
+
 *重要*
 タグの判別にはgameObject.tag == “string tag”もあるが、CompareTag()の方が早い
 
