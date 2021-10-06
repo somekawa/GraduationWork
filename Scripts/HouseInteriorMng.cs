@@ -29,7 +29,11 @@ public class HouseInteriorMng : MonoBehaviour
     void Start()
     {
         cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
-        playerController_ = GameObject.Find("Uni").GetComponent<UnitychanController>();
+
+        if(playerController_ == null)
+        {
+            playerController_ = GameObject.Find("Uni").GetComponent<UnitychanController>();
+        }
 
         inHouseInfoCanvas_ = this.transform.Find("Canvas").gameObject;
         iconImage_ = inHouseInfoCanvas_.transform.Find("Icon").gameObject;
@@ -189,7 +193,13 @@ public class HouseInteriorMng : MonoBehaviour
         // ワープ処理を止めるかどうか
         warpTown.enabled = allFlg;
 
-        if(!allFlg)
+        // TownMng.csから呼び出された時に、まだプレイヤー情報を取得していなかったら取得するようにする
+        if (playerController_ == null)
+        {
+            playerController_ = GameObject.Find("Uni").GetComponent<UnitychanController>();
+        }
+
+        if (!allFlg)
         {
             // キャラアニメーションを止める
             playerController_.StopUniRunAnim();

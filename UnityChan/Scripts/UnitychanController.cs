@@ -10,7 +10,7 @@ public class UnitychanController : MonoBehaviour
     private Rigidbody rigid;      // Rigidbodyコンポーネント
     private Animator animator_;   // Animator コンポーネント
 
-    private const string key_isRun = "isRun";         // Animatorで自分で設定したフラグの名前
+    private readonly int runParamHash = Animator.StringToHash("isRun");
 
     // 押下状態を確認したいキーをまとめたもの
     private KeyCode[] keyArray_ = new KeyCode[4] { KeyCode.UpArrow, KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow };
@@ -32,7 +32,7 @@ public class UnitychanController : MonoBehaviour
             if (Input.GetKey(i))
             {
                 // WaitからRunに遷移する
-                this.animator_.SetBool(key_isRun, true);
+                this.animator_.SetBool(runParamHash, true);
                 tmpFlg = true;
                 break;  // それ以上回す必要がないので、breakで抜ける
             }
@@ -41,7 +41,7 @@ public class UnitychanController : MonoBehaviour
         if (!tmpFlg) // 上のforeachを通ってもfalseのままだった場合は、走るアニメーションをfalseにする(=待機)
         {
             // RunからWaitに遷移する
-            this.animator_.SetBool(key_isRun, false);
+            this.animator_.SetBool(runParamHash, false);
             return; // 待機アニメーションということは下の座標移動処理を行う必要がないため、returnする
         }
 
@@ -71,7 +71,7 @@ public class UnitychanController : MonoBehaviour
 
             // ここでRunのアニメーションを変更しておかないと、モードが切り替わる瞬間まで走っていたら
             // 走りモーションが戦闘中に継続してしまう。
-            this.animator_.SetBool(key_isRun, false);
+            this.animator_.SetBool(runParamHash, false);
             return;
         }
 
@@ -100,7 +100,7 @@ public class UnitychanController : MonoBehaviour
     // キャラが移動中か
     public bool GetMoveFlag()
     {
-        return this.animator_.GetBool(key_isRun);
+        return this.animator_.GetBool(runParamHash);
     }
 
     // キャラの走りアニメーションを止める
@@ -109,7 +109,7 @@ public class UnitychanController : MonoBehaviour
         // アニメーションがあるかnullチェックを行う
         if(this.animator_ != null)
         {
-            this.animator_.SetBool(key_isRun, false);
+            this.animator_.SetBool(runParamHash, false);
         }
     }
 
