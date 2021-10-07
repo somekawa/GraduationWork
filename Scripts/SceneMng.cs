@@ -20,7 +20,9 @@ public class SceneMng : MonoBehaviour
         CONVERSATION,   // 会話シーン
         TOWN,           // 街シーン
         FIELD,          // フィールドシーン
-        UNIHOUSE        // ユニちゃんの家
+        TESTFIELD,
+        UNIHOUSE,       // ユニちゃんの家
+        MAX
     }
 
     public static SceneMng singleton;

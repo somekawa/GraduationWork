@@ -11,6 +11,9 @@ public class UniHouseMng : MonoBehaviour
         // WarpTown.csの初期化関数を呼ぶ
         GameObject.Find("WarpInTown").GetComponent<WarpTown>().Init();
 
+        // WarpField.csの初期化関数を先に呼ぶ
+        GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
+
         // メインカメラを最初にアクティブにする
         var cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
         cameraMng_.SetChangeCamera(false);

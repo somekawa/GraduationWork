@@ -67,7 +67,7 @@ public class WarpField : MonoBehaviour
 
         for (int i = (int)SceneMng.SCENE.TOWN; i < (int)SceneMng.SCENE.MAX; i++)
         {
-            Debug.Log((int)SceneMng.nowScene+"が現在のシーン       " +i + "番目のシーンにいます");
+            //Debug.Log((int)SceneMng.nowScene+"が現在のシーン       " +i + "番目のシーンにいます");
             selectFieldImage_[i] = locationSelCanvas_.transform.GetChild(i).GetComponent<Image>();
             selectFieldText_[i] = selectFieldImage_[i].transform.GetChild(0).GetComponent<Text>();
             selectFieldText_[i].text = sceneName_[i];// Textに文字を入れる

@@ -7,7 +7,7 @@ public class MayorHouse : HouseBase
         // ÉCÉxÉìÉgî≠ê∂
         if (EventMng.GetChapterNum() == 0)
         {
-            EventMng.SetChapterNum(1, (int)SceneMng.SCENE.CONVERSATION);
+            EventMng.SetChapterNum(1, SceneMng.SCENE.CONVERSATION);
             return true;
         }
         return false;

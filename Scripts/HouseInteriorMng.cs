@@ -50,6 +50,9 @@ public class HouseInteriorMng : MonoBehaviour
         //@ ここに全部の建物のイベント発生確認関数を登録していく
         func_.Add("MayorHouse", new MayorHouse().CheckEvent);
         func_.Add("Guild"     , new Guild().CheckEvent);
+        func_.Add("BookStore" , new BookStore().CheckEvent);
+        func_.Add("ItemStore" , new ItemStore().CheckEvent);
+        func_.Add("Restaurant", new Restaurant().CheckEvent);
     }
 
     public bool SetHouseVisible(string name)
@@ -251,6 +254,7 @@ public class HouseInteriorMng : MonoBehaviour
 
 
         //@ 新規Scriptで名前取得Setを呼び出す場所
+        QuestClearCheck.SetBuildName(nowInHouseName);
 
         // 現在の建物名を初期化
         nowInHouseName = "";

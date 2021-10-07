@@ -45,13 +45,16 @@ public class QuestMng : MonoBehaviour
     private GameObject DataPopPrefab_;
     private QuestInfo popQuestInfo_;
 
-    private int questNum_;  // 選択中のクエスト番号を保存する変数
+    private int questNum_;          // 選択中のクエスト番号を保存する変数
+
+    private Guild guild_ = null;    // ギルドスクリプトのインスタンス
 
     void Start()
 	{
         DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
         popQuestInfo_ = DataPopPrefab_.GetComponent<PopList>().GetData<QuestInfo>(PopList.ListData.QUESTINFO);
 
+        guild_ = new Guild();
 
         //　クエスト情報の表示先テキスト
         questInfoText = questUI.transform.Find("InfomationPanel/Text").GetComponent<Text>();
@@ -132,6 +135,9 @@ public class QuestMng : MonoBehaviour
 
             // クエストクリアを確認するスクリプトのリストに登録する
             QuestClearCheck.SetList(temp);
+
+            // クエストの受注でイベントが進行するか判断する
+            guild_.GuildQuestEvent(questNum_);
 
             Debug.Log("クエストを受注しました");
         }
