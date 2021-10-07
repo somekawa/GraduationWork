@@ -3,19 +3,15 @@ using UnityEngine;
 
 public class QuestClearCheck : MonoBehaviour
 {
-    private static List<(GameObject,bool)> completeQuestsList = new List<(GameObject,bool)>();
-
+    // 受注中のクエストを保存するリスト(最大3つ)
+    private static List<(GameObject,bool)> completeQuestsList_ = new List<(GameObject,bool)>();
+    // チュートリアルクエスト用のリスト(出入りした建物を記録する)
     private static List<string> buildList_ = new List<string>();
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.I))
-        {
-            SceneMng.SceneLoad((int)SceneMng.SCENE.TOWN);
-        }
-
         // リストを回して、フラグがtrueのものがあるか探す
-        foreach (var tmp in completeQuestsList)
+        foreach (var tmp in completeQuestsList_)
         {
             if (tmp.Item2)
             {
@@ -27,17 +23,17 @@ public class QuestClearCheck : MonoBehaviour
     public static void SetList(GameObject obj)
     {
         // リストに追加する
-        completeQuestsList.Add((obj,false));
+        completeQuestsList_.Add((obj,false));
     }
 
     // まだ新規でクエストを受けられるか確認する
     public static bool CanOrderNewQuest(int num)
     {
         // null演算子( if(list != null && list.Count < 3)と同じ意味 )
-        if (completeQuestsList?.Count < 3)
+        if (completeQuestsList_?.Count < 3)
         {
             // 同じクエストを受けようとしているか確認する
-            foreach (var tmp in completeQuestsList)
+            foreach (var tmp in completeQuestsList_)
             {
                 if (tmp.Item1.name == num.ToString())
                 {
@@ -57,7 +53,7 @@ public class QuestClearCheck : MonoBehaviour
     public static void SetBuildName(string name)
     {
         // 0番のクエストを受けていなければreturnする
-        foreach (var tmp in completeQuestsList)
+        foreach (var tmp in completeQuestsList_)
         {
             if (int.Parse(tmp.Item1.name) != 0)
             {
@@ -83,25 +79,26 @@ public class QuestClearCheck : MonoBehaviour
             }
         }
 
+        // 未登録の建物名だったら、addする
         if(!tmpFlg)
         {
             buildList_.Add(name);
         }
 
-        // 全ての建物へあいさつ回りができた
+        // 全ての建物へあいさつ回りができた(建物名が6箇所分入っている)
         if(buildList_.Count >= 6)
         {
-            for(int i = 0; i < completeQuestsList.Count; i++)
+            for(int i = 0; i < completeQuestsList_.Count; i++)
             {
-                if(int.Parse(completeQuestsList[i].Item1.name) == 0)
+                if(int.Parse(completeQuestsList_[i].Item1.name) == 0)
                 {
-                    // エラーの書き方
+                    // エラーのでる書き方
                     // completeQuestsList[i].Item2 = true;
 
                     // 一時変数に保存してから代入する方法で対処する
-                    (GameObject, bool) tmpData = completeQuestsList[i];
+                    (GameObject, bool) tmpData = completeQuestsList_[i];
                     tmpData.Item2 = true;
-                    completeQuestsList[i] = tmpData;
+                    completeQuestsList_[i] = tmpData;
                 }
             }
 

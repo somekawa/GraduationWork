@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 
-// このスクリプトの内容をクエストのクリア条件のあるゲームオブジェクトにアタッチする
-
 public class CompleteQuest : MonoBehaviour
 {
     void Awake()
     {
         // シーンを跨いでも消えないオブジェクトにする
+        // このオブジェクトが消えてしまうと、QuestClearCheck.csの受注中のクエストを保存しているリストがnullになってしまうから
         DontDestroyOnLoad(this);
     }
 
