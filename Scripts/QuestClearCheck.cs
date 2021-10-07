@@ -53,12 +53,10 @@ public class QuestClearCheck : MonoBehaviour
     public static void SetBuildName(string name)
     {
         // 0番のクエストを受けていなければreturnする
-        foreach (var tmp in completeQuestsList_)
+        // チュートリアルクエストを受注した時は、クエストが1つしかギルドに表示されていない設定にする
+        if (int.Parse(completeQuestsList_[0].Item1.name) != 0)
         {
-            if (int.Parse(tmp.Item1.name) != 0)
-            {
-                return;
-            }
+            return;
         }
 
         // 初回だけif文内に入るようにする
