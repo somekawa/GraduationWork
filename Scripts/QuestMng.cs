@@ -2,8 +2,11 @@
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 
 // クリックされたクエストを取得
+
+// コルーチンでボタン出現タイミングを遅らせる
 
 public class QuestMng : MonoBehaviour
 {
@@ -31,10 +34,11 @@ public class QuestMng : MonoBehaviour
     private Text questInfoText_;                     //　クエスト情報の表示先テキスト
     private GameObject questOrderButton_;            //　クエスト受注ボタン
 
-    private GameObject lookQuest_;   // クエストを見るボタン
     private int questNum_;           // 選択中のクエスト番号を保存する変数
 
     private Guild guild_ = null;     // ギルドスクリプトのインスタンス
+
+    private GameObject QuestCanvas;  // クエストキャンバス
 
     // Excelからのデータ読み込み
     private GameObject DataPopPrefab_;
@@ -92,13 +96,28 @@ public class QuestMng : MonoBehaviour
 			Debug.Log(questList_[i].GetTitle() + ":" + questList_[i].GetInformation());
 		}
 
-		lookQuest_ = GameObject.Find("QuestCanvas");
-	}
+        QuestCanvas = GameObject.Find("QuestCanvas");
 
-	// クエスト掲示板を見るとき
-	public void ClickLookQuest()
+        // いまは表示非表示で切り替えているが、右からボタン類を画面に差し込むようにする
+        // ボタン表示までの時間を設定する
+        StartCoroutine(ButtonVisible());
+    }
+
+    // コルーチン  
+    private IEnumerator ButtonVisible()
+    {
+        QuestCanvas.SetActive(false);
+
+        // 3秒待機してから表示する
+        yield return new WaitForSeconds(3.0f);
+
+        QuestCanvas.SetActive(true);
+    }
+
+    // クエスト掲示板を見るとき
+    public void ClickLookQuest()
 	{
-		lookQuest_.gameObject.SetActive(false);
+		QuestCanvas.gameObject.SetActive(false);
 
 		//　クエストの状態をアップデート
 		//UpdateQuestData();
@@ -134,7 +153,7 @@ public class QuestMng : MonoBehaviour
             Debug.Log("クエストを受注しました");
 
             // 受注ボタンを非表示にして画面を選択前に戻す
-            lookQuest_.gameObject.SetActive(true);
+            QuestCanvas.gameObject.SetActive(true);
             questUI.SetActive(!questUI.activeSelf);
             questOrderButton_.SetActive(false);
         }

@@ -4,14 +4,14 @@ using UnityEngine;
 public class QuestClearCheck : MonoBehaviour
 {
     // 受注中のクエストを保存するリスト(最大3つ)
-    private static List<(GameObject,bool)> completeQuestsList_ = new List<(GameObject,bool)>();
+    private static List<(GameObject,bool)> orderQuestsList_ = new List<(GameObject,bool)>();
     // チュートリアルクエスト用のリスト(出入りした建物を記録する)
-    private static List<string> buildList_ = new List<string>();
+    public static List<string> buildList = new List<string>();
 
     private void Update()
     {
         // リストを回して、フラグがtrueのものがあるか探す
-        foreach (var tmp in completeQuestsList_)
+        foreach (var tmp in orderQuestsList_)
         {
             if (tmp.Item2)
             {
@@ -23,17 +23,17 @@ public class QuestClearCheck : MonoBehaviour
     public static void SetList(GameObject obj)
     {
         // リストに追加する
-        completeQuestsList_.Add((obj,false));
+        orderQuestsList_.Add((obj,false));
     }
 
     // まだ新規でクエストを受けられるか確認する
     public static bool CanOrderNewQuest(int num)
     {
         // null演算子( if(list != null && list.Count < 3)と同じ意味 )
-        if (completeQuestsList_?.Count < 3)
+        if (orderQuestsList_?.Count < 3)
         {
             // 同じクエストを受けようとしているか確認する
-            foreach (var tmp in completeQuestsList_)
+            foreach (var tmp in orderQuestsList_)
             {
                 if (tmp.Item1.name == num.ToString())
                 {
@@ -54,22 +54,28 @@ public class QuestClearCheck : MonoBehaviour
     {
         // 0番のクエストを受けていなければreturnする
         // チュートリアルクエストを受注した時は、クエストが1つしかギルドに表示されていない設定にする
-        if (int.Parse(completeQuestsList_[0].Item1.name) != 0)
+        if (int.Parse(orderQuestsList_[0].Item1.name) != 0)
+        {
+            return;
+        }
+
+        // クリア済みならreturnする
+        if (orderQuestsList_[0].Item2)
         {
             return;
         }
 
         // 初回だけif文内に入るようにする
-        if (buildList_.Count <= 0 )
+        if (buildList.Count <= 0 )
         {
             // 先にあいさつ回りの関係がない建物名を登録しておく
-            buildList_.Add("MayorHouse");
-            buildList_.Add("Guild");
-            buildList_.Add("UniHouse");
+            buildList.Add("MayorHouse");
+            buildList.Add("Guild");
+            buildList.Add("UniHouse");
         }
 
         bool tmpFlg = false;    // すでに登録済みの建物からの退出ならtrue
-        foreach (string list in buildList_)
+        foreach (string list in buildList)
         {
             if(list == name)
             {
@@ -80,29 +86,32 @@ public class QuestClearCheck : MonoBehaviour
         // 未登録の建物名だったら、addする
         if(!tmpFlg)
         {
-            buildList_.Add(name);
+            buildList.Add(name);
         }
 
         // 全ての建物へあいさつ回りができた(建物名が6箇所分入っている)
-        if(buildList_.Count >= 6)
+        if(buildList.Count >= 6)
         {
-            for(int i = 0; i < completeQuestsList_.Count; i++)
+            for(int i = 0; i < orderQuestsList_.Count; i++)
             {
-                if(int.Parse(completeQuestsList_[i].Item1.name) == 0)
+                if(int.Parse(orderQuestsList_[i].Item1.name) == 0)
                 {
                     // エラーのでる書き方
                     // completeQuestsList[i].Item2 = true;
 
                     // 一時変数に保存してから代入する方法で対処する
-                    (GameObject, bool) tmpData = completeQuestsList_[i];
+                    (GameObject, bool) tmpData = orderQuestsList_[i];
                     tmpData.Item2 = true;
-                    completeQuestsList_[i] = tmpData;
+                    orderQuestsList_[i] = tmpData;
+
+                    // イベント進行度を6にする
+                    EventMng.SetChapterNum(6, SceneMng.SCENE.NON);
                 }
             }
 
             // クリア条件処理は終了したので、リストを削除して使えないようにしておく
-            buildList_.Clear();
-            buildList_ = null;
+            buildList.Clear();
+            buildList = null;
         }
     }
 }

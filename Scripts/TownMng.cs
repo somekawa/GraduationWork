@@ -9,10 +9,10 @@ public class TownMng : MonoBehaviour
 
     private readonly string[] buildNameEng_ = { "MayorHouse", "BookStore", "ItemStore", "Guild", "Restaurant" };  // 建物名(ヒエラルキーと同じ英語)
     private readonly Vector3[] buildPos_ = { new Vector3(0.0f, 0.0f, 110.0f),   
-                                             new Vector3(0.0f, 0.0f, 110.0f),
-                                             new Vector3(0.0f, 0.0f, 110.0f),
+                                             new Vector3(-12.0f,0.0f, 56.0f),
+                                             new Vector3(31.0f, 0.0f, 96.0f),
                                              new Vector3(23.0f, 0.0f, 96.0f),
-                                             new Vector3(0.0f, 0.0f, 110.0f) };
+                                             new Vector3(17.0f, 0.0f, 52.0f) };
     private Dictionary<string, Vector3> uniPosMap_ = new Dictionary<string, Vector3>();    // キー:英語建物名,値:ユニちゃん表示座標
 
     void Start()

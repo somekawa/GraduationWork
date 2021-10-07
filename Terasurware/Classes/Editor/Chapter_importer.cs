@@ -10,7 +10,7 @@ using NPOI.SS.UserModel;
 public class Chapter_importer : AssetPostprocessor
 {
     private static readonly string filePath = "Assets/ExcelData/Chapter.xls";
-    private static readonly string[] sheetNames = { "Chapter0","Chapter1", "Chapter2" };
+    private static readonly string[] sheetNames = { "0","1", "2", "3", "4", "5" };
     
     static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
     {
@@ -30,7 +30,7 @@ public class Chapter_importer : AssetPostprocessor
 
                 foreach (string sheetName in sheetNames)
                 {
-                    var exportPath = "Assets/Resources/Chapter/" + sheetName + ".asset";
+                    var exportPath = "Assets/Resources/Chapter/Chapter" + sheetName + ".asset";
 
                     // check scriptable object
                     var data = (ChapterList)AssetDatabase.LoadAssetAtPath(exportPath, typeof(ChapterList));
@@ -43,7 +43,7 @@ public class Chapter_importer : AssetPostprocessor
                     data.param.Clear();
 
 					// check sheet
-                    var sheet = book.GetSheet(sheetName);
+                    var sheet = book.GetSheet("Chapter" + sheetName);
                     if (sheet == null)
                     {
                         Debug.LogError("[QuestData] sheet not found:" + sheetName);
