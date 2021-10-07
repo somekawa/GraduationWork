@@ -16,116 +16,106 @@ public class WarpTown : MonoBehaviour
     }
 
     // 街中ワープ関連
-    private Canvas warpCanvas_;       // 街中のワープ先を表示するキャンバス
-
-    private GameObject warpInTown_;         // 街中ワープ先を持つ親オブジェクト
     private GameObject[] warpChildren_;     // 街中のワープ先
-    private float changeCnt_ = 0.0f;        // 連続でSpaceキーの処理に入らないようにするため
-    private bool decisionFlag_ = false;     // ワープ先が決まったかどうか
 
-    // ワープ選択画像背景
-    private Image frameImage_;
-    private Vector2 saveHandlePos_;
-    private Vector2 maxHandlePos_;
-    private float handleSpeed_ = 8.0f;
-    private float handleRotate_ = 1.0f;
-    private Image warpActive_;   // warpCanvasの子の背景画像を取得
+    // ワープ選択関連
+    private Image warpActive_;          // Mask画像。子に移動先と針がある
+    private Image frameImage_;          // フレーム画像
+    private Vector2[] framPositions_ = new Vector2[2];// 0初期値　1最大値
+    private float[] speeds_ = new float[2] { 8.0f, 1.0f };// 0移動速度　1回転速度
 
     // 長針関連
     private Image needleImage_;              // warpActive(背景の子)から長針画像を取得
-    private float[] needleRotate_ = new float[(int)warp.MAX] {
-            32.0f, 12.0f,  -12.0f, -32.0f
-        };
-    // 長針の回転先を保存
-    private bool moveNeedle_ = false;       // 長針が回転しても良い状態かチェック 
-    public static int warpNum_ = (int)warp.HOUSE; // 長針がどこを指しているか（1スタート
+    private float[] needleRotate_ = new float[(int)warp.MAX]
+                    {  // 長針の回転先を保存
+                        32.0f, 12.0f,  -12.0f, -32.0f
+                    };
+    public static int warpNum_ = (int)warp.HOUSE; // 長針がどこを指しているか（0スタート
+
+    // フェードアウト関連
+    private Fade fade_;
 
     // 町から出るとき関連
     private WarpField warpFieldScript_;  // warpField.cs
 
     // カメラ関連　座標関連
     private GameObject uniChan_;         // ユニちゃん
-    private GameObject cameraCtl_;      // CameraMng.csがアタッチされてるオブジェクト
     private CameraMng cameraMng_;        // メインカメラとサブカメラの切り替え
-    private Vector3 starMainCameraPos_; // ユニティちゃんとカメラの座標差を出すため初期座標を保存
 
-    // フェードアウト関連
-    private Image fadePanel;         // warpCanvasの子のフェードアウト用パネルを取得
-    private float alphaCnt_ = 0.0f;  // panelのアルファ値
-
-    // 家の前にいる場合
-    private Vector3 houseFrontPos_ = new Vector3(20.0f, 0.0f, 10.0f);
-    private Collider houseWarpColl_;
+    // ユニの家の前にいる場合
+    private Collider houseWarpColl_;// ユニの家に行く、出るための当たり判定
     private int count_ = 0;
+
+    private static bool tutorialFlag_ = true;
 
     // Start関数から名称を変更し、TownMng.csのStart関数で呼び出されるように修正
     public void Init()
     {
+        //if(tutorialFlag_==true)
+        //{
+        //    return;
+        //}
         // ワープする座標を入れるため
         uniChan_ = GameObject.Find("Uni");
 
         // オブジェクト経由でWarpFieldScriptを取得
         warpFieldScript_ = GameObject.Find("WarpOut").transform.GetComponent<WarpField>();
 
-        warpCanvas_ = GameObject.Find("WarpCanvas").GetComponent<Canvas>();
-        warpActive_ = warpCanvas_.transform.Find("WarpImageMask").GetComponent<Image>();
-        // フェードアウトするためのパネル
-        fadePanel = warpCanvas_.transform.Find("FadePanel").GetComponent<Image>();
-
+        // Mask画像を取得
+        warpActive_ = GameObject.Find("WarpCanvas").transform.Find("WarpImageMask").GetComponent<Image>();
         // ワープイメージのフレーム
-        frameImage_ = warpCanvas_.transform.Find("FrameImage").GetComponent<Image>();
-        saveHandlePos_ = new Vector2(frameImage_.transform.localPosition.x, frameImage_.transform.localPosition.y);
-        maxHandlePos_ = new Vector2(saveHandlePos_.x - 200, saveHandlePos_.y + 200);
-        Debug.Log("Max座標" + maxHandlePos_ + "  初期値" + saveHandlePos_);
-
+        frameImage_ = GameObject.Find("WarpCanvas").transform.Find("FrameImage").GetComponent<Image>();
+        framPositions_[0] = new Vector2(frameImage_.transform.localPosition.x, frameImage_.transform.localPosition.y);
+        framPositions_[1] = new Vector2(framPositions_[0].x - 200, framPositions_[0].y + 200);
+        //Debug.Log("初期値" + framPositions_[0] + "  Max座標" + framPositions_[1]);
 
         // 長針画像取得
         needleImage_ = warpActive_.transform.Find("Needle").GetComponent<Image>();
         // 長針の初期位置
         needleImage_.transform.rotation = Quaternion.Euler(0.0f, 0.0f, needleRotate_[(int)warp.HOUSE]);
 
-        if (SceneMng.nowScene == SceneMng.SCENE.TOWN)
-        {
-            // オブジェクト経由でCameraMngScriptを取得
-            cameraCtl_ = GameObject.Find("CameraController");
-            cameraMng_ = cameraCtl_.transform.GetComponent<CameraMng>();
-            // メインカメラの初期画像を取得
-            starMainCameraPos_ = cameraMng_.mainCamera.transform.position;
-        }
+        // トランジション
+        fade_ = GameObject.Find("FadeCanvas").GetComponent<Fade>();
 
-        // ワープ先のオブジェクトの親を取得
-        warpInTown_ = GameObject.Find("WarpInTown");
+        // ユニの家から出る、入るための当たり判定を取得
+        houseWarpColl_ = this.transform.Find("UniHouseCollider").GetComponent<Collider>();
+        houseWarpColl_.isTrigger = false;
 
         // 街中のワープ先を保存 フィールドを含まない
         warpChildren_ = new GameObject[(int)warp.MAX - 1];
         for (int i = (int)warp.HOUSE; i < (int)warp.MAX - 1; i++)
         {
             // 親からワープ先の子どもを順に代入
-            warpChildren_[i] = warpInTown_.transform.GetChild(i).gameObject;
+            warpChildren_[i] = GameObject.Find("WarpInTown").transform.GetChild(i).gameObject;
         }
-        houseWarpColl_ = this.gameObject.transform.Find("UniHouseCollider").GetComponent<Collider>();
-        houseWarpColl_.isTrigger = false;
 
+        // サブカメラ時にメインカメラに切り替えさせるために取得しておく
+        if (SceneMng.nowScene == SceneMng.SCENE.TOWN)
+        {
+            cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
+        }
+
+        // InHousesから戻ってきたときに針の場所を保存するため
         if (warpNum_ != (int)warp.HOUSE)
         {
+            Debug.Log("別シーンからワープで戻ってきました");
             needleImage_.transform.rotation = Quaternion.Euler(0.0f, 0.0f, needleRotate_[warpNum_]);
 
             if (SceneMng.nowScene == SceneMng.SCENE.TOWN)
             {
+                // 選択されているワープ座標に移動
                 uniChan_.transform.position = warpChildren_[warpNum_].transform.position;
-                // 初期座標の差でカメラが追従しているため
-                cameraMng_.mainCamera.transform.position =
-                 uniChan_.transform.position + starMainCameraPos_;
-            }
-            else
-            {
-                uniChan_.transform.position = houseFrontPos_;
             }
         }
     }
 
     void Update()
     {
+        //if (tutorialFlag_ == true)
+        //{
+        //    return;
+        //}
+
         if (houseWarpColl_.isTrigger == false)
         {
             if (count_ < 60)
@@ -139,186 +129,171 @@ public class WarpTown : MonoBehaviour
             }
         }
 
-        if (decisionFlag_ == true)
-        {
-            FadeOutAndIn();
-        }
-
-
+        frameImage_.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, speeds_[1]);
         // フィールドキャンバスがアクティブの時
         if (warpFieldScript_.GetLocationSelActive() == true)
         {
-            // 常に回転させる
-            handleRotate_ += 30.0f * Time.deltaTime;
-            frameImage_.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, handleRotate_);
+            speeds_[1] += 10.0f * Time.deltaTime;            // 右回転
             return;   // 町中のワープは選択できないように
         }
         else
         {
-            // 長針が動かない＝ワープ先を選べない
-            if (moveNeedle_ == false)
+            //// 長針が動かない＝ワープ先を選べない
+            if (warpFieldScript_.GetWarpNowFlag() == false)
             {
-                // 常に回転させる
-                handleRotate_ += 30.0f * Time.deltaTime;
-                frameImage_.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, handleRotate_);
+                Debug.Log("warpNowFlag_がfalseの時");
+                speeds_[1] += 10.0f * Time.deltaTime;            // 右回転
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
                     // ワープ準備
-                    moveNeedle_ = true;
                     warpFieldScript_.SetWarpNowFlag(true);
+                    StartCoroutine(NeedleCheck(true));            // ワープ先選択処理
                 }
             }
             else
             {
-                // moveNeedle_=trueになった瞬間にワープ選択処理に入らないようにする
-                if (changeCnt_ < 0.5f)
+                speeds_[1] += 30.0f * Time.deltaTime;// 回転スピードを上げる
+                if (framPositions_[1].x < frameImage_.transform.localPosition.x
+                      && frameImage_.transform.localPosition.y < framPositions_[1].y)
                 {
-                    // ワープ処理に入る時のSpaceキー処理が入らないようにするため
-                    changeCnt_ += Time.deltaTime;
-                    return;
-                }
-                ChoiceWarpLocation();            // ワープ先選択処理
-            }
-        }
-    }
-
-    private void ChoiceWarpLocation()
-    {
-        if (maxHandlePos_.x < frameImage_.transform.localPosition.x
-            && frameImage_.transform.localPosition.y < maxHandlePos_.y)
-        {
-            handleSpeed_ += 1.0f * Time.deltaTime;
-            frameImage_.transform.localPosition -= new Vector3(handleSpeed_, -handleSpeed_, 0.0f);
-            warpActive_.transform.localPosition -= new Vector3(handleSpeed_, -handleSpeed_, 0.0f);
-            //Debug.Log(maxHandlePos_ + "    <   " + frameImage_.transform.localPosition.x);
-        }
-        else
-        {
-            // スピードが変わるため初期化
-            handleSpeed_ = 8.0f;
-        }
-        // ワープ先選択中は反対周りにする
-        handleRotate_ -= 30.0f * Time.deltaTime;
-        frameImage_.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, handleRotate_);
-
-        // 選択先を変更
-        if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            StartCoroutine(WarpCansel(true));            // ワープキャンセルの場合
-            warpFieldScript_.SetWarpNowFlag(false);
-        }
-        else if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            if (warpNum_ < (int)warp.FIELD)
-            {
-                warpNum_++;      // 右に移動
-            }
-        }
-        else if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            if ((int)warp.HOUSE < warpNum_)
-            {
-                warpNum_--;    // 左に移動
-            }
-        }
-        else
-        {
-            // 何もしない
-        }
-
-        for (int i = (int)warp.HOUSE; i < (int)warp.MAX; i++)
-        {
-            if (warpNum_ == i)
-            {
-                // 長針の角度
-                needleImage_.transform.rotation = Quaternion.Euler(0.0f, 0.0f, needleRotate_[i]);
-                break;
-            }
-        }
-
-        // 行先決定時
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (warpNum_ != (int)warp.FIELD)
-            {
-                // フィールド以外のワープ先確定
-                decisionFlag_ = true;
-                warpFieldScript_.SetWarpNowFlag(false);
-            }
-            else
-            {                // フィールド選択時
-                warpFieldScript_.SetLocationSelActive(true);         // フィールドの移動先を表示
-                warpFieldScript_.SetNowTownFlag(true);// 町からのワープだとFlagをtrueにする
-            }
-            StartCoroutine(WarpCansel(true));            // ワープ処理リセット
-        }
-    }
-
-    private void FadeOutAndIn()
-    {
-        // 町中をワープする場合
-        if (alphaCnt_ < 1.0f)
-        {
-            uniChan_.SetActive(false);
-            alphaCnt_ += Time.deltaTime * 2;
-        }
-        else if (1.0f < alphaCnt_)
-        {
-            uniChan_.SetActive(true);
-            alphaCnt_ = 0.0f;
-            decisionFlag_ = false;
-
-            if (SceneMng.nowScene != SceneMng.SCENE.TOWN)
-            {
-                SceneMng.SceneLoad((int)SceneMng.SCENE.TOWN);
-            }
-            else
-            {
-                // 街中ワープ後のユニちゃんの座標
-                uniChan_.transform.position = warpChildren_[warpNum_].transform.position;
-                // サブカメラに切り替わっていたら
-                if (cameraMng_.mainCamera.activeSelf == false)
-                {
-                    cameraMng_.SetChangeCamera(false);// メインカメラに戻す
-
-                    // 初期座標の差でカメラが追従しているため
-                    cameraMng_.mainCamera.transform.position =
-                         uniChan_.transform.position + starMainCameraPos_;
+                    speeds_[0] += 1.0f * Time.deltaTime;
+                    frameImage_.transform.localPosition -= new Vector3(speeds_[0], -speeds_[0], 0.0f);
+                    warpActive_.transform.localPosition = frameImage_.transform.localPosition;
+                    //Debug.Log(maxHandlePos_ + "    <   " + frameImage_.transform.localPosition.x);
                 }
             }
         }
-        else
-        {
-            // 何もしない
-        }
-        fadePanel.color = new Color(1.0f, 1.0f, 1.0f, alphaCnt_);
     }
 
-    private IEnumerator WarpCansel(bool flag)
+    private IEnumerator NeedleCheck(bool flag)
     {
-        // 移動Cancelの場合
-        moveNeedle_ = false;             // 長針が動かないように
-        changeCnt_ = 0.0f;               // ワープに入るためのSpaceキー処理が入るように
+        // 0.5秒待ってからワープ選択処理に入る
+        yield return new WaitForSeconds(0.5f);
         while (flag)
         {
-            if (frameImage_.transform.localPosition.x < saveHandlePos_.x
-                  && saveHandlePos_.y < frameImage_.transform.localPosition.y)
+            yield return null;
+            // 選択先を変更
+            if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow))
             {
-                handleSpeed_ += 1.0f * Time.deltaTime;
-                frameImage_.transform.localPosition += new Vector3(handleSpeed_, -handleSpeed_, 0.0f);
-                warpActive_.transform.localPosition += new Vector3(handleSpeed_, -handleSpeed_, 0.0f);
+                StartCoroutine(WarpCansel());            // ワープキャンセルの場合
+                warpFieldScript_.SetWarpNowFlag(false);
+                yield break; // ループを抜ける
+            }
+            else if (Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                if (warpNum_ < (int)warp.FIELD)
+                {
+                    warpNum_++;      // 右に移動
+                }
+            }
+            else if (Input.GetKeyDown(KeyCode.LeftArrow))
+            {
+                if ((int)warp.HOUSE < warpNum_)
+                {
+                    warpNum_--;    // 左に移動
+                }
+            }
+            else
+            {
+                // 何もしない
+            }
+
+            for (int i = (int)warp.HOUSE; i < (int)warp.MAX; i++)
+            {
+                if (warpNum_ == i)
+                {
+                    // 長針の角度
+                    needleImage_.transform.rotation = Quaternion.Euler(0.0f, 0.0f, needleRotate_[i]);
+                    break;
+                }
+            }
+
+            // 行先決定時
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                if (warpNum_ == (int)warp.FIELD)
+                {
+                    // フィールド選択時
+                    warpFieldScript_.SetLocationSelActive(true);         // フィールドの移動先を表示
+                    warpFieldScript_.SetNowTownFlag(true);// 町からのワープだとFlagをtrueにする
+                }
+                else
+                {
+                    warpFieldScript_.SetWarpNowFlag(false);
+                    if (warpNum_ == (int)warp.HOUSE)
+                    {
+                        // Scene名がTownならユニの家のシーンに飛ぶ
+                        CommonWarp(SceneMng.SCENE.TOWN, SceneMng.SCENE.UNIHOUSE);
+                    }
+                    else
+                    {
+                        // Scene名がInHouseAndUniHouseならTwonに飛ぶ
+                        CommonWarp(SceneMng.SCENE.UNIHOUSE, SceneMng.SCENE.TOWN);
+                    }
+                }
+                StartCoroutine(WarpCansel());            // ワープ処理リセット
+                yield break;
+            }
+        }
+    }
+
+    private void CommonWarp(SceneMng.SCENE scene, SceneMng.SCENE nextScene)
+    {
+        // 現在シーンと同じ名前ならシーン遷移する
+        if (SceneMng.nowScene == scene)
+        {
+            SceneMng.SceneLoad((int)nextScene);
+        }
+        else
+        {
+            StartCoroutine(FadeOutAndIn()); // 以外ならフェードアウトさせるだけ
+        }
+    }
+
+    private IEnumerator FadeOutAndIn()
+    {
+        fade_.FadeIn(1);
+        uniChan_.SetActive(false);
+        yield return new WaitForSeconds(0.5f);
+        uniChan_.SetActive(true);
+        if (SceneMng.nowScene == SceneMng.SCENE.TOWN)
+        {
+            // 街中ワープ後のユニちゃんの座標
+            uniChan_.transform.position = warpChildren_[warpNum_].transform.position;
+            // サブカメラに切り替わっていたら
+            if (cameraMng_.mainCamera.activeSelf == false)
+            {
+                cameraMng_.SetChangeCamera(false);// メインカメラに戻す
+            }
+        }
+        fade_.FadeOut(1);
+        yield break; // ループを抜ける
+    }
+
+    private IEnumerator WarpCansel()
+    {
+        StopCoroutine(NeedleCheck(false));
+        // 移動Cancelの場合
+        while (true)
+        {
+            yield return null;
+            if (frameImage_.transform.localPosition.x < framPositions_[0].x
+                  && framPositions_[0].y < frameImage_.transform.localPosition.y)
+            {
+                speeds_[0] += 1.0f * Time.deltaTime;
+                frameImage_.transform.localPosition += new Vector3(speeds_[0], -speeds_[0], 0.0f);
+                warpActive_.transform.localPosition = frameImage_.transform.localPosition;
                 //Debug.Log(maxHandlePos_ + "    <   " + frameImage_.transform.localPosition.x);
             }
             else
             {
                 // スピードが変わるため初期化
-                handleSpeed_ = 8.0f;
-                handleRotate_ = 0.0f;
-                frameImage_.transform.localPosition = saveHandlePos_;
-                warpActive_.transform.localPosition = saveHandlePos_;
-                flag = false;
+                speeds_[0] = 8.0f;
+                speeds_[1] = 0.0f;
+                frameImage_.transform.localPosition = framPositions_[0];
+                warpActive_.transform.localPosition = framPositions_[0];
+                yield break; // ループを抜ける
             }
-            yield return null;
         }
     }
 
@@ -330,13 +305,11 @@ public class WarpTown : MonoBehaviour
             {
                 Debug.Log("ユニの家の前のコライダーに接触");
                 SceneMng.SceneLoad((int)SceneMng.SCENE.UNIHOUSE);
-                // ユニの家の中にワープ
             }
             else
             {
                 // ユニの家から街に出る
                 warpNum_ = (int)warp.HOUSE;
-                //  UniChan.transform.position = warpChildren_[(int)warp.HOUSE].transform.localPosition;
                 Debug.Log("ユニの家からタウンに出現" + uniChan_.transform.position);
                 SceneMng.SceneLoad((int)SceneMng.SCENE.TOWN);
             }
