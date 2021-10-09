@@ -616,12 +616,151 @@ yield return new WaitForSeconds(3.0f);
 
 ------------------------------------------------
 
-※ボタンを右から差し込む感じに今後修正する
-チュートリアルクエスト以外非表示になるようにする
+<クエストのExcelに、進行度欄を追加する>----------
+QuestInfo.xlsにEventNumという項目を追加する。
+「街の人に挨拶をしよう」には[2]を入れておくこと。
+→現在の進行度が2であるだろうから。
 
-※あとで追加で必要になるタブ[報酬][進行度]
-　進行度は、画面にそもそも表示させるかとかの
-　判定に必要になる
+QuestInfo.csにpublic int eventNumを追加する。
+QuestInfo_importer.csの64行目付近に、
+cell = row.GetCell(3); p.eventNum = (int)(cell == null ? 0 : cell.NumericCellValue);
+を追加する。
+
+<QuestMng.cs>
+totalQuestNumを、QuestInfo.xlsの数に合わせる。
+Start関数内で
+totalQuestNum_ = popQuestInfo_.param.Count;
+
+totalQuestNum_の数でfor文を回して、現在の進行度番号以下のクエスト数を一時変数に入れて記録する。
+
+そして、totalQuestNum_の数でクエストボタンを作成していた場所を、一時変数の数で作成するように修正
+→これで、まだ受けられないクエストが発生しないよ
+　うにできる。
+
+------------------------------------------------
+
+<クエストのクリア報告ができるようにする>---------
+
+QuestCanvasに[ReportQuest(Button)]を作成する。
+文字は「クエストを報告」と打ち込んでおく。
+
+<QuestMng.cs>
+新規で[ClickReportQuest]関数を作成し、
+[ReportQuest(Button)]のOnClickで呼ばれるように設定しておく。
+
+関数内でCanvasの表示/非表示切替処理を行う
+
+今のままだと、クエストを受注するのか報告するのか判定ができない
+→enumを作成し、今どのボタンの処理中かがわかるよ　うにする
+
+NOWPAGEというenumを作成した。
+それぞれボタン押下時にenumの状態を変更するように記述し、SetSelectQuest関数で受注ボタンを表示する
+のはLOOK_QUEST中だけという風にif文を追加した。
+
+<報告するボタンの作成>
+QuestUIの子に[ReportButton(Button)]を作成する。
+「報告する」とテキストに入れておき、
+CliclReportButton関数を作成しておいてOnClickに
+設定する。
+
+(ClickOrderQuest->ClickOrderButtonに名称変更)
+
+questOrderButton_変数と同様にquestReportButton_
+を作成し、表示/非表示切替をする
+
+<QuestClearCheck.csの修正>
+Update関数でフラグがtrueになっているものを発見したら、受注中リストからクリア済み用のリストへ移動させるようにする。
+
+①clearedQuestsList_というリスト変数と、
+　deleteNum_という削除予定番号を入れる変数を作る
+
+②Update関数でフラグがtrueの要素があれば
+　deleteNum_に代入する
+
+③deleteNum_が初期値(-1)でない場合は、削除番号と　一致している名前のオブジェクトをリストから探し　出して、clearedQuestsList_にコピーした後、
+　orderQuestsList_から削除する
+
+リストの要素の削除方法の参考サイト↓
+https://light11.hatenadiary.com/entry/2019/10/14/215209
+
+<クエストを報告するボタン押下時の処理>
+QuestClearCheck.csにGetClearedQuestsList関数を
+用意しておき、QuestMng.csのClickReportQuest関数内で、クリアしたクエストのボタンを表示させる。
+
+<ClickReportQuest関数での処理内容>
+①クリアしたもののボタンが上に来るように、
+　ヒエラルキー順を並び替える
+
+②1度全てのボタンを表示にする
+
+③クリアしたクエスト以外は非表示へするから
+　for文でクリア個数以上のクエストは非表示にする
+→①でヒエラルキー順を並び替えているから、
+　個数を見てオーバーしたクエスト分を非表示にする
+　だけで大丈夫になっている
+
+※もし並び替えをしていなかったら、
+　クリアしてないクエストが表示状態のままだったり
+　クリアしたクエストが非表示状態にされたりする
+　可能性がある
+
+<ClickReportButton関数での処理内容>
+最後に、達成報告ボタンを押したらクリアリストから
+削除する処理を行う。
+
+QuestClearCheck.csに、SetClearedQuestsList関数を
+用意して、Updateに記載しているのと似た削除処理を
+入れる。
+
+引数に削除番号を入れれるようにしておき、
+QuestMng.cs側ではそこにquestNum_を入れれば
+たぶん大丈夫。
+
+このときに、staticで生成していたプレハブも削除したほうがいいから、
+タグ+番号で探してDestroyしてnullをいれる。
+
+あと、報告したクエストは非表示組にいれないと
+いつまでも画面にボタン表示が残ってしまう。
+→さっきつくったClickReportQuest関数での処理内容
+　という内容のところを、ClearQuestUpdate関数とし　て別の関数に切り分けて
+　ClickReportQuest関数とClickReportButton関数の
+　両方で呼び出せるようにしたら解決した。
+
+これでクエストのクリア報告ができるようになった。
+
+------------------------------------------------
+
+<クエストの戻るボタンを設置>--------------------
+仮の画像で戻るボタンを設置する。
+QuestUIの子に[BackButton(Button)]を新規追加。
+
+QuestMng.csにもClickBackButton関数を追加して、
+OnClickに設定する。
+
+questOrderButton_変数等と同様にfindしておいて
+押下時には前の画面に戻るようにする。
+また、LOOK_QUESTとREPORT_QUEST画面では表示状態に
+しておき、NONのときは非表示にしておく。
+
+------------------------------------------------
+
+<ボタンUIアニメーションをつける>-----------------
+
+InHouseCanvasの子につけていたExitButtonを、
+QuestCanvasの子に持ってくる
+→まだGuildのExitButtonのみ移動させておく
+
+QuestCanvasに、金曜日に学校で作成した
+UIMove.csをアタッチする。
+
+QuestMng.csのコルーチンでCanvas表示を遅くしている
+のを削除する
+
+------------------------------------------------
+
+※あとで追加で必要になるタブ[報酬]
+
+クエスト受注画面から戻るアイコンをつける
 
 *重要*
 タグの判別にはgameObject.tag == “string tag”もあるが、CompareTag()の方が早い

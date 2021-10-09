@@ -13,5 +13,6 @@ public class QuestInfo : ScriptableObject
 		public int num;
 		public string info;
 		public int clear;
+        public int eventNum;
 	}
 }

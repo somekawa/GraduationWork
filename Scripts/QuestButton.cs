@@ -11,6 +11,11 @@ public class QuestButton : MonoBehaviour
         questNum_ = num;
     }
 
+    public int GetQuestNum()
+    {
+        return questNum_;
+    }
+
     public void OnClickButton()
     {
         Debug.Log(questNum_ + "‚Ì”Ô†‚ğ“n‚µ‚Ü‚·");
