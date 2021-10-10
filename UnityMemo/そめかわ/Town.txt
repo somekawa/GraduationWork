@@ -758,6 +758,75 @@ QuestMng.csのコルーチンでCanvas表示を遅くしている
 
 ------------------------------------------------
 
+<挨拶周りクエスト達成後のギルド会話を作成する>---
+
+ギルドで達成報告をした後に発生する会話をExcelの
+チャプター6として作成。
+
+Chapter_importer.csに"6"を追加してreimportする。
+
+QuestMng.csのClickReportButton関数内で
+GuildQuestEvent関数を呼び出すようにする。
+
+GuildQuestEvent関数に
+EventMng.GetChapterNum() == 6 && questNum == 0
+のif文を追加する。
+
+いまのままではクエストを受けたときに発生する会話なのか達成したときに発生する会話なのかが見分けつかないので、GuildQuestEvent関数の引数にboolを
+追加する。
+
+boolのデフォルトはfalseにしておいて、
+trueのときだけ引数にtrueをいれるようにする。
+
+会話後はUniHouseのシーンに飛ばす予定だから、UniHouse.csを作成して
+HouseInteriorMng.csのfunc_に登録する。
+
+※最初から通しでプレイしてデバッグする
+
+------------------------------------------------
+
+<UIMove.csの修正>-------------------------------
+ギルドに2回目以降入ったときに、ボタンが右から差し込まれるやつが発生しなかった。
+
+(原因)
+初回で中央に来た座標で止まっているから
+
+(対処法)
+UIMove.csのStart関数で、初期位置を右画面外にしておく必要がある。
+
+<UIMove.cs>
+Start関数にしていたところをOnEnable関数にして、
+表示状態になったら毎回差し込まれるようにした。
+
+コルーチンの時間や、子供の座標を毎回設定しなおす
+ように修正した。
+
+------------------------------------------------
+
+<挨拶クエスト達成後の会話の後に進行度7にしたい>--
+Chapter.xlsに新規で項目を増やすしかなさそう。
+messageの横にeventNumを追加する。
+
+Chapter6のタブで、
+name1がSceneの所のeventNumに[7]をいれる。
+※他の進行度が進まないところには[-1]を入れる。
+
+<ChapterList.cs>
+public int eventNumを追加する。
+<Chapter_importer.cs>65行目
+cell = row.GetCell(4); p.eventNum = 
+(int)(cell == null ? 0 : cell.NumericCellValue);
+
+<TextMng.cs>
+ChangeScene関数の中で、eventNumが[-1]以外なら
+EventMng.csを呼び出して設定するように処理を追加。
+
+これで、進行度が[7]の時にユニが家に帰ったときの処理を書けるようになる。
+※InHouseAndUniHouse.txtへ記載していくよ
+
+------------------------------------------------
+
+
 ※あとで追加で必要になるタブ[報酬]
 
 クエスト受注画面から戻るアイコンをつける

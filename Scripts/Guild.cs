@@ -15,12 +15,20 @@ public class Guild : HouseBase
 
     // クエストを受注でイベントが進行するときに使用
     // QuestMngでインスタンスして呼び出す
-    public void GuildQuestEvent(int questNum)
+    public void GuildQuestEvent(int questNum,bool clearFlg = false)
     {
         if (EventMng.GetChapterNum() == 2 && questNum == 0) // 現在の進行度が2で、クエスト0番を受注したら
         {
             // シーン遷移無し
             EventMng.SetChapterNum(3, SceneMng.SCENE.NON);
+        }
+        else if(EventMng.GetChapterNum() == 6 && questNum == 0) // 現在の進行度が6で、クエスト0番を達成したら
+        {
+            if(clearFlg)
+            {
+                // 会話シーンへ
+                EventMng.SetChapterNum(6, SceneMng.SCENE.CONVERSATION);
+            }
         }
     }
 }

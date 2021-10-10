@@ -302,6 +302,13 @@ public class TextMng : MonoBehaviour
 
             // SceneMng‚ÉŒš•¨–¼‚ğ•Û‘¶‚µ‚Ä‚¨‚­
             SceneMng.SetHouseName(popChapter_.param[nowText_].face);
+
+            // is“x‚Ìİ’è
+            if(popChapter_.param[nowText_].eventNum != -1)
+            {
+                EventMng.SetChapterNum(popChapter_.param[nowText_].eventNum, SceneMng.SCENE.NON);
+            }
+
             return true;
         }
 

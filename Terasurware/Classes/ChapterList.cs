@@ -9,10 +9,10 @@ public class ChapterList : ScriptableObject
 	[System.SerializableAttribute]
 	public class Param
 	{
-		
 		public string name1;
 		public string name2;
 		public string face;
 		public string message;
+        public int eventNum;
 	}
 }

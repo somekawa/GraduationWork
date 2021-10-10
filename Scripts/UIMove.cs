@@ -6,25 +6,39 @@ using UnityEngine;
 public class UIMove : MonoBehaviour
 {
     // コルーチンの現在時間
-    private float time_ = 0.0f;
+    private float time_;
     // コルーチン終了時間
-    private float totalTime_ = 5.0f;
+    private float totalTime_;
     // 目的座標
     private readonly Vector3 DestinationPos_ = new Vector3(0.0f, 0.0f, 0.0f);
 
-    void Start()
+    void OnEnable()
     {
+        time_ = 0.0f;
+        totalTime_ = 5.0f;
+
+        float tmpX = 850.0f;
+        float tmpY = 150.0f;
+        // 画面外右にボタン位置を初期化する(2回目以降も右から差し込まれるようにするため)
+        // 子のボタン数分for文を回す
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            transform.GetChild(i).transform.localPosition = new Vector3(tmpX, tmpY, 0.0f);
+            tmpX += 50.0f;
+            tmpY -= 100.0f;
+        }
+
         StartCoroutine(Easing());
     }
 
-    void Update()
-    {
-        // 永久ループ予防用
-        if(Input.GetKeyDown(KeyCode.I))
-        {
-            StopCoroutine(Easing());
-        }
-    }
+    //void Update()
+    //{
+    //    // 永久ループ予防用
+    //    if(Input.GetKeyDown(KeyCode.I))
+    //    {
+    //        StopCoroutine(Easing());
+    //    }
+    //}
 
     // コルーチン  
     private IEnumerator Easing()

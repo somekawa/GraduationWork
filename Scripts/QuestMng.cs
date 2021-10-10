@@ -196,6 +196,9 @@ public class QuestMng : MonoBehaviour
 
         ClearQuestUpdate();
 
+        // クエストの達成報告でイベントが進行するか判断する
+        guild_.GuildQuestEvent(questNum_,true);
+
         Debug.Log("クエストを報告しました");
     }
 

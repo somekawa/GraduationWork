@@ -47,12 +47,13 @@ public class HouseInteriorMng : MonoBehaviour
             buildNameMap_.Add(buildNameEng_[i], buildNameJpn_[i]);
         }
 
-        //@ ここに全部の建物のイベント発生確認関数を登録していく
+        // ここに全部の建物のイベント発生確認関数を登録していく
         func_.Add("MayorHouse", new MayorHouse().CheckEvent);
         func_.Add("Guild"     , new Guild().CheckEvent);
         func_.Add("BookStore" , new BookStore().CheckEvent);
         func_.Add("ItemStore" , new ItemStore().CheckEvent);
         func_.Add("Restaurant", new Restaurant().CheckEvent);
+        func_.Add("UniHouse"  , new UniHouse().CheckEvent);
     }
 
     public bool SetHouseVisible(string name)
