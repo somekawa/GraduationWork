@@ -1,0 +1,114 @@
+2021/10/11
+追加したもの
+
+・一時プレハブフォルダ
+MenuCanvas
+ItemBagCanvas
+
+・PrefabフォルダーBagUIフォルダ
+MateriaBox
+・StreamingAssetsフォルダーMateriaフォルダ
+Materia_Field0.png
+Materia_Field1.png
+Materia_Field2.png
+Materia_Field3.png
+Materia_Field4.png
+
+・Pictureフォルダ
+SingleBox.png
+
+・Scriptフォルダ
+ItemImageMng.cs
+・ScriptフォルダーBagScriptフォルダ内
+Bag_Item.cs
+Bag_Materia.cs
+Bag_Word.cs
+BagCanvasUI.cs
+TestField.cs
+OwnedMateria.cs
+MenuActive.cs
+
+更新したもの
+ItemGet.cs
+ーーーーーーーーーーーーーーーーーーーーーーーーーーー
+MenuCanvas
+Hierarchyに追加したらunPackPrefabしてください
+
+・MenuCanvas
+　ーMenu
+　ーItemBag
+　ーSaveOrLoad
+　ーOtherUI
+
+・メニューボタン処理系
+各SceneのMngにある『MenuActive』.csからクリック処理を持ってくる
+MenuCanvas
+ー『Menu』	メニュー系まとめ
+　ーMenuImage
+　　ーText	メニューと書かれたText
+　　ーItemBox　	MenuActive.OnClick『ItemButton』
+			　所持アイテム、素材、ワード表示
+　　ーStatus　	MenuActive.OnClick『Status』
+			ステータス表示
+　　ーSaveOrLoad	MenuActive.OnClick『SaveOrLoad』
+			セーブするかロードするかのキャンバス
+　　ーOther	MenuActive.OnClick『OtherBtn』
+			図鑑とクエスト状況表示
+　　ーCansel　	MenuActive.OnClick『CancelButton』
+			メニュー表示をキャンセル（閉じる）
+
+
+MenuCanvas
+ー『ItemBag』	バッグの中身まとめ
+			（シーン間で渡すもののため所持品は別Canvas）
+　　ーMenuBackPanel	背景を暗くするPanel
+　　ーExplanationImage	アイテム説明枠
+　　ーTopics
+　　　ーTopicFrame		TopicNameの背景画像
+　　　ーTopicName		現在表示中のもの（アイテム、素材、ワード）
+　　　ーLeftBtn　		MenuActive.OnClick『LeftArrow』
+			前のページを表示
+　　　ーRightBtn　		MenuActive.OnClick『RightArrow』
+			次のページを表示
+
+MenuCanvas
+ー『SaveOrLoad』　セーブとロードができる。
+			今は特に何かができるわけではない
+
+MenuCanvas
+ー『OtherUI』　図鑑とクエストを見れる
+		たぶんあとでシーン間で渡す情報になるからここからでる
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+Hierarchyに追加したらunPackPrefabしてください
+・拾ったアイテムを表示。シーン間で渡せれるようにDontDestroyOnLoadしている
+ItemBagCanvas	Destroyされないように『BagCanvasUI』.csをアタッチ
+			SortOderは『10』
+ーItemMng	『Bag_Item』.csをアタッチ（現在の処理は表示のみ）
+ーMateriaMng	『Bag_Materia』.csをアタッチ
+			MateriaUIPrefabに『MateriaBox』をアタッチ
+ーWordMng	『Bag_Word』.csをアタッチ（現在の処理は表示のみ）
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+MateriaBoxはPrefabでInstansさせるもののためHierarchyに置く必要はなし
+OwnedMateria.csは名前をHierarchyで名前をわかりやすくするため
+MateiaBox	素材画像の枠	
+			Source ImageーSingleBox2
+ーMateriaIcon	表示する素材画像
+ーMateriaNum	表示している素材の所持数
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+StreamingAssetsフォルダ
+TestフォルダからMateriaフォルダに変更しました。
+フォルダ内画像は後で変える。
+画像は512*64に変更済み
+ーーーーーーーーーーーーーーーーーーーーーーーーーーー
+ItemImageMng.csはSceneMngにアタッチ
+使用画像を読み込みBag_MateriaやItemGetに渡している
+1つあたりのサイズを64*64に変更
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
+TestField.csはTestFieldScene用
+Mngに入れてください

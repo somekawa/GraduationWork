@@ -7,6 +7,13 @@ using UnityEngine.SceneManagement;
 
 public class ItemGet : MonoBehaviour
 {
+    //[SerializeField]
+    //public GameObject materiaUIPrefab;    // 素材を拾ったときに生成されるプレハブ
+    ////[SerializeField]
+    //public GameObject canvasPrefab;    // 素材を拾ったときに生成されるプレハブ
+    //private GameObject parentObjPrefab_;
+    //private RectTransform parentRectPrefab_;
+
     public enum items
     {
         NON = -1,
@@ -17,6 +24,7 @@ public class ItemGet : MonoBehaviour
         ITEM4,  // 妖精の羽
         MAX
     }
+    private int itemNumber_ = (int)items.MAX;
     // オブジェクトの名前
     public static string[] objName = new string[(int)items.MAX] {
          "Item0","Item1","Item2","Item3","Item4"
@@ -51,14 +59,22 @@ public class ItemGet : MonoBehaviour
     private UnitychanController uniCtl_;
     private Camera mainCamera;      // 座標空間変更時に使用
 
+    // アイテムを取得した回数
+    //private int itemCnt_=0;
+    private MenuActive menuActive_;
+    private Bag_Materia materia_;
+    private string getItemName_ = "";
+    private int itemNumberCheck_;
+    private int fieldNumber_;
+
     void Start()
     {
         uniCtl_ = GameObject.Find("Uni").GetComponent<UnitychanController>();
         mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
         parentCanvas_ = GameObject.Find("ItemCanvas").GetComponent<RectTransform>();
-
         materiaImage_ = parentCanvas_.transform.Find("MaterialImage").GetComponent<Image>();
-
+         menuActive_ = GameObject.Find("Mng").GetComponent<MenuActive>();
+      
         telopImage_ = parentCanvas_.transform.Find("TelopBackImage").GetComponent<Image>();
         telopImage_.color = new Color(1.0f, 1.0f, 1.0f, telopAlpha_);
         telopImage_.gameObject.SetActive(false);
@@ -74,22 +90,41 @@ public class ItemGet : MonoBehaviour
             itemPointChildren_[i] = this.transform.GetChild(i).gameObject;
         }
         // Debug.Log(telopImage_.transform.localPosition);
+
+        //if (parentObjPrefab_ == null)
+        //{
+        //    parentObjPrefab_ = Instantiate(canvasPrefab);
+        //    //parentRectPrefab_=parentObjPrefab_.transform;
+        //}
     }
 
     public void SetItemName(int num,string name, bool flag)
     {
+        getItemName_ = name;
         // 接触したObjの名前,whileに入ってよいかのフラグ
         NameAndPosCheck(num, name);
+        //itemCnt_++;
         StartCoroutine(UpPosImages(name, flag));// 取得したアイテムをポップアップさせる
     }
 
     private void NameAndPosCheck(int num, string name)
     {
+        itemNumberCheck_ = num;
+
+        if (materia_ == null)
+        {
+            materia_ = menuActive_.GetBagMateria();
+        }
+        materia_.ItemGetCheck(fieldNumber_, itemNumberCheck_, getMaterial_[num]); 
+        //itemNumber_ = num;
+
+
         telopText_.text = getMaterial_[num];
         materiaImage_.gameObject.SetActive(true);
         telopImage_.gameObject.SetActive(true);
         uniCtl_.enabled = false;
-        materiaImage_.sprite = materialIcon_[num];
+        // materiaImage_.sprite = materialIcon_[num];
+        materiaImage_.sprite = ItemImageMng.materialIcon_[fieldNumber_, itemNumberCheck_];
         itemPointChildren_[num].SetActive(false);
 
         // オブジェクトのワールド空間positionをビューポート空間に変換
@@ -183,7 +218,7 @@ public class ItemGet : MonoBehaviour
         telopImage_.transform.localScale = new Vector3(telopScale_, telopScale_, telopScale_);
     }
 
-   public void SetMaterialKinds(int filedNum, MaterialList list)
+   public void SetMaterialKinds(int fieldNum, MaterialList list)
     {
         // 素材名のリストを取得
         if (list != null)
@@ -191,40 +226,42 @@ public class ItemGet : MonoBehaviour
             for (int i = 0; i < (int)items.MAX; i++)
             {
                 // 現在フィールドの素材名を保存
-                getMaterial_[i] = list.param[i].ItemName;
+                getMaterial_[i] = list.param[i].MateriaName;
             }
         }
+        fieldNumber_ = fieldNum;
 
-        ////Assets直下のBack.pngというテクスチャを取得する
-        //texture = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Texture/" + list.param[0].ImageName + ".png");
-        // Texture2Dとして画像を読み込む
-        string str = Application.streamingAssetsPath + "/Test/" + list.param[0].ImageName + ".png";
-        byte[] bytes = File.ReadAllBytes(str);
-        Texture2D texture = new Texture2D(128, 128);
-        texture.LoadImage(bytes);
 
-        // Sprite.Createで作られたものは動的に削除
-        // 1回目はnullのため2回目から削除する
-        if (onceFlag_ == true)
-        {
-            for (int x = 0; x < list.param.Count; x++)
-            {
-                Destroy(materialIcon_[x]);
-                Debug.Log(x + "番が破壊されました");
-            }
-        }
+        //// Texture2Dとして画像を読み込む
+        //string str = Application.streamingAssetsPath + "/Test/" + list.param[0].ImageName + ".png";
+        //byte[] bytes = File.ReadAllBytes(str);
+        //Texture2D texture = new Texture2D(128, 128);
+        //texture.LoadImage(bytes);
 
-        // 表示したい素材の最大個数を代入
-        materialIcon_ = new Sprite[list.param.Count];
+        //// Sprite.Createで作られたものは動的に削除
+        //// 1回目はnullのため2回目から削除する
+        //if (onceFlag_ == true)
+        //{
+        //    for (int x = 0; x < list.param.Count; x++)
+        //    {
+        //        Destroy(materialIcon_[x]);
+        //        Debug.Log(x + "番が破壊されました");
+        //    }
+        //}
 
-        for (int x = 0; x < list.param.Count; x++)
-        {
-            // 取得した画像を１つ128*128のサイズに分割
-            Rect rect = new Rect(x * 128, 0, 128, 128);
-            materialIcon_[x] =
-                Sprite.Create(texture, rect, new Vector2(0.5f, 0.5f),
-                                1.0f, 0, SpriteMeshType.FullRect);
-        }
-        onceFlag_ = true;
+        //// 表示したい素材の最大個数を代入
+        //materialIcon_ = new Sprite[list.param.Count];
+
+        //for (int x = 0; x < list.param.Count; x++)
+        //{
+        //    // 取得した画像を１つ128*128のサイズに分割
+        //    Rect rect = new Rect(x * 128, 0, 128, 128);
+        //    materialIcon_[x] =
+        //        Sprite.Create(texture, rect, new Vector2(0.5f, 0.5f),
+        //                        1.0f, 0, SpriteMeshType.FullRect);
+        //}
+        //onceFlag_ = true;
     }
+
+
 }
