@@ -25,6 +25,15 @@ public class SceneMng : MonoBehaviour
         MAX
     }
 
+    // 1日の時間経過
+    public enum TIMEGEAR
+    {
+        MOLNING,    // 朝
+        NOON,       // 昼
+        EVENING,    // 夕
+        NIGHT       // 夜
+    }
+
     public static SceneMng singleton;
 
     // enumとキャラオブジェクトをセットにしたmapを制作するためのリスト
@@ -38,7 +47,8 @@ public class SceneMng : MonoBehaviour
     public static SCENE nowScene = SCENE.NON;   // 現在のシーン
     public static float charaRunSpeed = 0.0f;   // キャラの移動速度(MODE毎に調整をする)
 
-    public static string houseName_ = "Mob";    // Excelから読み込んだ建物名
+    private static string houseName_ = "Mob";    // Excelから読み込んだ建物名
+    private static TIMEGEAR timeGrar_ = TIMEGEAR.MOLNING;               // 1日の経過時間の情報を入れる
 
     void Awake()
     {
@@ -159,5 +169,15 @@ public class SceneMng : MonoBehaviour
     public static string GetHouseName()
     {
         return houseName_;
+    }
+
+    public static void SetTimeGear(TIMEGEAR dayTime)
+    {
+        timeGrar_ = dayTime;
+    }
+
+    public static TIMEGEAR GetTimeGear()
+    {
+        return timeGrar_;
     }
 }

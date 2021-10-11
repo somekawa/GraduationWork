@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class UniHouseMng : MonoBehaviour
 {
-    // Start is called before the first frame update
     void Start()
     {
         // 現在のシーンをUNIHOUSEとする
@@ -17,5 +16,17 @@ public class UniHouseMng : MonoBehaviour
         // メインカメラを最初にアクティブにする
         var cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
         cameraMng_.SetChangeCamera(false);
+    }
+
+    public void ClickSleepButton()
+    {
+        if(EventMng.GetChapterNum() < 7)    // 進行度が0～6のとき
+        {
+            Debug.Log("現在の進行度が7未満のため、休めません");
+            return; // 休むボタンを押しても反応しないようにする
+        }
+
+        SceneMng.SetTimeGear(SceneMng.TIMEGEAR.MOLNING);   // 時間経過
+        Debug.Log("休むボタンが押下されました");
     }
 }

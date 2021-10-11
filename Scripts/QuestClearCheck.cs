@@ -15,16 +15,16 @@ public class QuestClearCheck : MonoBehaviour
     void Update()
     {
         // テスト用(クエストを全て達成状態にできるようにする)
-        if (Input.GetKeyDown(KeyCode.I))
-        {
-            for (int i = 0; i < orderQuestsList_.Count; i++)
-            {
-                // 一時変数に保存してから代入する方法で対処する
-                (GameObject, bool) tmpData = orderQuestsList_[i];
-                tmpData.Item2 = true;
-                orderQuestsList_[i] = tmpData;
-            }
-        }
+        //if (Input.GetKeyDown(KeyCode.I))
+        //{
+        //    for (int i = 0; i < orderQuestsList_.Count; i++)
+        //    {
+        //        // 一時変数に保存してから代入する方法で対処する
+        //        (GameObject, bool) tmpData = orderQuestsList_[i];
+        //        tmpData.Item2 = true;
+        //        orderQuestsList_[i] = tmpData;
+        //    }
+        //}
 
         // リストを回して、フラグがtrueのものがあるか探す
         foreach (var tmp in orderQuestsList_)

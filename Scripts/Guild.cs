@@ -7,6 +7,7 @@ public class Guild : HouseBase
         // イベント発生
         if (EventMng.GetChapterNum() == 1)
         {
+            SceneMng.SetTimeGear(SceneMng.TIMEGEAR.NOON);   // 時間経過
             EventMng.SetChapterNum(2, SceneMng.SCENE.CONVERSATION);
             return true;
         }
@@ -26,7 +27,7 @@ public class Guild : HouseBase
         {
             if(clearFlg)
             {
-                // 会話シーンへ
+                SceneMng.SetTimeGear(SceneMng.TIMEGEAR.EVENING);    // 時間経過
                 EventMng.SetChapterNum(6, SceneMng.SCENE.CONVERSATION);
             }
         }

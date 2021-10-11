@@ -486,9 +486,133 @@ inHouseCanvas_をSetActive(true)にした後に
 
 ------------------------------------------------
 
-出口処理はhouseinteriormng.csで共通にしたほうが
-キャラ操作の可能やワープ表示とかしやすい。
-それいがいの各建物の処理は、それぞれの空のオブジェクトにそれぞれのScriptを新規作成したほうがいい
+<進行度7の時に、家で「休む」ができるようにする>--
+
+逆に、[7]まではこのボタンが押せないようにする。
+
+まずは、TownのGuildから[QuestCanvas]と[QuestMng]
+をコピペして[UniHouse]の子にする。
+→このとき、InHouseCanvasの子にあったExitButtonを
+　削除しておく。
+
+[QuestCanvas]→[UniHouseCanvas]に名称変更。
+[QuestMng]は、ぶっちゃけ建物1つしかないこのシーン
+ならいらないから、子の[QuestUI]を[UniHouseUI]に
+して[QuestMng]から取り出す。
+
+※現時点で[UniHouseUI]に入れるものがないから放置
+　→表示/非表示の切替は[UniHouseMng.cs]でする
+　　外部アタッチ方式で管理する予定
+
+<「休む」ボタンの作成>
+UniHouseCanvasの子に、[SleepButton(Button)]を
+作成する。(Textを休むにしておく)
+
+<UniHouseMng.cs>
+ClickSleepButton関数を作成して、
+SleepButtonのOnClick関数にアタッチする。
+
+押された時に、現在の進行度を確認して、7未満
+だったら押されても何も起こらないようにreturnさせる。
+→ボタンは、押せないように暗くなるようにしたい
+
+これで、進行度7を境にしてボタンを反応させるか
+どうかを分けれるようにした。
+次はボタンを押した時の処理について考える。
+
+------------------------------------------------
+
+<日付が変わるのがわかる表現をする>---------------
+画面左上に朝、昼、夕、夜という4つを用意しておき
+切り替わるようにする。
+
+使用素材↓
+https://www.ac-illust.com/main/detail.php?id=22078260&word=%E6%AD%AF%E8%BB%8A&searchId=895069833
+
+どの画面の上にも出すからstaticなオブジェクトに
+したほうがよさそう。
+→新規Scriptを用意して、消えないオブジェクトにし　よう(SceneMngを参考に、消えないキャンバス作る)
+
+<キャンバスを用意する>
+[TimeCanvas(Canvas)]を新規作成し、
+その子として[Image(Image)]を作成する。
+→[Image]に[TimeGrar.png]を入れる。
+
+[Image]
+アンカーポイント：左上
+Pos X:10 Y:-10 Z:0
+Width:329 Height:329
+Scale X:1 Y:1 Z:1
+※Rotationは、Z軸をマイナスしていけばいい 
+
+<SceneMng.cs>
+enumでTIMEGEARを作成する。
+朝・昼・夕・夜
+
+Get/SetTimeGear関数を作成して、変数のtimeGear_
+設定したり取得したりできるようにしておく。
+
+新規Scriptで、[TimeGear.cs]を作成。
+TimeGear.pngを入れてるImageにアタッチする。
+
+<TimeGear.cs>
+Singletonにしないと、ヒエラルキーにキャンバスを
+置いてるだけで複数できてしまうから
+SceneMng.csのSingletonをマネして処理を入れる。
+
+Awake関数内で、自分の親(Canvas)
+がシーンを跨いでも消えないように処理を追加する。
+→親を登録すれば、子のImageも消えないオブジェクト
+　と判定されるみたい
+
+rotateTimeGearMap_関数を作成して、
+キーがenumのTIMEGEARで、値がZ軸の目標回転値に
+なるように設定する。
+あとはImageRotate.csを参考にして回転処理を作成する。
+
+------------------------------------------------
+
+<挨拶クエスト関連で時間が経過するようにする>-----
+
+①ギルドを初回訪れたタイミング→昼へ
+②クエストクリア時→夕方へ
+
+①について、
+Guild.csのCheckEvent関数でチャプター2の会話に
+飛ばすまえに、
+SceneMng.SetTimeGear(SceneMng.TIMEGEAR.NOON);
+
+②について、
+同じくGuild.csのGuildQuestEvent関数の方で
+チャプター6の会話に飛ばす前に、
+SceneMng.SetTimeGear(SceneMng.TIMEGEAR.EVENING);
+
+------------------------------------------------
+
+<家で[休む]を押したときに、時間経過で朝にする>---
+<UniHouseMng.cs>
+ClickSleepButton関数のreturnを通過したとき、
+SceneMng.SetTimeGear(SceneMng.TIMEGEAR.MOLNING);
+になるようにする。
+
+------------------------------------------------
+
+<時間経過時には、背景を暗くする>-----------------
+TimeCanvasに[Panel(Panel)]を用意する
+(黒背景でα値が0.5)
+
+TimeGear.csでFindで取得するようにして、
+Awake関数内で最初に非表示にする。
+その後、
+回転するときには表示に、それ以外は非表示にする。
+
+------------------------------------------------
+
+※現時点で[UniHouseUI]に入れるものがないから放置
+　ミニゲームとか図鑑系はここにいれるだろう
+　→表示/非表示の切替は[UniHouseMng.cs]でする
+　　外部アタッチ方式で管理する予定
+
 
 Updateとコルーチンの違い↓
 https://zenn.dev/torisoup/articles/coroutine_01
