@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
-using System.Collections;
 
 // クエスト管理スクリプト
+
+// メインクエストとサブクエストの達成回数を保存する変数が必要(メインは1回クリアしたら終了,サブは何回でも可能)
 
 public class QuestMng : MonoBehaviour
 {
@@ -39,6 +40,7 @@ public class QuestMng : MonoBehaviour
 
     private int totalQuestNum_;                      // 全クエストの数
     private int questNum_;                           // 選択中のクエスト番号を保存する変数
+    private static Dictionary<int, int> questClearCnt_ = new Dictionary<int, int>();   // キー:クエスト番号,値:クエスト達成回数
 
     private Guild guild_ = null;                     // ギルドスクリプトのインスタンス
 
@@ -110,10 +112,14 @@ public class QuestMng : MonoBehaviour
 			toggleTextCom.text = title;
 			//informationTextCom.text = info;
 		}
-		//　それぞれのクエスト情報を表示（確認の為）
-		for (var i = 0; i < totalQuestNum_; i++)
-		{
-            Debug.Log("進行度"+popQuestInfo_.param[i].eventNum);
+
+        // 初回のみ登録する(初回 = 登録数が0)
+        if(questClearCnt_.Count <= 0)
+        {
+            for (int i = 0; i < totalQuestNum_; i++)    // 全クエスト分で回す
+            {
+                questClearCnt_.Add(i, 0);   // クリア回数を0回で設定
+            }
         }
 
         questCanvas_ = GameObject.Find("QuestCanvas");
@@ -128,6 +134,41 @@ public class QuestMng : MonoBehaviour
         questOrderButton_.SetActive(false);     // 受注ボタンは非表示
         questReportButton_.SetActive(false);    // 報告ボタンは非表示
         backButton_.SetActive(true);
+
+        // 受注中のクエストと報告待ちクエストを合体させたリストをつくる
+        List<GameObject> mixList = new List<GameObject>();
+        foreach(var list in QuestClearCheck.GetOrderQuestsList())
+        {
+            mixList.Add(list.Item1);
+        }
+
+        foreach (var list in QuestClearCheck.GetClearedQuestsList())
+        {
+            mixList.Add(list);
+        }
+
+        // QuestUIと、その子を全て表示状態にする
+        questUI.SetActive(true);
+
+        for (int k = 0; k < questContent_.childCount; k++)  // 全体のクエスト分回す
+        {
+            questContent_.GetChild(k).gameObject.SetActive(true);   // 表示状態から調べる
+
+            // 合体させたリストに載っていたものは非表示にする
+            for (int i = 0; i < mixList.Count; i++)
+            {
+                if (int.Parse(mixList[i].name) == questButton_[k].GetQuestNum())
+                {
+                    questContent_.GetChild(k).gameObject.SetActive(false);
+                }
+            }
+
+            // 1度クリアしたメインクエストも非表示にする
+            if (popQuestInfo_.param[k].type == "main" && questClearCnt_[k] >= 1)
+            {
+                questContent_.GetChild(k).gameObject.SetActive(false);
+            }
+        }
     }
 
     // クエストを受注するとき
@@ -156,6 +197,8 @@ public class QuestMng : MonoBehaviour
 
             // 受注ボタンを非表示にする
             questOrderButton_.SetActive(false);
+            // 受注したものを左側のリストから非表示にする
+            questButton_[questNum_].gameObject.SetActive(false);
         }
     }
 
@@ -176,8 +219,10 @@ public class QuestMng : MonoBehaviour
     public void ClickReportButton()
     {
         //@ 報酬処理
-        //@ そのクエストに対するクリア回数を+する
 
+        // そのクエストに対するクリア回数を加算する
+        questClearCnt_[questNum_]++;
+        Debug.Log(questNum_ + "番のクリア回数が" + questClearCnt_[questNum_] + "になりました");
 
         // CompleteQuestのクリア報告用リストから報告した番号のオブジェクトを削除する
         QuestClearCheck.SetClearedQuestsList(questNum_);
@@ -205,29 +250,25 @@ public class QuestMng : MonoBehaviour
     // クリアクエストの更新(報告時にも非表示切り替えが発生するため)
     private void ClearQuestUpdate()
     {
-        // クリアしたやつが上に来るようにヒエラルキー順を並び替える
-        var tmp = QuestClearCheck.GetClearedQuestsList();
-        for (int i = 0; i < tmp.Count; i++)      // クリアしたクエスト分回す
-        {
-            for (int k = 0; k < questContent_.childCount; k++)  // 全体のクエスト分回す
-            {
-                // 番号が一致してたら、ヒエラルキー順を先頭にもってくる
-                if (int.Parse(tmp[i].name) == questButton_[k].GetQuestNum())
-                {
-                    questContent_.GetChild(k).transform.SetSiblingIndex(0);
-                }
-            }
-        }
-
-        // QuestUIを一度、全て表示状態にする
         questUI.SetActive(true);
 
-        // クリアしたクエスト以外は非表示にする(questContent_の子供を見る)
-        for (int k = 0; k < questContent_.childCount; k++)
+        // すべてのボタンをfalseにする
+        for (int k = 0; k < questContent_.childCount; k++)  // 全体のクエスト分回す
         {
-            if (tmp.Count < k + 1)   // 単純な個数で考えるからk+1で記述
+            questContent_.GetChild(k).gameObject.SetActive(false);
+        }
+
+        var tmp = QuestClearCheck.GetClearedQuestsList();
+
+        // リストに載ってたら表示にする(questContent_の子供を見る)
+        for (int k = 0; k < questContent_.childCount; k++)  // 全体のクエスト分回す
+        {
+            for (int i = 0; i < tmp.Count; i++)
             {
-                questContent_.GetChild(k).gameObject.SetActive(false);
+                if (int.Parse(tmp[i].name) == questButton_[k].GetQuestNum())
+                {
+                    questContent_.GetChild(k).gameObject.SetActive(true);
+                }
             }
         }
     }

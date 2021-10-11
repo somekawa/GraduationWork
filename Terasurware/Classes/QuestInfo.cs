@@ -9,10 +9,10 @@ public class QuestInfo : ScriptableObject
 	[System.SerializableAttribute]
 	public class Param
 	{
-		
 		public int num;
 		public string info;
 		public int clear;
         public int eventNum;
+        public string type;
 	}
 }

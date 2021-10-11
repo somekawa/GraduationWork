@@ -67,6 +67,11 @@ public class QuestClearCheck : MonoBehaviour
         orderQuestsList_.Add((obj,false));
     }
 
+    public static List<(GameObject, bool)> GetOrderQuestsList()
+    {
+        return orderQuestsList_;
+    }
+
     public static void SetClearedQuestsList(int num)
     {
         for (int i = 0; i < clearedQuestsList_.Count; i++)

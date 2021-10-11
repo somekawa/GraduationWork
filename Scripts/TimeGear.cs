@@ -34,7 +34,7 @@ public class TimeGear : MonoBehaviour
         else
         {
             //　既に同じスクリプトがあればこのシーンの同じゲームオブジェクトを削除
-            Destroy(gameObject);
+            Destroy(transform.root.gameObject);
         }
 
     }

@@ -11,6 +11,11 @@ public class Guild : HouseBase
             EventMng.SetChapterNum(2, SceneMng.SCENE.CONVERSATION);
             return true;
         }
+        else if(EventMng.GetChapterNum() == 7 && SceneMng.GetTimeGear() == SceneMng.TIMEGEAR.MOLNING)
+        {
+            // 時間帯を条件に入れないと、挨拶クエスト終了直後に発生する可能性が高い
+            EventMng.SetChapterNum(7, SceneMng.SCENE.CONVERSATION); 
+        }
         return false;
     }
 
