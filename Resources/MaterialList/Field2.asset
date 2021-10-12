@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: Field2
   m_EditorClassIdentifier: 
   param:
-  - ItemName: "\u30B5\u30DC\u30C6\u30F3"
+  - MateriaName: "\u30B5\u30DC\u30C6\u30F3"
     ImageName: Material_Field2
-  - ItemName: "\u9B54\u77F3"
+  - MateriaName: "\u9B54\u77F3"
     ImageName: 
-  - ItemName: "\u7370\u731B\u306A\u7259"
+  - MateriaName: "\u7370\u731B\u306A\u7259"
     ImageName: 
-  - ItemName: "\u592A\u967D\u306E\u5B9F"
+  - MateriaName: "\u592A\u967D\u306E\u5B9F"
     ImageName: 
-  - ItemName: "\u9695\u77F3\u306E\u6B20\u7247"
+  - MateriaName: "\u9695\u77F3\u306E\u6B20\u7247"
     ImageName: 
-  - ItemName: 
+  - MateriaName: 
     ImageName: 

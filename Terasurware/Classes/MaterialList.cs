@@ -10,7 +10,7 @@ public class MaterialList : ScriptableObject
 	public class Param
 	{
 		
-		public string ItemName;
+		public string MateriaName;
 		public string ImageName;
 	}
 }

@@ -58,7 +58,7 @@ public class MaterialList_importer : AssetPostprocessor
                         
                         var p = new MaterialList.Param();
 			
-					cell = row.GetCell(0); p.ItemName = (cell == null ? "" : cell.StringCellValue);
+					cell = row.GetCell(0); p.MateriaName = (cell == null ? "" : cell.StringCellValue);
 					cell = row.GetCell(1); p.ImageName = (cell == null ? "" : cell.StringCellValue);
 
                         data.param.Add(p);
