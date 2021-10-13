@@ -42,18 +42,18 @@ public class TimeGear : MonoBehaviour
     void Update()
     {
         // 時間経過テスト用
-        //if (Input.GetKeyDown(KeyCode.O))
-        //{
-        //    var aa = SceneMng.GetTimeGear();
-        //    if (aa >= SceneMng.TIMEGEAR.NIGHT) // 今が夜なら、朝が入るようにする
-        //    {
-        //        SceneMng.SetTimeGear(SceneMng.TIMEGEAR.MOLNING);
-        //    }
-        //    else
-        //    {
-        //        SceneMng.SetTimeGear((SceneMng.TIMEGEAR)((int)aa + 1));
-        //    }
-        //}
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            var aa = SceneMng.GetTimeGear();
+            if (aa >= SceneMng.TIMEGEAR.NIGHT) // 今が夜なら、朝が入るようにする
+            {
+                SceneMng.SetTimeGear(SceneMng.TIMEGEAR.MORNING);
+            }
+            else
+            {
+                SceneMng.SetTimeGear((SceneMng.TIMEGEAR)((int)aa + 1));
+            }
+        }
 
         // 目標角度をオイラー角からクォータニオンにする
         var target = Quaternion.Euler(new Vector3(0.0f, 0.0f, rotateTimeGearMap_[SceneMng.GetTimeGear()]));

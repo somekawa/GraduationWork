@@ -608,6 +608,12 @@ Awake関数内で最初に非表示にする。
 
 ------------------------------------------------
 
+<DirectonalLightの数値変更>---------------------
+
+InHouseAndUniHouseのDirectionalLightのRealtimeShadowsにあるStrengthを[0.2]にする
+
+------------------------------------------------
+
 ※現時点で[UniHouseUI]に入れるものがないから放置
 　ミニゲームとか図鑑系はここにいれるだろう
 　→表示/非表示の切替は[UniHouseMng.cs]でする

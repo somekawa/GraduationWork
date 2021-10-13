@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +5,9 @@ public class TownMng : MonoBehaviour
 {
     [SerializeField]
     private Canvas inHouseCanvas;
+
+    [SerializeField]
+    private GameObject nightLights; // 街頭
 
     private readonly string[] buildNameEng_ = { "MayorHouse", "BookStore", "ItemStore", "Guild", "Restaurant" };  // 建物名(ヒエラルキーと同じ英語)
     private readonly Vector3[] buildPos_ = { new Vector3(0.0f, 0.0f, 110.0f),   
@@ -20,8 +22,19 @@ public class TownMng : MonoBehaviour
         // 現在のシーンをTOWNとする
         SceneMng.SetNowScene(SceneMng.SCENE.TOWN);
 
+        // 今が夜ならばライト点灯、それ以外ならライト消灯
+        if(SceneMng.GetTimeGear() == SceneMng.TIMEGEAR.NIGHT)
+        {
+            nightLights.SetActive(true);
+        }
+        else
+        {
+            nightLights.SetActive(false);
+        }
+
+
         // 建物と座標を一致させる
-        for(int i = 0; i < buildNameEng_.Length; i++)
+        for (int i = 0; i < buildNameEng_.Length; i++)
         {
             uniPosMap_.Add(buildNameEng_[i], buildPos_[i]);
         }
