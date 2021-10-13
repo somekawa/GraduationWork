@@ -31,8 +31,8 @@ public class CharacterMng : MonoBehaviour
     //    MAX
     //}
 
-    CharcterNum oldTurnChar_ = CharcterNum.UNI;     // 前に行動順が回ってきていたキャラクター
-    CharcterNum nowTurnChar_ = CharcterNum.MAX;     // 現在行動順が回ってきているキャラクター
+    CHARACTERNUM oldTurnChar_ = CHARACTERNUM.UNI;     // 前に行動順が回ってきていたキャラクター
+    CHARACTERNUM nowTurnChar_ = CHARACTERNUM.MAX;     // 現在行動順が回ってきているキャラクター
     private bool selectFlg_ = false;                // 敵を選択中かのフラグ
     private bool lastEnemytoAttackFlg_ = false;     // キャラの攻撃対象が最後の敵であるか     
 
@@ -42,7 +42,7 @@ public class CharacterMng : MonoBehaviour
     private Quaternion[] buttleWarpPointsRotate_ = new Quaternion[buttleCharMax_];   // 戦闘時の回転角度を保存しておく変数(クォータニオン)
 
     // キーをキャラ識別enum,値を(キャラ識別に対応した)キャラオブジェクトで作ったmap
-    private Dictionary<CharcterNum, GameObject> charMap_;
+    private Dictionary<CHARACTERNUM, GameObject> charMap_;
     // Chara.csをキャラ毎にリスト化する
     private List<Chara> charasList_ = new List<Chara>();          
 
@@ -67,7 +67,7 @@ public class CharacterMng : MonoBehaviour
         //Debug.Log("HHHPPP"+charasList_[0].HP());
         //SceneMng.SceneLoad((int)SceneMng.SCENE.TOWN);
 
-        nowTurnChar_ = CharcterNum.UNI;
+        nowTurnChar_ = CHARACTERNUM.UNI;
 
         // ワープポイントの数ぶん、for文を回す
         for (int i = 0; i < buttleWarpPointPack.transform.childCount; i++)
@@ -113,17 +113,17 @@ public class CharacterMng : MonoBehaviour
         buttleAnounceText_.text = announceText_[0];
 
         // 最初の行動キャラを指定する
-        nowTurnChar_ = CharcterNum.UNI;
+        nowTurnChar_ = CHARACTERNUM.UNI;
 
         // フラグの初期化を行う
         lastEnemytoAttackFlg_ = false;
 
         // 戦闘前の座標を保存しておく
-        keepFieldPos_ = charMap_[CharcterNum.UNI].gameObject.transform.position;
+        keepFieldPos_ = charMap_[CHARACTERNUM.UNI].gameObject.transform.position;
 
         // 戦闘用座標と回転角度を代入する
         // キャラの角度を変更は、ButtleWarpPointの箱の角度を回転させると可能。(1体1体向きを変えることもできる)
-        foreach (KeyValuePair<CharcterNum, GameObject> character in charMap_)
+        foreach (KeyValuePair<CHARACTERNUM, GameObject> character in charMap_)
         {
             character.Value.gameObject.transform.position = buttleWarpPointsPos_[(int)character.Key];
             character.Value.gameObject.transform.rotation = buttleWarpPointsRotate_[(int)character.Key];
@@ -150,7 +150,7 @@ public class CharacterMng : MonoBehaviour
                 Destroy(obj);
             }
             FieldMng.nowMode = FieldMng.MODE.SEARCH;
-            charMap_[CharcterNum.UNI].gameObject.transform.position = keepFieldPos_;
+            charMap_[CHARACTERNUM.UNI].gameObject.transform.position = keepFieldPos_;
 
             Debug.Log("Uniは逃げ出した");
         }
@@ -221,9 +221,9 @@ public class CharacterMng : MonoBehaviour
 
                 // 次のキャラが行動できるようにする
                 // 最大まで加算されたら、初期値に戻す(前演算子重要)
-                if (++nowTurnChar_ >= CharcterNum.MAX)
+                if (++nowTurnChar_ >= CHARACTERNUM.MAX)
                 {
-                    nowTurnChar_ = CharcterNum.UNI;
+                    nowTurnChar_ = CHARACTERNUM.UNI;
                 }
             }
         }
@@ -277,6 +277,6 @@ public class CharacterMng : MonoBehaviour
 
     public void SetCharaFieldPos()
     {
-        charMap_[CharcterNum.UNI].gameObject.transform.position = keepFieldPos_;
+        charMap_[CHARACTERNUM.UNI].gameObject.transform.position = keepFieldPos_;
     }
 }

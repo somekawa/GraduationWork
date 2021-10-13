@@ -7,7 +7,7 @@ public abstract class CharaBase : object
     private GameObject DataPopPrefab_;
 
     // 番号
-    private SceneMng.CharcterNum charNum_;
+    private SceneMng.CHARACTERNUM charNum_;
 
     public struct CharacterSetting
     {
@@ -33,7 +33,7 @@ public abstract class CharaBase : object
 
     private CharacterSetting setting_;
 
-    public CharaBase(string name, SceneMng.CharcterNum num, Animator animator)
+    public CharaBase(string name, SceneMng.CHARACTERNUM num, Animator animator)
     {
         setting_.name = name;
 
@@ -57,7 +57,7 @@ public abstract class CharaBase : object
         //setting.buttlePos = set.buttlePos;    // 設定のタイミングが異なる
     }
 
-    public SceneMng.CharcterNum GetNum()
+    public SceneMng.CHARACTERNUM GetNum()
     {
         return charNum_;
     }

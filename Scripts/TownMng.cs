@@ -61,6 +61,8 @@ public class TownMng : MonoBehaviour
 
             // 現在の建物名を保存(カメラ位置調整に必要)
             temp.SetInHouseName(str);
+
+            SceneMng.SetHouseName("Mob");
         }
         else
         {

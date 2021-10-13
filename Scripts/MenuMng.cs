@@ -21,7 +21,7 @@ public class MenuMng : MonoBehaviour
         buttons_.SetActive(false);
 
         // キャラのステータス値を表示させたい
-        var data = SceneMng.GetCharasSettings((int)SceneMng.CharcterNum.UNI);
+        var data = SceneMng.GetCharasSettings((int)SceneMng.CHARACTERNUM.UNI);
 
         // 表示する文字の作成
         string str = "名前  :"   + data.name               + "\n" +
@@ -43,7 +43,7 @@ public class MenuMng : MonoBehaviour
     {
         Debug.Log("セーブボタンが押された");
 
-        var data = SceneMng.GetCharasSettings((int)SceneMng.CharcterNum.UNI);
+        var data = SceneMng.GetCharasSettings((int)SceneMng.CHARACTERNUM.UNI);
 
         // データ書き出しテスト
         StreamWriter swLEyeLog;

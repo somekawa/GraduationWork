@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine;
@@ -6,7 +5,7 @@ using UnityEngine;
 public class SceneMng : MonoBehaviour
 {
     // キャラクターの種類
-    public enum CharcterNum
+    public enum CHARACTERNUM
     {
         UNI,    // 手前
         DEMO,   // 奥
@@ -28,7 +27,7 @@ public class SceneMng : MonoBehaviour
     // 1日の時間経過
     public enum TIMEGEAR
     {
-        MOLNING,    // 朝
+        MORNING,    // 朝
         NOON,       // 昼
         EVENING,    // 夕
         NIGHT       // 夜
@@ -41,14 +40,14 @@ public class SceneMng : MonoBehaviour
     public List<GameObject> charaObjList;
 
     // キーをキャラ識別enum,値を(キャラ識別に対応した)キャラオブジェクトで作ったmap
-    public static Dictionary<CharcterNum, GameObject> charMap_;
+    public static Dictionary<CHARACTERNUM, GameObject> charMap_;
     public static List<Chara> charasList_ = new List<Chara>();          // Chara.csをキャラ毎にリスト化する
 
     public static SCENE nowScene = SCENE.NON;   // 現在のシーン
     public static float charaRunSpeed = 0.0f;   // キャラの移動速度(MODE毎に調整をする)
 
     private static string houseName_ = "Mob";    // Excelから読み込んだ建物名
-    private static TIMEGEAR timeGrar_ = TIMEGEAR.MOLNING;               // 1日の経過時間の情報を入れる
+    private static TIMEGEAR timeGrar_ = TIMEGEAR.MORNING;               // 1日の経過時間の情報を入れる
 
     void Awake()
     {
@@ -82,13 +81,13 @@ public class SceneMng : MonoBehaviour
         }
 
         // キャラクターの情報をゲームオブジェクトとして最初に取得しておく
-        charMap_ = new Dictionary<CharcterNum, GameObject>(){
-                {CharcterNum.UNI,charaObjList[(int)CharcterNum.UNI]},
-                {CharcterNum.DEMO,charaObjList[(int)CharcterNum.DEMO]},
+        charMap_ = new Dictionary<CHARACTERNUM, GameObject>(){
+                {CHARACTERNUM.UNI,charaObjList[(int)CHARACTERNUM.UNI]},
+                {CHARACTERNUM.DEMO,charaObjList[(int)CHARACTERNUM.DEMO]},
             };
 
         // charMap_でforeachを回して、キャラクターのリストを作成
-        foreach (KeyValuePair<CharcterNum, GameObject> anim in charMap_)
+        foreach (KeyValuePair<CHARACTERNUM, GameObject> anim in charMap_)
         {
             // Charaクラスの生成
             charasList_.Add(new Chara(anim.Value.name, anim.Key, anim.Value.GetComponent<Animator>()));

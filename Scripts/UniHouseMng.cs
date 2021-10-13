@@ -26,7 +26,7 @@ public class UniHouseMng : MonoBehaviour
             return; // 休むボタンを押しても反応しないようにする
         }
 
-        SceneMng.SetTimeGear(SceneMng.TIMEGEAR.MOLNING);   // 時間経過
+        SceneMng.SetTimeGear(SceneMng.TIMEGEAR.MORNING);   // 時間経過
         Debug.Log("休むボタンが押下されました");
     }
 }

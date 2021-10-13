@@ -25,7 +25,7 @@ public class TimeGear : MonoBehaviour
 
             // ÉLÅ[Ç∆ílÇìoò^Ç∑ÇÈ
             rotateTimeGearMap_ = new Dictionary<SceneMng.TIMEGEAR, float>{
-            {SceneMng.TIMEGEAR.MOLNING, 0.0f},
+            {SceneMng.TIMEGEAR.MORNING, 0.0f},
             {SceneMng.TIMEGEAR.NOON   , 90.0f},
             {SceneMng.TIMEGEAR.EVENING, 180.0f},
             {SceneMng.TIMEGEAR.NIGHT  , 270.0f},
