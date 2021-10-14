@@ -26,8 +26,6 @@ public class FieldMng : MonoBehaviour
     public static MODE nowMode = MODE.SEARCH;      // 現在のモード
     public static MODE oldMode = MODE.NON;         // 前のモード
 
-    public Canvas menuUICanvas;                    // メニュー画面Canvas
-
     private float toButtleTime_ = 1.0f;            // 30秒経過でバトルへ遷移する
     private float time_ = 0.0f;                    // 現在の経過時間
 
@@ -49,10 +47,10 @@ public class FieldMng : MonoBehaviour
             Debug.Log("FieldMng.csで取得しているCameraMngがnullです");
         }
 
-        menuUICanvas.gameObject.SetActive(false);
-
         // 現在のシーンをFIELDとする
-        SceneMng.SetNowScene(SceneMng.SCENE.FIELD);
+        SceneMng.SetNowScene(SceneMng.SCENE.FIELD0);
+        // WarpField.csの初期化関数を先に呼ぶ
+        GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
     }
 
     void Update()
@@ -62,13 +60,6 @@ public class FieldMng : MonoBehaviour
 
         if (nowMode == MODE.SEARCH)
         {
-            // 探索中にTABキーが押下されたらnowModeをMENUに切り替える
-            if (Input.GetKeyDown(KeyCode.Tab))
-            {
-                Debug.Log("メニュー画面を表示します");
-                nowMode = MODE.MENU;
-            }
-
             // 探索中の時間加算処理
             if (player_.GetMoveFlag() && time_ < toButtleTime_)
             {
@@ -90,7 +81,6 @@ public class FieldMng : MonoBehaviour
         {
             ChangeMode(nowMode);
         }
-
     }
 
     // モードが切り替わったタイミングのみで呼び出す関数
@@ -103,7 +93,6 @@ public class FieldMng : MonoBehaviour
 
             case MODE.SEARCH:
                 cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
-                menuUICanvas.gameObject.SetActive(false);
                 break;
 
             case MODE.BUTTLE:
@@ -111,7 +100,6 @@ public class FieldMng : MonoBehaviour
                 break;
 
             case MODE.MENU:
-                menuUICanvas.gameObject.SetActive(true);
                 break;
 
             default:
@@ -128,5 +116,4 @@ public class FieldMng : MonoBehaviour
     {
         return time_ / toButtleTime_;
     }
-
 }
