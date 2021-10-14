@@ -138,13 +138,12 @@ public class MenuActive : MonoBehaviour
             return;
         }
 
-
-
         if (parentMenuBtn_.gameObject.activeSelf == false)
         {
             if (Input.GetKeyUp(KeyCode.Tab))
             {
-                activeFlag_ = true;
+                Debug.Log("メニュー画面を表示します");
+                FieldMng.nowMode = FieldMng.MODE.MENU;  // ユニが歩行できないようにモードを切り替える  activeFlag_ = true;
                 bagImage_.color = new Color(0.5f, 1.0f, 0.5f, 1.0f);
                 parentRectTrans_[(int)CANVAS.MENU].gameObject.SetActive(true);
                 StartCoroutine(MoveMenuButtons(1));
