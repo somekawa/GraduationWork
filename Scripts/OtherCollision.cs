@@ -13,7 +13,6 @@ public class OtherCollision : MonoBehaviour
     private Vector3 activePos_;
     private Camera mainCamera_;      // 座標空間変更時に使用
     private GameObject uniChan_;      // 座標空間変更時に使用
-   // private Vector2 addPos_=new Vector2(20.0f,40.0f);
 
     void Start()
     {

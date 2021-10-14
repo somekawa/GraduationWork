@@ -5,7 +5,7 @@ using UnityEngine;
 public class OnClickEvent : MonoBehaviour
 {
     private RectTransform locationSelMng_;        // ワープ先を出すCanvas（親）
-    private WarpField warpField_;
+    private WarpField warpField_;           // ボタンの名前と比べるため
 
     void Start()
     {
