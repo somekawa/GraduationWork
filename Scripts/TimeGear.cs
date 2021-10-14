@@ -14,7 +14,7 @@ public class TimeGear : MonoBehaviour
         // ゲームオブジェクトがまだ作られていないとき
         if (timgeGrarSingleton_ == null)
         {
-            panel_ = GameObject.Find("TimeCanvas/Panel");
+            panel_ = GameObject.Find("DontDestroyCanvas/TimeGear/Panel");
             panel_.SetActive(false);
 
             timgeGrarSingleton_ = this;
