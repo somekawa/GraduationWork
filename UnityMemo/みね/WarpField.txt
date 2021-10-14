@@ -1,5 +1,18 @@
 WarpField.cs
 ーーーーーーーーーーーーーーーーーーー
+2021/10/14　更新メモ
+キャンバス自体を変更
+・LocationSelCanvas
+　ーScrollView
+　　ーContent
+　ーScrollbar Vertical
+
+warpField.csのSceneBtnPrefab＿に
+PrefabーWarpー「SceneBtn」を入れてください
+
+「SceneBtn」にOnClickEvent.csをアタッチ
+ButtonのOnClickに自分自身を入れて「OnClickSceneBtn」を入れてください
+ーーーーーーーーーーーーーーーーーーー
 2021/10/01　更新メモ
 
 新しいFieldが追加された際に変更しにくかったので

@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 
 public class WarpField : MonoBehaviour
 {
@@ -10,24 +9,29 @@ public class WarpField : MonoBehaviour
 
     // 表示関連
     private Canvas locationSelCanvas_;        // ワープ先を出すCanvas（親）
-    private Image[] selectFieldImage_ = new Image[(int)SceneMng.SCENE.MAX];  // 選択できるフィールドの背景（locationSelCanvasの孫
-    private Text[] selectFieldText_   = new Text[(int)SceneMng.SCENE.MAX];   // 選択できるフィールドの文字（locationSelCanvasの孫
+    [SerializeField]
+    private GameObject sceneBtnPrefab_; // 行先ボタンを表示するためのプレハブ                                        
+    // 生成したものを保存するオブジェクト
+    public static GameObject[] btnMng_ = new GameObject[(int)SceneMng.SCENE.MAX];
+    // 生成されたものの中からTextを保存
+    private Text[] sceneText_ = new Text[(int)SceneMng.SCENE.MAX];
+    // ボタンの親にあたるオブジェクト
+    private RectTransform btnParent_; 
 
-    private string[] sceneName_ = new string[(int)SceneMng.SCENE.MAX]{
-           "", "Town","Forest","Test","cansel"
-    };
+    private string[] sceneName = new string[(int)SceneMng.SCENE.MAX] {
+    "","town","house","field0","field1","field2","field3","field4","cancel"};
+    private int stpryProgress_ = (int)SceneMng.SCENE.FIELD1;// どの章まで進んでいるか
 
-    private float changeSelectCnt_ = 0.0f;  // 連続でSpaceキーの処理に入らないようにするため
 
-    private int saveNowField_;    // 現在いるフィールドを保存
+    private int saveNowField_ = -1;    // 現在いるフィールドを保存
     private int selectFieldNum_;  // どのフィールドを選んでいるか（1スタート
 
-    private Color nowImageColor_ = new Color(0.0f, 0.0f, 1.0f, 1.0f);  // 選択中の色（青）
-    private Color resetColor_ = new Color(1.0f, 1.0f, 1.0f, 1.0f);     // 選択外の色（白）
 
     private bool fieldEndHit = false;   // ワープオブジェクトに接触したかどうか
     private bool nowTownFlag_ = false;  // 町ワープからのフィールドワープか
     private bool warpNowFlag_ = false;  // フィールドワープを選択中の時
+
+
 
     // マップ端からフィールド選択→キャンセルした場合関連
     private enum rotate
@@ -55,39 +59,35 @@ public class WarpField : MonoBehaviour
     private float rotateNormalized_ = 0.0f;// 向いてる方向の正規化を保存
 
     public void Init()
-    // void Start()
     {
         // 座標と回転を変える可能性があるためユニを取得
         UniChan_ = GameObject.Find("Uni");
         UniChanController_ = UniChan_.GetComponent<UnitychanController>();
 
+        btnMng_ = new GameObject[(int)SceneMng.SCENE.MAX];
+        sceneText_ = new Text[(int)SceneMng.SCENE.MAX];
         locationSelCanvas_ = GameObject.Find("LocationSelCanvas").GetComponent<Canvas>();
-        // フィールド選択キャンバスを非表示
-        locationSelCanvas_.gameObject.SetActive(false);
-
-        for (int i = (int)SceneMng.SCENE.TOWN; i < (int)SceneMng.SCENE.MAX; i++)
+        btnParent_ = locationSelCanvas_.transform.Find("ScrollView/Viewport/Content").GetComponent<RectTransform>();
+        Debug.Log(btnParent_.name);
+        for (int i = (int)SceneMng.SCENE.CONVERSATION; i < (int)SceneMng.SCENE.MAX; i++)
         {
-            //Debug.Log((int)SceneMng.nowScene+"が現在のシーン       " +i + "番目のシーンにいます");
-            selectFieldImage_[i] = locationSelCanvas_.transform.GetChild(i).GetComponent<Image>();
-            selectFieldText_[i] = selectFieldImage_[i].transform.GetChild(0).GetComponent<Text>();
-            selectFieldText_[i].text = sceneName_[i];// Textに文字を入れる
-            if ((int)SceneMng.nowScene == i)
+            btnMng_[i] = Instantiate(sceneBtnPrefab_, new Vector2(0, 0),
+                Quaternion.identity, btnParent_.transform);
+            sceneText_[i] = btnMng_[i].transform.GetChild(0).GetComponent<Text>();
+            sceneText_[i].text = sceneName[i];
+            btnMng_[i].name = sceneName[i];
+            if (((int)SceneMng.nowScene == i)|| (stpryProgress_ <i))
             {
-                saveNowField_ = i;// 現在のシーン名と合っているものを保存
-                                  // 保存＝現在いるシーン　選べない色にする
+                btnMng_[i].SetActive(false);
             }
         }
-        selectFieldImage_[saveNowField_].color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
-
-        // 選択中の初期場所を決める
-        if (saveNowField_ == (int)SceneMng.SCENE.TOWN)
-        {
-            selectFieldNum_ = (int)SceneMng.SCENE.FIELD;
-        }
-        else
-        {
-            selectFieldNum_ = (int)SceneMng.SCENE.TOWN;
-        }
+        //// 現在ストーリ以降のフィールドは非表示
+        //for (int i = stpryProgress_ + 1; i < (int)SceneMng.SCENE.CANCEL; i++)
+        //{
+        //    btnMng_[i].SetActive(false);
+        //}
+        btnMng_[(int)SceneMng.SCENE.CONVERSATION].SetActive(false);// 0番目はずっと非表示
+        btnMng_[(int)SceneMng.SCENE.CANCEL].SetActive(true);// 0番目はずっと非表示
 
         // マップ端にあるオブジェクトを検索（フィールドによって個数が違うため子の個数で見る）
         warpObject_ = new GameObject[this.transform.childCount];
@@ -96,128 +96,106 @@ public class WarpField : MonoBehaviour
             warpObject_[i] = this.transform.GetChild(i).gameObject;
             //Debug.Log(warpObject_[i].name + "側のワープ座表" + warpObject_[i].transform.position);
         }
+        // フィールド選択キャンバスを非表示
+        locationSelCanvas_.gameObject.SetActive(false);
     }
 
     // コルーチン  
-    private IEnumerator Select()
-    {
-        // コルーチンの処理(返り値がtrueなら処理を続行する)  
-        while (SelectGoToFiled())
-        {
-            yield return null;
-        }
-    }
+    //private IEnumerator Select()
+    //{
+    //    // コルーチンの処理(返り値がtrueなら処理を続行する)  
+    //    while (SelectGoToFiled())
+    //    {
+    //        yield return null;
+    //    }
+    //}
 
-    private bool SelectGoToFiled()
-    {
-        // 選択中の画像の色を変更
-        for (int i = (int)SceneMng.SCENE.TOWN; i < (int)SceneMng.SCENE.MAX; i++)
-        {
-            if (saveNowField_ == i)
-            {
-                continue;  // 現在いるSceneの色はStartで指定した色。変化しない
-            }
+    //private bool SelectGoToFiled()
+    //{
 
-            if (selectFieldNum_ == i)
-            {
-                selectFieldImage_[selectFieldNum_].color = nowImageColor_;  // 現在選択中の時（青
-            }
-            else
-            {
-                selectFieldImage_[i].color = resetColor_; // 選択されてない時（白
-            }
-        }
 
-        // フィールド選択中にSpaceキー処理が入らないようにするため
-        if (changeSelectCnt_ < 0.5f)
-        {
-            changeSelectCnt_ += Time.deltaTime;
-            return true;
-        }
+    //    if (Input.GetKeyDown(KeyCode.DownArrow))
+    //    {
+    //        if (selectFieldNum_ < (int)SceneMng.SCENE.MAX - 1)
+    //        {
+    //            selectFieldNum_++;      // 下に移動
+    //        }
+    //        //if (selectFieldNum_ == saveNowField_)
+    //        //{
+    //        //    selectFieldNum_++;// 現在シーンの場合はもう一度加算
+    //        //}
+    //        return true;
+    //        //Debug.Log("下に移動" + selectFieldNum_);
+    //    }
+    //    else if (Input.GetKeyDown(KeyCode.UpArrow))
+    //    {
+    //        if (saveNowField_ != (int)SceneMng.SCENE.TOWN)
+    //        {
+    //            if ((int)SceneMng.SCENE.TOWN < selectFieldNum_)
+    //            {
+    //                selectFieldNum_--;    // 上に移動
+    //            }
+    //            //if (selectFieldNum_ == saveNowField_)
+    //            //{
+    //            //    selectFieldNum_--;
+    //            //}
+    //        }
+    //        else
+    //        {
+    //            // 町にいるときは町が一番上のため減算してほしくない
+    //            if ((int)SceneMng.SCENE.TOWN + 1 < selectFieldNum_)
+    //            {
+    //                selectFieldNum_--;    // 上に移動
+    //            }
+    //        }
+    //        return true;
+    //    }
+    //    else
+    //    {
+    //        // 何も処理を行わない
+    //    }
 
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            if (selectFieldNum_ < (int)SceneMng.SCENE.MAX-1)
-            {
-                selectFieldNum_++;      // 下に移動
-            }
-            if (selectFieldNum_ == saveNowField_)
-            {
-                selectFieldNum_++;// 現在シーンの場合はもう一度加算
-            }
-            return true;
-            //Debug.Log("下に移動" + selectFieldNum_);
-        }
-        else if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            if (saveNowField_ != (int)SceneMng.SCENE.TOWN)
-            {
-                if ((int)SceneMng.SCENE.TOWN < selectFieldNum_)
-                {
-                    selectFieldNum_--;    // 上に移動
-                }
-                if (selectFieldNum_ == saveNowField_)
-                {
-                    selectFieldNum_--;
-                }
-            }
-            else
-            {
-                // 町にいるときは町が一番上のため減算してほしくない
-                if ((int)SceneMng.SCENE.TOWN + 1 < selectFieldNum_)
-                {
-                    selectFieldNum_--;    // 上に移動
-                }
-            }
-            return true;
-        }
-        else
-        {
-            // 何も処理を行わない
-        }
+    //    // 行先決定
+    //    if (Input.GetKey(KeyCode.Space))
+    //    {
+    //        // キャンセル以外の時＝シーン遷移をする
+    //        if (selectFieldNum_ != (int)SceneMng.SCENE.MAX - 1)
+    //        {
+    //            Debug.Log("コルーチンストップ");
+    //            StopCoroutine(Select());                // コルーチンストップ
+    //            //Debug.Log(selectFieldNum_+ "を選択中。Sceneを移動します");
+    //            WarpTown.warpNum_ = 0;// フィールドからタウンに戻った時のために0に戻しておく
+    //            SceneMng.SceneLoad(selectFieldNum_ + 1);
+    //        }
+    //        else
+    //        {
+    //            // フィールド端に接触した際はユニを回転させて押し返す必要がある
+    //            if (fieldEndHit == true)
+    //            {
+    //                UniPushBack();
+    //            }
 
-        // 行先決定
-        if (Input.GetKey(KeyCode.Space))
-        {
-            // キャンセル以外の時＝シーン遷移をする
-            if (selectFieldNum_ != (int)SceneMng.SCENE.MAX-1)
-            {
-                Debug.Log("コルーチンストップ");
-                StopCoroutine(Select());                // コルーチンストップ
-                //Debug.Log(selectFieldNum_+ "を選択中。Sceneを移動します");
-                WarpTown.warpNum_ = 0;// フィールドからタウンに戻った時のために0に戻しておく
-                SceneMng.SceneLoad(selectFieldNum_);
-            }
-            else
-            {
-                // フィールド端に接触した際はユニを回転させて押し返す必要がある
-                if (fieldEndHit == true)
-                {
-                    UniPushBack();
-                }
+    //            //// 選択中の位置を初期化
+    //            //if (saveNowField_ == (int)SceneMng.SCENE.TOWN)
+    //            //{
+    //            //    selectFieldNum_ = (int)SceneMng.SCENE.FIELD; // フィールドの行き先をリセット
+    //            //}
+    //            //else
+    //            //{
+    //            //    selectFieldNum_ = (int)SceneMng.SCENE.TOWN; // フィールドの行き先をリセット
+    //            //}
 
-                // 選択中の位置を初期化
-                if (saveNowField_ == (int)SceneMng.SCENE.TOWN)
-                {
-                    selectFieldNum_ = (int)SceneMng.SCENE.FIELD; // フィールドの行き先をリセット
-                }
-                else
-                {
-                    selectFieldNum_ = (int)SceneMng.SCENE.TOWN; // フィールドの行き先をリセット
-                }
+    //            // フィールド選択キャンバス非表示
+    //            locationSelCanvas_.gameObject.SetActive(false);
 
-                // フィールド選択キャンバス非表示
-                locationSelCanvas_.gameObject.SetActive(false);
-                changeSelectCnt_ = 0.0f;
-
-                Debug.Log("コルーチンストップ");
-                StopCoroutine(Select());                // コルーチンストップ
-            }
-            nowTownFlag_ = false;
-            SetWarpNowFlag(false);
-        }
-        return nowTownFlag_;
-    }
+    //            Debug.Log("コルーチンストップ");
+    //            StopCoroutine(Select());                // コルーチンストップ
+    //        }
+    //        nowTownFlag_ = false;
+    //        SetWarpNowFlag(false);
+    //    }
+    //    return nowTownFlag_;
+    //}
 
     private void UniPushBack()
     {
@@ -295,7 +273,7 @@ public class WarpField : MonoBehaviour
     {
         warpNowFlag_ = flag;
 
-        if(warpNowFlag_)
+        if (warpNowFlag_)
         {
             // ワープ選択中はユニちゃんのアニメーションを止めて、移動操作不可
             UniChanController_.StopUniRunAnim();
@@ -330,11 +308,20 @@ public class WarpField : MonoBehaviour
         // フィールド上でワープする時、Updataがないためここ経由で呼び出す必要がある
         nowTownFlag_ = flag;
 
-        if (flag)
+        //if (flag)
+        //{
+        //    Debug.Log("コルーチンスタート");
+        //    // コルーチンスタート
+        //    StartCoroutine(Select());
+        //}
+    }
+
+    public void CancelCheck()
+    {
+        if (fieldEndHit == true)
         {
-            Debug.Log("コルーチンスタート");
-            // コルーチンスタート
-            StartCoroutine(Select());
+            UniPushBack();
         }
     }
+
 }
