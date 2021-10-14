@@ -30,11 +30,11 @@ public class OtherCollision : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (saveObjName_ == other.name)
-        {
-            // 同じ名前のオブジェクトの場合取得できないようにする
-            return;
-        }
+        //if (saveObjName_ == other.name)
+        //{
+        //    // 同じ名前のオブジェクトの場合取得できないようにする
+        //    return;
+        //}
         if (Input.GetKey(KeyCode.Space))
         {
             for (int i = 0; i < (int)ItemGet.items.MAX; i++)
