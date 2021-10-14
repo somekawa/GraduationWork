@@ -5,33 +5,22 @@ using UnityEngine.UI;
 
 public class WarpField : MonoBehaviour
 {
-    private GameObject[] warpObject_;   // マップ端のワープオブジェを保存
-
     // 表示関連
-    private Canvas locationSelCanvas_;        // ワープ先を出すCanvas（親）
-    [SerializeField]
-    private GameObject sceneBtnPrefab_; // 行先ボタンを表示するためのプレハブ                                        
-    // 生成したものを保存するオブジェクト
-    public static GameObject[] btnMng_ = new GameObject[(int)SceneMng.SCENE.MAX];
-    // 生成されたものの中からTextを保存
-    private Text[] sceneText_ = new Text[(int)SceneMng.SCENE.MAX];
-    // ボタンの親にあたるオブジェクト
-    private RectTransform btnParent_; 
+    private Canvas dontDestroyCanvas_;
+    private RectTransform locationSelMng_;  // ワープ先を出すCanvas（親）
+    public static Image[] btnMng_;          // 生成したものを保存するオブジェクト
+    private Text[] sceneText_;              // 生成されたものの中からTextを保存
+    private RectTransform btnParent_;       // ボタンの親にあたるオブジェクト
 
     private string[] sceneName = new string[(int)SceneMng.SCENE.MAX] {
     "","town","house","field0","field1","field2","field3","field4","cancel"};
     private int stpryProgress_ = (int)SceneMng.SCENE.FIELD1;// どの章まで進んでいるか
 
-
-    private int saveNowField_ = -1;    // 現在いるフィールドを保存
-    private int selectFieldNum_;  // どのフィールドを選んでいるか（1スタート
-
-
     private bool fieldEndHit = false;   // ワープオブジェクトに接触したかどうか
     private bool nowTownFlag_ = false;  // 町ワープからのフィールドワープか
     private bool warpNowFlag_ = false;  // フィールドワープを選択中の時
 
-
+    private GameObject[] warpObject_;   // マップ端のワープオブジェを保存
 
     // マップ端からフィールド選択→キャンセルした場合関連
     private enum rotate
@@ -64,30 +53,33 @@ public class WarpField : MonoBehaviour
         UniChan_ = GameObject.Find("Uni");
         UniChanController_ = UniChan_.GetComponent<UnitychanController>();
 
-        btnMng_ = new GameObject[(int)SceneMng.SCENE.MAX];
+        btnMng_ = new Image[(int)SceneMng.SCENE.MAX];
         sceneText_ = new Text[(int)SceneMng.SCENE.MAX];
-        locationSelCanvas_ = GameObject.Find("LocationSelCanvas").GetComponent<Canvas>();
-        btnParent_ = locationSelCanvas_.transform.Find("ScrollView/Viewport/Content").GetComponent<RectTransform>();
+
+        dontDestroyCanvas_ = GameObject.Find("DontDestroyCanvas").GetComponent<Canvas>();
+        GameObject game = DontDestroyMng.Instance;
+        locationSelMng_ = dontDestroyCanvas_.transform.Find("LocationSelMng").GetComponent<RectTransform>();
+       
+       btnParent_ = locationSelMng_.transform.Find("Viewport/Content").GetComponent<RectTransform>();
         Debug.Log(btnParent_.name);
         for (int i = (int)SceneMng.SCENE.CONVERSATION; i < (int)SceneMng.SCENE.MAX; i++)
         {
-            btnMng_[i] = Instantiate(sceneBtnPrefab_, new Vector2(0, 0),
-                Quaternion.identity, btnParent_.transform);
+            btnMng_[i] = btnParent_.transform.GetChild(i).GetComponent<Image>();
             sceneText_[i] = btnMng_[i].transform.GetChild(0).GetComponent<Text>();
             sceneText_[i].text = sceneName[i];
             btnMng_[i].name = sceneName[i];
-            if (((int)SceneMng.nowScene == i)|| (stpryProgress_ <i))
+            // 現在ストーリ以降のフィールドと現在いるシーンは非表示
+            if (((int)SceneMng.nowScene == i) || (stpryProgress_ < i))
             {
-                btnMng_[i].SetActive(false);
+                btnMng_[i].gameObject.SetActive(false);
+            }
+            else
+            {
+                btnMng_[i].gameObject.SetActive(true);
             }
         }
-        //// 現在ストーリ以降のフィールドは非表示
-        //for (int i = stpryProgress_ + 1; i < (int)SceneMng.SCENE.CANCEL; i++)
-        //{
-        //    btnMng_[i].SetActive(false);
-        //}
-        btnMng_[(int)SceneMng.SCENE.CONVERSATION].SetActive(false);// 0番目はずっと非表示
-        btnMng_[(int)SceneMng.SCENE.CANCEL].SetActive(true);// 0番目はずっと非表示
+        btnMng_[(int)SceneMng.SCENE.CONVERSATION].gameObject.SetActive(false);// 0番目はずっと非表示
+        btnMng_[(int)SceneMng.SCENE.CANCEL].gameObject.SetActive(true);// キャンセルはずっと必要はずっと非表示
 
         // マップ端にあるオブジェクトを検索（フィールドによって個数が違うため子の個数で見る）
         warpObject_ = new GameObject[this.transform.childCount];
@@ -97,105 +89,8 @@ public class WarpField : MonoBehaviour
             //Debug.Log(warpObject_[i].name + "側のワープ座表" + warpObject_[i].transform.position);
         }
         // フィールド選択キャンバスを非表示
-        locationSelCanvas_.gameObject.SetActive(false);
+        locationSelMng_.gameObject.SetActive(false);
     }
-
-    // コルーチン  
-    //private IEnumerator Select()
-    //{
-    //    // コルーチンの処理(返り値がtrueなら処理を続行する)  
-    //    while (SelectGoToFiled())
-    //    {
-    //        yield return null;
-    //    }
-    //}
-
-    //private bool SelectGoToFiled()
-    //{
-
-
-    //    if (Input.GetKeyDown(KeyCode.DownArrow))
-    //    {
-    //        if (selectFieldNum_ < (int)SceneMng.SCENE.MAX - 1)
-    //        {
-    //            selectFieldNum_++;      // 下に移動
-    //        }
-    //        //if (selectFieldNum_ == saveNowField_)
-    //        //{
-    //        //    selectFieldNum_++;// 現在シーンの場合はもう一度加算
-    //        //}
-    //        return true;
-    //        //Debug.Log("下に移動" + selectFieldNum_);
-    //    }
-    //    else if (Input.GetKeyDown(KeyCode.UpArrow))
-    //    {
-    //        if (saveNowField_ != (int)SceneMng.SCENE.TOWN)
-    //        {
-    //            if ((int)SceneMng.SCENE.TOWN < selectFieldNum_)
-    //            {
-    //                selectFieldNum_--;    // 上に移動
-    //            }
-    //            //if (selectFieldNum_ == saveNowField_)
-    //            //{
-    //            //    selectFieldNum_--;
-    //            //}
-    //        }
-    //        else
-    //        {
-    //            // 町にいるときは町が一番上のため減算してほしくない
-    //            if ((int)SceneMng.SCENE.TOWN + 1 < selectFieldNum_)
-    //            {
-    //                selectFieldNum_--;    // 上に移動
-    //            }
-    //        }
-    //        return true;
-    //    }
-    //    else
-    //    {
-    //        // 何も処理を行わない
-    //    }
-
-    //    // 行先決定
-    //    if (Input.GetKey(KeyCode.Space))
-    //    {
-    //        // キャンセル以外の時＝シーン遷移をする
-    //        if (selectFieldNum_ != (int)SceneMng.SCENE.MAX - 1)
-    //        {
-    //            Debug.Log("コルーチンストップ");
-    //            StopCoroutine(Select());                // コルーチンストップ
-    //            //Debug.Log(selectFieldNum_+ "を選択中。Sceneを移動します");
-    //            WarpTown.warpNum_ = 0;// フィールドからタウンに戻った時のために0に戻しておく
-    //            SceneMng.SceneLoad(selectFieldNum_ + 1);
-    //        }
-    //        else
-    //        {
-    //            // フィールド端に接触した際はユニを回転させて押し返す必要がある
-    //            if (fieldEndHit == true)
-    //            {
-    //                UniPushBack();
-    //            }
-
-    //            //// 選択中の位置を初期化
-    //            //if (saveNowField_ == (int)SceneMng.SCENE.TOWN)
-    //            //{
-    //            //    selectFieldNum_ = (int)SceneMng.SCENE.FIELD; // フィールドの行き先をリセット
-    //            //}
-    //            //else
-    //            //{
-    //            //    selectFieldNum_ = (int)SceneMng.SCENE.TOWN; // フィールドの行き先をリセット
-    //            //}
-
-    //            // フィールド選択キャンバス非表示
-    //            locationSelCanvas_.gameObject.SetActive(false);
-
-    //            Debug.Log("コルーチンストップ");
-    //            StopCoroutine(Select());                // コルーチンストップ
-    //        }
-    //        nowTownFlag_ = false;
-    //        SetWarpNowFlag(false);
-    //    }
-    //    return nowTownFlag_;
-    //}
 
     private void UniPushBack()
     {
@@ -253,13 +148,27 @@ public class WarpField : MonoBehaviour
         }
     }
 
+    public void CancelCheck()
+    {
+        if (fieldEndHit == true)
+        {
+            UniPushBack();
+        }
+        else
+        {
+            SetNowTownFlag(false);
+        }
+        UniChanController_.enabled = true;
+        warpNowFlag_ = false;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         // プレイヤーがフィールド端に接触したかどうか
         if (other.CompareTag("Player"))
         {
             // フィールドの移動先を表示
-            locationSelCanvas_.gameObject.SetActive(true);
+            locationSelMng_.gameObject.SetActive(true);
             fieldEndHit = true;
             SetWarpNowFlag(true);
             CheckUniTransfoem();// ユニが向いてる方向を確定
@@ -271,19 +180,10 @@ public class WarpField : MonoBehaviour
     // ユニちゃんのアニメーションを止められるように、あえて同じスクリプト内でもここからフラグを変更するようにしている
     public void SetWarpNowFlag(bool flag)
     {
-        warpNowFlag_ = flag;
-
-        if (warpNowFlag_)
-        {
-            // ワープ選択中はユニちゃんのアニメーションを止めて、移動操作不可
-            UniChanController_.StopUniRunAnim();
-            UniChanController_.enabled = false;
-        }
-        else
-        {
-            // 移動操作可能
-            UniChanController_.enabled = true;
-        }
+        warpNowFlag_ = true;
+        // ワープ選択中はユニちゃんのアニメーションを止めて、移動操作不可
+        UniChanController_.StopUniRunAnim();
+        UniChanController_.enabled = false;
     }
 
     public bool GetWarpNowFlag()
@@ -294,12 +194,7 @@ public class WarpField : MonoBehaviour
     // 街中でフィールドに行くためのキャンバスを表示するかどうか
     public bool GetLocationSelActive()
     {
-        return locationSelCanvas_.gameObject.activeSelf;
-    }
-
-    public void SetLocationSelActive(bool flag)
-    {
-        locationSelCanvas_.gameObject.SetActive(flag);
+        return locationSelMng_.gameObject.activeSelf;
     }
 
     public void SetNowTownFlag(bool flag)
@@ -307,21 +202,6 @@ public class WarpField : MonoBehaviour
         // 街中でフィールドにワープする時
         // フィールド上でワープする時、Updataがないためここ経由で呼び出す必要がある
         nowTownFlag_ = flag;
-
-        //if (flag)
-        //{
-        //    Debug.Log("コルーチンスタート");
-        //    // コルーチンスタート
-        //    StartCoroutine(Select());
-        //}
+        locationSelMng_.gameObject.SetActive(flag);
     }
-
-    public void CancelCheck()
-    {
-        if (fieldEndHit == true)
-        {
-            UniPushBack();
-        }
-    }
-
 }

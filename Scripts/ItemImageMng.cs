@@ -7,9 +7,16 @@ public class ItemImageMng : MonoBehaviour
 {
     //public int[,] materiaImages_ = new int[5, 5];
     public static Sprite[,] materialIcon_ = new Sprite[5,5];// æ“¾‚µ‚½‘fŞ‚ÌƒCƒ‰ƒXƒg
+    private static bool onceFlag_ = false;
 
     void Start()
     {
+        if(onceFlag_==true)
+        {
+            // ‚·‚Å‚É‰æ‘œ¶¬Ï‚İ‚È‚ç2‰ñ‚à“ü‚ç‚È‚¢‚æ‚¤‚É‚·‚é
+            return;
+        }
+
         for (int f = 0; f < 5; f++)
         {
             // Texture2D‚Æ‚µ‚Ä‰æ‘œ‚ğ“Ç‚İ‚Ş
@@ -27,5 +34,6 @@ public class ItemImageMng : MonoBehaviour
                // Debug.Log(f + "" + x);
             }
         }
+        onceFlag_ = true;
     }
 }

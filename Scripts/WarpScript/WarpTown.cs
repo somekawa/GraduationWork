@@ -106,8 +106,15 @@ public class WarpTown : MonoBehaviour
 
             if (SceneMng.nowScene == SceneMng.SCENE.TOWN)
             {
-                // 選択されているワープ座標に移動
-                uniChan_.transform.position = warpChildren_[warpNum_].transform.position;
+                if (warpNum_ != (int)warp.FIELD)
+                {
+                    // 選択されているワープ座標に移動
+                    uniChan_.transform.position = warpChildren_[warpNum_].transform.position;
+                }
+                else
+                {
+                    uniChan_.transform.position = warpChildren_[(int)warp.HOUSE].transform.position;
+                }
             }
         }
     }
@@ -184,7 +191,7 @@ public class WarpTown : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow))
             {
                 StartCoroutine(WarpCansel());            // ワープキャンセルの場合
-                warpFieldScript_.SetWarpNowFlag(false);
+                warpFieldScript_.CancelCheck();
                 yield break; // ループを抜ける
             }
             else if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -222,12 +229,11 @@ public class WarpTown : MonoBehaviour
                 if (warpNum_ == (int)warp.FIELD)
                 {
                     // フィールド選択時
-                    warpFieldScript_.SetLocationSelActive(true);         // フィールドの移動先を表示
                     warpFieldScript_.SetNowTownFlag(true);// 町からのワープだとFlagをtrueにする
                 }
                 else
                 {
-                    warpFieldScript_.SetWarpNowFlag(false);
+                    warpFieldScript_.CancelCheck();
                     if (warpNum_ == (int)warp.HOUSE)
                     {
                         // Scene名がTownならユニの家のシーンに飛ぶ
