@@ -1,3 +1,58 @@
+2021/10/14
+
+BagScriptフォルダ
+PictureBookCheck.cs
+PictureAndQuestMng.cs	
+
+
+MenuActive.csのアタッチ先をSceneMngに変更
+
+MenuCanvasとItemBagCanvasを合体させて
+DontDestroyCanvasを作成
+
+・DontDestroyCanvas
+　ーMenu
+　ーBackPanel
+　ーItemBagMng
+　ーStatusMng
+　ーOtherUI
+
+・DontDestroyCanvas
+　ーMenu
+　　ーBagImage
+　　ーMenuImage
+　　　ーText
+　　　ーItemBox
+　　　ーStatus
+　　　ーOther
+　　　ーCancel
+　　　ーSave
+　　　ーLoad
+
+ItemBoxからLoadまでのボタンはすべて	MenuAcive.cs『OnClickMenuBtn』
+処理をfor文で回しており、別でパネルを表示するものもあるため
+SaveとLoadはCancelより下に配置（表示はCancelより上）
+ーーーーーーーーーーーーーーーーーーーーーーーー
+・DontDestroyCanvas
+　ーOtherUI		PictureAndQuestMng.csをアタッチ
+　　ーBack
+　　ーExplanationImage
+　　ーQuestMng
+　　ーPictureBookMng	PictureBookCheck.csをアタッチ
+			PictureUIにPrefabーBagUIー『PictureUI』をアタッチ
+
+ーーーーーーーーーーーーーーーーーーーーーーーー
+・DontDestroyCanvas
+　ーItemBagMng
+　　ーExplanationImage
+　　ーTopics
+　　　ーTopicNameBack
+　　　ーTopicName
+　　　ーLeftBtn	ItemBagMng.cs『OnClickLeftArrow』
+　　　ーRightBtn	ItemBagMng.cs『OnClickRightArrow』
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーー
 2021/10/11
 追加したもの
 

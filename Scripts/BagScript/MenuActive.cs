@@ -3,43 +3,44 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class MenuActive : MonoBehaviour
 {
+    private EventSystem eventSystem;// ボタンクリックのためのイベント処理
+    private GameObject clickbtn_;    // どのボタンをクリックしたか代入する変数
+
+    private Image backPanel_;
     //[SerializeField]
     //public GameObject canvasPrefab;    // 素材を拾ったときに生成されるプレハブ
     //private GameObject parentObjPrefab_;
 
-    private GameObject itemBag_;
+    //private GameObject itemBagCanvas_;// シーン遷移後も使いたいオブジェクトたちの親
+    private RectTransform itemBagMng_;// itemBag_の子
+    private ItemBagMng itemBagMngCS_;
+    private RectTransform pictureMng_;// itemBag_の子
+    private RectTransform[] otherMng_ = new RectTransform[2];
 
-    public enum topic
+
+    private Canvas parentCanvas_;
+
+    public enum CANVAS
     {
         NON = -1,
-        ITEM,// 魔法
-        MATERIA,// 素材
-        WORD,// ワード
-        MAX,
-    }
-    // アイテム選択時に表示するトピック名
-    private Text topicText_;
-    private int stringNum_ = 0;
-    private string[] topicString_ = new string[(int)topic.MAX] {
-    "アイテム","そざい","わーど"};
-
-
-    private Canvas parentMenuCanvas_;
-    private enum canvas
-    {
-        NON = -1,
-        MENU,// メニュー関連のCanvas
-        BAG,// メニューでアイテムを選んだ際のCanvas
-            // STATUS,
-        SAVE_LOAD,// セーブとロード用のキャンバス
-        OTHER,// クエストと図鑑用のキャンバス
+        MENU,   // メニュー関連のCanvas
+        BAG,    // メニューでアイテムを選んだ際のCanvas
+        STATUS, // ステータス表示ボタン
+        OTHER,  // クエストと図鑑用のキャンバス
+        // ここまで表示用のMng持ち
+        CANCEL,
+        LOAD,   // ロード用のボタン
+        SAVE,   // セーブ用のボタン
         MAX
     }
-    private RectTransform[] parentRectTrans_ = new RectTransform[(int)canvas.MAX];
-
+    public static RectTransform[] parentRectTrans_ = new RectTransform[(int)CANVAS.MAX];
+    private string[] btnName = new string[(int)CANVAS.MAX] {
+    "Menu","ItemBox","Status","Other","Cancel","Load","Save"
+    };
     // バッグ使用中はずっとアクティブにしたいCanvasのため別で取得
     // private Canvas menuCanvas_;         // メニューCanvas
     private RectTransform parentMenuBtn_;  // 表示するボタンたちの親
@@ -49,9 +50,9 @@ public class MenuActive : MonoBehaviour
     private Image bagImage_;// バッグの画像
     private TMPro.TextMeshProUGUI statusInfo_;  // キャラのステータス描画先
 
-    // ItemBox選択時
-    private RectTransform topicParent_;// 何を表示しているか
-    private RectTransform[] mngs_ = new RectTransform[(int)topic.MAX];
+    //// ItemBox選択時
+    //private RectTransform topicParent_;// 何を表示しているか
+    //private RectTransform[] mngs_ = new RectTransform[(int)topic.MAX];
     private Bag_Materia bagMateria_;
     private Bag_Item bagItem_;
     private Bag_Word bagWord_;
@@ -64,71 +65,80 @@ public class MenuActive : MonoBehaviour
 
     void Start()
     {
+        eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
         warpField_ = GameObject.Find("WarpOut").GetComponent<WarpField>();
-        parentMenuCanvas_ = GameObject.Find("MenuCanvas").GetComponent<Canvas>();
-        
-        parentRectTrans_[(int)canvas.MENU] = parentMenuCanvas_.transform.Find("Menu").GetComponent<RectTransform>();
+
+        parentCanvas_ = GameObject.Find("DontDestroyCanvas").GetComponent<Canvas>();
+        backPanel_ = parentCanvas_.transform.Find("BackPanel").GetComponent<Image>();
+        parentRectTrans_[(int)CANVAS.MENU] = parentCanvas_.transform.Find("Menu").GetComponent<RectTransform>();
+        parentRectTrans_[(int)CANVAS.BAG] = parentCanvas_.transform.Find("ItemBagMng").GetComponent<RectTransform>();
+        parentRectTrans_[(int)CANVAS.STATUS] = parentCanvas_.transform.Find("StatusMng").GetComponent<RectTransform>();
+        parentRectTrans_[(int)CANVAS.OTHER] = parentCanvas_.transform.Find("OtherUI").GetComponent<RectTransform>();
+
+
         // バッグ（左下）の画像
-        bagImage_ = parentRectTrans_[(int)canvas.MENU].transform.Find("BagImage").GetComponent<Image>();
-        statusInfo_ = parentRectTrans_[(int)canvas.MENU].transform.Find("StatusInfo").GetComponent<TMPro.TextMeshProUGUI>();
-        statusInfo_.gameObject.SetActive(false);
-        parentMenuBtn_ = parentRectTrans_[(int)canvas.MENU].transform.Find("MenuImage").GetComponent<RectTransform>();
+        bagImage_ = parentRectTrans_[(int)CANVAS.MENU].Find("BagImage").GetComponent<Image>();
+     
+        // ステータス表示
+        statusInfo_ = parentRectTrans_[(int)CANVAS.STATUS].Find("StatusInfo").GetComponent<TMPro.TextMeshProUGUI>();
+
+        // メニューで表示するボタンたち
+        parentMenuBtn_ = parentRectTrans_[(int)CANVAS.MENU].Find("MenuImage").GetComponent<RectTransform>();
         parentMenuBtn_.gameObject.SetActive(false);
         startMenuPos_ = parentMenuBtn_.transform.localPosition;
         maxMenuPos_ = new Vector2(startMenuPos_.x, 300.0f);
         Debug.Log("Menuボタンの初期座標" + startMenuPos_ + "        移動最大位置" + maxMenuPos_);
 
         // アイテム、ワード、素材表示キャンバス
-        //if(BagCanvasUI.singleton==null)
-        //{
-        //    parentObjPrefab_ = Instantiate(canvasPrefab);
-        //    parentObjPrefab_.GetComponent<BagCanvasUI>().SetMyName("CommonItemBagCanvas");
+        //itemBagCanvas_ = BagCanvasUI.Instance;
+        itemBagMngCS_ = parentCanvas_.transform.Find("ItemBagMng").GetComponent<ItemBagMng>();
+        // parentRectTrans_[(int)CANVAS.BAG] = itemBagMng_;
+        bagItem_ = parentRectTrans_[(int)CANVAS.BAG].transform.Find("ItemMng").GetComponent<Bag_Item>();
+        bagMateria_ = parentRectTrans_[(int)CANVAS.BAG].transform.Find("MateriaMng").GetComponent<Bag_Materia>();
+        bagWord_ = parentRectTrans_[(int)CANVAS.BAG].transform.Find("WordMng").GetComponent<Bag_Word>();
+        parentRectTrans_[(int)CANVAS.BAG].gameObject.SetActive(false);
+        //itemBagCanvas_.gameObject.SetActive(false);
 
-        //}
-        itemBag_ = BagCanvasUI.Instance;
-        mngs_[(int)topic.ITEM] = itemBag_.transform.Find("ItemMng").GetComponent<RectTransform>();
-        bagItem_ = itemBag_.transform.Find("ItemMng").GetComponent<Bag_Item>();
-        mngs_[(int)topic.MATERIA] = itemBag_.transform.Find("MateriaMng").GetComponent<RectTransform>();
-        bagMateria_ = itemBag_.transform.Find("MateriaMng").GetComponent<Bag_Materia>();
-        mngs_[(int)topic.WORD] = itemBag_.transform.Find("WordMng").GetComponent<RectTransform>();
-        bagWord_ = itemBag_.transform.Find("WordMng").GetComponent<Bag_Word>();
-        itemBag_.gameObject.SetActive(false);
-
-        parentRectTrans_[(int)canvas.BAG] = parentMenuCanvas_.transform.Find("ItemBag").GetComponent<RectTransform>();
-        topicParent_ = parentRectTrans_[(int)canvas.BAG].transform.Find("Topics").GetComponent<RectTransform>();
-        topicText_ = topicParent_.transform.Find("TopicName").GetComponent<Text>();
-        topicText_.text = topicString_[(int)topic.ITEM];
+        //topicParent_ = parentRectTrans_[(int)canvas.BAG].transform.Find("Topics").GetComponent<RectTransform>();
+        //topicText_ = topicParent_.transform.Find("TopicName").GetComponent<Text>();
+        //topicText_.text = topicString_[(int)topic.ITEM];
 
         // セーブとロード用のキャンバス
-        parentRectTrans_[(int)canvas.SAVE_LOAD] = parentMenuCanvas_.transform.Find("SaveOrLoad").GetComponent<RectTransform>();
-        parentRectTrans_[(int)canvas.SAVE_LOAD].gameObject.SetActive(false);
+        // parentRectTrans_[(int)CANVAS.SAVE_LOAD] = parentCanvas_.transform.Find("SaveOrLoad").GetComponent<RectTransform>();
+        //parentRectTrans_[(int)CANVAS.SAVE_LOAD].gameObject.SetActive(false);
 
         // クエスト確認と図鑑用のキャンバス
-        parentRectTrans_[(int)canvas.OTHER] = parentMenuCanvas_.transform.Find("OtherUI").GetComponent<RectTransform>();
-        parentRectTrans_[(int)canvas.OTHER].gameObject.SetActive(false);
+        //otherMng_[0] = itemBagMng_.transform.Find("PictureImage").GetComponent<RectTransform>();
+        //otherMng_[1] = itemBagMng_.transform.Find("QuestImage").GetComponent<RectTransform>();
+        //parentRectTrans_[(int)CANVAS.OTHER] = pictureMng_;
+        //parentRectTrans_[(int)canvas.OTHER] = parentMenuCanvas_.transform.Find("OtherUI").GetComponent<RectTransform>();
+        // parentRectTrans_[(int)CANVAS.OTHER].gameObject.SetActive(false);
 
+        backPanel_.gameObject.SetActive(false);
         // メニューの子であるBagは常時表示しておきたいためBagスタート
-        for (int i = (int)canvas.BAG; i < (int)canvas.MAX; i++)
+        for (int i = (int)CANVAS.BAG; i < (int)CANVAS.CANCEL; i++)
         {
             parentRectTrans_[i].gameObject.SetActive(false);
         }
-        for (int i = 0; i < (int)topic.MAX; i++)
-        {
-            mngs_[i].gameObject.SetActive(false);
-        }
-
-        //if (parentObjPrefab_ == null)
+        //for (int i = 0; i < (int)topic.MAX; i++)
         //{
-        //    parentObjPrefab_ = parentObjPrefab_.transform;
+        //    mngs_[i].gameObject.SetActive(false);
         //}
     }
 
     void Update()
     {
+        if ((int)SceneMng.nowScene == (int)SceneMng.SCENE.CONVERSATION)
+        {
+            return;
+        }
+
         if (warpField_.GetWarpNowFlag() == true)
         {
             return;
         }
+
+
 
         if (parentMenuBtn_.gameObject.activeSelf == false)
         {
@@ -136,106 +146,17 @@ public class MenuActive : MonoBehaviour
             {
                 activeFlag_ = true;
                 bagImage_.color = new Color(0.5f, 1.0f, 0.5f, 1.0f);
+                parentRectTrans_[(int)CANVAS.MENU].gameObject.SetActive(true);
                 StartCoroutine(MoveMenuButtons(1));
             }
         }
     }
 
-    public void OnClickItemButton()
-    {
-        // アイテムボタンが押されるとき
-        CommonOnClick(canvas.BAG);
 
-        itemBag_.gameObject.SetActive(true);
-        //parentCanvas_[(int)canvas.SAVE_LOAD].gameObject.SetActive(false);
-        //parentCanvas_[(int)canvas.OTHER].gameObject.SetActive(false);
-        bagItem_.ActiveItem(this);
-        //parentObjPrefab_.transform.Find("ItemMng").GetComponent<Bag_Item>().Init(this);
-    }
-
-    public void OnClickCancelButton()
-    {
-        // キャンセルボタンが押されるとき
-        itemBag_.gameObject.SetActive(false);
-        StartCoroutine(MoveMenuButtons(-1));
-        bagImage_.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-        stringNum_ = (int)topic.ITEM;
-        for (int i = 0; i < (int)topic.MAX; i++)
-        {
-            mngs_[i].gameObject.SetActive(false);
-        }
-        for (int i = (int)canvas.BAG; i < (int)canvas.MAX; i++)
-        {
-            parentRectTrans_[i].gameObject.SetActive(false);
-        }
-        statusInfo_.gameObject.SetActive(false);
-    }
-
-    public void OnClickRightArrow()
-    {
-        // 値を加算
-        stringNum_++;
-        if ((int)topic.WORD < stringNum_)
-        {
-            stringNum_ = (int)topic.ITEM;
-        }
-        ActiveRectTransform();
-        topicText_.text = topicString_[stringNum_];
-        Debug.Log("右矢印をクリック" + stringNum_);
-    }
-
-    public void OnClickLeftArrow()
-    {
-        stringNum_--;
-        if (stringNum_ < (int)topic.ITEM)
-        {
-            stringNum_ = (int)topic.WORD;
-        }
-        topicText_.text = topicString_[stringNum_];
-        ActiveRectTransform();
-        Debug.Log("左矢印をクリック" + stringNum_);
-    }
-
-    private void ActiveRectTransform()
-    {
-        for (int i = 0; i < (int)topic.MAX; i++)
-        {
-            if (stringNum_ == i)
-            {
-                // 選択のものを表示
-                mngs_[i].gameObject.SetActive(true);
-            }
-            else
-            {
-                // 選択中のもの以外は非表示に
-                mngs_[i].gameObject.SetActive(false);
-            }
-        }
-        if (stringNum_ == (int)MenuActive.topic.MATERIA)
-        {
-            // WarpField.csの初期化関数を先に呼ぶ
-            // parentCanvas_[(int)canvas.BAG].transform.Find("MateriaMng").GetComponent<Bag_Materia>().Init(this);
-            bagMateria_.ActiveMateria(this);
-        }
-        else if (stringNum_ == (int)MenuActive.topic.WORD)
-        {
-            // WarpField.csの初期化関数を先に呼ぶ
-            //parentObjPrefab_.transform.Find("WordMng").GetComponent<Bag_Word>().Init(this);
-            bagWord_.ActiveWord(this);
-
-        }
-        else if (stringNum_ == (int)MenuActive.topic.ITEM)
-        {
-            // WarpField.csの初期化関数を先に呼ぶ
-            //parentObjPrefab_.transform.Find("ItemMng").GetComponent<Bag_Item>().Init(this);
-            bagItem_.ActiveItem(this);
-        }
-    }
-
-    public int GetStringNumber()
-    {
-        return stringNum_;
-    }
+    //public int GetStringNumber()
+    //{
+    //    return stringNum_;
+    //}
 
     private IEnumerator MoveMenuButtons(int puramai)
     {
@@ -272,13 +193,13 @@ public class MenuActive : MonoBehaviour
         }
     }
 
-    public void OnClickStatus()
+    private void SctiveStatus()
     {
         Debug.Log("ステータス確認ボタンが押された");
         //  buttons_.SetActive(false);
 
         // キャラのステータス値を表示させたい
-        var data = SceneMng.GetCharasSettings((int)SceneMng.CharcterNum.UNI);
+        var data = SceneMng.GetCharasSettings((int)SceneMng.CHARACTERNUM.UNI);
 
         // 表示する文字の作成
         string str = "名前  :" + data.name + "\n" +
@@ -297,25 +218,11 @@ public class MenuActive : MonoBehaviour
     }
 
 
-    public void OnClickSaveOrLoad()
-    {
-        Debug.Log("セーブボタンが押された");
-        CommonOnClick(canvas.SAVE_LOAD);
-        //  parentCanvas_[(int)canvas.SAVE_LOAD].gameObject.SetActive(true);
-    }
-
-    public void OnClickOtherBtn()
-    {
-        Debug.Log("アザーボタンが押されました");
-        CommonOnClick(canvas.OTHER);
-        // parentCanvas_[(int)canvas.OTHER].gameObject.SetActive(true);
-    }
-
-    public void OnClickSave()
+    private void DateSave()
     {
         Debug.Log("セーブボタンが押された");
 
-        var data = SceneMng.GetCharasSettings((int)SceneMng.CharcterNum.UNI);
+        var data = SceneMng.GetCharasSettings((int)SceneMng.CHARACTERNUM.UNI);
 
         // データ書き出しテスト
         StreamWriter swLEyeLog;
@@ -343,21 +250,6 @@ public class MenuActive : MonoBehaviour
         swLEyeLog.Close();
     }
 
-    private void CommonOnClick(canvas num)
-    {
-        for (int i = (int)canvas.BAG; i < (int)canvas.MAX; i++)
-        {
-            if (i == (int)num)
-            {
-                parentRectTrans_[(int)num].gameObject.SetActive(true);
-            }
-            else
-            {
-                parentRectTrans_[i].gameObject.SetActive(false);
-            }
-        }
-    }
-
     public bool GetActiveFlag()
     {
         return activeFlag_;
@@ -366,5 +258,76 @@ public class MenuActive : MonoBehaviour
     public Bag_Materia GetBagMateria()
     {
         return bagMateria_;
+    }
+
+    public void OnClickMenuBtn()
+    {
+        clickbtn_ = eventSystem.currentSelectedGameObject;
+        if (clickbtn_.name == btnName[(int)CANVAS.CANCEL])
+        {
+            //itemBagFlag_ = false;
+            backPanel_.gameObject.SetActive(false) ;
+            StartCoroutine(MoveMenuButtons(-1));
+            bagImage_.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+            for (int i = (int)CANVAS.BAG; i < (int)CANVAS.CANCEL; i++)
+            {
+                parentRectTrans_[i].gameObject.SetActive(false);
+            }
+          //  statusInfo_.gameObject.SetActive(false);
+            return;
+        }
+
+        // キャンセル意外だった場合
+        backPanel_.gameObject.SetActive(true);
+        if (clickbtn_.name == btnName[(int)CANVAS.SAVE])
+        {
+            DateSave();
+            return;
+        }
+        else
+        {
+            //statusInfo_.gameObject.SetActive(false);
+            for (int i = (int)CANVAS.BAG; i < (int)CANVAS.CANCEL; i++)
+            {
+            if (clickbtn_.name == btnName[i])
+                {
+                //Debug.Log(clickbtn_.name);
+                // クリックしたボタンの名前と一致していたら
+                SelectCanvasActive((CANVAS)i);
+                }
+                else
+                {
+                parentRectTrans_[i].gameObject.SetActive(false);
+                }
+            }
+        }
+    }
+
+    private void SelectCanvasActive(CANVAS canvas)
+    {
+        Debug.Log(canvas + "を表示しています");
+
+        parentRectTrans_[(int)canvas].gameObject.SetActive(true);
+        switch (canvas)
+        {
+            case CANVAS.BAG:
+                // アイテムボタンが押されるとき
+                itemBagMngCS_.ActiveRectTransform();
+                break;
+
+            case CANVAS.STATUS:
+                SctiveStatus();
+                //Debug.Log("移動速度変更" + charaRunSpeed);
+                break;
+
+            case CANVAS.OTHER:
+                // PictureAndQuestMng.csの初期化関数を呼ぶ
+                GameObject.Find("DontDestroyCanvas/OtherUI").GetComponent<PictureAndQuestMng>().Init();
+                //Debug.Log("移動速度変更" + charaRunSpeed);
+                break;
+
+            default:
+                break;
+        }
     }
 }

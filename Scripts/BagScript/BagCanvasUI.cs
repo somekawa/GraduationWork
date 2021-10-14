@@ -5,15 +5,15 @@ using UnityEngine;
 public class BagCanvasUI : MonoBehaviour
 {
     public static BagCanvasUI singleton;
-    private static GameObject mInstance;
+    //private static GameObject mInstance;
 
-    public static GameObject Instance
-    {
-        get
-        {
-            return mInstance;
-        }
-    }
+    //public static GameObject Instance
+    //{
+    //    get
+    //    {
+    //        return mInstance;
+    //    }
+    //}
     // private GameObject prefab_;
     void Awake()
     {
@@ -25,7 +25,7 @@ public class BagCanvasUI : MonoBehaviour
             // シーンを跨いでも消えないオブジェクトに設定する
             DontDestroyOnLoad(gameObject);
             singleton = this;
-            mInstance = this.gameObject;
+            //mInstance = this.gameObject;
 
         }
         else
@@ -40,10 +40,5 @@ public class BagCanvasUI : MonoBehaviour
         // 他スクリプトがヒエラルキーからこのオブジェクトを検索するときに番号+タグ(Quest)で判別できるようにした
         this.gameObject.name = num.ToString();
     }
-
-    //public GameObject Instance()
-    //{
-    //        return this.gameObject;
-    //}
 
 }

@@ -18,9 +18,13 @@ public class SceneMng : MonoBehaviour
         NON = -1,
         CONVERSATION,   // 会話シーン
         TOWN,           // 街シーン
-        FIELD,          // フィールドシーン
-        TESTFIELD,
         UNIHOUSE,       // ユニちゃんの家
+        FIELD0,          // フィールドシーン
+        FIELD1,          // フィールドシーン
+        FIELD2,          // フィールドシーン
+        FIELD3,          // フィールドシーン
+        FIELD4,          // フィールドシーン
+        CANCEL,          // ワープ先表示用
         MAX
     }
 
@@ -125,7 +129,12 @@ public class SceneMng : MonoBehaviour
                     Debug.Log("移動速度変更" + charaRunSpeed);
                     break;
 
-                case SCENE.FIELD:
+                case SCENE.FIELD0:
+                    charaRunSpeed = 8.0f;
+                    Debug.Log("移動速度変更" + charaRunSpeed);
+                    break;
+
+                case SCENE.FIELD1:
                     charaRunSpeed = 8.0f;
                     Debug.Log("移動速度変更" + charaRunSpeed);
                     break;

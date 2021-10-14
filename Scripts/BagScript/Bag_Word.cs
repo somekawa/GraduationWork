@@ -18,18 +18,20 @@ public class Bag_Word : MonoBehaviour
     {
         // menuActive_ = menuActive;
         // menuActive_ = GameObject.Find("Mng").GetComponent<MenuActive>();
-        gameObject.SetActive(true);
+        gameObject.SetActive(false);
 
         //StartCoroutine(ActiveWord(menuActive));
 
     }
-    public IEnumerator ActiveWord(MenuActive menuActive)
+
+    public IEnumerator ActiveWord(ItemBagMng menuActive)
     {
         gameObject.SetActive(true);
+        Debug.Log("Word•\Ž¦’†‚Å‚·");
         while (true)
         {
             yield return null;
-            if (menuActive.GetStringNumber() != (int)MenuActive.topic.WORD)
+            if (menuActive.GetStringNumber() != (int)ItemBagMng.topic.WORD)
             {
                 gameObject.SetActive(false);
                 yield break;
@@ -38,16 +40,16 @@ public class Bag_Word : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        //if (menuActive_.StringNumber() == (int)MenuActive.topic.WORD)
-        //{
-        //    gameObject.SetActive(true);
-        //}
-        //else
-        //{
-        //    gameObject.SetActive(false);
-        //}
+    //void Update()
+    //{
+    //    //if (menuActive_.StringNumber() == (int)MenuActive.topic.WORD)
+    //    //{
+    //    //    gameObject.SetActive(true);
+    //    //}
+    //    //else
+    //    //{
+    //    //    gameObject.SetActive(false);
+    //    //}
 
-    }
+    //}
 }

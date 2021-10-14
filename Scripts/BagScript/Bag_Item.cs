@@ -22,19 +22,20 @@ public class Bag_Item : MonoBehaviour
         //menuActive_ = menuActive;
 
         //  itemBox_ = transform.Find("ItemBox").GetComponent<Image>();
-        gameObject.SetActive(true);
+        gameObject.SetActive(false);
 
-       // StartCoroutine(ActiveItem(menuActive));
+        // StartCoroutine(ActiveItem(menuActive));
 
     }
 
-    public IEnumerator ActiveItem(MenuActive menuActive)
+    public IEnumerator ActiveItem(ItemBagMng menuActive)
     {
         gameObject.SetActive(true);
+        Debug.Log("Item•\Ž¦’†‚Å‚·");
         while (true)
         {
             yield return null;
-            if (menuActive.GetStringNumber() != (int)MenuActive.topic.ITEM)
+            if (menuActive.GetStringNumber() != (int)ItemBagMng.topic.ITEM)
             {
                 gameObject.SetActive(false);
                 yield break;
@@ -43,16 +44,16 @@ public class Bag_Item : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        //if (menuActive_.StringNumber() == (int)MenuActive.topic.ITEM)
-        //{
-        //    gameObject.SetActive(true);
-        //}
-        //else
-        //{
-        //    gameObject.SetActive(false);
-        //}
+    //void Update()
+    //{
+    //    //if (menuActive_.StringNumber() == (int)MenuActive.topic.ITEM)
+    //    //{
+    //    //    gameObject.SetActive(true);
+    //    //}
+    //    //else
+    //    //{
+    //    //    gameObject.SetActive(false);
+    //    //}
 
-    }
+    //}
 }

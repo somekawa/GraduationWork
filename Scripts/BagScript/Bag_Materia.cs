@@ -16,77 +16,42 @@ public class Bag_Materia : MonoBehaviour
     //// Materiaを取得した際に生成されるprefab
     //private GameObject materiaCanvas;
 
-    //[SerializeField]
-    //private GameObject canvasPrefab;    // 素材を拾ったときに生成されるプレハブ
-    //private Transform tPrefab_;    // 素材を拾ったときに生成されるプレハブ
-    //private GameObject gPrefab_;    // 素材を拾ったときに生成されるプレハブ
-
     // プレハブから生成されたオブジェクトを代入
-    public static GameObject[] materiaBox_ = new GameObject[30];
-    public static Image[] instanceImages_ = new Image[30];
-    public static Text[] instanceTexts_ = new Text[30];
+    private static GameObject[] materiaBox_ = new GameObject[30];
+    private static Image[] instanceImages_ = new Image[30];
+    private static Text[] instanceTexts_ = new Text[30];
 
-    public static int materiaNum_ = 0;// 何番目の生成なのか
-    public static int[] materiaCnt_ = new int[30];// 1つの素材に対するの所持数
-    public static string[] saveMateriaName_ = new string[30];    // 拾った素材の名前を保存
-    public static int[] saveMateriaNum_ = new int[30];    // 何番目を拾ったか保存
+    private static int materiaNum_ = 0;// 何番目の生成なのか
+    private static int[] materiaCnt_ = new int[30];// 1つの素材に対するの所持数
+    private static string[] saveMateriaName_ = new string[30];    // 拾った素材の名前を保存
+    private static int[] saveMateriaNum_ = new int[30];    // 何番目を拾ったか保存
 
     // 表示する画像のX座標
-    public static float[] boxPosX_ = new float[5] {
+    private static float[] boxPosX_ = new float[5] {
         -285.0f,-95.0f,100.0f,290.0f,490.0f
     };
-    public static float[] boxPosY_ = new float[2] {
+    private static float[] boxPosY_ = new float[2] {
         150.0f,-50.0f
     };
-    public static int xCount_ = 0;// X座標をずらすためのカウント
-    public static int yCount_ = 0;// Y座標をずらすためのカウント
+    private static int xCount_ = 0;// X座標をずらすためのカウント
+    private static int yCount_ = 0;// Y座標をずらすためのカウント
 
-    //struct InstanceUIs
-    //{
-    //    public Image activeImage; // どの背景画像か
-    //    public Text numText;       // どのテキストであるか
-    //    public int materiaNumber_;
-    //    public string materiaName_;
-    //    public int materiaCnt_;
-    //    //public bool checkFlag;      // 指定の行動をとったかどうか
-    //    //public bool activeFlag;     // 指示を終わらせたかどうか
-    //}
-    //private InstanceUIs[] status_;
-   
-    //void Awake()
-    //{
-    //    DontDestroyOnLoad(gameObject);
-    //    Debug.Log(gameObject + "はシーンをまたいでオブジェクトを残します");
-    //}
+    private PictureBookCheck picture_;
 
     void Start()
     // public void Init(MenuActive menuActive)
     {
-
-        //if (gPrefab_ == null)
-        //{
-        //    gPrefab_ = Instantiate(canvasPrefab);
-        //    tPrefab_ = gPrefab_.transform;
-        //}
+        picture_ =GameObject.Find("DontDestroyCanvas").transform.Find("OtherUI/PictureBookMng").GetComponent<PictureBookCheck>();
         //menuActive_ = menuActive;
 
-        //gameObject.SetActive(false);
+        gameObject.SetActive(false);
 
-        // StartCoroutine(ActiveMateria(menuActive));
-        //itemkinds_ = new int[(int)SceneMng.SCENE.MAX, (int)ItemGet.items.MAX];
-
-        //for(int i=0;i<materiaNum_;i++)
-        //{
-        //    status_[i] = new InstanceUIs()
-        //    {
-
-        //    };
-        //}
     }
 
-    public IEnumerator ActiveMateria(MenuActive menuActive)
+    public IEnumerator ActiveMateria(ItemBagMng menuActive)
     {
         gameObject.SetActive(true);
+         Debug.Log("Materia表示中です");
         while (true)
         {
             yield return null;
@@ -106,7 +71,7 @@ public class Bag_Materia : MonoBehaviour
             //}
             ////
 
-            if (menuActive.GetStringNumber() != (int)MenuActive.topic.MATERIA)
+            if (menuActive.GetStringNumber() != (int)ItemBagMng.topic.MATERIA)
             {
                 gameObject.SetActive(false);
                 yield break;
@@ -140,6 +105,7 @@ public class Bag_Materia : MonoBehaviour
            // var prefab = Instantiate(materiaUIPrefab);
             // クエスト番号の設定
             materiaBox_[materiaNum_].GetComponent<OwnedMateria>().SetMyName(materiaName);
+            picture_.GetMateriakinds(fieldNum,itemNum);
         }
         else
         {
@@ -195,24 +161,23 @@ public class Bag_Materia : MonoBehaviour
                   //  var prefab = Instantiate(materiaUIPrefab);
                     // クエスト番号の設定
                     materiaBox_[materiaNum_].GetComponent<OwnedMateria>().SetMyName(materiaName);
+                    picture_.GetMateriakinds(fieldNum,itemNum);
                 }
             }
         }
-        Debug.Log("フィールド番号：" + fieldNum + "     アイテム番号：" + itemNum + "     アイテム名：" + materiaName);
-        //Debug.Log("表示する画像" + materiaNum_ + "つめ");
-        // Debug.Log("取得したアイテム名：" + materiaName);
+      //  Debug.Log("フィールド番号：" + fieldNum + "     アイテム番号：" + itemNum + "     アイテム名：" + materiaName);
     }
 
-    public static int GetMateriaDate()
-    {
-        return materiaNum_;
-    }
-    public static Image GetMateriaImage()
-    {
-        return instanceImages_[0];
-    }
-    public static Text GetMateriaText()
-    {
-        return instanceTexts_[0];
-    }
+    //public static int GetMateriaDate()
+    //{
+    //    return materiaNum_;
+    //}
+    //public static Image GetMateriaImage()
+    //{
+    //    return instanceImages_[0];
+    //}
+    //public static Text GetMateriaText()
+    //{
+    //    return instanceTexts_[0];
+    //}
 }
