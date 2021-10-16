@@ -10,7 +10,7 @@ using NPOI.SS.UserModel;
 public class Character_importer : AssetPostprocessor
 {
     private static readonly string filePath = "Assets/ExcelData/Character.xls";
-    private static readonly string[] sheetNames = { "CharaUni","CharaDemo", };
+    private static readonly string[] sheetNames = { "CharaUni","CharaJack", };
     
     static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
     {
@@ -62,12 +62,11 @@ public class Character_importer : AssetPostprocessor
 					cell = row.GetCell(1); p.Level = (int)(cell == null ? 0 : cell.NumericCellValue);
 					cell = row.GetCell(2); p.HP = (int)(cell == null ? 0 : cell.NumericCellValue);
 					cell = row.GetCell(3); p.MP = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(4); p.Constitution = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(5); p.Power = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(6); p.Attack = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(7); p.Defence = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(8); p.Speed = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(9); p.Luck = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(4); p.Attack = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(5); p.Defence = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(6); p.Speed = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(7); p.Luck = (int)(cell == null ? 0 : cell.NumericCellValue);
+                    cell = row.GetCell(8); p.AnimMax = (float)(cell == null ? 0.0f : cell.NumericCellValue);
 
                         data.param.Add(p);
                     }

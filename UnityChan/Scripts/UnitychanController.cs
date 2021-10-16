@@ -74,6 +74,11 @@ public class UnitychanController : MonoBehaviour
             this.animator_.SetBool(runParamHash, false);
             return;
         }
+        else
+        {
+            // 戦闘から探索に戻ってきたときに、攻撃モーションの途中なら切り上げるようにする
+            this.animator_.SetBool("isAttack", false);
+        }
 
         // グローバル座標に変換すると、キャラの方向転換後に+-がバグが起きた
         //Vector3 globaldir = transform.TransformDirection(movedir);

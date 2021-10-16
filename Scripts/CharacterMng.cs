@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using static SceneMng;
 
 // 探索中/戦闘中問わず、キャラクターに関連するものを管理する
@@ -11,11 +10,20 @@ using static SceneMng;
 
 public class CharacterMng : MonoBehaviour
 {
-    public Canvas buttleUICanvas;           // 表示/非表示をこのクラスで管理される
+    enum ANIMATION
+    {
+        NON,
+        IDLE,
+        BEFORE,
+        ATTACK,
+        AFTER
+    };
 
-    // enumとキャラオブジェクトをセットにしたmapを制作するためのリスト
-    // キャラオブジェクトを要素としてアタッチできるようにしておく
-    //public List<GameObject> charaObjList;
+    private ANIMATION anim_ = ANIMATION.NON;
+    private ANIMATION oldAnim_ = ANIMATION.NON;
+
+
+    public Canvas buttleUICanvas;           // 表示/非表示をこのクラスで管理される
 
     public GameObject buttleWarpPointPack;  // 戦闘時にフィールド上の戦闘ポイントにキャラをワープさせる
 
@@ -23,21 +31,13 @@ public class CharacterMng : MonoBehaviour
     [SerializeField]
     private GameObject uniAttackPrefab_;
 
-    // キャラ識別用enum
-    //public enum CharcterNum
-    //{
-    //    UNI,    // 手前
-    //    DEMO,   // 奥
-    //    MAX
-    //}
-
     CHARACTERNUM oldTurnChar_ = CHARACTERNUM.UNI;     // 前に行動順が回ってきていたキャラクター
     CHARACTERNUM nowTurnChar_ = CHARACTERNUM.MAX;     // 現在行動順が回ってきているキャラクター
-    private bool selectFlg_ = false;                // 敵を選択中かのフラグ
-    private bool lastEnemytoAttackFlg_ = false;     // キャラの攻撃対象が最後の敵であるか     
+    private bool selectFlg_ = false;                  // 敵を選択中かのフラグ
+    private bool lastEnemytoAttackFlg_ = false;       // キャラの攻撃対象が最後の敵であるか     
 
-    private Vector3 keepFieldPos_;                  // 戦闘に入る直前のキャラの座標を保存しておく 
-    private const int buttleCharMax_ = 2;           // バトル参加可能キャラ数の最大値(最終的には3にする)
+    private Vector3 keepFieldPos_;                    // 戦闘に入る直前のキャラの座標を保存しておく 
+    private const int buttleCharMax_ = 2;             // バトル参加可能キャラ数の最大値(最終的には3にする)
     private Vector3[] buttleWarpPointsPos_ = new Vector3[buttleCharMax_];            // 戦闘時の配置位置を保存しておく変数
     private Quaternion[] buttleWarpPointsRotate_ = new Quaternion[buttleCharMax_];   // 戦闘時の回転角度を保存しておく変数(クォータニオン)
 
@@ -55,6 +55,10 @@ public class CharacterMng : MonoBehaviour
     private int enemyNum_ = 0;                                    // バトル時の敵の数
     private Dictionary<int, List<Vector3>> enemyInstancePos_;     // 敵のインスタンス位置の全情報
 
+    private Vector3 charaPos_;
+    private Vector3 enePos_;
+    //private bool runToAttackChageFlg_ = false;                    // 移動から攻撃への切り替えフラグ
+    //private bool AttackToBackChageFlg_ = false;                   // 攻撃から元居た場所へ戻る時の切り替えフラグ
 
     void Start()
     {
@@ -110,6 +114,9 @@ public class CharacterMng : MonoBehaviour
             buttleCommandRotate_.ResetRotate();   // UIの回転を一番最初に戻す
         }
 
+        anim_ = ANIMATION.IDLE;
+        oldAnim_ = ANIMATION.IDLE;
+
         buttleAnounceText_.text = announceText_[0];
 
         // 最初の行動キャラを指定する
@@ -158,6 +165,7 @@ public class CharacterMng : MonoBehaviour
         // ATTACKで敵選択中に、特定のキー(今はTキー)を押下されたらコマンド選択に戻る
         if (selectFlg_ && !buttleEnemySelect_.ReturnSelectCommand())
         {
+            anim_ = ANIMATION.NON;
             selectFlg_ = false;
             buttleCommandRotate_.SetRotaFlg(!selectFlg_);   // コマンド回転を有効化
             buttleAnounceText_.text = announceText_[0];
@@ -175,11 +183,7 @@ public class CharacterMng : MonoBehaviour
                         // 自分の行動の前の人が動作終わっているか調べる
                         if (!charasList_[(int)oldTurnChar_].GetIsMove())
                         {
-                            oldTurnChar_ = nowTurnChar_;
-
-                            Debug.Log("前のキャラが行動終了");
-                            selectFlg_ = true;
-                            buttleAnounceText_.text = announceText_[1];
+                            anim_ = ANIMATION.BEFORE;
                         }
                         else
                         {
@@ -188,15 +192,8 @@ public class CharacterMng : MonoBehaviour
                     }
                     else
                     {
-                        if(charasList_[(int)nowTurnChar_].Attack())
-                        {
-                            AttackStart((int)nowTurnChar_);
-                            selectFlg_ = false;
-                        }
+                        BeforeAttack((int)nowTurnChar_);    // 攻撃準備
                     }
-
-                    buttleCommandRotate_.SetRotaFlg(!selectFlg_);
-                    buttleEnemySelect_.SetActive(selectFlg_);
 
                     break;
                 case ImageRotate.COMMAND.MAGIC:
@@ -213,10 +210,24 @@ public class CharacterMng : MonoBehaviour
                     break;
             }
         }
-        else
+
+        if (oldAnim_ != anim_)
         {
-            if (charasList_[(int)nowTurnChar_].ChangeNextChara())
-            {
+            oldAnim_ = anim_;
+            AnimationChange();
+        }
+
+        if (anim_ == ANIMATION.ATTACK && charasList_[(int)nowTurnChar_].ChangeNextChara())
+        {
+            anim_ = ANIMATION.AFTER;
+        }
+    }
+
+    void AnimationChange()
+    {
+        switch(anim_)
+        {
+            case ANIMATION.IDLE:
                 buttleAnounceText_.text = announceText_[0];
 
                 // 次のキャラが行動できるようにする
@@ -225,42 +236,155 @@ public class CharacterMng : MonoBehaviour
                 {
                     nowTurnChar_ = CHARACTERNUM.UNI;
                 }
-            }
+
+                selectFlg_ = false;
+                break;
+            case ANIMATION.BEFORE:
+                oldTurnChar_ = nowTurnChar_;
+
+                Debug.Log("前のキャラが行動終了");
+                selectFlg_ = true;
+                buttleAnounceText_.text = announceText_[1];
+
+                buttleCommandRotate_.SetRotaFlg(false);
+                buttleEnemySelect_.SetActive(true);
+
+                break;
+            case ANIMATION.ATTACK:
+                if (charasList_[(int)nowTurnChar_].Attack())
+                {
+                    AttackStart((int)nowTurnChar_);
+                    buttleCommandRotate_.SetRotaFlg(true);
+                    buttleEnemySelect_.SetActive(false);
+                }
+                break;
+            case ANIMATION.AFTER:
+                AfterAttack((int)nowTurnChar_);
+                break;
+            default: 
+                break;
         }
     }
 
-    void AttackStart(int charNum)
+    // 攻撃準備処理
+    void BeforeAttack(int charNum)
     {
         // キャラの位置を取得する
-        Vector3 charaPos = charasList_[charNum].GetButtlePos();
+        charaPos_ = charasList_[charNum].GetButtlePos();
         // 敵の位置を取得する
-        Vector3 enePos = buttleEnemySelect_.GetSelectEnemyPos();
-        enePos.y = 0.0f;        // ここで0.0fにしないと斜め上方向に飛んでしまう
-
-        // 通常攻撃弾の方向の計算
-        var dir = (enePos - charaPos).normalized;
+        enePos_ = buttleEnemySelect_.GetSelectEnemyPos();
+        enePos_.y = 0.0f;        // ここで0.0fにしないと斜め上方向に飛んでしまう
 
         // 行動中のキャラが、攻撃対象の方向に体を向ける
         // charMap_の情報を直接変更する必要があるため、charMap_[nowTurnChar_]と記述している
-        charMap_[nowTurnChar_].transform.localRotation = Quaternion.LookRotation(enePos - charaPos);
+        charMap_[nowTurnChar_].transform.localRotation = Quaternion.LookRotation(enePos_ - charaPos_);
 
-        // エフェクトの発生位置高さ調整
-        var adjustPos = new Vector3(charaPos.x, charaPos.y + 0.5f, charaPos.z);
 
-        //　通常攻撃弾プレハブをインスタンス化
-        //var uniAttackInstance = Instantiate(uniAttackPrefab_, transform.position + transform.forward, Quaternion.identity);
-        var uniAttackInstance = Instantiate(uniAttackPrefab_, adjustPos + transform.forward, Quaternion.identity);
+        if (charNum == (int)CHARACTERNUM.JACK)
+        {
+            // 敵に向かって走る処理
+            StartCoroutine(MoveToEnemyPos());
+        }
+        else
+        {
+            anim_ = ANIMATION.ATTACK;    // ユニ
+        }
 
-        MagicMove magicMove = uniAttackInstance.GetComponent<MagicMove>();
-        //　通常攻撃弾の飛んでいく方向を指定
-        //magicMove.SetDirection(transform.forward);
-        magicMove.SetDirection(dir);
+    }
 
-        // 選択した敵の番号を渡す
-        magicMove.SetTargetNum(buttleEnemySelect_.GetSelectNum() + 1);
+    // 攻撃への移動コルーチン  
+    private IEnumerator MoveToEnemyPos()
+    {
+        bool flag = false;
+        float time = 0.0f;
+        while (!flag)
+        {
+            yield return null;
 
-        // 矢印位置のリセットを行う(falseなら、敵を全て倒したということなのでフラグを切り替える)
-        lastEnemytoAttackFlg_ = !buttleEnemySelect_.ResetSelectPoint();
+            time += Time.deltaTime / 25.0f;  // deltaTimeだけだと移動が速すぎるため、任意の値で割る
+
+            var tmp = charasList_[(int)nowTurnChar_].RunMove(time,charMap_[nowTurnChar_].transform.localPosition, enePos_);
+            flag = tmp.Item2;   // while文を抜けるかフラグを代入する
+            charMap_[nowTurnChar_].transform.localPosition = tmp.Item1;     // キャラ座標を代入する
+
+            Debug.Log("ジャック現在値" + charMap_[nowTurnChar_].transform.localPosition);
+        }
+
+        anim_ = ANIMATION.ATTACK;    // 攻撃モーション移行確認切替
+
+    }
+
+    void AfterAttack(int charNum)
+    {
+        // キャラの位置を取得する
+        charaPos_ = charasList_[charNum].GetButtlePos();
+
+        if (charNum == (int)CHARACTERNUM.JACK)
+        {
+            // 元いた位置に戻る処理
+            StartCoroutine(MoveToInitPos());
+        }
+        else
+        {
+            anim_ = ANIMATION.IDLE;    // ユニ
+        }
+    }
+
+    // 攻撃から戻ってくるコルーチン  
+    private IEnumerator MoveToInitPos()
+    {
+        bool flag = false;
+        float time = 0.0f;
+        while (!flag)
+        {
+            yield return null;
+
+            time += Time.deltaTime / 25.0f;  // deltaTimeだけだと移動が速すぎるため、任意の値で割る
+
+            var tmp = charasList_[(int)nowTurnChar_].BackMove(time, charMap_[nowTurnChar_].transform.localPosition, buttleWarpPointsPos_[(int)CHARACTERNUM.JACK]);
+            flag = tmp.Item2;   // while文を抜けるかフラグを代入する
+            charMap_[nowTurnChar_].transform.localPosition = tmp.Item1;     // キャラ座標を代入する
+
+            Debug.Log("ジャック現在値" + charMap_[nowTurnChar_].transform.localPosition);
+        }
+
+        anim_ = ANIMATION.IDLE;
+
+    }
+
+
+    void AttackStart(int charNum)
+    {
+        if (charNum == (int)CHARACTERNUM.UNI)
+        {
+            // 通常攻撃弾の方向の計算
+            var dir = (enePos_ - charaPos_).normalized;
+
+            // エフェクトの発生位置高さ調整
+            var adjustPos = new Vector3(charaPos_.x, charaPos_.y + 0.5f, charaPos_.z);
+
+            //　通常攻撃弾プレハブをインスタンス化
+            //var uniAttackInstance = Instantiate(uniAttackPrefab_, transform.position + transform.forward, Quaternion.identity);
+            var uniAttackInstance = Instantiate(uniAttackPrefab_, adjustPos + transform.forward, Quaternion.identity);
+
+            MagicMove magicMove = uniAttackInstance.GetComponent<MagicMove>();
+            //　通常攻撃弾の飛んでいく方向を指定
+            //magicMove.SetDirection(transform.forward);
+            magicMove.SetDirection(dir);
+
+            // 選択した敵の番号を渡す
+            magicMove.SetTargetNum(buttleEnemySelect_.GetSelectNum() + 1);
+
+            // 矢印位置のリセットを行う(falseなら、敵を全て倒したということなのでフラグを切り替える)
+            lastEnemytoAttackFlg_ = !buttleEnemySelect_.ResetSelectPoint();
+        }
+        else if(charNum == (int)CHARACTERNUM.JACK)
+        {
+
+        }
+
+        //anim_ = ANIMATION.AFTER;
+
     }
 
     // ButtleMng.csで参照

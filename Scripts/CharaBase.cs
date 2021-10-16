@@ -23,12 +23,11 @@ public abstract class CharaBase : object
         public int Level;
         public int HP;
         public int MP;
-        public int Constitution;    // この値にポイントを振り分けるとHPが増える
-        public int Power;           // この値にポイントを振り分けるとMPが増える
         public int Attack;          // この値にポイントを振り分けると攻撃力が上がる
         public int Defence;         // この値にポイントを振り分けると防御力が上がる
         public int Speed;           // この値にポイントを振り分けると素早さが上がる
         public int Luck;            // この値にポイントを振り分けると幸運が上がる
+        public float AnimMax;       // 攻撃モーションのフレームを時間に直した値が入っている(モーション切り替えで使用する)
     }
 
     private CharacterSetting setting_;
@@ -42,12 +41,11 @@ public abstract class CharaBase : object
         setting_.Level = popCharacter.param[0].Level;
         setting_.HP = popCharacter.param[0].HP;
         setting_.MP = popCharacter.param[0].MP;
-        setting_.Constitution = popCharacter.param[0].Constitution;
-        setting_.Power   = popCharacter.param[0].Power;
         setting_.Attack  = popCharacter.param[0].Attack;
         setting_.Defence = popCharacter.param[0].Defence;
         setting_.Speed   = popCharacter.param[0].Speed;
         setting_.Luck    = popCharacter.param[0].Luck;
+        setting_.AnimMax = popCharacter.param[0].AnimMax;
 
         charNum_ = num;
 

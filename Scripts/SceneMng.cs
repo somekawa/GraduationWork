@@ -8,7 +8,7 @@ public class SceneMng : MonoBehaviour
     public enum CHARACTERNUM
     {
         UNI,    // 手前
-        DEMO,   // 奥
+        JACK,   // 奥
         MAX
     }
 
@@ -87,7 +87,7 @@ public class SceneMng : MonoBehaviour
         // キャラクターの情報をゲームオブジェクトとして最初に取得しておく
         charMap_ = new Dictionary<CHARACTERNUM, GameObject>(){
                 {CHARACTERNUM.UNI,charaObjList[(int)CHARACTERNUM.UNI]},
-                {CHARACTERNUM.DEMO,charaObjList[(int)CHARACTERNUM.DEMO]},
+                {CHARACTERNUM.JACK,charaObjList[(int)CHARACTERNUM.JACK]},
             };
 
         // charMap_でforeachを回して、キャラクターのリストを作成

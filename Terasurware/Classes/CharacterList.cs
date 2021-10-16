@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 
 public class CharacterList : ScriptableObject
@@ -14,11 +13,11 @@ public class CharacterList : ScriptableObject
 		public int Level;
 		public int HP;
 		public int MP;
-		public int Constitution;
-		public int Power;
 		public int Attack;
 		public int Defence;
 		public int Speed;
 		public int Luck;
-	}
+        public float AnimMax;
+
+    }
 }

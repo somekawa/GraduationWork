@@ -1,6 +1,4 @@
 using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 
 interface InterfaceButtle
 {
@@ -8,4 +6,6 @@ interface InterfaceButtle
     bool Attack();
     void Damage();
     int HP();
+    (Vector3, bool) RunMove(float time,Vector3 myPos, Vector3 targetPos);
+    (Vector3, bool) BackMove(float time, Vector3 myPos, Vector3 targetPos);
 }

@@ -41,6 +41,53 @@ public class Chara : CharaBase,InterfaceButtle
         return set_.HP;
     }
 
+    public (Vector3,bool) RunMove(float time,Vector3 myPos, Vector3 targetPos)
+    {
+        if (!set_.animator.GetBool("isRun"))
+        {
+            set_.animator.SetBool("isRun", true);
+        }
+
+        float distance = Vector3.Distance(myPos, targetPos);
+
+        if (distance <= 1.5f)   // 目標地点0.0fにすると敵と衝突してお互い吹っ飛んでいくから1.5fにしている
+        {
+            // 指定箇所まできたらtrueを返す
+            Debug.Log("ジャック目的敵到着");
+            set_.animator.SetBool("isRun", false);
+            return (Vector3.Lerp(myPos, targetPos, time), true);
+        }
+        else
+        {
+            // キャラの座標移動
+            return (Vector3.Lerp(myPos, targetPos, time), false);
+        }
+    }
+
+    public (Vector3, bool) BackMove(float time, Vector3 myPos, Vector3 targetPos)
+    {
+        if (!set_.animator.GetBool("isRun"))
+        {
+            set_.animator.SetBool("isRun", true);
+        }
+
+        float distance = Vector3.Distance(myPos, targetPos);
+
+        if (distance <= 0.1f)  // 目標地点0.0fにすると誤差で辿り着けなくなるから0.1fにしている
+        {
+            // 指定箇所まできたらtrueを返す
+            Debug.Log("ジャック目的敵到着");
+            set_.animator.SetBool("isRun", false);
+            return (Vector3.Lerp(myPos, targetPos, 1.0f),true);
+        }
+        else
+        {
+            // キャラの座標移動
+            return (Vector3.Lerp(myPos, targetPos, time),false);
+        }
+    }
+
+
     // テスト用
     public void sethp(int hp)
     {
@@ -70,10 +117,9 @@ public class Chara : CharaBase,InterfaceButtle
         Debug.Log("アイテム！");
     }
 
+    // 名称正しくないかも。攻撃Motion終了確認に使いたい
     public override bool ChangeNextChara()
     {
-        set_.animator.SetBool(key_isAttack, false);
-
         if (!set_.isMove)
         {
             return false;
@@ -83,7 +129,7 @@ public class Chara : CharaBase,InterfaceButtle
         // isMoveがtrueなら、さっきまで攻撃モーションだったことがわかる
         // 再生時間用に間を空ける
         // キャラ毎に必要な間が違うかもしれないから、1.0fの所は外部データ読み込みで、charSetting[(int)nowTurnChar_].maxAnimTimeとかを用意したほうがいい
-        if (set_.animTime < 1.0f)
+        if (set_.animTime < set_.AnimMax)
         {
             set_.animTime += Time.deltaTime;
             return false;
@@ -91,9 +137,10 @@ public class Chara : CharaBase,InterfaceButtle
         else
         {
             // animTime値が1.0を上回ったとき
-            // animTime値の初期化と、モーションがWaitになった為isMoveをfalseへ戻す
+            // animTime値の初期化と、攻撃モーションの終了処理をしてisMoveをfalseへ戻す
             set_.animTime = 0.0f;
             set_.isMove = false;
+            set_.animator.SetBool(key_isAttack, false);
 
             return true;
 
@@ -105,8 +152,6 @@ public class Chara : CharaBase,InterfaceButtle
             //    nowTurnChar_ = CharcterNum.UNI;
             //}
         }
-
-        return false;
     }
 
     public Vector3 GetButtlePos()
@@ -144,12 +189,11 @@ public class Chara : CharaBase,InterfaceButtle
         set_.Level = set.Level;
         set_.HP = set.HP;
         set_.MP = set.MP;
-        set_.Constitution = set.Constitution;
-        set_.Power = set.Power;
         set_.Attack = set.Attack;
         set_.Defence = set.Defence;
         set_.Speed = set.Speed;
         set_.Luck = set.Luck;
+        set_.AnimMax = set.AnimMax;
 
         SetTurnInit();
         // アニメーターはセットしてはいけない
