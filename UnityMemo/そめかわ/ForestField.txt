@@ -1830,6 +1830,283 @@ Chara.csのSetCharaSetting関数で
 
 ------------------------------------------------
 
+<文字フォントとフォントサイズ変更>---------------
+ButtleUICanvasのAnnouceTextのTextMeshProを
+フォント　　　[NewMplus-1-Medium]
+フォントサイズ[18]
+とする。
+------------------------------------------------
+
+<ButtleCamera画角変更>--------------------------
+
+Position  X:4  Y:2.6 Z:7.5
+Rotation  X:25 Y:-60 Z:0
+
+------------------------------------------------
+
+<ジャックとDemoを入れ替える>--------------------
+
+*重要*
+①ジャックのScaleを[1.2]にする
+②AnimatorのApplyRootMotionのチェックをはずす
+
+プレハブをヒエラルキーにおきunpack
+AnimatorのControllerが入っていないので
+ひとまずUnitychanAnimatorを入れとく。
+
+Demoと同じScriptをアタッチする
+※_faceはjack_faceがあったのでそれを使う。
+
+SceneMngの外部アタッチでCharaObjListの
+Element1を、DemoからJackに変更する。
+※全てのSceneMngを置いているシーンで入れ替える
+
+また、SceneMng.csのキャラクターの種類を
+DEMO→JACKに変更する。
+
+ExcelのChara.xlsのCharaDemoをCharaJackに変えて、
+Character_importer.csのCharaDemoをCharaJackに
+する。そしてreimport。
+
+ここまででUniとおんなじモーションをするようには
+なった。次は武器持たせてモーション変更をさせる。
+
+------------------------------------------------
+
+<ジャックに武器を持たせる(右片手斧)>-------------
+
+使用する武器
+Assets/Blink/Art/Weapons/LowPoly/FreeRPGWeapons
+にある、Axes/Axe1h.fbx
+
+右手の位置とか設定の仕方は、
+https://unity-shoshinsha.biz/archives/987
+を参考にしてやる。
+
+[Axe1h]
+Layer:Weapon
+Position  X:0.03  Y:0.05 Z:-0.035
+Rotation  X:180   Y:0    Z:0
+Scale     X:1     Y:1    Z:1
+
+使用マテリアル
+Axe_1H_Epic
+
+------------------------------------------------
+
+<ジャックのモーションを作成する>-----------------
+
+<攻撃モーション>
+使用するモーション
+Asset/ExplosiveLLC/WarriorPackBundle2FREE/
+KnightWarriorMecanimAnimationPack/Animations
+
+※使用するAnimations以外のフォルダは
+　全部消しました
+
+三角タブを開いた中にある、[三△]のアイコンのやつ
+
+①UnitychanAnimator.controllerを複製して、
+　JackAnimator.controllerとする。
+
+②Animator編集画面を開いて、それぞれの項目の
+　Motionだけ変更していく
+
+<変更点>Motionのみ使用するモーションのやつに変更
+Standiong@loop → Idle
+Attack         → Attack1
+Running@loop   → Run
+
+③①をジャックのAnimatorControllerに設定する
+
+
+エラーで、
+[AnimationEvent 'Hit' on animation 'Attack1' has no receiver! Are you missing a component?]
+というのがでるから直す。
+
+参考サイト↓
+https://obenkyolab.com/?p=2112
+
+AnimationのInspectorからEventを削除しないとダメ
+
+①攻撃モーションのやつを複製して、
+  [Jack@Attack1]という名前にする
+
+②Attack1のEditを押してEventsを開く
+
+③真ん中らへんに棒が入ってるのを右クリックして
+　Deleteする
+
+④Applyをおして、このAttack1をAnimatorのAttackに
+　設定する
+
+ついでにRunのEventsもDeleteしてAnimator入れ替え
+[Jack@Run]を作成する
+
+------------------------------------------------
+
+<ジャックの攻撃について考える>-------------------
+
+ジャックの場合は、
+Run→Attack1→BackStep
+となるから、ユニのようにいきなりattackを出せない
+
+<CharacterMng.cs>
+
+Chara.csのAttack関数を呼ぶ前に、
+移動させる処理が必要
+
+(方針)
+移動させる処理のほうにキャラの位置と敵の位置の
+取得、それからキャラの向きを変える処理を移して
+AttackStart関数は攻撃のみにしたほうがいい。
+
+AttackStart関数でUNIの攻撃かJACKの攻撃かを
+if文でわけるようにする。
+
+(実装)
+BeforeAttack関数を新規で作成し、
+このなかに
+①キャラの位置取得
+②敵の位置の取得
+③キャラの向きを変える処理
+を入れる。
+①と②はprivate変数を作ってそのなかに代入する
+
+さらに、ジャックであれば、敵に向かって走る処理を
+いれる
+
+<敵に向かって走る処理>
+指定座標とかをするのならVector3.Distanceを使うといいらしい。
+参考サイト↓
+https://teratail.com/questions/93794
+
+オブジェクトのいろいろな移動方法↓
+https://3dcg-school.pro/unity-object-move-beginner/#MoveTowards
+
+まずはInterfaceButtle.csに
+(Vector3, bool) RunMove(float time,Vector3 myPos, Vector3 targetPos);
+を追加する。
+
+次にChara.csにRunMove関数の内部処理を書く。
+引数で時間と現在キャラ座標と目標的座標をもらって
+Vector3.Distanceで目的地までとの差分をみて、
+差があるときはLerp関数で距離を詰めるようにする。
+
+ただし、Chara.csからキャラ座標はいじれないため
+returnで値を返すだけにする。
+
+最後にBeforeAttack関数でジャックの
+行動ターンなら新規でつくったコルーチンの
+MoveToEnemyPosを呼び出すようにする。
+※このMoveToEnemyPosの中でRunMoveを呼び出してる。
+
+あとは移動時のRunモーションの後に、
+攻撃モーションが来るようにする。
+
+<Run->Attackの流れをつくる>
+<CharacterMng.cs>
+runToAttackChageFlg_変数を作成し、
+これがtrueになったら攻撃モーションへ移行する。
+という処理を書いていく。
+
+途中だいぶいろいろ処理の置き場所を変えました…
+
+<Chara.cs>
+ChangeNextChara関数の中の順番をちょこちょこ変更
+
+あとはRunMoveのdistanceのif文で
+0.0fと比較すると敵と衝突してふわふわ飛んでくから
+1.5fぐらいにしとくべし。
+
+そろそろanimTimeMaxをExcelから読み込めるように
+したほうがよさげ
+
+<攻撃後の処理>
+無料版にバックステップなんてありませんでした。
+ジャンプで帰ってくる感じにしようかなぁ。
+
+なんかもう処理をいろいろ修正した。
+一番大きい変化はANIMATIONenumを作成して、
+これの順番でキャラがアニメーションするようにした
+処理としてはだいぶ読みやすくなったと思う。
+
+※Attackから戻るところアニメーションが
+　まだできてないから土日で終わらせる
+
+------------------------------------------------
+
+<ジャックのAfterAttackにジャンプを追加する>------
+
+ジャンプMotionは
+KnightWarriorのJumpを使用する。
+コピペして[Jack@Jump]に変更し、Eventsを削除する。
+※もともとEvents設定なかったからそのままでおｋ
+
+Animatorに[Jamp][Land]を追加して、
+Attack->Jump->Land->Standingとなるようにつなぐ。
+※AttackからStandingの繋ぎを消す
+
+Attack->Jump->Land->Standingの部分の
+ConditionsにisAttackがfalseになったときと設定する
+(合ってるかわからん)
+
+また、Attack->JumpのHasExitTimeのチェックを
+外しておく。
+
+Attack後の硬直をどうしたら直せるのか。
+(原因)
+現状だとanimTimeが2.0f以上にならないとkey_isAttackがfalseにならないから、
+falseへ変わらないとジャンプ処理に入らないからね…
+
+(対処法)
+animTimeMaxをExcel読み込みにしよう
+
+------------------------------------------------
+
+<Character.xlsの修正と追加を行う>---------------
+
+<削除する項目>
+・Constitution
+・Power
+
+<追加項目>
+・AnimMax
+→攻撃モーションの終了時間を入れる
+
+それぞれの攻撃モーション時間
+ユニ　　：40フレームだから、0.67
+ジャック：30フレームだから、0.50
+→0.5にしたらモーションの余韻がなくてあれだから
+　1.0にしよう
+
+<CharacterList.cs>
+public int Constitutionと
+public int Powerを削除して、
+public float AnimMaxを追加する
+
+<CharaBase.cs>
+setting_の項目にあるConstitutionとPowerを削除して、AnimMaxを追加する
+
+<Chara.cs>
+SetCharaSetting関数の
+ConstitutionとPowerを削除して、AnimMaxを追加する
+
+ChangeNextChara関数のset_.animTime < 2.0fを
+set_.animTime < set_.AnimMaxに変更する。
+
+<MenuActive.cs>
+ConstitutionとPowerを削除
+※AnimMaxは追加しない
+
+<Character_importer.cs>
+ConstitutionとPowerを削除して、AnimMaxを追加する
+※GetCellの番号を変えるのを忘れずに
+
+あとは.xlsをreimportする。
+
+------------------------------------------------
+
 <いろいろメモ欄>
 static変数をprivate変数に代入して、private変数の
 数値が変わるだけで代入前の大元のstatic変数の数値も変化した(テストで実験してみた結果です)
