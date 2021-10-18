@@ -205,8 +205,6 @@ public class MenuActive : MonoBehaviour
                      "レベル:" + data.Level.ToString() + "\n" +
                      "HP    :" + data.HP.ToString() + "\n" +
                      "MP    :" + data.MP.ToString() + "\n" +
-                     "体    :" + data.Constitution.ToString() + "\n" +
-                     "精神  :" + data.Power.ToString() + "\n" +
                      "攻撃力:" + data.Attack.ToString() + "\n" +
                      "防御力:" + data.Defence.ToString() + "\n" +
                      "素早さ:" + data.Speed.ToString() + "\n" +
@@ -237,8 +235,6 @@ public class MenuActive : MonoBehaviour
                      data.Level.ToString() + "," +
                      data.HP.ToString() + "," +
                      data.MP.ToString() + "," +
-                     data.Constitution.ToString() + "," +
-                     data.Power.ToString() + "," +
                      data.Attack.ToString() + "," +
                      data.Defence.ToString() + "," +
                      data.Speed.ToString() + "," +

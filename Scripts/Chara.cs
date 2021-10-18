@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 //　抽象クラス(CharaBase)とインタフェース(InterfaceButtle)を継承してCharaクラスを作成
@@ -39,6 +37,11 @@ public class Chara : CharaBase,InterfaceButtle
     public int HP()
     {
         return set_.HP;
+    }
+
+    public int MaxHP()
+    {
+        return set_.maxHP;
     }
 
     public (Vector3,bool) RunMove(float time,Vector3 myPos, Vector3 targetPos)

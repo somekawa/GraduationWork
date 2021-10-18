@@ -17,6 +17,8 @@ public abstract class CharaBase : object
         public Vector3 buttlePos;   // 戦闘開始時に設定されるポジション(攻撃エフェクト等のInstance位置に利用)
 
         public string name;
+        public int maxHP;           // 最大HP
+        public int maxMP;           // 最大MP
 
         // Excel読み込みで得るデータ(最終的にはセーブ/ロード用に構造体分けたほうがいいかも)
         // 構造体分けたら、構造体(CharacterSetting)の中に構造体(新規)を入れる感じにする
@@ -53,6 +55,9 @@ public abstract class CharaBase : object
         setting_.isMove    = false;
         setting_.animTime  = 0.0f;
         //setting.buttlePos = set.buttlePos;    // 設定のタイミングが異なる
+
+        setting_.maxHP = setting_.HP;
+        setting_.maxMP = setting_.MP;
     }
 
     public SceneMng.CHARACTERNUM GetNum()

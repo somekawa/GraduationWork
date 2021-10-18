@@ -2107,6 +2107,148 @@ ConstitutionとPowerを削除して、AnimMaxを追加する
 
 ------------------------------------------------
 
+<スペースキー連打したら攻撃モーションがバグる>---
+
+(原因)
+攻撃モーションへ移行する条件式の不足
+
+(対処法)
+CharacterMng.csのButtle関数でcase ATTACKの際、
+selectFlg_がfalseでanim_を切り替えるには、
+そもそも現在IDLEもしくはNONであるか確認する。
+NONが必要なのは、コマンド選択へ戻った後再度処理が
+できなくなるのを防ぐため。
+
+そして、
+selectFlg_がtrueでBeforeAttack関数を呼び出すとき
+には、そもそも現在BEFOREであるか確認するように
+if文を追加した。
+
+------------------------------------------------
+
+<Jackの武器に当たり判定を付ける>-----------------
+
+右手につけたAxe1hに、BoxColliderをつける。
+
+IsTrigger:チェックあり
+Center   :X:0    Y:0.4  Z:0
+Size     :X:0.35 Y:0.35 Z:0.05 
+
+新規タグで[Weapon]を用意して、
+斧と杖と、杖から発生する魔法(UniAttack)につける。
+→UniAttackはプレハブフォルダ内にある
+
+新規Scriptで、[CheckAttackHit.cs]を作成して
+斧とUniAttackにアタッチする。
+
+中ではMagicMove.csで行っていた当たり判定の確認と
+SetTargetNum関数を入れた。
+→MagicMove.csから同じ処理は削除した。
+
+あとは、CharacterMng.csのAttackStart関数で
+[Weapon]タグで検索してCheckAttackHit.csを取得し
+SetTargetNum関数の設定を呼び出すようにする。
+
+
+ついでに、ジャックが最後の敵を倒した時に探索画面に戻るタイミングがおかしかったため、
+
+lastEnemytoAttackFlg_ = 
+!buttleEnemySelect_.ResetSelectPoint();
+この処理をAttackStart関数からAnimationChangeの
+IDLEの中へ移した。
+→これで、自分の定位置に戻ってから戦闘終了に
+　できる。
+
+------------------------------------------------
+
+<戦闘時、キャラステータス表示場所のサイズを調整>-
+
+画面サイズ的に再調整が必要になった。
+
+[CharaStatusFrame]
+Pos   X:230 Y:55 Z:0
+Scale X:4   Y:1  Z:1
+
+[CharaIconFrame]
+Pos   X:60  Y:60   Z:0
+Scale X:1.2 Y:1.2  Z:1
+
+------------------------------------------------
+
+<HP処理を追加する>------------------------------
+
+学校で作成したプレハブとScriptをそれぞれのフォルダにいれる。
+
+プレハブの[Slider]をButtleUICanvasにおいて
+unpackし、プレハブフォルダから削除する
+→名前を[HPSlider]に変更
+
+[Uni]と[Jack]に[HPBar.cs]をアタッチして、
+Sliderという引数には[HPSlider]をアタッチする。
+
+[HPSlider]
+Pos   X:300 Y:70 Z:0
+Scale X:1.2 Y:2  Z:1
+
+Eキー押下時にHPが減っていくテストを行った。
+
+次に、最大HPとか現在のHPをキャラ毎のやつに置き換える必要がある
+キャラに関しては、1つのHPバーを使いまわししたい。
+
+現在行動中のキャラのHPにしたいから、
+CharacterMng.csから現在行動中のキャラが誰なのかの
+情報を引っ張ってくる必要がある。
+いや、むしろHPBar.csをCharacterMng.csから呼び出して、nowchara != oldcharaのときに値設定するように
+何か関数呼び出したほうがよさそう。
+
+というか、[HPBar.cs]って、キャンバスに置いた
+[HPBar]にアタッチしたほうが良くないか？？
+
+<アタッチ箇所を変える>
+HPBar.csを各キャラにつけていたのを外し、
+ButtleUICanvas内のHPBarにアタッチする。
+外部アタッチが必要なくなるからpublic変数をprivate変数にする。(Start関数でGetComponentへ)
+
+CharacterMng.cs側からHPBar.csを呼び出すようにする
+外部アタッチ方式で呼び出すようにしたほうがいい
+→Findで探すと敵HPバーも見つけてしまいそうだから
+
+<CharacterMng.cs>
+public変数でcharaHPBarを作成。
+ButtleSetCallOnce関数で、HPBar.csのSetHPBar関数
+を呼び出す。
+
+次にButtle関数内でダメージ処理を呼び出すように変更する。(もとはHPBar.csのUpdateにあったもの)
+
+maxHPがわからないのが良くないから、Chara.csとCharaBase.csとInterfaceButtle.csに処理を追加する
+
+<CharaBase.cs>
+CharacterSettingにmaxHPとmaxMPの項目を追加し、
+設定ではHPとMPを入れるようにする。
+
+<InterfaceButtle.cs>
+とりあえずMaxHP関数を追加する
+
+<Chara.cs>
+MaxHP関数を作成して、return set_.maxHP;とする
+
+あとは、maxHPの設定ができるようにHPBar.csと
+CharacterMng.csを修正して、
+キャラクターが切り替わったときにもSetHPBar関数を
+呼び出すようにする。
+※SetHPBarでスライドバーへの反映を忘れないように
+
+※DontDestroyCanvasのBagImageでパラメータの場所
+　が見えなくなってるので、α値を0にしています
+
+------------------------------------------------
+
+<敵のHPバーの管理を行う>------------------------
+
+
+
+------------------------------------------------
+
 <いろいろメモ欄>
 static変数をprivate変数に代入して、private変数の
 数値が変わるだけで代入前の大元のstatic変数の数値も変化した(テストで実験してみた結果です)
@@ -2149,5 +2291,3 @@ EnemyInstancePointPackの2つをPrefab化しておいて
 
 タグ検索速度↓
 https://kan-kikuchi.hatenablog.com/entry/CompareTag
-
-

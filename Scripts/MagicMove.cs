@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MagicMove : MonoBehaviour
@@ -14,7 +12,7 @@ public class MagicMove : MonoBehaviour
     // パーティクルシステム
     private ParticleSystem particle;
     // 目標の敵か判別する番号
-    private int targetNum_;
+    //private int targetNum_;
 
     void Start()
     {
@@ -41,10 +39,10 @@ public class MagicMove : MonoBehaviour
         this.direction = direction;
     }
 
-    public void SetTargetNum(int num)
-    {
-        targetNum_ = num;
-    }
+    //public void SetTargetNum(int num)
+    //{
+    //    targetNum_ = num;
+    //}
 
     //　力を加えて飛ばす
     void FixedUpdate()
@@ -52,19 +50,19 @@ public class MagicMove : MonoBehaviour
         rigid.AddForce(direction * power);
     }
 
-    void OnTriggerEnter(Collider col)
-    {
-        // 敵に当たった場合(col.tag == "Enemy"と書くより、処理が速い)
-        if (col.CompareTag("Enemy"))
-        {
-            // 目標の敵に当たった場合
-            if(targetNum_ == int.Parse(col.name))
-            {
-                Debug.Log("Hit");
-                Destroy(col.gameObject);
-                Destroy(this.gameObject);
-                col = null; // Destroy後にnull代入処理
-            }
-        }
-    }
+    //void OnTriggerEnter(Collider col)
+    //{
+    //    // 敵に当たった場合(col.tag == "Enemy"と書くより、処理が速い)
+    //    if (col.CompareTag("Enemy"))
+    //    {
+    //        // 目標の敵に当たった場合
+    //        if(targetNum_ == int.Parse(col.name))
+    //        {
+    //            Debug.Log("Hit");
+    //            Destroy(col.gameObject);
+    //            Destroy(this.gameObject);
+    //            col = null; // Destroy後にnull代入処理
+    //        }
+    //    }
+    //}
 }

@@ -14,9 +14,10 @@ GameObject:
   - component: {fileID: 7802861421762137193}
   - component: {fileID: 454513751203309508}
   - component: {fileID: 1785585678884434883}
+  - component: {fileID: 4721738912201180491}
   m_Layer: 0
   m_Name: UniAttack
-  m_TagString: Untagged
+  m_TagString: Weapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4861,6 +4862,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   power: 10
+--- !u!114 &4721738912201180491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5442109269014625985}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a5f1792d5873ec4c9ff35dcb8b3b82f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5442109269014625987
 GameObject:
   m_ObjectHideFlags: 0

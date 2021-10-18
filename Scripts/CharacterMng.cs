@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using static SceneMng;
 
 // 探索中/戦闘中問わず、キャラクターに関連するものを管理する
@@ -22,9 +23,8 @@ public class CharacterMng : MonoBehaviour
     private ANIMATION anim_ = ANIMATION.NON;
     private ANIMATION oldAnim_ = ANIMATION.NON;
 
-
     public Canvas buttleUICanvas;           // 表示/非表示をこのクラスで管理される
-
+    public HPBar charaHPBar;               // キャラクター用のHPバー
     public GameObject buttleWarpPointPack;  // 戦闘時にフィールド上の戦闘ポイントにキャラをワープさせる
 
     //　通常攻撃弾のプレハブ
@@ -55,10 +55,8 @@ public class CharacterMng : MonoBehaviour
     private int enemyNum_ = 0;                                    // バトル時の敵の数
     private Dictionary<int, List<Vector3>> enemyInstancePos_;     // 敵のインスタンス位置の全情報
 
-    private Vector3 charaPos_;
-    private Vector3 enePos_;
-    //private bool runToAttackChageFlg_ = false;                    // 移動から攻撃への切り替えフラグ
-    //private bool AttackToBackChageFlg_ = false;                   // 攻撃から元居た場所へ戻る時の切り替えフラグ
+    private Vector3 charaPos_;                         // キャラクター座標
+    private Vector3 enePos_;                           // 目標の敵座標
 
     void Start()
     {
@@ -122,6 +120,9 @@ public class CharacterMng : MonoBehaviour
         // 最初の行動キャラを指定する
         nowTurnChar_ = CHARACTERNUM.UNI;
 
+        // 最初の行動キャラのHPバーを表示する
+        charaHPBar.SetHPBar(charasList_[(int)nowTurnChar_].HP(), charasList_[(int)nowTurnChar_].MaxHP());
+
         // フラグの初期化を行う
         lastEnemytoAttackFlg_ = false;
 
@@ -148,6 +149,16 @@ public class CharacterMng : MonoBehaviour
     // キャラの戦闘中に関する処理(ButtleMng.csで参照)
     public void Buttle()
     {
+        // テスト用(ダメージ処理)
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            // 現在行動中のキャラのHPを削る(スライドバー変更)
+            StartCoroutine(charaHPBar.MoveSlideBar(charasList_[(int)nowTurnChar_].HP() - 10));
+            // 内部数値の変更を行う
+            charasList_[(int)nowTurnChar_].sethp(charasList_[(int)nowTurnChar_].HP() - 10);
+        }
+
+
         // 戦闘から逃げる
         if (!selectFlg_ && Input.GetKeyDown(KeyCode.LeftShift))
         {
@@ -183,7 +194,10 @@ public class CharacterMng : MonoBehaviour
                         // 自分の行動の前の人が動作終わっているか調べる
                         if (!charasList_[(int)oldTurnChar_].GetIsMove())
                         {
-                            anim_ = ANIMATION.BEFORE;
+                            if(anim_ == ANIMATION.IDLE || anim_ == ANIMATION.NON)
+                            {
+                                anim_ = ANIMATION.BEFORE;
+                            }
                         }
                         else
                         {
@@ -192,7 +206,10 @@ public class CharacterMng : MonoBehaviour
                     }
                     else
                     {
-                        BeforeAttack((int)nowTurnChar_);    // 攻撃準備
+                        if (anim_ == ANIMATION.BEFORE)
+                        {
+                            BeforeAttack((int)nowTurnChar_);    // 攻撃準備
+                        }
                     }
 
                     break;
@@ -237,7 +254,14 @@ public class CharacterMng : MonoBehaviour
                     nowTurnChar_ = CHARACTERNUM.UNI;
                 }
 
+                // 次の行動キャラのHPバーを表示する
+                charaHPBar.SetHPBar(charasList_[(int)nowTurnChar_].HP(), charasList_[(int)nowTurnChar_].MaxHP());
+
                 selectFlg_ = false;
+
+                // 矢印位置のリセットを行う(falseなら、敵を全て倒したということなのでフラグを切り替える)
+                lastEnemytoAttackFlg_ = !buttleEnemySelect_.ResetSelectPoint();
+
                 break;
             case ANIMATION.BEFORE:
                 oldTurnChar_ = nowTurnChar_;
@@ -307,7 +331,7 @@ public class CharacterMng : MonoBehaviour
             flag = tmp.Item2;   // while文を抜けるかフラグを代入する
             charMap_[nowTurnChar_].transform.localPosition = tmp.Item1;     // キャラ座標を代入する
 
-            Debug.Log("ジャック現在値" + charMap_[nowTurnChar_].transform.localPosition);
+            //Debug.Log("ジャック現在値" + charMap_[nowTurnChar_].transform.localPosition);
         }
 
         anim_ = ANIMATION.ATTACK;    // 攻撃モーション移行確認切替
@@ -345,7 +369,7 @@ public class CharacterMng : MonoBehaviour
             flag = tmp.Item2;   // while文を抜けるかフラグを代入する
             charMap_[nowTurnChar_].transform.localPosition = tmp.Item1;     // キャラ座標を代入する
 
-            Debug.Log("ジャック現在値" + charMap_[nowTurnChar_].transform.localPosition);
+            //Debug.Log("ジャック現在値" + charMap_[nowTurnChar_].transform.localPosition);
         }
 
         anim_ = ANIMATION.IDLE;
@@ -355,35 +379,51 @@ public class CharacterMng : MonoBehaviour
 
     void AttackStart(int charNum)
     {
+        string str = "";
+
         if (charNum == (int)CHARACTERNUM.UNI)
         {
             // 通常攻撃弾の方向の計算
             var dir = (enePos_ - charaPos_).normalized;
-
             // エフェクトの発生位置高さ調整
             var adjustPos = new Vector3(charaPos_.x, charaPos_.y + 0.5f, charaPos_.z);
 
-            //　通常攻撃弾プレハブをインスタンス化
-            //var uniAttackInstance = Instantiate(uniAttackPrefab_, transform.position + transform.forward, Quaternion.identity);
+            // 通常攻撃弾プレハブをインスタンス化
             var uniAttackInstance = Instantiate(uniAttackPrefab_, adjustPos + transform.forward, Quaternion.identity);
-
             MagicMove magicMove = uniAttackInstance.GetComponent<MagicMove>();
-            //　通常攻撃弾の飛んでいく方向を指定
-            //magicMove.SetDirection(transform.forward);
+            // 通常攻撃弾の飛んでいく方向を指定
             magicMove.SetDirection(dir);
 
-            // 選択した敵の番号を渡す
-            magicMove.SetTargetNum(buttleEnemySelect_.GetSelectNum() + 1);
-
-            // 矢印位置のリセットを行う(falseなら、敵を全て倒したということなのでフラグを切り替える)
-            lastEnemytoAttackFlg_ = !buttleEnemySelect_.ResetSelectPoint();
+            // 名前の設定
+            str = "UniAttack(Clone)";
         }
         else if(charNum == (int)CHARACTERNUM.JACK)
         {
-
+            // 名前の設定
+            str = "Axe1h";
+        }
+        else
+        {
+            return;  // 何も処理を行わない
         }
 
-        //anim_ = ANIMATION.AFTER;
+        if (str == "")
+        {
+            Debug.Log("エラー：文字が入っていません");
+            return; // 文字が入っていない場合はreturnする
+        }
+
+        // [Weapon]のタグがついているオブジェクトを全て検索する
+        var weaponTagObj = GameObject.FindGameObjectsWithTag("Weapon");
+        for (int i = 0; i < weaponTagObj.Length; i++)
+        {
+            // 見つけたオブジェクトの名前を比較して、今回攻撃に扱う武器についているCheckAttackHit関数の設定を行う
+            if(weaponTagObj[i].name == str)
+            {
+                // 選択した敵の番号を渡す
+                weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(buttleEnemySelect_.GetSelectNum() + 1);
+            }
+        }
 
     }
 
