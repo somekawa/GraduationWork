@@ -1,0 +1,24 @@
+シーン間で破壊されないCanvasを作成
+
+DontDestroyMng.csを
+DontDestroyCanvasにアタッチ
+つくりは翼が作ったSceneMngと同じ
+
+private static GameObject mInstance;
+public static GameObject Instance
+{
+        // 破壊されるスクリプトからも検索ができるように
+        get
+        {
+            return mInstance;
+        }
+}
+はDontDestroyOnLoad内にアタッチされてないScriptが
+DontDestroyOnLoad内にあるScriptを探したいときに使用
+（DontDestroyOnLoad()を記載されたScriptはGameObject.Find()で見つけることができないため）
+PopItemList.csのvoid Start()や
+WarpField.csのpublic void Init()で
+『GameObject game = DontDestroyMng.Instance;』
+と記載してGameObjectを探してからScriptを探す
+
+破壊されないオブジェクトについているScript
