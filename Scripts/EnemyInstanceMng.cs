@@ -4,8 +4,9 @@ using UnityEngine;
 public class EnemyInstanceMng : MonoBehaviour
 {
     public GameObject enemyInstancePointPack;   // 敵の出現位置を設定したもの
-    public GameObject enemyCube;                // テスト用の敵
+    public GameObject enemyTest;                // テスト用の敵
     public GameObject enemyHPBar;               // 敵用のHPバー
+    public EnemySelect enemySelectObj;          // 敵選択用アイコン
 
     // キーがint , valueがList Vector3の[各ワープポイントの数]のmapがいいかも
     private Dictionary<int, List<Vector3>> enemyPosSetMap_ = new Dictionary<int, List<Vector3>>();
@@ -79,7 +80,7 @@ public class EnemyInstanceMng : MonoBehaviour
         foreach(Vector3 pos in enemyPosSetMap_[mapNum])
         {
             // 敵プレハブをインスタンス
-            GameObject enemy = Instantiate(enemyCube, pos, Quaternion.identity) as GameObject;
+            GameObject enemy = Instantiate(enemyTest, pos, Quaternion.identity) as GameObject;
             enemy.name = num.ToString();
 
             // 敵HPをインスタンス
@@ -111,10 +112,13 @@ public class EnemyInstanceMng : MonoBehaviour
         // もしHPが0になったら、オブジェクトを削除する
         if(enemyList_[num].Item1.HP() <= 0)
         {
+            // ここで矢印処理を呼び出す(HP減少処理→矢印処理としないと、HPが0の場所に矢印が出てしまうから)
+            enemySelectObj.ResetSelectPoint();
+
             // 敵オブジェクトを削除する(タグ検索)
             foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Enemy"))
             {
-                if(int.Parse(obj.name) == num + 1)
+                if (int.Parse(obj.name) == num + 1)
                 {
                     Destroy(obj);   // 敵の削除
                 }
