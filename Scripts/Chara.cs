@@ -8,7 +8,7 @@ public class Chara : CharaBase,InterfaceButtle
 
     // name,num,animatorは親クラスのコンストラクタを呼び出して設定
     // numは、CharacterNumのenumの取得で使えそうかもだから用意してみた。使わなかったら削除する。
-    public Chara(string name, SceneMng.CHARACTERNUM num, Animator animator) : base(name,num,animator)
+    public Chara(string name, int objNum, Animator animator) : base(name,objNum,animator,null)
     {
         set_ = GetSetting();  // CharaBase.csからGet関数で初期設定する
     }
@@ -31,7 +31,7 @@ public class Chara : CharaBase,InterfaceButtle
 
     public void Damage()
     {
-        Debug.Log("ダメージ受けた！");
+        Debug.Log(set_.name + "はダメージ受けた！");
     }
 
     public int HP()

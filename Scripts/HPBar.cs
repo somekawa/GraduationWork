@@ -5,16 +5,18 @@ using UnityEngine.UI;
 public class HPBar : MonoBehaviour
 {
     //int damage = 10;        // 敵の攻撃力とキャラの防御力で変動(攻撃力-防御力)
-    int maxHp_;              // 最大HP
-    int currentHp_;          // 現在のHP
+    int maxHp_;               // 最大HP
+    int currentHp_;           // 現在のHP
 
     private Slider slider_;
 
     void Start()
     {
-        // Sliderを満タンにする。
-        slider_ = this.GetComponent<Slider>();
-        slider_.value = 1.0f;
+        if (slider_ == null)
+        {
+            slider_ = this.GetComponent<Slider>();
+        }
+        slider_.value = 1.0f;           // Sliderを満タンにする。
 
         Debug.Log("Start currentHp : " + currentHp_);
     }
@@ -37,6 +39,11 @@ public class HPBar : MonoBehaviour
     {
         currentHp_ = nowHp;
         maxHp_ = maxHp;
+
+        if(slider_ == null)
+        {
+            slider_ = this.GetComponent<Slider>();
+        }
         // スライドバーへ反映
         slider_.value = (float)currentHp_ / (float)maxHp_;
     }

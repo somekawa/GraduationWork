@@ -420,6 +420,12 @@ public class CharacterMng : MonoBehaviour
             // 見つけたオブジェクトの名前を比較して、今回攻撃に扱う武器についているCheckAttackHit関数の設定を行う
             if(weaponTagObj[i].name == str)
             {
+                // 武器コライダーの有効化
+                if (str == "Axe1h")
+                {
+                    weaponTagObj[i].GetComponent<BoxCollider>().enabled = true;
+                }
+
                 // 選択した敵の番号を渡す
                 weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(buttleEnemySelect_.GetSelectNum() + 1);
             }

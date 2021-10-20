@@ -94,7 +94,7 @@ public class SceneMng : MonoBehaviour
         foreach (KeyValuePair<CHARACTERNUM, GameObject> anim in charMap_)
         {
             // Charaクラスの生成
-            charasList_.Add(new Chara(anim.Value.name, anim.Key, anim.Value.GetComponent<Animator>()));
+            charasList_.Add(new Chara(anim.Value.name,0,anim.Value.GetComponent<Animator>()));
         }
 
         // 初回のみキャラステータスを初期値で登録

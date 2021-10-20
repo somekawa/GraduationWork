@@ -21,15 +21,20 @@ public class CheckAttackHit : MonoBehaviour
             if (targetNum_ == int.Parse(col.name))
             {
                 Debug.Log("Hit");
-                Destroy(col.gameObject);
+
+                // HP減少処理
+                GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().HPdecrease(targetNum_ - 1);
 
                 // 魔法の弾の時だけ魔法の弾を削除する
                 if(this.gameObject.name == "UniAttack(Clone)")
                 {
                     Destroy(this.gameObject);
                 }
-
-                col = null; // Destroy後にnull代入処理
+                else
+                {
+                    // 武器コライダーの有効化(多段ヒットを防ぐ)
+                    this.gameObject.GetComponent<BoxCollider>().enabled = false;
+                }
             }
         }
     }

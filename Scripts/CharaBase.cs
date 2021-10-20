@@ -1,13 +1,8 @@
 using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 
 public abstract class CharaBase : object
 {
     private GameObject DataPopPrefab_;
-
-    // 番号
-    private SceneMng.CHARACTERNUM charNum_;
 
     public struct CharacterSetting
     {
@@ -30,39 +25,64 @@ public abstract class CharaBase : object
         public int Speed;           // この値にポイントを振り分けると素早さが上がる
         public int Luck;            // この値にポイントを振り分けると幸運が上がる
         public float AnimMax;       // 攻撃モーションのフレームを時間に直した値が入っている(モーション切り替えで使用する)
+
+        // 敵用の情報
+        public int Exp;             // この敵を倒した際にキャラが得られる経験値
+        public string Drop;         // この敵を倒した際にキャラが得られるドロップ素材
     }
 
     private CharacterSetting setting_;
 
-    public CharaBase(string name, SceneMng.CHARACTERNUM num, Animator animator)
+    public CharaBase(string name,int objNum, Animator animator,EnemyList.Param param)
     {
-        setting_.name = name;
-
         DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
-        var popCharacter = DataPopPrefab_.GetComponent<PopList>().GetData<CharacterList>(PopList.ListData.CHARACTER, 0, name);
-        setting_.Level = popCharacter.param[0].Level;
-        setting_.HP = popCharacter.param[0].HP;
-        setting_.MP = popCharacter.param[0].MP;
-        setting_.Attack  = popCharacter.param[0].Attack;
-        setting_.Defence = popCharacter.param[0].Defence;
-        setting_.Speed   = popCharacter.param[0].Speed;
-        setting_.Luck    = popCharacter.param[0].Luck;
-        setting_.AnimMax = popCharacter.param[0].AnimMax;
 
-        charNum_ = num;
+        if(objNum == 0)
+        {
+            // キャラクター
+            var popCharacter = DataPopPrefab_.GetComponent<PopList>().GetData<CharacterList>(PopList.ListData.CHARACTER, 0, name);
+            setting_.name = name;
+            setting_.Level = popCharacter.param[0].Level;
+            setting_.HP = popCharacter.param[0].HP;
+            setting_.MP = popCharacter.param[0].MP;
+            setting_.Attack = popCharacter.param[0].Attack;
+            setting_.Defence = popCharacter.param[0].Defence;
+            setting_.Speed = popCharacter.param[0].Speed;
+            setting_.Luck = popCharacter.param[0].Luck;
+            setting_.AnimMax = popCharacter.param[0].AnimMax;
 
-        setting_.animator  = animator;
-        setting_.isMove    = false;
-        setting_.animTime  = 0.0f;
-        //setting.buttlePos = set.buttlePos;    // 設定のタイミングが異なる
+            setting_.animator = animator;
+            setting_.isMove = false;
+            setting_.animTime = 0.0f;
+            //setting.buttlePos = set.buttlePos;    // 設定のタイミングが異なる
 
-        setting_.maxHP = setting_.HP;
-        setting_.maxMP = setting_.MP;
-    }
+            setting_.maxHP = setting_.HP;
+            setting_.maxMP = setting_.MP;
+        }
+        else
+        {
+            // 敵情報
+            setting_.name = param.Name + "_" +name;
+            setting_.Level = param.Level;
+            setting_.HP = param.HP;
+            setting_.MP = param.MP;
+            setting_.Attack = param.Attack;
+            setting_.Defence = param.Defence;
+            setting_.Speed = param.Speed;
+            setting_.Luck = param.Luck;
+            setting_.AnimMax = param.AnimMax;
 
-    public SceneMng.CHARACTERNUM GetNum()
-    {
-        return charNum_;
+            setting_.Exp = param.Exp;
+            setting_.Drop = param.Drop;
+
+            setting_.animator = animator;
+            setting_.isMove = false;
+            setting_.animTime = 0.0f;
+            //setting.buttlePos = set.buttlePos;    // 設定のタイミングが異なる
+
+            setting_.maxHP = setting_.HP;
+            setting_.maxMP = setting_.MP;
+        }
     }
 
     public CharacterSetting GetSetting()

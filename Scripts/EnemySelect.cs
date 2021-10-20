@@ -9,7 +9,6 @@ public class EnemySelect : MonoBehaviour
 {
     // Item1:座標情報のリスト,Item2:敵の生存切替用のリスト(Destroyされた敵の座標リストをfalseにする)
     private System.Tuple<List<Vector3>, List<bool>> posList_;
-    //private List<Vector3> posList_ = new List<Vector3>();
 
     private int selectNum_ = 0;
     private readonly float posOffset_Y = 1.5f;
@@ -22,11 +21,6 @@ public class EnemySelect : MonoBehaviour
     }
 
     private SelectKey selectKey_ = SelectKey.NON;
-
-    void Start()
-    {
-        
-    }
 
     void Update()
     {
@@ -54,35 +48,6 @@ public class EnemySelect : MonoBehaviour
 
         // 座標移動
         this.gameObject.transform.position = posList_.Item1[selectNum_];
-
-        // タプル変更前
-        //if(posList_.Count <= 0)
-        //{
-        //    return;
-        //}
-        //if (Input.GetKeyDown(KeyCode.J))
-        //{
-        //    // 奥の敵に矢印が動く
-        //    if (selectNum_ < posList_.Count - 1)
-        //    {
-        //        selectNum_++;
-        //    }
-        //}
-        //else if (Input.GetKeyDown(KeyCode.H))
-        //{
-        //    // 手前の敵に矢印が動く
-        //    if (selectNum_ > 0)
-        //    {
-        //        selectNum_--;
-        //    }
-        //}
-        //else
-        //{
-        //    // 何も処理を行わない
-        //}
-        //Debug.Log("選択中の敵" + selectNum_);
-        //// 座標移動
-        //this.gameObject.transform.position = posList_[selectNum_];
     }
 
     // falseになっているposListがあったらアイコン設置位置を飛ばす処理
@@ -192,19 +157,6 @@ public class EnemySelect : MonoBehaviour
         selectNum_ = 0;
         this.gameObject.transform.position = posList_.Item1[selectNum_];
 
-        // タプル変更前
-        //posList_ = list;
-        //// 受け取った値のY座標にoffsetが必要
-        //for (int i = 0; i < posList_.Count; i++)
-        //{
-        //    // そのままlistを書き換えようとするとエラーがでるので、下記のようにして変更する
-        //    Vector3 tmpData = posList_[i];
-        //    tmpData.y += posOffset_Y;
-        //    posList_[i] = tmpData;
-        //}
-        // 矢印の初期位置
-        //this.gameObject.transform.position = posList_[0];
-
         // 戦闘画面に遷移時、すぐにアイコンが表示されたら困るため非表示にする
         this.gameObject.SetActive(false);
     }
@@ -228,7 +180,7 @@ public class EnemySelect : MonoBehaviour
     public int GetSelectNum()
     {
         // returnされるselectNum_はMagicMove.csでDestroyされるので、該当するlistをfalseにする
-        posList_.Item2[selectNum_] = false;
+        //posList_.Item2[selectNum_] = false;
         return selectNum_;
     }
 
@@ -236,6 +188,16 @@ public class EnemySelect : MonoBehaviour
     // この処理がないと、次のキャラの行動時にDestroyした敵の頭上から矢印がスタートしてしまう。
     public bool ResetSelectPoint()
     {
+        // HPが0の敵はfalseにする
+        var tmp = EnemyInstanceMng.enemyList_;
+        for (int i = 0; i < tmp.Count(); i++)
+        {
+            if (tmp[i].Item1.HP() <= 0 && posList_.Item2[i])
+            {
+                posList_.Item2[i] = false;
+            }
+        }
+
         // 0から順に調べて、trueのところで止まる
         int num = 0;
         foreach (bool flag in posList_.Item2)

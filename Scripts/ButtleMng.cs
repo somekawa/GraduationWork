@@ -50,7 +50,7 @@ public class ButtleMng : MonoBehaviour
             characterMng_.ButtleSetCallOnce();
 
             // 敵のインスタンス(1～4)
-            enemyInstanceMng_.EnemyInstance(debugEnemyNum);
+            enemyInstanceMng_.EnemyInstance(debugEnemyNum, buttleUICanvas);
 
             // Character管理クラスに敵の出現数を渡す
             characterMng_.SetEnemyNum(debugEnemyNum);
