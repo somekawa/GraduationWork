@@ -1,0 +1,118 @@
+<キャラステータスに魔力を加える>-----------------
+
+この魔力値が高いほど同じ魔法でも威力が増減する。
+Character.xlsの変更とそれに伴うScriptの書き換えが必要になる。
+※本から得られる能力値も割り振り変更必要
+
+
+①Character.xlsとEnemy.xls
+AttackとDefenceの項目の間に[MagicAttack]を追加
+
+②CharacterList.cs
+public int MagicAttack;を追加する。
+
+③Character_importer.cs
+cell = row.GetCell(5); p.MagicAttack = (int)(cell == null ? 0 : cell.NumericCellValue);
+を追加する。
+
+④CharaBase.cs
+CharacterSettingにpublic int MagicAttack;を追加
+値の代入もする(敵の方も)
+
+⑤MenuActive.cs
+ステータス部分にMagicAttackを追加
+
+⑥Chara.cs
+SetCharaSetting関数にMagicAttackを追加
+
+------------------------------------------------
+
+<セーブとロードを追加>--------------------------
+
+テストで作成していたデータの方から
+・SaveCSV
+・CsvLoad
+・SampleFScript
+のScriptを持ってきて、全てSceneMngにアタッチする
+Resourcesフォルダにdata.csvを作成する。
+
+正常に動作しているのを確認。
+後はこれを、キャラクターデータの保存に置き換えていく。
+
+<SaveCSV.cs>
+SaveDataの引数をCharaBase.CharacterSettingにする
+テストとして名前とレベルを出力できるようにする。
+
+public void SaveData
+(CharaBase.CharacterSetting set)
+{
+  string[] s1 =
+            { set.name, set.Level.ToString() };
+  string s2 = string.Join(",", s1);
+  sw.WriteLine(s2);
+}
+
+
+<SampleFScript>
+今はFキーを押すと時間を記録するので、ここをキャラ情報を記録するように変更する。
+SampleSaveCsvScript.SaveData(SceneMng.GetCharasSettings((int)SceneMng.CHARACTERNUM.UNI));
+
+次にレベルアップしたデータを記録してみる。
+
+<レベルアップ処理の追加>
+Chara.csのLevelUp関数に値を適当に決めて入れる。
+        set_.Level += 1;
+        set_.HP += 10;
+        set_.MP += 5;
+        set_.Attack += 3;
+        set_.MagicAttack += 2;
+        set_.Defence += 3;
+        set_.Speed += 2;
+        set_.Luck += 1;
+この関数をCharacterMng.csで呼び出すようにする
+(テストとしてButtle関数で呼ぶ)
+
+// テスト用(レベルアップ処理)
+if (Input.GetKeyDown(KeyCode.L))
+{
+    charasList_[(int)nowTurnChar_].LevelUp();
+}
+
+<ロード処理>
+Bキーを押したときにキャラにデータを代入するように
+変更する。
+
+[1][0]名前
+[1][1]レベル値
+
+名前とレベルだけ読み込むようにしてみる。
+
+CharaBase.CharacterSetting set = new CharaBase.CharacterSetting {
+   name = csvDatas[1][0],
+   Level = int.Parse(csvDatas[1][1])
+};
+SceneMng.SetCharasSettings(0, set);
+
+SceneMng.csにロードデータを代入するために
+SetCharasSettingsを用意した。
+これをCsvLoad.csで呼び出すようにする。
+
+メニュー画面でステータスを確認したときに
+レベルアップしたぶんが反映されているのを確認。
+シーンを跨いでも反映されるのを確認。
+
+次に、MenuActive.csへ処理を移す。
+DataSave関数でSampleFScript.csでやってた
+saveCsvSc_.SaveData(SceneMng.GetCharasSettings((int)SceneMng.CHARACTERNUM.UNI));
+を呼び出すようにした(今はUNIだけの処理でやる)
+
+次にDataLoad関数を新規で作成して、
+その中にCsvLoad.csの内容を移す。
+
+OnClickMenuBtn関数にLoadだった場合のelseif文追加
+メニュー画面操作でセーブ/ロードできることを確認
+
+・SaveCSVだけ追加すれば大丈夫そう。念のため
+　他2つは別のファイルに保存しとく
+
+------------------------------------------------
