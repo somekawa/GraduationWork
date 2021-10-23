@@ -15,11 +15,11 @@ MonoBehaviour:
   param:
   - Name: Uni
     Level: 1
-    HP: 20
+    HP: 15
     MP: 16
-    Constitution: 5
-    Power: 4
     Attack: 5
+    MagicAttack: 6
     Defence: 3
     Speed: 3
     Luck: 3
+    AnimMax: 0.67

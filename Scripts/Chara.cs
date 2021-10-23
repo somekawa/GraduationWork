@@ -100,6 +100,15 @@ public class Chara : CharaBase,InterfaceButtle
     // CharaBaseクラスの抽象メソッドを実装する
     public override void LevelUp()
     {
+        set_.Level += 1;
+        set_.HP += 10;
+        set_.MP += 5;
+        set_.Attack += 3;
+        set_.MagicAttack += 2;
+        set_.Defence += 3;
+        set_.Speed += 2;
+        set_.Luck += 1;
+
         Debug.Log("レベルアップ！");
     }
 
@@ -193,6 +202,7 @@ public class Chara : CharaBase,InterfaceButtle
         set_.HP = set.HP;
         set_.MP = set.MP;
         set_.Attack = set.Attack;
+        set_.MagicAttack = set.MagicAttack;
         set_.Defence = set.Defence;
         set_.Speed = set.Speed;
         set_.Luck = set.Luck;

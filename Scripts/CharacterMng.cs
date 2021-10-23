@@ -158,6 +158,12 @@ public class CharacterMng : MonoBehaviour
             charasList_[(int)nowTurnChar_].sethp(charasList_[(int)nowTurnChar_].HP() - 10);
         }
 
+        // テスト用(レベルアップ処理)
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            charasList_[(int)nowTurnChar_].LevelUp();
+        }
+
 
         // 戦闘から逃げる
         if (!selectFlg_ && Input.GetKeyDown(KeyCode.LeftShift))

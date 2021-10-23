@@ -15,11 +15,11 @@ MonoBehaviour:
   param:
   - Name: Jack
     Level: 1
-    HP: 28
-    MP: 12
-    Constitution: 7
-    Power: 3
+    HP: 20
+    MP: 10
     Attack: 7
+    MagicAttack: 4
     Defence: 5
     Speed: 2
     Luck: 2
+    AnimMax: 1

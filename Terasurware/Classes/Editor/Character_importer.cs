@@ -63,10 +63,11 @@ public class Character_importer : AssetPostprocessor
 					cell = row.GetCell(2); p.HP = (int)(cell == null ? 0 : cell.NumericCellValue);
 					cell = row.GetCell(3); p.MP = (int)(cell == null ? 0 : cell.NumericCellValue);
 					cell = row.GetCell(4); p.Attack = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(5); p.Defence = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(6); p.Speed = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(7); p.Luck = (int)(cell == null ? 0 : cell.NumericCellValue);
-                    cell = row.GetCell(8); p.AnimMax = (float)(cell == null ? 0.0f : cell.NumericCellValue);
+                    cell = row.GetCell(5); p.MagicAttack = (int)(cell == null ? 0 : cell.NumericCellValue);
+                    cell = row.GetCell(6); p.Defence = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(7); p.Speed = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(8); p.Luck = (int)(cell == null ? 0 : cell.NumericCellValue);
+                    cell = row.GetCell(9); p.AnimMax = (float)(cell == null ? 0.0f : cell.NumericCellValue);
 
                         data.param.Add(p);
                     }

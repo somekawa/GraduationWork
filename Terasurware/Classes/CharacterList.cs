@@ -14,6 +14,7 @@ public class CharacterList : ScriptableObject
 		public int HP;
 		public int MP;
 		public int Attack;
+        public int MagicAttack;
 		public int Defence;
 		public int Speed;
 		public int Luck;

@@ -4,6 +4,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System;
 
 public class MenuActive : MonoBehaviour
 {
@@ -16,6 +17,12 @@ public class MenuActive : MonoBehaviour
     //private GameObject parentObjPrefab_;
 
     //private GameObject itemBagCanvas_;// シーン遷移後も使いたいオブジェクトたちの親
+
+    // データ系
+    private SaveCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
+    private const string saveDataFilePath_ = @"Assets/Resources/data.csv";
+    List<string[]> csvDatas = new List<string[]>(); // CSVの中身を入れるリスト;
+
     private RectTransform itemBagMng_;// itemBag_の子
     private ItemBagMng itemBagMngCS_;
     private RectTransform pictureMng_;// itemBag_の子
@@ -65,6 +72,7 @@ public class MenuActive : MonoBehaviour
 
     void Start()
     {
+        saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveCSV>();
         eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
         warpField_ = GameObject.Find("WarpOut").GetComponent<WarpField>();
 
@@ -205,7 +213,8 @@ public class MenuActive : MonoBehaviour
                      "レベル:" + data.Level.ToString() + "\n" +
                      "HP    :" + data.HP.ToString() + "\n" +
                      "MP    :" + data.MP.ToString() + "\n" +
-                     "攻撃力:" + data.Attack.ToString() + "\n" +
+                     "物理攻撃力:" + data.Attack.ToString() + "\n" +
+                     "魔法攻撃力:" + data.MagicAttack.ToString() + "\n" +
                      "防御力:" + data.Defence.ToString() + "\n" +
                      "素早さ:" + data.Speed.ToString() + "\n" +
                      "幸運  :" + data.Luck.ToString();
@@ -215,35 +224,53 @@ public class MenuActive : MonoBehaviour
     }
 
 
-    private void DateSave()
+    private void DataSave()
     {
         Debug.Log("セーブボタンが押された");
-
-        var data = SceneMng.GetCharasSettings((int)SceneMng.CHARACTERNUM.UNI);
-
-        // データ書き出しテスト
-        StreamWriter swLEyeLog;
-        FileInfo fiLEyeLog;
-
-        // 保存位置
-        fiLEyeLog = new FileInfo(Application.dataPath + "/saveData.csv");
-
-        swLEyeLog = fiLEyeLog.AppendText();
-
-        // 書き込み内容の作成
-        string str = data.name + "," +
-                     data.Level.ToString() + "," +
-                     data.HP.ToString() + "," +
-                     data.MP.ToString() + "," +
-                     data.Attack.ToString() + "," +
-                     data.Defence.ToString() + "," +
-                     data.Speed.ToString() + "," +
-                     data.Luck.ToString();
-
-        swLEyeLog.Write(str);   // 書き込み
-        swLEyeLog.Flush();
-        swLEyeLog.Close();
+        // ユニのデータだけテスト中
+        saveCsvSc_.SaveData(SceneMng.GetCharasSettings((int)SceneMng.CHARACTERNUM.UNI));
     }
+
+    private void DataLoad()
+    {
+        Debug.Log("ロードキー押下");
+
+        csvDatas.Clear();
+
+        // 行分けだけにとどめる
+        string[] texts = File.ReadAllText(saveDataFilePath_).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+        for (int i = 0; i < texts.Length; i++)
+        {
+            // カンマ区切りでリストへ登録していく(2次元配列状態になる[行番号][カンマ区切り])
+            csvDatas.Add(texts[i].Split(','));
+        }
+
+        Debug.Log("データ数" + csvDatas.Count);
+
+        // csvDatas[行][列]を指定して値を自由に取り出す方法
+        //Debug.Log(csvDatas[0][1]);
+
+        // 列を見た後に次の行へ進むようにする(デバッグ用)
+        for (int y = 0; y < csvDatas.Count; y++) // 全ての行文で回す
+        {
+            for (int x = 0; x < csvDatas[y].Length; x++) // 1行当たりに対する列の数で回す
+            {
+                // ゲームを閉じた後とかじゃないと反映されてない可能性あり
+                // SaveCSV.csからデータを直接もらってきたほうがいい?
+                Debug.Log(csvDatas[y][x]);
+            }
+        }
+
+        // yのほうは、キャラenum+1でいけそう2重for文でいけそうやな
+        CharaBase.CharacterSetting set = new CharaBase.CharacterSetting
+        {
+            name = csvDatas[1][0],
+            Level = int.Parse(csvDatas[1][1])
+        };
+        SceneMng.SetCharasSettings((int)SceneMng.CHARACTERNUM.UNI, set);
+    }
+
 
     public bool GetActiveFlag()
     {
@@ -276,8 +303,12 @@ public class MenuActive : MonoBehaviour
         backPanel_.gameObject.SetActive(true);
         if (clickbtn_.name == btnName[(int)CANVAS.SAVE])
         {
-            DateSave();
+            DataSave();
             return;
+        }
+        else if(clickbtn_.name == btnName[(int)CANVAS.LOAD])
+        {
+            DataLoad();
         }
         else
         {

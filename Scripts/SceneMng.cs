@@ -110,6 +110,12 @@ public class SceneMng : MonoBehaviour
 
     }
 
+    // ロードデータを代入する
+    public static void SetCharasSettings(int num,CharaBase.CharacterSetting set)
+    {
+        charasList_[num].SetCharaSetting(set);
+    }
+
     // MenuMng.csで呼び出す
     public static CharaBase.CharacterSetting GetCharasSettings(int num)
     {

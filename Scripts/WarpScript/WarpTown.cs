@@ -156,7 +156,7 @@ public class WarpTown : MonoBehaviour
             //// 長針が動かない＝ワープ先を選べない
             if (warpFieldScript_.GetWarpNowFlag() == false)
             {
-                Debug.Log("warpNowFlag_がfalseの時");
+                //Debug.Log("warpNowFlag_がfalseの時");
                 speeds_[1] += 10.0f * Time.deltaTime;            // 右回転
                 if (Input.GetKeyDown(KeyCode.Space))
                 {

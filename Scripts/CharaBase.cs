@@ -21,6 +21,7 @@ public abstract class CharaBase : object
         public int HP;
         public int MP;
         public int Attack;          // この値にポイントを振り分けると攻撃力が上がる
+        public int MagicAttack;
         public int Defence;         // この値にポイントを振り分けると防御力が上がる
         public int Speed;           // この値にポイントを振り分けると素早さが上がる
         public int Luck;            // この値にポイントを振り分けると幸運が上がる
@@ -46,6 +47,7 @@ public abstract class CharaBase : object
             setting_.HP = popCharacter.param[0].HP;
             setting_.MP = popCharacter.param[0].MP;
             setting_.Attack = popCharacter.param[0].Attack;
+            setting_.MagicAttack = popCharacter.param[0].MagicAttack;
             setting_.Defence = popCharacter.param[0].Defence;
             setting_.Speed = popCharacter.param[0].Speed;
             setting_.Luck = popCharacter.param[0].Luck;
@@ -67,6 +69,7 @@ public abstract class CharaBase : object
             setting_.HP = param.HP;
             setting_.MP = param.MP;
             setting_.Attack = param.Attack;
+            setting_.MagicAttack = param.MagicAttack;
             setting_.Defence = param.Defence;
             setting_.Speed = param.Speed;
             setting_.Luck = param.Luck;
