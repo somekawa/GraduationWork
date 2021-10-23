@@ -31,7 +31,8 @@ public class QuestMng : MonoBehaviour
     private List<Quest> questList_;                  // クエストリスト
 	private List<Transform> questUIInstanceList_;    // クエスト用UIのインスタンスを入れる
     private Transform questContent_;                 // クエストを表示するUIのコンテンツ
-    private Text questInfoText_;                     // クエスト情報の表示先テキスト
+    private Text questInfoText_;                     // クエスト情報の題名テキスト
+    private Text questInfoText2_;                    // クエスト情報の詳細テキスト
     private GameObject questOrderButton_;            // クエスト受注ボタン
     private GameObject questReportButton_;           // クエスト報告ボタン
     private GameObject backButton_;                  // 前の画面に戻るボタン
@@ -71,7 +72,9 @@ public class QuestMng : MonoBehaviour
         guild_ = new Guild();
 
         //　クエスト情報の表示先テキスト
-        questInfoText_ = questUI.transform.Find("InfomationPanel/Text").GetComponent<Text>();
+        questInfoText_ = questUI.transform.Find("InfomationPanel/TitleText").GetComponent<Text>();
+        questInfoText2_ = questUI.transform.Find("InfomationPanel/DetailText").GetComponent<Text>();
+
         questOrderButton_ = questUI.transform.Find("OrderButton").gameObject;
         questReportButton_ = questUI.transform.Find("ReportButton").gameObject;
         backButton_ = questUI.transform.Find("BackButton").gameObject;
@@ -299,6 +302,9 @@ public class QuestMng : MonoBehaviour
         questNum_ = num;
         // クエスト説明を描画する(画面右側の所)
         questInfoText_.text = popQuestInfo_.param[num].info;
+
+        questInfoText2_.text = popQuestInfo_.param[num].detail;
+
         Debug.Log("QuestMngで" + num + "を受け取りました");
 
         if(nowPage_ == NOWPAGE.LOOK_QUEST)

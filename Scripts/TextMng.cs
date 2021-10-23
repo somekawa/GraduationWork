@@ -46,6 +46,7 @@ public class TextMng : MonoBehaviour
 
     private Image backImage_;        // 会話中の背景画像(Excelから画像名を読み込んで動的に差し替える)
     private Image objectImage_;      // 会話中に登場する画像(Excelから画像名を読み込んで動的に差し替える)
+    private RectTransform objectImageRect_; // 会話中に登場する画像の差し込み場所サイズを変更する
 
     private Fade fade_;              // トランジション関連(fadeoutとfadein関数を呼び出すために必要)
     private readonly float fadeTimeMax_ = 3.0f;
@@ -89,6 +90,7 @@ public class TextMng : MonoBehaviour
         backImage_ = GameObject.Find("BackCanvas/BackImage").GetComponent<Image>();
         // 通常画像
         objectImage_ = ConversationCanvas.transform.Find("ObjectImage").GetComponent<Image>();
+        objectImageRect_ = ConversationCanvas.transform.Find("ObjectImage").GetComponent<RectTransform>();
 
         // トランジション
         fade_ = GameObject.Find("FadeCanvas").GetComponent<Fade>();
@@ -174,7 +176,7 @@ public class TextMng : MonoBehaviour
                 }
                 else
                 {
-                    // 手紙画像
+                    // 画像
                     objectImage_.sprite = CreateSprite(popChapter_.param[nowText_].name2);
                     // 描画する画像があるときは表示にする
                     objectImage_.gameObject.SetActive(true);
@@ -431,6 +433,10 @@ public class TextMng : MonoBehaviour
         texture.LoadImage(bytes);
         // Texture2DからSpriteへ変換
         Rect rect = new Rect(0.0f, 0.0f, texture.width, texture.height);
+
+        // 貼り付け先の画像サイズ変更
+        objectImageRect_.sizeDelta = new Vector2(texture.width, texture.height);
+
         Sprite sprite = Sprite.Create(texture, rect, Vector2.zero);
 
         // すぐには破棄が出来ないので、後から破棄できるようにリストに入れておく

@@ -34,6 +34,16 @@ public class FieldMng : MonoBehaviour
 
     void Start()
     {
+        // 現在のシーンをFIELDとする
+        SceneMng.SetNowScene(SceneMng.SCENE.FIELD0);
+
+        // イベントが発生するか確認する
+        if (EventMng.GetChapterNum() == 8)
+        {
+            EventMng.SetChapterNum(8, SceneMng.SCENE.CONVERSATION);
+        }
+
+
         //unitychanの情報を取得
         player_ = GameObject.Find("Uni").GetComponent<UnitychanController>();
         if (player_ == null)
@@ -47,8 +57,6 @@ public class FieldMng : MonoBehaviour
             Debug.Log("FieldMng.csで取得しているCameraMngがnullです");
         }
 
-        // 現在のシーンをFIELDとする
-        SceneMng.SetNowScene(SceneMng.SCENE.FIELD0);
         // WarpField.csの初期化関数を先に呼ぶ
         GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
     }
