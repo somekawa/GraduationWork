@@ -101,13 +101,13 @@ public class SceneMng : MonoBehaviour
         if(singleton == null)
         {
             CharaData.SetCharaData(charasList_[0].GetCharaSetting());
+            CharaData.SetCharaData(charasList_[1].GetCharaSetting());
             singleton = this;
         }
 
-        //@ ここでcharasDataのステータス値をcharasList_に代入？
-        // ステータス値代入テスト
+        // ここでcharasDataのステータス値をcharasList_に代入
         charasList_[0].SetCharaSetting(CharaData.GetCharaData());
-
+        charasList_[1].SetCharaSetting(CharaData.GetCharaData());
     }
 
     // ロードデータを代入する
