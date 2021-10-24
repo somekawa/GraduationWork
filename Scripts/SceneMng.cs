@@ -168,6 +168,7 @@ public class SceneMng : MonoBehaviour
 
         //@ ここでcharasList_のステータス値をcharasDataに避難させる？ 
         CharaData.SetCharaData(charasList_[0].GetCharaSetting());
+        CharaData.SetCharaData(charasList_[1].GetCharaSetting());
 
         // int番号は、ビルド設定の数値
         SceneManager.LoadScene(load);
