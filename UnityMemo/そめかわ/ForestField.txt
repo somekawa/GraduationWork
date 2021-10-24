@@ -2243,11 +2243,304 @@ CharacterMng.csを修正して、
 
 ------------------------------------------------
 
-<敵のHPバーの管理を行う>------------------------
+<敵のインスタンス位置を再調整する>---------------
 
+EnemyInstancePointPackの更新が必要になる
 
+<3体のとき>
+１　X:-3.5
+２　X:-1
+３　X:1.5
+
+<4体のとき>
+１　X:-4
+２　X:-1.5
+３　X:0
+４　X:2
 
 ------------------------------------------------
+
+<敵のHPバーの管理を行う>------------------------
+
+敵のHPバーは、敵の頭上に置きたいからインスタンス方式でやる。
+
+HPSliderをプレハブ化する。
+→プレハブのままButtleUICanvasにも置いて、
+　EnemyInstanceMng.csで外部アタッチ方式でプレハブ　を入れよう。そうしよう。
+
+<EnemyInstanceMng.cs>
+public変数でenemyHPBarを作成し、
+EnemyInstance関数で敵のインスタンスと同時に
+その頭上にHPバーをインスタンスするように設定。
+→SetHPBarの数値は適当に・・・
+
+インスタンスしたときにButtleUICanvasの子に
+なるようにしよう。
+
+EnemyInstance関数の引数にCanvas parentCanvas追加
+呼び出し元のButtleMng.csでButtleUICanvasを設定し
+Instantiate(enemyHPBar, pos, Quaternion.identity, parentCanvas.transform);
+とする。
+※ただし、これだと座標が全然敵の頭上にこないから
+　調整が必要
+
+<表示位置調整>
+各表示位置を予め決めておいたほうがいいかも
+
+<1体のとき>
+X:1000 Y:530
+
+<2体のとき>
+X:870  Y:560
+X:1030 Y:530
+
+<3体のとき>
+X:780  Y:570
+X:940  Y:540
+X:1150 Y:510
+
+<4体のとき>
+X:760  Y:580
+X:830  Y:540
+X:1000 Y:520
+X:1170 Y:470
+
+EnemyInstanceMng.csのStart関数でHPバー表示位置を
+決定する
+
+※ボスのHPは中央上部にするとか
+敵の高さに合わせてHPバーのY軸は調整が必要に
+なりそう
+
+------------------------------------------------
+
+<Enemy用のScriptをつくる>-----------------------
+
+EnemyBase.csとEnemy.csが必要になってくる。
+※基本のつくりはCharaBase.csとChara.cs参考
+
+というか、CharaBaseって別にキャラだけじゃなくて
+Enemyのベースとしても使えるよね。
+※CharaBaseの引数にしてたCHARACTERNUMを削除
+　それと入れ替えに、キャラなら0,敵なら1と入力
+　するintを追加する。
+　→データを取りに行くときのクラス型の指定分け用
+
+名称変更してEnemyでも使えるようにしよ。
+(とりあえず今はCharaBaseのまま使うよー)
+
+<Enemy.cs(新規作成)>
+基底クラスをCharaBaseとInterfaceButtleにして
+必要な関数を一気に作成する(エラーでるからわかる)
+※関数の中身はとりあえず適当に書いとく
+
+EnemyInstanceMng.csでEnemyを呼び出す処理を書く
+①enemyList_変数を作成する(charaList_と同様)
+②EnemyInstance関数内で①をAddする
+　→アニメーター情報がないからnullにしとく
+
+Excel読み込み用に、敵の名前が必要になる。
+番号でいろいろ指定してるところはあんまり
+いじりたくないなぁ…
+[番号_名前]みたいにして、使うときは"_"の前後で
+わけようかな。
+※これなら同じ敵が複数でも対応できるし
+　→setting_.name = param.Name + "_" +name;
+    という風にした。
+
+<敵のExcelを作成する>
+基本はキャラと同じで、+経験値と素材ドロップの
+項目が必要になる。
+
+新規で[Enemy.xls]を作成する。
+フィールド毎にシートを分けたほうがいいから、
+シート名はフィールド番号にする。
+その後、import処理とエラーの対処をする。
+
+Resourcesファイルに新規でEnemyDataファイルを作成して、Enemy_importer.csのexportPathの設定をする
+
+PopLostにもEnemyを加える。
+
+[EnemyInstanceMng.cs]
+Enemy情報をリストに該当フィールド丸ごと入れたほうがいい。そこから取り出す感じにする。
+→enemyData_変数を作成し、nullのときに
+　書きこむようにする。
+
+敵個別情報をCharaBase.csに持っていくために、
+Enemy.csでは引数にEnemyList.Paramを追加する。
+(Chara.csにはnullをいれる)
+
+enemyList_.Add(new Enemy(enemy.name,1,null,enemyData_.param[0]));
+という感じで書く。
+
+フィールド単位で読み込んでおいて、一度保存した内容を使いまわす感じ。
+
+------------------------------------------------
+
+<キャラの攻撃で敵のHPが減るようにしたい>---------
+
+そもそもまず、敵とHPバーを関連付ける必要がある。
+→enemyList_をEnemyとHPBarのペアにする。
+それに伴ってEnemyInstance関数も少し修正
+
+いま敵オブジェクトを削除しているCheckAttackHit.cs
+でHP減少処理をする。
+※OnTriggerEnterの中に減少コルーチンを呼び出すと
+　1フレームしか入らなくてうまくいかない。
+
+CheckAttackHit.cs内でEnemyInstanceMng.csの関数を呼び出してそこでHPBar.csのコルーチンを呼び出す。
+HPdecrease関数
+
+そのままHPdecrease関数で敵オブジェクトとHPバーの
+削除も行う
+
+------------------------------------------------
+
+<倒しきれてない敵が選択不可能になる>-------------
+
+EnemySelect.csのGetSelectNum関数で
+フラグをfalseにしているから。
+
+ResetSelectPoint関数で、enemyList_を引っ張ってきてHPが0以下、かつ、まだフラグがtrueならfalseにする処理をいれる。
+
+ここに入れる事で、敵を全て倒した時に探索画面に
+戻る処理も続けて入るから楽になる。
+
+------------------------------------------------
+
+<ジャックの攻撃判定が2回起こる>------------------
+
+当たり判定コライダーをON/OFF切り替わるようにする
+
+攻撃Hit直後 → enable(false)
+CheckAttackHit.csのOnTriggerEnter関数の中
+
+攻撃直前    → enable(true)
+CharacterMng.csのAttackStart関数の中
+
+------------------------------------------------
+
+<敵が複数体の時に、交互に攻撃して倒すと
+ 矢印が倒したはずの場所に出現する>---------------
+
+(原因)
+敵を倒した際の矢印フラグがうまくいってない
+呼び出し順がわるい
+
+矢印の再設定→HP減少処理の順になってるから
+HP0の敵の場所にも矢印でてきちゃう
+
+(対処法)
+処理順を、HPの減少処理→矢印の再設定
+になるようにする。
+
+EnemyInstanceMng.csにpublic変数で外部アタッチ式のEnemySelectObjを用意する。
+※表示/非表示の変更が多いものは外部アタッチと
+　学んだからね
+
+あとはHPdecrease関数内でResetSelectPoint関数を
+呼び出すだけ。
+
+------------------------------------------------
+
+<敵をカボスにする>------------------------------
+PictureにKabosu.pngを追加する。
+マテリアルに貼り付けて敵として利用したいから、
+
+sphereを[Enemy_Kabosu]と命名して、
+Tagを[Enemy]にしてShaderをLegacyShaders/Diffuse
+にする。
+SphereColliderとRigidbodyをつけとく。
+
+Kabosu.matというマテリアルを作成してShaderを
+LegacyShader/Diffuseにする。Selectの所に
+Kabosu.pngをいれてからEnemy_Kabosuにアタッチする
+
+あとは、EnemyInstanceMngのEnemyCubeを
+Enemy_Kabosuをアタッチするように変更する
+
+EnemyCubeという名前も合わないからEnemyTestとした
+
+------------------------------------------------
+
+<宝箱の設置>------------------------------------
+
+仮置きとしてCubeを[TreasureBox]とする。
+→処理方法はさきちゃんの素材拾いと同じに
+
+※クエスト１を受注中のみ設置されるようにする
+宝箱をField0に設置して、
+中からワード[炎]と、[ギルドテスト合格証]を入手
+
+------------------------------------------------
+
+<フィールドの歩き方を説明する>-------------------
+
+chapterNumが8でForestFieldにきたら
+ジャックと会話を挟む。
+
+エンカウント率や素材取得方法をまとめた画像を用意する。
+
+------------------------------------------------
+
+<Chapter8の作成>--------------------------------
+森の背景画像と、フィールド説明画像が必要になる。
+(Forest.png  , FieldInfo.png)
+
+Chapter.xlsにChapter8のシートを作成。
+会話文を入れて、Chapter_importer.csに"8"を
+追加する。そしてreimport
+
+<森の背景画像>
+使用画像
+https://www.ac-illust.com/main/detail.php?id=2346343&word=%E6%A3%AE%E3%81%AE%E5%A5%A5
+
+<イベントの設定>
+FieldMng.csのStart関数に、
+// イベントが発生するか確認する
+if (EventMng.GetChapterNum() == 8)
+{
+  EventMng.SetChapterNum(8, 　SceneMng.SCENE.CONVERSATION);
+}
+を追加する。
+
+
+<説明画像>
+画像サイズを取得して貼り付け先のobjのサイズを変更するようにしたい
+
+TextMng.csのCreateSprite関数に、
+// 貼り付け先の画像サイズ変更
+objectImageRect_.sizeDelta = new Vector2(texture.width, texture.height);
+という処理を追加
+
+※objectImageRect変数は、Start関数で
+objectImageRect_ = ConversationCanvas.transform.Find("ObjectImage").GetComponent<RectTransform>();
+という風にfindしている
+
+------------------------------------------------
+
+<チュートリアル戦闘>----------------------------
+
+画像で用意して、戦い方を説明するようにしたい。
+※いつでも確認できますみたいな。
+
+------------------------------------------------
+
+<戦闘中にユニの移動キーを押すと走るアニメーション
+ になるバグ>------------------------------------
+
+(原因)
+UnitychanController.csのUpdate関数で戦闘中でも
+キーが押されたらアニメーション切り替わるままに
+なっているから。
+
+(対処法)
+Update関数の最初にSEARCHじゃないならreturnする
+ように書いておく。
+
+------------------------------------------------
+
+EnemyInstanceMng.csを、EnemyMng.csにする予定
 
 <いろいろメモ欄>
 static変数をprivate変数に代入して、private変数の

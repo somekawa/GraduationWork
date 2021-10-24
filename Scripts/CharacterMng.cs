@@ -161,7 +161,8 @@ public class CharacterMng : MonoBehaviour
         // テスト用(レベルアップ処理)
         if (Input.GetKeyDown(KeyCode.L))
         {
-            charasList_[(int)nowTurnChar_].LevelUp();
+            charasList_[0].LevelUp();
+            charasList_[1].LevelUp();
         }
 
 

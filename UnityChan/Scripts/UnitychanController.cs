@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 // キャラの基本移動と方向転換のみのScript
@@ -7,10 +5,12 @@ using UnityEngine;
 
 public class UnitychanController : MonoBehaviour
 {
-    private Rigidbody rigid;      // Rigidbodyコンポーネント
-    private Animator animator_;   // Animator コンポーネント
+    private Rigidbody rigid_;      // Rigidbodyコンポーネント
+    private Animator animator_;    // Animator コンポーネント
 
-    private readonly int runParamHash = Animator.StringToHash("isRun");
+    // アニメーション
+    private readonly int runParamHash_ = Animator.StringToHash("isRun");
+    private readonly int attackParamHash_ = Animator.StringToHash("isAttack");
 
     // 押下状態を確認したいキーをまとめたもの
     private KeyCode[] keyArray_ = new KeyCode[4] { KeyCode.UpArrow, KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow };
@@ -19,20 +19,26 @@ public class UnitychanController : MonoBehaviour
 
     void Start()
     {
-        rigid = GetComponent<Rigidbody>();
+        rigid_ = GetComponent<Rigidbody>();
         animator_= GetComponent<Animator>();
     }
 
     void Update()
-    {        
-        bool tmpFlg = false;       // 座標移動のボタン押下時にtrueになる
+    {
+        // 探索中以外はアニメーションが変わらないようにする
+        if (FieldMng.nowMode != FieldMng.MODE.SEARCH)
+        {
+            return;
+        }
+
+         bool tmpFlg = false;       // 座標移動のボタン押下時にtrueになる
         foreach (KeyCode i in keyArray_)
         {
             // keyArray_に設定したKeyCodeの中で、押下されているボタンがあるかを調べる
             if (Input.GetKey(i))
             {
                 // WaitからRunに遷移する
-                this.animator_.SetBool(runParamHash, true);
+                this.animator_.SetBool(runParamHash_, true);
                 tmpFlg = true;
                 break;  // それ以上回す必要がないので、breakで抜ける
             }
@@ -41,7 +47,7 @@ public class UnitychanController : MonoBehaviour
         if (!tmpFlg) // 上のforeachを通ってもfalseのままだった場合は、走るアニメーションをfalseにする(=待機)
         {
             // RunからWaitに遷移する
-            this.animator_.SetBool(runParamHash, false);
+            this.animator_.SetBool(runParamHash_, false);
             return; // 待機アニメーションということは下の座標移動処理を行う必要がないため、returnする
         }
 
@@ -66,18 +72,18 @@ public class UnitychanController : MonoBehaviour
         if (FieldMng.nowMode != FieldMng.MODE.SEARCH)
         {
             // キャラにかかっている慣性を一時的に止める
-            rigid.velocity = Vector3.zero;
-            rigid.angularVelocity = Vector3.zero;
+            rigid_.velocity = Vector3.zero;
+            rigid_.angularVelocity = Vector3.zero;
 
             // ここでRunのアニメーションを変更しておかないと、モードが切り替わる瞬間まで走っていたら
             // 走りモーションが戦闘中に継続してしまう。
-            this.animator_.SetBool(runParamHash, false);
+            this.animator_.SetBool(runParamHash_, false);
             return;
         }
         else
         {
             // 戦闘から探索に戻ってきたときに、攻撃モーションの途中なら切り上げるようにする
-            this.animator_.SetBool("isAttack", false);
+            this.animator_.SetBool(attackParamHash_, false);
         }
 
         // グローバル座標に変換すると、キャラの方向転換後に+-がバグが起きた
@@ -89,23 +95,23 @@ public class UnitychanController : MonoBehaviour
             // 速度ベクトルを作成（3次元用）Y座標は0.0fで必ず固定する
             var speed = new Vector3(moveDir_.x, 0.0f, moveDir_.z);
             // 速度に正規化したベクトルに、移動速度をかけて代入する
-            rigid.velocity = speed.normalized * SceneMng.charaRunSpeed;
+            rigid_.velocity = speed.normalized * SceneMng.charaRunSpeed;
 
             // 座標更新
             // キャラクターを移動させる処理
-            rigid.MovePosition(rigid.position + rigid.velocity * Time.deltaTime);
+            rigid_.MovePosition(rigid_.position + rigid_.velocity * Time.deltaTime);
             // キャラ方向転換
             transform.rotation = Quaternion.LookRotation(moveDir_);
         }
 
         moveDir_ = Vector3.zero;
-        rigid.velocity = Vector3.zero;
+        rigid_.velocity = Vector3.zero;
     }
 
     // キャラが移動中か
     public bool GetMoveFlag()
     {
-        return this.animator_.GetBool(runParamHash);
+        return this.animator_.GetBool(runParamHash_);
     }
 
     // キャラの走りアニメーションを止める
@@ -114,7 +120,7 @@ public class UnitychanController : MonoBehaviour
         // アニメーションがあるかnullチェックを行う
         if(this.animator_ != null)
         {
-            this.animator_.SetBool(runParamHash, false);
+            this.animator_.SetBool(runParamHash_, false);
         }
     }
 

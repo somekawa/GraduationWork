@@ -1,2 +1,3 @@
-﻿Name,Level
-Uni,1
+﻿Name,Level,HP,MP,Attack,MagicAttack,Defence,Speed,Luck,AnimMax
+Uni,2,25,21,8,8,6,5,4,0.67
+Jack,2,30,15,10,6,8,4,3,1
