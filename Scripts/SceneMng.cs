@@ -100,14 +100,14 @@ public class SceneMng : MonoBehaviour
         // 初回のみキャラステータスを初期値で登録
         if(singleton == null)
         {
-            CharaData.SetCharaData(charasList_[0].GetCharaSetting());
-            CharaData.SetCharaData(charasList_[1].GetCharaSetting());
+            CharaData.SetCharaData(0,charasList_[0].GetCharaSetting());
+            CharaData.SetCharaData(1,charasList_[1].GetCharaSetting());
             singleton = this;
         }
 
         // ここでcharasDataのステータス値をcharasList_に代入
-        charasList_[0].SetCharaSetting(CharaData.GetCharaData());
-        charasList_[1].SetCharaSetting(CharaData.GetCharaData());
+        charasList_[0].SetCharaSetting(CharaData.GetCharaData(0));
+        charasList_[1].SetCharaSetting(CharaData.GetCharaData(1));
     }
 
     // ロードデータを代入する
@@ -167,8 +167,8 @@ public class SceneMng : MonoBehaviour
         }
 
         //@ ここでcharasList_のステータス値をcharasDataに避難させる？ 
-        CharaData.SetCharaData(charasList_[0].GetCharaSetting());
-        CharaData.SetCharaData(charasList_[1].GetCharaSetting());
+        CharaData.SetCharaData(0,charasList_[0].GetCharaSetting());
+        CharaData.SetCharaData(1,charasList_[1].GetCharaSetting());
 
         // int番号は、ビルド設定の数値
         SceneManager.LoadScene(load);
