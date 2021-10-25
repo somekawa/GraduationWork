@@ -14,13 +14,21 @@ public class Enemy : CharaBase, InterfaceButtle
 
     public bool Attack()
     {
-        Debug.Log(set_.name + "の攻撃！");
-        return true;
+        if (set_.HP <= 0)
+        {
+            Debug.Log(set_.name + "はすでに死亡している");
+            return true;
+        }
+        else
+        {
+            Debug.Log(set_.name + "は様子を見ている");
+            return true;
+        }
     }
 
-    public void Damage()
+    public int Damage()
     {
-        Debug.Log(set_.name + "はダメージ受けた！");
+        return set_.Attack;
     }
 
     public int HP()
@@ -59,9 +67,9 @@ public class Enemy : CharaBase, InterfaceButtle
     {
         Debug.Log("武器切替！");
     }
-    public override void Defence()
+    public override int Defence()
     {
-        Debug.Log("防御！");
+        return set_.Defence;
     }
     public override void Magic()
     {
@@ -75,5 +83,15 @@ public class Enemy : CharaBase, InterfaceButtle
     public override bool ChangeNextChara()
     {
         return true;
+    }
+
+    public int Speed()
+    {
+        return set_.Speed;
+    }
+
+    public string Name()
+    {
+        return set_.name;
     }
 }

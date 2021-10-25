@@ -2540,6 +2540,142 @@ Update関数の最初にSEARCHじゃないならreturnする
 
 ------------------------------------------------
 
+<行動をspeed順にする>---------------------------
+ButtleMng.csで行動順を管理するようにしたい。
+
+<キャラのスピード値を引っ張ってくる>
+①InterfaceButtle.csにint Speed();と
+　string Name();追加する
+②Chara.csにpublic int Speed()と
+　public string Name()を実装する
+③CharacterMng.csにCharaTurnSpeed関数を実装して
+　引数にint num 返り値として
+  名前と行動速度を返す
+④ButtleMng.csで値とどのキャラかがわかるように
+　目印をつけてListで値を保存する。
+　→戦闘開始時に設定される項目にmoveTurnList_.Add
+    の処理を入れる。
+
+<敵のスピード値を引っ張ってくる>
+①Chara.csに追加したのと同様の関数をEnemy.csに
+　用意する
+②EnemyInstanceMng.csにEnemyTurnSpeed関数を
+　作成して、名前と行動速度を返す
+  ※キャラの③と内容は同じ
+③ButtleMng.csで敵の数分for文を回してキャラの④
+　と同様の処理を行う。
+
+※数値でソートするために、行動順,名前の順番で
+　Addしないとだめだわ
+
+ソートしたときに昇順になるから、
+値が大きいほうを先に行動させるためにReverseして
+降順に直す。
+
+<実際の行動のところを処理する>
+プレイヤーの行動と敵の行動を管理できるようにする
+
+①ButtleMng.csにprivate int moveTurnCntを
+　用意して、SetMoveTurn関数を用意。
+　そのなかで値の加算を行う
+　※各自行動が終わったらこの関数を呼び出す仕組み
+
+②キャラが行動終わったときの処理
+　CharacterMng.csのAnimatonChange関数にある
+　case IDLEのところでbuttleMng_.SetMoveTurn関数
+　を呼び出すようにする。
+　※buttleMng_変数はFindするようにした。
+
+③敵が行動終わったときの処理
+　buttleMng_変数はFindするようにした。
+　EnemyInstanceMng.csのAttack関数でSetMoveTurnを
+　呼び出すようにする。
+
+　※倒した敵は行動順から抜かないといけない
+　→Attack関数でHP見てログ内容変更するようにした
+
+<キャラが死亡中も行動順を飛ばしたい>
+①CharacterMng.csのANIMATIONのenumにDEATHを追加　AnimationChangeにcase DEATHを入れとく。
+　→中でIDLEになるように設定
+
+②Buttle関数内にあるテストダメージ処理にHPが0以下
+　になったらanim_ = ANIMATION.DEATHになるように
+　する(HPの数値も0ぴったりにする)
+
+③case文のIDLE内に、次のキャラにしたときにHPが
+　0以下になっていたらanim_ = ANIMATION.DEATHを
+　設定する
+
+<次のキャラのHPバーも0になるバグ>
+(原因)
+コルーチンが原因ぽい。
+0にしきるまえに次のキャラの行動に移ってた。
+
+(対処法)
+0になってから次のキャラの行動に移行するように修正
+しないといけない。
+コルーチンの終了判定をとったほうがいいのかも
+→フラグでできた
+
+①HPBar.csにcolFlg_変数を作成し、
+　MoveSliderBar関数のwhile文ではtrueにしておき、
+　抜けたところでfalseにする。
+
+②GetColFlg関数を作成しておき、CharacterMng.csの
+　Buttle関数でanim_==DEATHのときに呼び出す。
+　trueならまだ減少処理中だからreturnし、
+　falseならanim_=IDLEとする。
+　※switch文のDEATHの内容が不必要になったから
+　　コメントアウトしとく
+
+------------------------------------------------
+
+<ダメージ算出>----------------------------------
+現在は固定値でダメージを出しているので、
+これを[攻撃力-防御力]で計算されるように変更する。
+
+<キャラから敵へのダメージ>
+ButtleMng.cs経由で値を渡したほうがよさそう。
+
+[キャラの攻撃力を渡す方法]
+InterfaceButtle.csのDamage関数の返り値をintへ。
+ButtleMng.csにSetDamageNum関数を作成しておき、
+CharacterMng.csのcase文のATTACKで呼び出す。
+
+[敵のダメージ処理]
+EnemyInstanceMng.csのHPdecrease関数で処理する。
+ButtleMng.csのGetDamageNum関数を引っ張ってきて、
+自分のDefence-キャラからのダメージ値を計算する
+※Defence関数の返り値をintに直す
+→防御力が上回って減算の結果がマイナス値だったら
+　0にするようにガード処理入れとく
+あとは、固定値でダメージ入れてたところを変更
+するだけ
+
+[敵の攻撃力を渡す方法]
+EnemyInstanceMng.csのAttack関数で
+buttleMng_.SetDamageNum
+(enemyList_[num].Item1.Damage());
+を呼び出す。
+
+[キャラのダメージ処理]
+いまは当たった瞬間というのがないから手動で値を
+貰う処理でテストする。
+
+Buttle関数のテスト用ダメージ処理の中で、
+敵と同じくダメージ値の算出を行い、
+削るHP部分を修正したら終了。
+→ちょっとHP減少処理のデバッグしづらくなったから
+　注意
+
+※カボス君の攻撃力低すぎたわ。値修正する
+　6にしとこ
+
+------------------------------------------------
+
+もしかしたらInterfaceButtle.csいらないかも
+→CharaBaseを敵もキャラも両方のベースにしてるから
+　必要なくなる可能性高め
 EnemyInstanceMng.csを、EnemyMng.csにする予定
 
 <いろいろメモ欄>

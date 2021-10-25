@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 // 戦闘全体について管理する
 
@@ -18,6 +16,12 @@ public class ButtleMng : MonoBehaviour
 
     private CharacterMng characterMng_;         // キャラクター管理クラスの情報
     private EnemyInstanceMng enemyInstanceMng_; // 敵インスタンス管理クラスの情報
+
+    private List<(int,string)> moveTurnList_ = new List<(int, string)>();   // キャラと敵の行動順をまとめるリスト
+
+    private int moveTurnCnt_ = 0;           // 自分の行動が終わったら値を増やす
+
+    private int damageNum_ = 0;
 
     void Start()
     {
@@ -52,24 +56,68 @@ public class ButtleMng : MonoBehaviour
             // 敵のインスタンス(1～4)
             enemyInstanceMng_.EnemyInstance(debugEnemyNum, buttleUICanvas);
 
+            // 敵の名前と行動速度を受け取ってリストに入れる
+            for (int i = 0; i < debugEnemyNum; i++)
+            {
+                moveTurnList_.Add(enemyInstanceMng_.EnemyTurnSpeed(i));
+            }
+
+            // キャラの名前と行動速度を受け取ってリストに入れる
+            for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+            {
+                moveTurnList_.Add(characterMng_.CharaTurnSpeed(i));
+            }
+
+            moveTurnList_.Sort();    // 昇順にソート
+            moveTurnList_.Reverse(); // 降順にするために逆転させる
+
             // Character管理クラスに敵の出現数を渡す
             characterMng_.SetEnemyNum(debugEnemyNum);
         }
 
-        // キャラクターの行動
-        characterMng_.Buttle();
-        // コマンド状態の表示/非表示切替
-        buttleCommandUI_.gameObject.SetActive(!characterMng_.GetSelectFlg());
-
-        // キャラクターの攻撃対象が最後の敵だった時
-        if (characterMng_.GetLastEnemyToAttackFlg())
+        if(moveTurnList_[moveTurnCnt_].Item2 == "Uni" || moveTurnList_[moveTurnCnt_].Item2 == "Jack")
         {
-            // Enemyタグの数を見て該当する物がない(= 0)なら、MODEを探索に切り替える
-            if (GameObject.FindGameObjectsWithTag("Enemy").Length == 0)
+            // キャラクターの行動
+            characterMng_.Buttle();
+            // コマンド状態の表示/非表示切替
+            buttleCommandUI_.gameObject.SetActive(!characterMng_.GetSelectFlg());
+
+            // キャラクターの攻撃対象が最後の敵だった時
+            if (characterMng_.GetLastEnemyToAttackFlg())
             {
-                FieldMng.nowMode = FieldMng.MODE.SEARCH;
-                characterMng_.SetCharaFieldPos();
+                // Enemyタグの数を見て該当する物がない(= 0)なら、MODEを探索に切り替える
+                if (GameObject.FindGameObjectsWithTag("Enemy").Length == 0)
+                {
+                    FieldMng.nowMode = FieldMng.MODE.SEARCH;
+                    characterMng_.SetCharaFieldPos();
+                }
             }
         }
+        else
+        {
+            string[] arr = moveTurnList_[moveTurnCnt_].Item2.Split('_');
+            // 敵の行動
+            enemyInstanceMng_.Attack(int.Parse(arr[1]) - 1);
+        }
+    }
+
+    // 行動が終わったときに呼び出されて自動で加算される
+    public void SetMoveTurn()
+    {
+        // 加算値がリストの上限を越えたら0に戻す
+        if(++moveTurnCnt_ > moveTurnList_.Count - 1)
+        {
+            moveTurnCnt_ = 0;
+        }
+    }
+
+    public void SetDamageNum(int num)
+    {
+        damageNum_ = num;
+    }
+
+    public int GetDamageNum()
+    {
+        return damageNum_;
     }
 }

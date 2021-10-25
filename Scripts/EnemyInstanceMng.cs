@@ -17,6 +17,8 @@ public class EnemyInstanceMng : MonoBehaviour
 
     public static List<(Enemy,HPBar)> enemyList_ = new List<(Enemy, HPBar)>();   // Enemy.csをキャラ毎にリスト化する
 
+    private ButtleMng buttleMng_;
+
     void Start()
     {
         // HPバー表示位置の設定
@@ -68,6 +70,8 @@ public class EnemyInstanceMng : MonoBehaviour
         {
             enemyData_ = DataPopPrefab_.GetComponent<PopList>().GetData<EnemyList>(PopList.ListData.ENEMY, 0, name);
         }
+
+        buttleMng_ = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
     }
 
     // 敵のインスタンス処理(配置ポジションをButtleMng.csで指定できるように引数を用意している)
@@ -97,6 +101,22 @@ public class EnemyInstanceMng : MonoBehaviour
         }
     }
 
+    public (int,string) EnemyTurnSpeed(int num)
+    {
+        return (enemyList_[num].Item1.Speed(), enemyList_[num].Item1.Name());
+    }
+
+    public void Attack(int num)
+    {
+        enemyList_[num].Item1.Attack();
+
+        // ダメージを渡す
+        buttleMng_.SetDamageNum(enemyList_[num].Item1.Damage());
+
+        // 行動が終わったからターンを移す(いまはとりあえずここでターン移行)
+        buttleMng_.SetMoveTurn();
+    }
+
     // CharacterMng.csに座標情報を渡す
     public Dictionary<int, List<Vector3>> GetEnemyPos()
     {
@@ -105,9 +125,17 @@ public class EnemyInstanceMng : MonoBehaviour
 
     public void HPdecrease(int num)
     {
-        StartCoroutine(enemyList_[num].Item2.MoveSlideBar(enemyList_[num].Item1.HP() - 5));
+        // ダメージ値の算出
+        var damage = buttleMng_.GetDamageNum() - enemyList_[num].Item1.Defence();
+        if(damage <= 0)
+        {
+            Debug.Log("キャラの攻撃力より敵の防御力が上回ったのでダメージが0になりました");
+            damage = 0;
+        }
+
+        StartCoroutine(enemyList_[num].Item2.MoveSlideBar(enemyList_[num].Item1.HP() - damage));
         // 内部数値の変更を行う
-        enemyList_[num].Item1.sethp(enemyList_[num].Item1.HP() - 5);
+        enemyList_[num].Item1.sethp(enemyList_[num].Item1.HP() - damage);
 
         // もしHPが0になったら、オブジェクトを削除する
         if(enemyList_[num].Item1.HP() <= 0)

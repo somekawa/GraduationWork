@@ -17,9 +17,9 @@ public class CharacterMng : MonoBehaviour
         IDLE,
         BEFORE,
         ATTACK,
-        AFTER
+        AFTER,
+        DEATH
     };
-
     private ANIMATION anim_ = ANIMATION.NON;
     private ANIMATION oldAnim_ = ANIMATION.NON;
 
@@ -51,6 +51,7 @@ public class CharacterMng : MonoBehaviour
 
     private ImageRotate buttleCommandRotate_;                     // バトル中のコマンドUIを取得して、保存しておく変数
     private EnemySelect buttleEnemySelect_;                       // バトル中の選択アイコン情報
+    private ButtleMng buttleMng_;                                 // ButtleMng.csの取得
 
     private int enemyNum_ = 0;                                    // バトル時の敵の数
     private Dictionary<int, List<Vector3>> enemyInstancePos_;     // 敵のインスタンス位置の全情報
@@ -86,7 +87,7 @@ public class CharacterMng : MonoBehaviour
 
         enemyInstancePos_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().GetEnemyPos();
 
-
+        buttleMng_ = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
     }
 
     // ButtleMng.csから敵の数を受け取る
@@ -146,16 +147,50 @@ public class CharacterMng : MonoBehaviour
         }
     }
 
+    public (int,string) CharaTurnSpeed(int num)
+    {
+        return (charasList_[num].Speed(), charasList_[num].Name());
+    }
+
     // キャラの戦闘中に関する処理(ButtleMng.csで参照)
     public void Buttle()
     {
         // テスト用(ダメージ処理)
         if (Input.GetKeyDown(KeyCode.E))
         {
+            // ダメージ値の算出
+            var damage = buttleMng_.GetDamageNum() - charasList_[(int)nowTurnChar_].Defence();
+            if (damage <= 0)
+            {
+                Debug.Log("敵の攻撃力よりキャラの防御力が上回ったのでダメージが0になりました");
+                damage = 0;
+            }
+
             // 現在行動中のキャラのHPを削る(スライドバー変更)
-            StartCoroutine(charaHPBar.MoveSlideBar(charasList_[(int)nowTurnChar_].HP() - 10));
+            StartCoroutine(charaHPBar.MoveSlideBar(charasList_[(int)nowTurnChar_].HP() - damage));
             // 内部数値の変更を行う
-            charasList_[(int)nowTurnChar_].sethp(charasList_[(int)nowTurnChar_].HP() - 10);
+            charasList_[(int)nowTurnChar_].sethp(charasList_[(int)nowTurnChar_].HP() - damage);
+
+            if(charasList_[(int)nowTurnChar_].HP() <= 0)
+            {
+                Debug.Log("キャラが死亡");
+                charasList_[(int)nowTurnChar_].sethp(0);
+                anim_ = ANIMATION.DEATH;
+            }
+        }
+
+        if(anim_ == ANIMATION.DEATH)
+        {
+            if (charaHPBar.GetColFlg())
+            {
+                return;
+            }
+            else
+            {
+                oldAnim_ = anim_;
+                Debug.Log("死亡中だから行動を飛ばす");
+                anim_ = ANIMATION.IDLE;
+            }
         }
 
         // テスト用(レベルアップ処理)
@@ -252,6 +287,10 @@ public class CharacterMng : MonoBehaviour
         switch(anim_)
         {
             case ANIMATION.IDLE:
+
+                // 前のキャラの行動が終わったからターンを移す
+                buttleMng_.SetMoveTurn();
+
                 buttleAnounceText_.text = announceText_[0];
 
                 // 次のキャラが行動できるようにする
@@ -259,6 +298,12 @@ public class CharacterMng : MonoBehaviour
                 if (++nowTurnChar_ >= CHARACTERNUM.MAX)
                 {
                     nowTurnChar_ = CHARACTERNUM.UNI;
+                }
+
+                if (charasList_[(int)nowTurnChar_].HP() <= 0)
+                {
+                    Debug.Log("キャラが死亡");
+                    anim_ = ANIMATION.DEATH;
                 }
 
                 // 次の行動キャラのHPバーを表示する
@@ -284,6 +329,9 @@ public class CharacterMng : MonoBehaviour
             case ANIMATION.ATTACK:
                 if (charasList_[(int)nowTurnChar_].Attack())
                 {
+                    //@ ここでキャラの攻撃力をButtleMng.csに渡す？
+                    buttleMng_.SetDamageNum(charasList_[(int)nowTurnChar_].Damage());
+
                     AttackStart((int)nowTurnChar_);
                     buttleCommandRotate_.SetRotaFlg(true);
                     buttleEnemySelect_.SetActive(false);
@@ -291,6 +339,10 @@ public class CharacterMng : MonoBehaviour
                 break;
             case ANIMATION.AFTER:
                 AfterAttack((int)nowTurnChar_);
+                break;
+            case ANIMATION.DEATH:
+                //Debug.Log("死亡中だから行動を飛ばす");
+                //anim_ = ANIMATION.IDLE;
                 break;
             default: 
                 break;

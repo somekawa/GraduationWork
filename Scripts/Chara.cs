@@ -29,9 +29,9 @@ public class Chara : CharaBase,InterfaceButtle
         return false;
     }
 
-    public void Damage()
+    public int Damage()
     {
-        Debug.Log(set_.name + "はダメージ受けた！");
+        return set_.Attack;
     }
 
     public int HP()
@@ -116,9 +116,9 @@ public class Chara : CharaBase,InterfaceButtle
     {
         Debug.Log("武器切替！");
     }
-    public override void Defence()
+    public override int Defence()
     {
-        Debug.Log("防御！");
+        return set_.Defence;
     }
     public override void Magic()
     {
@@ -213,4 +213,13 @@ public class Chara : CharaBase,InterfaceButtle
         //setting_.animator = animator;
     }
 
+    public int Speed()
+    {
+        return set_.Speed;
+    }
+
+    public string Name()
+    {
+        return set_.name;
+    }
 }

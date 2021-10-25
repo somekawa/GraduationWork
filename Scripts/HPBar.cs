@@ -5,8 +5,9 @@ using UnityEngine.UI;
 public class HPBar : MonoBehaviour
 {
     //int damage = 10;        // 敵の攻撃力とキャラの防御力で変動(攻撃力-防御力)
-    int maxHp_;               // 最大HP
-    int currentHp_;           // 現在のHP
+    private int maxHp_;               // 最大HP
+    private int currentHp_;           // 現在のHP
+    private bool colFlg_ = false;     // コルーチン用フラグ(true:コルーチン中,false:非コルーチン)
 
     private Slider slider_;
 
@@ -26,6 +27,8 @@ public class HPBar : MonoBehaviour
     {
         while(currentHp_ > num)   // 現在値が目標値より大きかったら減らして、while文続行
         {
+            colFlg_ = true;
+
             currentHp_ -= 1;
 
             // スライドバーへ反映
@@ -33,6 +36,8 @@ public class HPBar : MonoBehaviour
 
             yield return null;
         }
+
+        colFlg_ = false;
     }
 
     public void SetHPBar(int nowHp,int maxHp)
@@ -69,5 +74,11 @@ public class HPBar : MonoBehaviour
             slider_.value = (float)currentHp_ / (float)maxHp_; ;
             Debug.Log("slider.value : " + slider_.value);
         }
+    }
+
+    // コルーチン処理中かを確かめるフラグの取得
+    public bool GetColFlg()
+    {
+        return colFlg_;
     }
 }
