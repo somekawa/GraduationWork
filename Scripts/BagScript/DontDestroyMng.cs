@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class DontDestroyMng : MonoBehaviour
@@ -31,5 +29,4 @@ public class DontDestroyMng : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
 }

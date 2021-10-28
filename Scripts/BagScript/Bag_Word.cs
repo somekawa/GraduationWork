@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,20 +17,20 @@ public class Bag_Word : MonoBehaviour
     {
         // menuActive_ = menuActive;
         // menuActive_ = GameObject.Find("Mng").GetComponent<MenuActive>();
-        gameObject.SetActive(false);
+       // gameObject.SetActive(false);
 
         //StartCoroutine(ActiveWord(menuActive));
 
     }
 
-    public IEnumerator ActiveWord(ItemBagMng menuActive)
+    public IEnumerator ActiveWord(ItemBagMng itemBagMng)
     {
         gameObject.SetActive(true);
         Debug.Log("Word•\Ž¦’†‚Å‚·");
         while (true)
         {
             yield return null;
-            if (menuActive.GetStringNumber() != (int)ItemBagMng.topic.WORD)
+            if (itemBagMng.GetStringNumber() != (int)ItemBagMng.topic.WORD)
             {
                 gameObject.SetActive(false);
                 yield break;

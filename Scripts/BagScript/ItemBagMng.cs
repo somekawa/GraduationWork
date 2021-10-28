@@ -1,11 +1,10 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ItemBagMng : MonoBehaviour
 {
-   // private GameObject itemBagCanvas_;// シーン遷移後も使いたいオブジェクトたちの親
+    // private GameObject itemBagCanvas_;// シーン遷移後も使いたいオブジェクトたちの親
     private RectTransform itemBagMng_;// itemBag_の子
 
     public enum topic
@@ -29,15 +28,16 @@ public class ItemBagMng : MonoBehaviour
     private Bag_Item bagItem_;
     private Bag_Word bagWord_;
 
-   // private bool activeFlag_ = false;
-       
-    void Start()
+    private bool activeFlag_ = false;
+
+    public void Init()
     {
-       // itemBag_ = BagCanvasUI.Instance;
+        // itemBag_ = BagCanvasUI.Instance;
         itemBagMng_ = transform.GetComponent<RectTransform>();
         mngs_[(int)topic.ITEM] = itemBagMng_.transform.Find("ItemMng").GetComponent<RectTransform>();
         mngs_[(int)topic.MATERIA] = itemBagMng_.transform.Find("MateriaMng").GetComponent<RectTransform>();
         mngs_[(int)topic.WORD] = itemBagMng_.transform.Find("WordMng").GetComponent<RectTransform>();
+
         bagItem_ = itemBagMng_.transform.Find("ItemMng").GetComponent<Bag_Item>();
         bagMateria_ = itemBagMng_.transform.Find("MateriaMng").GetComponent<Bag_Materia>();
         bagWord_ = itemBagMng_.transform.Find("WordMng").GetComponent<Bag_Word>();
@@ -45,9 +45,13 @@ public class ItemBagMng : MonoBehaviour
         topicParent_ = itemBagMng_.transform.Find("Topics").GetComponent<RectTransform>();
         topicText_ = topicParent_.transform.Find("TopicName").GetComponent<Text>();
         topicText_.text = topicString_[(int)topic.ITEM];
-        
-            //mngs_[i].gameObject.SetActive(false);
-            //Debug.Log(stringNum_+"      "+mngs_[i].gameObject.name);
+
+        //for (int i = 0; i < (int)topic.MAX; i++)
+        //{
+        //    Debug.Log(stringNum_ + "      "+mngs_[i].gameObject.name);
+        //  //  Debug.Log();
+        //}
+        StartCoroutine(ActiveRectTransform((int)topic.ITEM, true));
     }
 
     public void OnClickRightArrow()
@@ -58,7 +62,7 @@ public class ItemBagMng : MonoBehaviour
         {
             stringNum_ = (int)topic.ITEM;
         }
-        ActiveRectTransform();
+        //ActiveRectTransform();
         topicText_.text = topicString_[stringNum_];
         Debug.Log("右矢印をクリック" + stringNum_);
     }
@@ -71,40 +75,46 @@ public class ItemBagMng : MonoBehaviour
             stringNum_ = (int)topic.WORD;
         }
         topicText_.text = topicString_[stringNum_];
-        ActiveRectTransform();
+        //ActiveRectTransform();
         Debug.Log("左矢印をクリック" + stringNum_);
     }
 
-    public void ActiveRectTransform()
+    public IEnumerator ActiveRectTransform(int startNum, bool flag)
     {
-        for (int i = 0; i < (int)topic.MAX; i++)
+        activeFlag_ = flag;
+        while (activeFlag_)
         {
-            if (stringNum_ == i)
+            yield return null;
+            for (int i = 0; i < (int)topic.MAX; i++)
             {
-                // 選択のものを表示
-                mngs_[i].gameObject.SetActive(true);
+                if (stringNum_ == i)
+                {
+                    // 選択のものを表示
+                    mngs_[i].gameObject.SetActive(true);
+                }
+                else
+                {
+                    // 選択中のもの以外は非表示に
+                    mngs_[i].gameObject.SetActive(false);
+                }
             }
-            else
-            {
-                // 選択中のもの以外は非表示に
-                mngs_[i].gameObject.SetActive(false);
-            }
-        }
 
-        if (stringNum_ == (int)ItemBagMng.topic.MATERIA)
-        {
-            // parentCanvas_[(int)canvas.BAG].transform.Find("MateriaMng").GetComponent<Bag_Materia>().Init(this);
-            bagMateria_.ActiveMateria(this);
-        }
-        else if (stringNum_ == (int)ItemBagMng.topic.WORD)
-        {
-            //parentObjPrefab_.transform.Find("WordMng").GetComponent<Bag_Word>().Init(this);
-            bagWord_.ActiveWord(this);
-        }
-        else if (stringNum_ == (int)ItemBagMng.topic.ITEM)
-        {
-            //parentObjPrefab_.transform.Find("ItemMng").GetComponent<Bag_Item>().Init(this);
-            bagItem_.ActiveItem(this);
+            if (stringNum_ == (int)ItemBagMng.topic.MATERIA)
+            {
+                // parentCanvas_[(int)canvas.BAG].transform.Find("MateriaMng").GetComponent<Bag_Materia>().Init(this);
+                bagMateria_.ActiveMateria(this);
+            }
+            else if (stringNum_ == (int)ItemBagMng.topic.WORD)
+            {
+                //parentObjPrefab_.transform.Find("WordMng").GetComponent<Bag_Word>().Init(this);
+                bagWord_.ActiveWord(this);
+            }
+            else if (stringNum_ == (int)ItemBagMng.topic.ITEM)
+            {
+                //parentObjPrefab_.transform.Find("ItemMng").GetComponent<Bag_Item>().Init(this);
+                bagItem_.ActiveItem(this);
+                //bagItem_.ItemGetCheck(EventMng.GetChapterNum());
+            }
         }
     }
 
@@ -113,14 +123,8 @@ public class ItemBagMng : MonoBehaviour
         return stringNum_;
     }
 
-    //public bool SetActiveCanvas()
-    //{
-    //    return activeFlag_;
-    //}
-
-    //public void GetActiveCanvas()
-    //{
-    //    mngs_[stringNum_].gameObject.SetActive(true);
-    //    bagItem_.ActiveItem(this);
-    //}
+    public void SetActiveCanvas()
+    {
+        StopCoroutine(ActiveRectTransform((int)topic.ITEM, false));
+    }
 }

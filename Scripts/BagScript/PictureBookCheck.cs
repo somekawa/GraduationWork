@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,6 +15,7 @@ public class PictureBookCheck : MonoBehaviour
     private float[] posX_;
 
     void Start()
+    //    public void Init()
     {
         activePicture_ = new GameObject[(int)ItemGet.items.MAX];
         posX_ = new float[(int)ItemGet.items.MAX] {
@@ -30,7 +29,7 @@ public class PictureBookCheck : MonoBehaviour
         activePicture_[itemNum] = Instantiate(pictureUI,
                         new Vector2(0, 0), 
                         Quaternion.identity,
-                        transform.Find("MateriaPicture").GetComponent<RectTransform>());
+                        transform.Find("DontDestroyCanvas/OtherUI/PictureBookMng").GetComponent<RectTransform>());
         // 表示位置をずらす
         activePicture_[itemNum].transform.localPosition = new Vector2(posX_[itemNum], 0.0f);
         Debug.Log("フィールド番号：" + fieldNum + "     アイテム番号：" + itemNum);
