@@ -21,9 +21,15 @@ public class Enemy : CharaBase, InterfaceButtle
         }
         else
         {
-            Debug.Log(set_.name + "は様子を見ている");
-            return true;
+            Debug.Log(set_.name + "の攻撃");
+            if (!set_.isMove)
+            {
+                //set_.animator.SetBool(key_isAttack, true);
+                set_.isMove = true;
+                return true;
+            }
         }
+        return false;
     }
 
     public int Damage()
@@ -80,9 +86,32 @@ public class Enemy : CharaBase, InterfaceButtle
         Debug.Log("アイテム！");
     }
 
+    // 名称正しくないかも。攻撃Motion終了確認に使いたい
     public override bool ChangeNextChara()
     {
-        return true;
+        if (!set_.isMove)
+        {
+            return false;
+        }
+
+        // ここから下は、isMoveがtrueの状態
+        // isMoveがtrueなら、さっきまで攻撃モーションだったことがわかる
+        // 再生時間用に間を空ける(敵毎に必要な間が違うから、AnimMaxは外部データ読み込む)
+        if (set_.animTime < set_.AnimMax)
+        {
+            set_.animTime += Time.deltaTime;
+            return false;
+        }
+        else
+        {
+            // animTime値が1.0を上回ったとき
+            // animTime値の初期化と、攻撃モーションの終了処理をしてisMoveをfalseへ戻す
+            set_.animTime = 0.0f;
+            set_.isMove = false;
+            //set_.animator.SetBool(key_isAttack, false);
+
+            return true;
+        }
     }
 
     public int Speed()

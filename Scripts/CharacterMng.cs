@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using static CharaBase;
 using static SceneMng;
 
 // 探索中/戦闘中問わず、キャラクターに関連するものを管理する
@@ -11,15 +11,6 @@ using static SceneMng;
 
 public class CharacterMng : MonoBehaviour
 {
-    enum ANIMATION
-    {
-        NON,
-        IDLE,
-        BEFORE,
-        ATTACK,
-        AFTER,
-        DEATH
-    };
     private ANIMATION anim_ = ANIMATION.NON;
     private ANIMATION oldAnim_ = ANIMATION.NON;
 
@@ -44,10 +35,10 @@ public class CharacterMng : MonoBehaviour
     // キーをキャラ識別enum,値を(キャラ識別に対応した)キャラオブジェクトで作ったmap
     private Dictionary<CHARACTERNUM, GameObject> charMap_;
     // Chara.csをキャラ毎にリスト化する
-    private List<Chara> charasList_ = new List<Chara>();          
+    private List<Chara> charasList_ = new List<Chara>();
 
     private TMPro.TextMeshProUGUI buttleAnounceText_;             // バトル中の案内
-    private readonly string[] announceText_ = new string[2]{ " 左シフトキー：\n 戦闘から逃げる", " Tキー：\n コマンドへ戻る" };
+    private readonly string[] announceText_ = new string[2] { " 左シフトキー：\n 戦闘から逃げる", " Tキー：\n コマンドへ戻る" };
 
     private ImageRotate buttleCommandRotate_;                     // バトル中のコマンドUIを取得して、保存しておく変数
     private EnemySelect buttleEnemySelect_;                       // バトル中の選択アイコン情報
@@ -147,7 +138,7 @@ public class CharacterMng : MonoBehaviour
         }
     }
 
-    public (int,string) CharaTurnSpeed(int num)
+    public (int, string) CharaTurnSpeed(int num)
     {
         return (charasList_[num].Speed(), charasList_[num].Name());
     }
@@ -155,31 +146,7 @@ public class CharacterMng : MonoBehaviour
     // キャラの戦闘中に関する処理(ButtleMng.csで参照)
     public void Buttle()
     {
-        // テスト用(ダメージ処理)
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            // ダメージ値の算出
-            var damage = buttleMng_.GetDamageNum() - charasList_[(int)nowTurnChar_].Defence();
-            if (damage <= 0)
-            {
-                Debug.Log("敵の攻撃力よりキャラの防御力が上回ったのでダメージが0になりました");
-                damage = 0;
-            }
-
-            // 現在行動中のキャラのHPを削る(スライドバー変更)
-            StartCoroutine(charaHPBar.MoveSlideBar(charasList_[(int)nowTurnChar_].HP() - damage));
-            // 内部数値の変更を行う
-            charasList_[(int)nowTurnChar_].sethp(charasList_[(int)nowTurnChar_].HP() - damage);
-
-            if(charasList_[(int)nowTurnChar_].HP() <= 0)
-            {
-                Debug.Log("キャラが死亡");
-                charasList_[(int)nowTurnChar_].sethp(0);
-                anim_ = ANIMATION.DEATH;
-            }
-        }
-
-        if(anim_ == ANIMATION.DEATH)
+        if (anim_ == ANIMATION.DEATH)
         {
             if (charaHPBar.GetColFlg())
             {
@@ -228,15 +195,15 @@ public class CharacterMng : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             // 選択されたコマンドに対する処理
-            switch(buttleCommandRotate_.GetNowCommand())
+            switch (buttleCommandRotate_.GetNowCommand())
             {
                 case ImageRotate.COMMAND.ATTACK:
-                    if(!selectFlg_)
+                    if (!selectFlg_)
                     {
                         // 自分の行動の前の人が動作終わっているか調べる
                         if (!charasList_[(int)oldTurnChar_].GetIsMove())
                         {
-                            if(anim_ == ANIMATION.IDLE || anim_ == ANIMATION.NON)
+                            if (anim_ == ANIMATION.IDLE || anim_ == ANIMATION.NON)
                             {
                                 anim_ = ANIMATION.BEFORE;
                             }
@@ -262,6 +229,12 @@ public class CharacterMng : MonoBehaviour
                     Debug.Log("アイテムコマンドが有効コマンドです");
                     break;
                 case ImageRotate.COMMAND.BARRIER:
+                    // 次の自分のターンまで防御力を1.5倍にする
+                    charasList_[(int)nowTurnChar_].SetBarrierNum(charasList_[(int)nowTurnChar_].Defence() / 2);
+                    // 次のキャラor敵に行動が回るようにanim_とoldAnim_を設定する
+                    anim_ = ANIMATION.IDLE;
+                    oldAnim_ = ANIMATION.NON;
+
                     Debug.Log("防御コマンドが有効コマンドです");
                     break;
                 default:
@@ -284,7 +257,7 @@ public class CharacterMng : MonoBehaviour
 
     void AnimationChange()
     {
-        switch(anim_)
+        switch (anim_)
         {
             case ANIMATION.IDLE:
 
@@ -309,6 +282,9 @@ public class CharacterMng : MonoBehaviour
                 // 次の行動キャラのHPバーを表示する
                 charaHPBar.SetHPBar(charasList_[(int)nowTurnChar_].HP(), charasList_[(int)nowTurnChar_].MaxHP());
 
+                // 防御用の値を0に戻す
+                charasList_[(int)nowTurnChar_].SetBarrierNum();
+
                 selectFlg_ = false;
 
                 // 矢印位置のリセットを行う(falseなら、敵を全て倒したということなのでフラグを切り替える)
@@ -329,7 +305,7 @@ public class CharacterMng : MonoBehaviour
             case ANIMATION.ATTACK:
                 if (charasList_[(int)nowTurnChar_].Attack())
                 {
-                    //@ ここでキャラの攻撃力をButtleMng.csに渡す？
+                    // ここでキャラの攻撃力をButtleMng.csに渡す
                     buttleMng_.SetDamageNum(charasList_[(int)nowTurnChar_].Damage());
 
                     AttackStart((int)nowTurnChar_);
@@ -344,7 +320,7 @@ public class CharacterMng : MonoBehaviour
                 //Debug.Log("死亡中だから行動を飛ばす");
                 //anim_ = ANIMATION.IDLE;
                 break;
-            default: 
+            default:
                 break;
         }
     }
@@ -386,7 +362,7 @@ public class CharacterMng : MonoBehaviour
 
             time += Time.deltaTime / 25.0f;  // deltaTimeだけだと移動が速すぎるため、任意の値で割る
 
-            var tmp = charasList_[(int)nowTurnChar_].RunMove(time,charMap_[nowTurnChar_].transform.localPosition, enePos_);
+            var tmp = charasList_[(int)nowTurnChar_].RunMove(time, charMap_[nowTurnChar_].transform.localPosition, enePos_);
             flag = tmp.Item2;   // while文を抜けるかフラグを代入する
             charMap_[nowTurnChar_].transform.localPosition = tmp.Item1;     // キャラ座標を代入する
 
@@ -456,7 +432,7 @@ public class CharacterMng : MonoBehaviour
             // 名前の設定
             str = "UniAttack(Clone)";
         }
-        else if(charNum == (int)CHARACTERNUM.JACK)
+        else if (charNum == (int)CHARACTERNUM.JACK)
         {
             // 名前の設定
             str = "Axe1h";
@@ -477,7 +453,7 @@ public class CharacterMng : MonoBehaviour
         for (int i = 0; i < weaponTagObj.Length; i++)
         {
             // 見つけたオブジェクトの名前を比較して、今回攻撃に扱う武器についているCheckAttackHit関数の設定を行う
-            if(weaponTagObj[i].name == str)
+            if (weaponTagObj[i].name == str)
             {
                 // 武器コライダーの有効化
                 if (str == "Axe1h")
@@ -507,5 +483,28 @@ public class CharacterMng : MonoBehaviour
     public void SetCharaFieldPos()
     {
         charMap_[CHARACTERNUM.UNI].gameObject.transform.position = keepFieldPos_;
+    }
+
+    public void HPdecrease(int num)
+    {
+        // ダメージ値の算出
+        var damage = buttleMng_.GetDamageNum() - charasList_[num].Defence();
+        if (damage <= 0)
+        {
+            Debug.Log("敵の攻撃力よりキャラの防御力が上回ったのでダメージが0になりました");
+            damage = 0;
+        }
+
+        // 現在行動中のキャラのHPを削る(スライドバー変更)
+        StartCoroutine(charaHPBar.MoveSlideBar(charasList_[num].HP() - damage));
+        // 内部数値の変更を行う
+        charasList_[num].sethp(charasList_[num].HP() - damage);
+
+        if (charasList_[num].HP() <= 0)
+        {
+            Debug.Log("キャラが死亡");
+            charasList_[num].sethp(0);
+            anim_ = ANIMATION.DEATH;
+        }
     }
 }

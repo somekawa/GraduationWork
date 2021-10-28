@@ -18,9 +18,7 @@ public class ButtleMng : MonoBehaviour
     private EnemyInstanceMng enemyInstanceMng_; // 敵インスタンス管理クラスの情報
 
     private List<(int,string)> moveTurnList_ = new List<(int, string)>();   // キャラと敵の行動順をまとめるリスト
-
     private int moveTurnCnt_ = 0;           // 自分の行動が終わったら値を増やす
-
     private int damageNum_ = 0;
 
     void Start()
@@ -50,6 +48,10 @@ public class ButtleMng : MonoBehaviour
             setCallOnce_ = true;
             buttleUICanvas.gameObject.SetActive(true);
             fieldUICanvas.gameObject.SetActive(false);
+
+            moveTurnList_.Clear();
+            moveTurnCnt_ = 0;
+            damageNum_ = 0;
 
             characterMng_.ButtleSetCallOnce();
 
@@ -97,7 +99,7 @@ public class ButtleMng : MonoBehaviour
         {
             string[] arr = moveTurnList_[moveTurnCnt_].Item2.Split('_');
             // 敵の行動
-            enemyInstanceMng_.Attack(int.Parse(arr[1]) - 1);
+            enemyInstanceMng_.Buttle(int.Parse(arr[1]) - 1);
         }
     }
 

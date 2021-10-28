@@ -17,10 +17,11 @@ MonoBehaviour:
     Level: 1
     HP: 10
     MP: 8
-    Attack: 3
+    Attack: 6
+    MagicAttack: 1
     Defence: 2
     Speed: 1
     Luck: 2
-    AnimMax: 0
+    AnimMax: 0.67
     Exp: 20
     Drop: "\u304B\u307C\u3059"

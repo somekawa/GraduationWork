@@ -32,6 +32,16 @@ public abstract class CharaBase : object
         public string Drop;         // ‚±‚Ì“G‚ğ“|‚µ‚½Û‚ÉƒLƒƒƒ‰‚ª“¾‚ç‚ê‚éƒhƒƒbƒv‘fŞ
     }
 
+    public enum ANIMATION
+    {
+        NON,
+        IDLE,
+        BEFORE,
+        ATTACK,
+        AFTER,
+        DEATH
+    };
+
     private CharacterSetting setting_;
 
     public CharaBase(string name,int objNum, Animator animator,EnemyList.Param param)

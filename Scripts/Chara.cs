@@ -4,7 +4,8 @@ using UnityEngine;
 public class Chara : CharaBase,InterfaceButtle
 {
     private const string key_isAttack = "isAttack"; // 攻撃モーション(全キャラで名前を揃える必要がある)
-    private CharacterSetting set_;                  // キャラ毎の情報            
+    private CharacterSetting set_;                  // キャラ毎の情報   
+    private int barrierNum_ = 0;                    // 防御時に値が入る
 
     // name,num,animatorは親クラスのコンストラクタを呼び出して設定
     // numは、CharacterNumのenumの取得で使えそうかもだから用意してみた。使わなかったら削除する。
@@ -118,7 +119,7 @@ public class Chara : CharaBase,InterfaceButtle
     }
     public override int Defence()
     {
-        return set_.Defence;
+        return set_.Defence + barrierNum_;
     }
     public override void Magic()
     {
@@ -221,5 +222,10 @@ public class Chara : CharaBase,InterfaceButtle
     public string Name()
     {
         return set_.name;
+    }
+
+    public void SetBarrierNum(int num = 0)
+    {
+        barrierNum_ = num;
     }
 }
