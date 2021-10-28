@@ -1,9 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
-using UnityEngine.SceneManagement;
 
 public class ItemGet : MonoBehaviour
 {
@@ -95,7 +93,7 @@ public class ItemGet : MonoBehaviour
         {
             materia_ = menuActive_.GetBagMateria();
         }
-        materia_.ItemGetCheck(fieldNumber_, itemNumberCheck_, getMaterial_[num]);
+        materia_.MateriaGetCheck(fieldNumber_, itemNumberCheck_, getMaterial_[num]);
 
         telopText_.text = getMaterial_[num];
         materiaImage_.gameObject.SetActive(true);
@@ -196,7 +194,7 @@ public class ItemGet : MonoBehaviour
         telopImage_.transform.localScale = new Vector3(telopScale_, telopScale_, telopScale_);
     }
 
-    public void SetMaterialKinds(int fieldNum, MaterialList list)
+    public void SetMaterialKinds(int fieldNum, MateriaList list)
     {
         // 素材名のリストを取得
         if (list != null)
