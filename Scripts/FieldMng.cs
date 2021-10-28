@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 // 町の外での画面管理をする。(町中ではnowModeをNONにする)
 // 探索・戦闘・メニュー画面の切り替わり時にenumで変更を行う
@@ -31,7 +32,7 @@ public class FieldMng : MonoBehaviour
 
     private UnitychanController player_;           // プレイヤー情報格納用
     private CameraMng cameraMng_;
-
+    private Image bagImage_;// 左下のバッグの画像
     void Start()
     {
         // 現在のシーンをFIELDとする
@@ -42,8 +43,6 @@ public class FieldMng : MonoBehaviour
         {
             EventMng.SetChapterNum(8, SceneMng.SCENE.CONVERSATION);
         }
-
-
         //unitychanの情報を取得
         player_ = GameObject.Find("Uni").GetComponent<UnitychanController>();
         if (player_ == null)
@@ -59,6 +58,10 @@ public class FieldMng : MonoBehaviour
 
         // WarpField.csの初期化関数を先に呼ぶ
         GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
+
+        // バッグの画像がDontDestroyOnLoadされるオブジェクトのこのためその親から探す
+        var gameObject = DontDestroyMng.Instance;
+        bagImage_ = gameObject.transform.Find("DontDestroyCanvas/Menu/BagImage").GetComponent<Image>();
     }
 
     void Update()
@@ -81,6 +84,12 @@ public class FieldMng : MonoBehaviour
             else
             {
                 // 何も処理を行わない
+            }
+
+            if (bagImage_.gameObject.activeSelf == false)
+            {
+                // 非アクティブ状態ならアクティブ状態に
+                bagImage_.gameObject.SetActive(true);
             }
         }
 
@@ -105,6 +114,7 @@ public class FieldMng : MonoBehaviour
 
             case MODE.BUTTLE:
                 cameraMng_.SetChangeCamera(true);   // サブカメラアクティブ
+                bagImage_.gameObject.SetActive(false);// バッグ画像を非アクティブに
                 break;
 
             case MODE.MENU:
