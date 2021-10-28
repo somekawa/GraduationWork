@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc22a6017df729f4e8b987aab614d748, type: 3}
+  m_Name: Chapter100
+  m_EditorClassIdentifier: 
+  param:
+  - name1: Fade
+    name2: In
+    face: Mob
+    message: 
+    eventNum: 0
+  - name1: Image
+    name2: Back
+    face: Mob
+    message: MayorHouse
+    eventNum: 0
+  - name1: "\u30E6\u30CB"
+    name2: Uni
+    face: sad@sd_hmd
+    message: "\u3046\u3045\u3045\u3093\u2026\u3002\u3042\u308C\u3001\u3053\u3053\u306F\uFF1F"
+    eventNum: 0
+  - name1: "\u753A\u9577"
+    name2: Yuji
+    face: Mob
+    message: "\u76EE\u304C\u899A\u3081\u305F\u304B\u3044\uFF1F\\n\u8857\u306E\u5916\u3067\u5012\u308C\u3066\u3044\u308B\u306E\u3092\u898B\u3064\u3051\u305F\u4EBA\u304C\u3001\u8857\u307E\u3067\u904B\u3093\u3067\u304F\u308C\u305F\u3093\u3060\u3088\u3002"
+    eventNum: 0
+  - name1: "\u30E6\u30CB"
+    name2: Uni
+    face: sad@sd_hmd
+    message: "\u305D\u3046\u3060\u3063\u305F\u3093\u3067\u3059\u304B\u30FB\u30FB\u30FB"
+    eventNum: 0
+  - name1: "\u753A\u9577"
+    name2: Yuji
+    face: Mob
+    message: "\u6B21\u304B\u3089\u306F\u6C17\u3092\u4ED8\u3051\u308B\u3088\u3046\u306B\u3002"
+    eventNum: 0
+  - name1: "\u30E6\u30CB"
+    name2: Uni
+    face: smile2@sd_hmd
+    message: "\u306F\u3044\u3002\u3042\u308A\u304C\u3068\u3046\u3054\u3056\u3044\u307E\u3059\u3002\\n(\u6C17\u6301\u3061\u3092\u5207\u308A\u66FF\u3048\u3066\u3001\u9811\u5F35\u308D\u3046\uFF01)"
+    eventNum: 0
+  - name1: Scene
+    name2: TOWN
+    face: MayorHouse
+    message: 
+    eventNum: 101

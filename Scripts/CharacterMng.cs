@@ -15,7 +15,6 @@ public class CharacterMng : MonoBehaviour
     private ANIMATION oldAnim_ = ANIMATION.NON;
 
     public Canvas buttleUICanvas;           // 表示/非表示をこのクラスで管理される
-    public HPBar charaHPBar;               // キャラクター用のHPバー
     public GameObject buttleWarpPointPack;  // 戦闘時にフィールド上の戦闘ポイントにキャラをワープさせる
 
     //　通常攻撃弾のプレハブ
@@ -36,6 +35,8 @@ public class CharacterMng : MonoBehaviour
     private Dictionary<CHARACTERNUM, GameObject> charMap_;
     // Chara.csをキャラ毎にリスト化する
     private List<Chara> charasList_ = new List<Chara>();
+    // 各キャラのHP情報
+    private Dictionary<CHARACTERNUM, HPBar> charHPMap_ = new Dictionary<CHARACTERNUM, HPBar>();
 
     private TMPro.TextMeshProUGUI buttleAnounceText_;             // バトル中の案内
     private readonly string[] announceText_ = new string[2] { " 左シフトキー：\n 戦闘から逃げる", " Tキー：\n コマンドへ戻る" };
@@ -79,6 +80,12 @@ public class CharacterMng : MonoBehaviour
         enemyInstancePos_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().GetEnemyPos();
 
         buttleMng_ = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
+        //@ キャラ名+CharaDataのステータス表から、HP情報を取得する
+        charHPMap_[CHARACTERNUM.UNI] = buttleUICanvas.transform.Find("UniCharaData/HPSlider").GetComponent<HPBar>();
+        charHPMap_[CHARACTERNUM.JACK] = buttleUICanvas.transform.Find("JackCharaData/HPSlider").GetComponent<HPBar>();
+        //@ 初期HPを代入
+        charHPMap_[CHARACTERNUM.UNI].SetHPBar(charasList_[(int)CHARACTERNUM.UNI].HP(), charasList_[(int)CHARACTERNUM.UNI].MaxHP());
+        charHPMap_[CHARACTERNUM.JACK].SetHPBar(charasList_[(int)CHARACTERNUM.JACK].HP(), charasList_[(int)CHARACTERNUM.JACK].MaxHP());
     }
 
     // ButtleMng.csから敵の数を受け取る
@@ -113,7 +120,7 @@ public class CharacterMng : MonoBehaviour
         nowTurnChar_ = CHARACTERNUM.UNI;
 
         // 最初の行動キャラのHPバーを表示する
-        charaHPBar.SetHPBar(charasList_[(int)nowTurnChar_].HP(), charasList_[(int)nowTurnChar_].MaxHP());
+        //charaHPBar.SetHPBar(charasList_[(int)nowTurnChar_].HP(), charasList_[(int)nowTurnChar_].MaxHP());
 
         // フラグの初期化を行う
         lastEnemytoAttackFlg_ = false;
@@ -146,9 +153,12 @@ public class CharacterMng : MonoBehaviour
     // キャラの戦闘中に関する処理(ButtleMng.csで参照)
     public void Buttle()
     {
-        if (anim_ == ANIMATION.DEATH)
+        //Debug.Log(anim_);
+
+        // 死亡していたら
+        if (charasList_[(int)nowTurnChar_].GetDeathFlg())
         {
-            if (charaHPBar.GetColFlg())
+            if (charHPMap_[nowTurnChar_].GetColFlg())
             {
                 return;
             }
@@ -157,7 +167,54 @@ public class CharacterMng : MonoBehaviour
                 oldAnim_ = anim_;
                 Debug.Log("死亡中だから行動を飛ばす");
                 anim_ = ANIMATION.IDLE;
+                oldAnim_ = ANIMATION.NON;
+
+                // 全滅したか確認する処理
+                bool allDeathFlg = true;
+                for (int i = 0; i < (int)CHARACTERNUM.MAX; i++)
+                {
+                    if (!charasList_[i].GetDeathFlg())
+                    {
+                        // 1人でも生存状態だと分かればbreakして抜ける
+                        allDeathFlg = false;
+                        break;
+                    }
+                }
+                // 全滅時は町長の家へ飛ばす
+                if (allDeathFlg)
+                {
+                    EventMng.SetChapterNum(100, SCENE.CONVERSATION);
+                }
             }
+
+            //if (charaHPBar.GetColFlg())
+            //{
+            //    return;
+            //}
+            //else
+            //{
+            //    oldAnim_ = anim_;
+            //    Debug.Log("死亡中だから行動を飛ばす");
+            //    anim_ = ANIMATION.IDLE;
+            //    oldAnim_ = ANIMATION.NON;
+
+            //    // 全滅したか確認する処理
+            //    bool allDeathFlg = true;
+            //    for (int i = 0; i < (int)CHARACTERNUM.MAX; i++)
+            //    {
+            //        if (!charasList_[i].GetDeathFlg())
+            //        {
+            //            // 1人でも生存状態だと分かればbreakして抜ける
+            //            allDeathFlg = false;
+            //            break;
+            //        }
+            //    }
+            //    // 全滅時は町長の家へ飛ばす
+            //    if (allDeathFlg)
+            //    {
+            //        EventMng.SetChapterNum(100, SCENE.CONVERSATION);
+            //    }
+            //}
         }
 
         // テスト用(レベルアップ処理)
@@ -276,11 +333,15 @@ public class CharacterMng : MonoBehaviour
                 if (charasList_[(int)nowTurnChar_].HP() <= 0)
                 {
                     Debug.Log("キャラが死亡");
-                    anim_ = ANIMATION.DEATH;
+                    //anim_ = ANIMATION.DEATH;
+                }
+                else
+                {
+                    anim_ = ANIMATION.IDLE;
                 }
 
                 // 次の行動キャラのHPバーを表示する
-                charaHPBar.SetHPBar(charasList_[(int)nowTurnChar_].HP(), charasList_[(int)nowTurnChar_].MaxHP());
+                //charaHPBar.SetHPBar(charasList_[(int)nowTurnChar_].HP(), charasList_[(int)nowTurnChar_].MaxHP());
 
                 // 防御用の値を0に戻す
                 charasList_[(int)nowTurnChar_].SetBarrierNum();
@@ -316,10 +377,10 @@ public class CharacterMng : MonoBehaviour
             case ANIMATION.AFTER:
                 AfterAttack((int)nowTurnChar_);
                 break;
-            case ANIMATION.DEATH:
+            //case ANIMATION.DEATH:
                 //Debug.Log("死亡中だから行動を飛ばす");
                 //anim_ = ANIMATION.IDLE;
-                break;
+                //break;
             default:
                 break;
         }
@@ -495,8 +556,10 @@ public class CharacterMng : MonoBehaviour
             damage = 0;
         }
 
-        // 現在行動中のキャラのHPを削る(スライドバー変更)
-        StartCoroutine(charaHPBar.MoveSlideBar(charasList_[num].HP() - damage));
+        // キャラのHPを削る(スライドバー変更)
+        //StartCoroutine(charaHPBar.MoveSlideBar(charasList_[num].HP() - damage));
+        StartCoroutine(charHPMap_[(CHARACTERNUM)num].MoveSlideBar(charasList_[num].HP() - damage));
+
         // 内部数値の変更を行う
         charasList_[num].sethp(charasList_[num].HP() - damage);
 
@@ -504,7 +567,9 @@ public class CharacterMng : MonoBehaviour
         {
             Debug.Log("キャラが死亡");
             charasList_[num].sethp(0);
-            anim_ = ANIMATION.DEATH;
+            //anim_ = ANIMATION.DEATH;
+            // Chara.csに死亡情報を入れる
+            charasList_[num].SetDeathFlg(true);
         }
     }
 }

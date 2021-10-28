@@ -39,7 +39,7 @@ public abstract class CharaBase : object
         BEFORE,
         ATTACK,
         AFTER,
-        DEATH
+        //DEATH
     };
 
     private CharacterSetting setting_;

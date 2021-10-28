@@ -6,6 +6,7 @@ public class Chara : CharaBase,InterfaceButtle
     private const string key_isAttack = "isAttack"; // 攻撃モーション(全キャラで名前を揃える必要がある)
     private CharacterSetting set_;                  // キャラ毎の情報   
     private int barrierNum_ = 0;                    // 防御時に値が入る
+    private bool deathFlg_ = false;                 // 死亡状態か確認する変数
 
     // name,num,animatorは親クラスのコンストラクタを呼び出して設定
     // numは、CharacterNumのenumの取得で使えそうかもだから用意してみた。使わなかったら削除する。
@@ -227,5 +228,15 @@ public class Chara : CharaBase,InterfaceButtle
     public void SetBarrierNum(int num = 0)
     {
         barrierNum_ = num;
+    }
+
+    public bool GetDeathFlg()
+    {
+        return deathFlg_;
+    }
+
+    public void SetDeathFlg(bool flag)
+    {
+        deathFlg_ = flag;
     }
 }

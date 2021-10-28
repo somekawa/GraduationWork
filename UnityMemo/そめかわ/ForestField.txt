@@ -2673,6 +2673,387 @@ Buttle関数のテスト用ダメージ処理の中で、
 
 ------------------------------------------------
 
+<防御コマンドの実装>----------------------------
+
+防御の時には自分の次のターンまで防御力を1.5倍に
+する。
+①Chara.csにbarrierNum_変数を用意する。
+②Defence関数をreturn set_.Defence+barrierNum_へ
+③SetBarrierNum関数を用意しとく
+　※数値入力なしなら引数の値を0にするようにしとく
+④CharacterMng.csのButtle関数で防御コマンド選択時
+　に③を呼び出すようにしとく
+　→引数は防御力/2
+⑤AnimationChange関数で③の引数なしを呼び出す
+　→引数なしなら0になるから防御解除ができる
+⑥防御コマンド実行後は次のキャラor敵に行動が回る
+　ように、anim_にIDLE,oldAnim_にNONを設定する。
+
+確認しづらいけど、たぶん実装完了している。
+
+------------------------------------------------
+
+<敵の行動について>------------------------------
+とりあえずカボスでも魔法の弾とばしてもらう。
+テストでユニの通暁攻撃弾を複製して用意し、
+[KabosuAttack]というプレハブにする。
+
+CharacterMng.csに置いているenum ANIMATIONは
+キャラも敵も共通で使うので、CharaBase.csにpublic
+でおくように変更する。
+CharacterMng.csとEnemyInstanceMng.csには
+using static CharaBase;を記載する。
+
+[EnemyInstanceMng.cs]
+[SerializeField]で、
+private GameObject kabosuAttackPrefab_;を追加し
+Buttle関数やAnimationChange関数等を用意する。
+(引数付きにして敵の番号を入れる)
+
+Buttle関数内ではanim_がNONのときにはBEFOREにして
+BeforeAttack関数を呼び出せるようにする。
+
+BeforeAttack関数では、
+①自分の位置を取得
+②ランダムで選んだキャラの位置を取得
+③体をむける
+ところまでとりあえずやる。
+→走る処理とかは、走る必要がある敵かどうか判別
+　できるようにしたほうがいいかも。Excel読み込みで
+　もしくは、アニメーション時間みたらわかるかもな
+
+①について、
+enemyPosSetMap_変数を利用できそう。
+新規でmapNum_変数を追加して、敵のインスタンス数を
+保存できるようにした。
+②について、
+SceneMng.charasList_[xx].GetButtlePos();で
+取得できそう。
+③について、
+新規でenemyMap_変数を作成して、インスタンス時に
+番号とGameObjectそのものを保存するようにした。
+※最後にanim_をANIMATION.ATTACKにする。
+
+次に、実際の攻撃処理をする
+AttackStart関数を用意して、攻撃の弾を出すように
+する。弾の方向計算やプレハブのインスタンスをする
+→名前をKabosuAttack(Clone)とする
+キャラ番号はCHARACTERNUMのenumでわかる。
+
+[CheckAttackHit.cs]
+OnTriggerEnter関数に
+else if(col.CompareTag("Player"))を追加する。
+HPの減少処理を書く必要がある。
+GameObject.Fin("CharacterMng").
+GetComponent<CharacterMng>().
+HPdecrease(targetNum_);
+とする。
+
+[CharacterMng.cs]
+HPdecrease関数を追加。
+引数に入れられた番号のキャラのHPを減らす。
+※処理内容はもともとButtle関数に書いていたものを
+　転記した。
+
+<当たり判定が発生しない>
+UniとJackにPlayerというタグをつけるのを忘れてた
+
+<敵の攻撃の次に他の敵が攻撃できるようにする>
+AfterAttack関数を用意しておいて、中でIDLEに切替。
+IDLE時のcase文に                buttleMng_.SetMoveTurn();
+を入れておく。
+ターン切替処理の後にanim_をNONにしておく。
+
+攻撃モーションが終了しているかの確認関数が必要。
+Enemy.csにChangeNextChara関数の中身を作成
+→キャラと同じでよい。
+あとはButtle関数で
+if (anim_ == ANIMATION.ATTACK &&
+　　enemyList_[num].Item1.ChangeNextChara())
+{
+    anim_ = ANIMATION.AFTER;
+}
+として、anim_をAFTERへ切り替えられるようにする。
+※Enemy.xlsのKabosuのAnimMaxを0.67にする。
+
+<魔法の弾の発生位置が敵より後ろになるバグ>
+キャラとエフェクトの発生方向が逆だから、
+forwardの加算/減算に気を付ける
+→Z軸はマイナスしないとだめ
+
+<攻撃対象をランダムにする>
+ランダムについての解説サイト↓
+https://xr-hub.com/archives/10747
+
+[EnemyInstanceMng.cs]
+Start関数で、      
+Random.InitState(System.DateTime.Now.Millisecond);
+としておき、現在の時間でランダムの種をつくる。
+あとは、BeforeAttack関数でキャラをランダム取得
+させるだけ。
+
+<自分の弾が自分に当たるバグ>
+CheckAttackHit.csで、
+Enemyとの当たり判定でKabosuAttack(Clone)と
+当たったらreturnするようにし、
+同様にPlayerとの当たり判定でUniAttack(Clone)と
+当たったらreturnするようにする。
+
+<死亡した敵が攻撃しようとしてバグ>
+GameObjectそのものが消えているから座標とか
+取ろうとしたらnullでエラーがでる。
+BeforeAttack関数で、
+if(enemyMap_[num + 1] == null)
+{
+    // 死亡しているからDestroyされている
+    anim_ = ANIMATION.IDLE;
+    return;
+}
+というのを最初に追加する。
+
+<2回目の戦闘で、敵が4回ぐらい攻撃してくるバグ>
+ButtleMng.csのmoveTurnList_変数が初期化されて
+いなかったから。
+setCallOnceがfalseのとき、最初に
+・moveTurnList.Clear();
+・moveTurnCnt_ = 0;
+・damageNum_ = 0;
+を入れておく。
+
+
+ダメージ数値がどこで取得できるかさきちゃんに
+つたえないといけない
+------------------------------------------------
+
+<敵撃破時のエフェクト>--------------------------
+学校でダウンロードして持って帰ってきた
+[Hovl Studio]というファイルに入っているエフェクト
+を使って、敵の魂出ました的な表現にしようと考え中
+※新規で[Effect]ファイルを作成してその中に入れる
+
+緑色の光を出現させたいから[Magicfire0]を使う。
+プレハブのまま外部アタッチさせようかなぁ。
+
+出現タイミングは、敵の削除直前がいいので、
+EnemyInstanceMng.csのHPdecrease関数で処理する。
+
+エフェクト発生/削除の参考サイト↓
+https://your-3d.com/unity-particle-script-1/#toc5
+
+[EnemyInstanceMng.cs]
+private GameObject soulEffect_;
+という新規変数を作成する
+→Assets/Effect/HovlStudio/Procedualfire/Prefabs
+　の、Magicfire0を外部アタッチする
+
+HPdecrease関数の敵削除の直前に、
+// エフェクトの生成
+Instantiate(soulEffect_, 
+enemyMap_[num + 1].transform.position, Quaternion.identity);
+と追加する。
+
+新規Scriptとして[SelfEffectDestroy.cs]を作成。
+内容はサイトのSelfDestroy.csのものを丸々いれる。
+→Magicfire0のプレハブの中にこのScriptを入れる。
+
+※注意点として、エフェクトがループ再生になってい　たら、ループ解除しておくこと。
+
+<だんだん小さく、上にあがるようにする>
+より魂ぽくするために、Scaleを小さくして
+Y座標を上に加算していきたい
+
+[SelfEffectDestroy.cs]
+Destroy処理をしない場合はスケールと座標を調整する
+ように処理を書く。
+※スケールはマイナス値に行かないようにif文で
+　条件をつけておくこと
+　→マイナス値にいくと爆発するようなボォォンって
+　　なるからね
+
+[MagicFire0の変更点]
+ヒエラルキーの、Velocity over Lifetimeの
+Linear Y:1.5->0.5に変更
+
+------------------------------------------------
+
+<敵の弾がキャラをすり抜ける時がある>-------------
+
+原因がまだよくわからない
+
+EnemyInstanceMng.csのAttackStart関数で
+adjustPosの計算にxとyは+forward.xと.yをしてたのを
+削除したらなおった。。。？
+座標がずれていたのかもしれない。
+まだ確認が必要
+
+[Uni]
+RigidbodyのConstraintsにある
+FreezeRotation XYZにチェックをいれる
+
+CapsuleColliderの
+CenterのYを0.8(他は0)
+Radius 0.8
+
+[Jack]
+RigidbodyのConstraintsにある
+FreezeRotation XYZにチェックをいれる
+
+CapsuleColliderの
+CenterのYを0.8(他は0)
+Radius 0.8
+
+もしかして、前の弾の目的地が次の弾の攻撃対象が
+他のキャラだったときに座標がそれてる？
+AnimMaxの時間いじったほうがいいかも
+カボスのAnimMaxを0.67->2.0に変更
+
+------------------------------------------------
+
+<キャラ全滅時に画面を暗転させて街に送還する>-----
+
+暗転部分はFadeのやつをつかって町長の家の会話に
+飛ばしてしまえばよさそう。
+
+チャプター番号を100ぐらいにして、Chapter.xlsに
+会話作成する。
+→会話内容は制作メモの方に書いておく
+
+Chapter_importer.csに"100"を追加して、
+reimprtする。
+※eventNumは101にする
+
+<全滅してるかの判定をする>
+Chara.csにdeathFlg_変数を用意しておいて、
+CharacterMng.csからキャラ数とdeathFlg_の数が
+一致しているか調べたらいいのかな。
+
+①Chara.csにdeathFlg_変数を用意して、
+　Set/GetDeathFlg関数をつくる。
+
+②CharacterMng.csの、Buttle関数の始めにDEATHなら
+　行う処理があるから、そこに
+　キャラ数分for文を回して1人でも生きていればなに　もせず全員死亡していたら
+  EventMng.SetChapterNum(100,SCENE.CONVERSATION)
+  を呼ぶようにする。
+　
+　HPdecreaseで0以下になればSetDeathFlg関数呼ぶ。
+
+③100番の会話が終わった後に元の番号に戻したいから
+　古い番号を保存しておかないといけない。
+　EventMng.csのSetChapterNum関数に
+
+if (num == 100)
+{
+  // 全滅時の特殊会話時には、全滅前のチャプター番　　　号を保存しておく
+  oldNum = chapterNum;
+}
+
+if(oldNum != 100 && num == 101)
+{
+  // さっきまでの会話が全滅時の特殊会話だったとき　　　は、番号を100の前に入れてたやつに戻す
+  chapterNum = oldNum;
+}
+else
+{
+  chapterNum = num;	// 通常の会話処理
+}
+
+という処理を追加する。
+これで全滅時に遷移するようにできた。
+
+------------------------------------------------
+
+<戦闘UIの見直し>--------------------------------
+画面左側の、時間帯の下にキャラのHP/MPを出す場所を
+用意する。
+CharaStatusFrameとCharaIconFrameの親として
+空のオブジェクトを用意し、[UniCharaData]とする。
+2人分いるから複製して[JackCharaData]も用意。
+
+またまたサイズ変更が必要になります。。
+
+(上の段)
+CharaStatusFrame
+Pos   X:-440 Y:150 Z:0
+Scale X:3    Y:1.5 Z:1
+
+CharaIconFrame
+Pos   X:-530 Y:180 Z:0
+
+(下の段)
+CharaStatusFrame
+Pos   X:-440 Y:100 Z:0
+Scale X:3    Y:1.5 Z:1
+
+CharaIconFrame
+Pos   X:-530 Y:140 Z:0
+
+あとはここにHPバーを追加する。
+(上の段)
+HPSlider
+Pos   X:-390 Y:160 Z:0
+Scale X:1    Y:2   Z:1
+
+(下の段)
+HPSlider
+Pos   X:-390 Y:110 Z:0
+Scale X:1    Y:2 Z:1
+
+charHPMap_変数を新規で用意し、
+CharacterMng.csのStart関数で、
+[キャラ名+CharaData]の中のHPSliderのHPBar.csを
+取得するように記述する。
+※初期HP情報もその後すぐに設定する
+
+これまでcharaHPBar変数でやってたところを
+charHPMap_に置き換えて実行してみる。
+→デバッグ成功
+
+------------------------------------------------
+
+<キャラが片方だけ死んだときのデバッグ>-----------
+
+ユニが死んだとき
+attackTarget_ = 0;でデバッグする
+特にバグなし
+
+ジャックが死んだとき
+attackTarget_ = 1;でデバッグする
+※バグ発生
+①ユニが与えるダメージ量がおかしい
+②倒したあとにすぐ戦闘終了しない
+
+(原因)
+ユニのAnimMaxが速すぎたせい。
+
+(解決策)
+2.0とか遅くしたらなおった。
+0.67はだめやね
+
+------------------------------------------------
+
+<敵が、死亡したキャラを狙ってこないようにする>---
+攻撃対象の決定タイミングがEnemyInstanceMng.csの
+BeforeAttack関数でやってる。
+
+決定したキャラのHPが0以下だったら再選択をするようにdo-while文をいれる。
+
+do
+{
+   attackTarget_ = Random.Range   ((int)SceneMng.CHARACTERNUM.UNI,        (int)SceneMng.CHARACTERNUM.MAX);
+} while
+ (SceneMng.charasList_[attackTarget_].HP()<=0);
+
+これでHPが0のキャラを選んだ時は再選択できる。
+
+------------------------------------------------
+
+<UniとカボスのAnimMaxについて>------------------
+
+両方とも1.0に設定した
+
+------------------------------------------------
+
 もしかしたらInterfaceButtle.csいらないかも
 →CharaBaseを敵もキャラも両方のベースにしてるから
 　必要なくなる可能性高め

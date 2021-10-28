@@ -115,11 +115,13 @@ public class ButtleMng : MonoBehaviour
 
     public void SetDamageNum(int num)
     {
+        Debug.Log("*SetDamageNum" + num);
         damageNum_ = num;
     }
 
     public int GetDamageNum()
     {
+        Debug.Log("***GetDamageNum" + damageNum_);
         return damageNum_;
     }
 }

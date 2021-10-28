@@ -123,8 +123,13 @@ public class EnemyInstanceMng : MonoBehaviour
         // 自分の位置を取得する
         enemyPos_ = enemyPosSetMap_[mapNum_][num];
 
-        // ランダムなキャラの位置を取得する
-        attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
+        // ランダムなキャラを取得する(ただし、死亡したキャラは除外する)
+        do
+        {
+            attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
+        } while (SceneMng.charasList_[attackTarget_].HP() <= 0);
+        //attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);
+
         charaPos_ = SceneMng.charasList_[attackTarget_].GetButtlePos();
 
         Debug.Log("攻撃対象は" + (SceneMng.CHARACTERNUM)attackTarget_);
@@ -186,8 +191,8 @@ public class EnemyInstanceMng : MonoBehaviour
             case ANIMATION.AFTER:
                 AfterAttack();     // 攻撃終了後 
                 break;
-            case ANIMATION.DEATH:
-                break;
+            //case ANIMATION.DEATH:
+            //    break;
             default:
                 break;
         }
@@ -216,7 +221,7 @@ public class EnemyInstanceMng : MonoBehaviour
         var dir = (charaPos_ - enemyPos_).normalized;
         // エフェクトの発生位置高さ調整
         // キャラとエフェクトの発生方向が逆だから、forwardの減算に気を付ける事(Z軸はマイナスしないとだめ)
-        var adjustPos = new Vector3(enemyPos_.x, enemyPos_.y + 0.5f, enemyPos_.z - transform.forward.z);
+        var adjustPos = new Vector3(enemyPos_.x, enemyPos_.y + 0.3f, enemyPos_.z - transform.forward.z);
 
         // 通常攻撃弾プレハブをインスタンス化
         var uniAttackInstance = Instantiate(kabosuAttackPrefab_, adjustPos, Quaternion.identity);
