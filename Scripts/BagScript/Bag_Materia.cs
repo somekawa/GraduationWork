@@ -6,6 +6,8 @@ public class Bag_Materia : MonoBehaviour
 {
     [SerializeField]
     private GameObject materiaUIPrefab;    // 素材を拾ったときに生成されるプレハブ
+    [SerializeField]
+    private RectTransform materiaParent_;    // 素材を拾ったときに生成されるプレハブ
 
     //[SerializeField]
     //// Materiaを取得した際に生成されるprefab
@@ -87,7 +89,7 @@ public class Bag_Materia : MonoBehaviour
         materiaCnt_[0] = 5;// 所持数を加算
         materiaBox_[0] = Instantiate(materiaUIPrefab,
             new Vector2(0, 0), Quaternion.identity,
-            GameObject.Find("ItemBagMng/MateriaMng/Viewport/Content").transform);
+            materiaParent_);
         // 生成したプレハブの子になっているImageを見つける
         instanceImages_[0] = materiaBox_[0].transform.Find("MateriaIcon").GetComponent<Image>();
         instanceImages_[0].sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][0, 5];
@@ -104,7 +106,7 @@ public class Bag_Materia : MonoBehaviour
         materiaCnt_[materiaNum_] = 1;// 所持数を加算
         materiaBox_[materiaNum_] = Instantiate(materiaUIPrefab,
             new Vector2(0, 0), Quaternion.identity,
-            GameObject.Find("ItemBagMng/MateriaMng/Viewport/Content").transform);
+            materiaParent_);
         // 生成したプレハブの子になっているImageを見つける
         instanceImages_[materiaNum_] = materiaBox_[materiaNum_].transform.Find("MateriaIcon").GetComponent<Image>();
         instanceImages_[materiaNum_].sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][0, 0];
@@ -121,7 +123,7 @@ public class Bag_Materia : MonoBehaviour
         materiaCnt_[materiaNum_] = 1;// 所持数を加算
         materiaBox_[materiaNum_] = Instantiate(materiaUIPrefab,
             new Vector2(0, 0), Quaternion.identity,
-            GameObject.Find("ItemBagMng/MateriaMng/Viewport/Content").transform);
+            materiaParent_);
         // 生成したプレハブの子になっているImageを見つける
         instanceImages_[materiaNum_] = materiaBox_[materiaNum_].transform.Find("MateriaIcon").GetComponent<Image>();
         instanceImages_[materiaNum_].sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][0, 1];

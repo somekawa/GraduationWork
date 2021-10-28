@@ -14,8 +14,9 @@ public class Bag_Item : MonoBehaviour
     private string[] itemName= new string[30];
 
     [SerializeField]
-    // クエストを受注したときに生成されるプレハブ
     private GameObject itemUIPrefab;
+    [SerializeField]
+    private RectTransform itemParent_;    // 素材を拾ったときに生成されるプレハブ
 
     private static GameObject[] itemBox_ = new GameObject[30];
     private Image[] instanceImages_ = new Image[30];
@@ -75,7 +76,7 @@ public class Bag_Item : MonoBehaviour
             // 画像を生成　(元になるprefab、座標、回転、親)
             itemBox_[0] = Instantiate(itemUIPrefab,
                 new Vector2(0, 0), Quaternion.identity,
-                GameObject.Find("ItemBagMng/ItemMng/Viewport/Content").transform);
+                itemParent_);
 
             // 生成したプレハブの子になっているImageを見つける
             instanceImages_[0] = itemBox_[0].transform.Find("ItemIcon").GetComponent<Image>();

@@ -35,8 +35,7 @@ public class PictureBookCheck : MonoBehaviour
         Debug.Log("フィールド番号：" + fieldNum + "     アイテム番号：" + itemNum);
         // 生成したプレハブの子になっているImageを見つける
         instanceImages_[itemNum] = activePicture_[itemNum].GetComponent<Image>();
-        instanceImages_[itemNum].sprite = ItemImageMng.materialIcon_[fieldNum, itemNum];
-
+        instanceImages_[itemNum].sprite =  ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][fieldNum, itemNum];
 
         // var prefab = Instantiate(materiaUIPrefab);
         // クエスト番号の設定

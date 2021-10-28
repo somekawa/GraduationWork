@@ -1,3 +1,31 @@
+10/28更新
+アタッチ先
+DontDestroyCanvasーDontDestroyMng.cs
+
+　ManagersーBag_Materia.cs【MateriaUIPrefabーmateriaBox】
+			【MateriaParent_　： ItemBagMng-MateriaMng-Viewport-『Content』】
+	　　Bag_Item.cs【itemUIPrefabーitemBox】
+		　　　　【itemParent_ ItemBagMng-ItemMng-Viewport-『Content』】
+　
+　MenuーMenuImage
+	　ーItemBoxからLoadまでSceneMngにあるMenuActive.OnClickMenu
+　
+　ItemBagMngーItemBagMng.cs
+　　Topics
+　　　LeftBtn　ItemBagMngにあるItemBagMng.csのOnClickLeft
+　　　RightBtn　ItemBagMngにあるItemBagMng.csのOnClickRight
+
+　OtherUI：PictureAndWuestMng.cs
+　　Back
+　　　Quest　OtherUIのPictureAndWuestMng.csのOnClickOtherFrame()
+　　　Picture　OtherUIのPictureAndWuestMng.csのOnClickOtherFrame()
+　　QuestMng（まだ何も作ってない）
+　　PictureBookMng：PictureBookCheck 
+		　【pictureUI　PictureImage】		
+
+ーーーーーーーーーーーーーーーーーーーーーーーーー
+
+
 シーン間で破壊されないCanvasを作成
 
 DontDestroyMng.csを
