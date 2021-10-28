@@ -85,12 +85,6 @@ public class FieldMng : MonoBehaviour
             {
                 // 何も処理を行わない
             }
-
-            if (bagImage_.gameObject.activeSelf == false)
-            {
-                // 非アクティブ状態ならアクティブ状態に
-                bagImage_.gameObject.SetActive(true);
-            }
         }
 
         // 前回のModeと一致しないとき
@@ -110,6 +104,7 @@ public class FieldMng : MonoBehaviour
 
             case MODE.SEARCH:
                 cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
+                bagImage_.gameObject.SetActive(true);
                 break;
 
             case MODE.BUTTLE:
