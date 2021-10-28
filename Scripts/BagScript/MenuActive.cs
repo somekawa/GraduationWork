@@ -54,7 +54,7 @@ public class MenuActive : MonoBehaviour
     //// ItemBox選択時
     private ItemBagMng itemBagMngCS_;
     private Bag_Materia bagMateria_;
-  //  private bool chapterCheck_ = false;
+    //  private bool chapterCheck_ = false;
     private Bag_Item bagItem_;
     private Bag_Word bagWord_;
 
@@ -69,7 +69,7 @@ public class MenuActive : MonoBehaviour
         saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveCSV>();
         eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
         Debug.Log(eventSystem.name + "をクリック");
-        //warpField_ = GameObject.Find("WarpOut").GetComponent<WarpField>();
+        warpField_ = GameObject.Find("WarpOut").GetComponent<WarpField>();
 
         parentCanvas_ = GameObject.Find("DontDestroyCanvas").GetComponent<Canvas>();
         backPanel_ = parentCanvas_.transform.Find("BackPanel").GetComponent<Image>();
@@ -191,8 +191,14 @@ public class MenuActive : MonoBehaviour
     private void DataSave()
     {
         Debug.Log("セーブボタンが押された");
-        // ユニのデータだけテスト中
-        saveCsvSc_.SaveData(SceneMng.GetCharasSettings((int)SceneMng.CHARACTERNUM.UNI));
+
+        saveCsvSc_.SaveStart();
+        // キャラクター数分のfor文を回す
+        for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+        {
+            saveCsvSc_.SaveData(SceneMng.GetCharasSettings(i));
+        }
+        saveCsvSc_.SaveEnd();
     }
 
     private void DataLoad()
@@ -226,13 +232,24 @@ public class MenuActive : MonoBehaviour
             }
         }
 
-        // yのほうは、キャラenum+1でいけそう2重for文でいけそうやな
-        CharaBase.CharacterSetting set = new CharaBase.CharacterSetting
+        // キャラクター数分のfor文を回す
+        for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
         {
-            name = csvDatas[1][0],
-            Level = int.Parse(csvDatas[1][1])
-        };
-        SceneMng.SetCharasSettings((int)SceneMng.CHARACTERNUM.UNI, set);
+            CharaBase.CharacterSetting set = new CharaBase.CharacterSetting
+            {
+                name = csvDatas[i + 1][0],
+                Level = int.Parse(csvDatas[i + 1][1]),
+                HP = int.Parse(csvDatas[i + 1][2]),
+                MP = int.Parse(csvDatas[i + 1][3]),
+                Attack = int.Parse(csvDatas[i + 1][4]),
+                MagicAttack = int.Parse(csvDatas[i + 1][5]),
+                Defence = int.Parse(csvDatas[i + 1][6]),
+                Speed = int.Parse(csvDatas[i + 1][7]),
+                Luck = int.Parse(csvDatas[i + 1][8]),
+                AnimMax = float.Parse(csvDatas[i + 1][9])
+            };
+            SceneMng.SetCharasSettings(i, set);
+        }
     }
 
     public bool GetActiveFlag()
