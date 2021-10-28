@@ -100,7 +100,7 @@ public class ItemGet : MonoBehaviour
         telopImage_.gameObject.SetActive(true);
         uniCtl_.enabled = false;
         // materiaImage_.sprite = materialIcon_[num];
-        materiaImage_.sprite = ItemImageMng.materialIcon_[fieldNumber_, itemNumberCheck_];
+        materiaImage_.sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][fieldNumber_, itemNumberCheck_];
         itemPointChildren_[num].SetActive(false);
 
         // オブジェクトのワールド空間positionをビューポート空間に変換

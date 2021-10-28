@@ -79,7 +79,7 @@ public class Bag_Item : MonoBehaviour
 
             // 生成したプレハブの子になっているImageを見つける
             instanceImages_[0] = itemBox_[0].transform.Find("ItemIcon").GetComponent<Image>();
-            instanceImages_[0].sprite = ItemImageMng.itemIcon_[0, 2];
+            instanceImages_[0].sprite =  ItemImageMng.spriteMap_[ItemImageMng.IMAGE.ITEM][0, 1];
 
             // 生成したプレハブの子になっているTextを見つける
             instanceTexts_[0] = itemBox_[0].transform.Find("ItemNum").GetComponent<Text>();

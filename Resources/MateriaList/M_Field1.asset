@@ -9,17 +9,27 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b369e72604e75aa41be3a0e34828ce78, type: 3}
-  m_Name: Field1
+  m_Script: {fileID: 11500000, guid: d2821f08f126191418ae31f3b9cd7cd5, type: 3}
+  m_Name: M_Field1
   m_EditorClassIdentifier: 
   param:
   - MateriaName: "\u6E05\u3089\u304B\u306A\u6C34"
+    Price_Buy: 500
+    Price_Sell: 250
     ImageName: Material_Field1
   - MateriaName: "\u67AF\u308C\u305F\u679D"
-    ImageName: 
+    Price_Buy: 400
+    Price_Sell: 200
+    ImageName: non
   - MateriaName: "\u3055\u3089\u3055\u3089\u306E\u571F"
-    ImageName: 
+    Price_Buy: 300
+    Price_Sell: 150
+    ImageName: non
   - MateriaName: "\u6697\u95C7\u30EA\u30F3\u30B4"
-    ImageName: 
+    Price_Buy: 200
+    Price_Sell: 100
+    ImageName: non
   - MateriaName: "\u308F\u305F\u96F2"
-    ImageName: 
+    Price_Buy: 100
+    Price_Sell: 50
+    ImageName: non

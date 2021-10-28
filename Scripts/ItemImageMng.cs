@@ -1,39 +1,117 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using System.Collections;
+using System.Collections.Generic;
 
 public class ItemImageMng : MonoBehaviour
 {
-    //public int[,] materiaImages_ = new int[5, 5];
-    public static Sprite[,] materialIcon_ = new Sprite[5,5];// 取得した素材のイラスト
+    public enum IMAGE
+    {
+        NON = -1,
+        MATERIA,
+        ITEM,
+        BOOK,
+        RECIPE,
+        RESTAURANT,
+        MAX
+    }
+    public static Dictionary<IMAGE, Sprite[,]> spriteMap_ = new Dictionary<IMAGE, Sprite[,]>();
     private static bool onceFlag_ = false;
 
-    void Start()
+    void Awake()
     {
-        if(onceFlag_==true)
+        if (onceFlag_ == true)
         {
             // すでに画像生成済みなら2回も入らないようにする
             return;
         }
 
-        for (int f = 0; f < 5; f++)
+        spriteMap_[IMAGE.ITEM] = ImageMng(1, 7, "/Item/Items01");
+        spriteMap_[IMAGE.MATERIA] = ImageMng(5, 7, "/Materia/Materia_Field");
+        onceFlag_ = true;
+    }
+
+    public Sprite[,] ImageMng(int pageMax, int spliteMax, string path)
+    {
+        var sprite = new Sprite[pageMax, spliteMax];
+        if (pageMax <= 1)
         {
+            // 読み込みたい画像が1枚だけの場合
             // Texture2Dとして画像を読み込む
-            string str = Application.streamingAssetsPath + "/Materia/Materia_Field" + f+".png";
+            string str = Application.streamingAssetsPath + path + ".png";
             byte[] bytes = File.ReadAllBytes(str);
             Texture2D texture = new Texture2D(64, 64);
             texture.LoadImage(bytes);
 
-            for (int x = 0; x < 5; x++)
+            for (int x = 0; x < spliteMax; x++)
             {
-                // 取得した画像を１つ128*128のサイズに分割
+                // 取得した画像を１つ64*64のサイズに分割
                 Rect rect = new Rect(x * 64, 0, 64, 64);
-                materialIcon_[f, x] = Sprite.Create(texture, rect,
+                sprite[0, x] = Sprite.Create(texture, rect,
                     new Vector2(0.5f, 0.5f), 1.0f, 0, SpriteMeshType.FullRect);
-               // Debug.Log(f + "" + x);
             }
         }
-        onceFlag_ = true;
-    }
+        else
+        {
+            for (int f = 0; f < pageMax; f++)
+            {
+                // Texture2Dとして画像を読み込む
+                string str = Application.streamingAssetsPath + path + f + ".png";
+                byte[] bytes = File.ReadAllBytes(str);
+                Texture2D texture = new Texture2D(64, 64);
+                texture.LoadImage(bytes);
+
+                for (int x = 0; x < spliteMax; x++)
+                {
+                    // 取得した画像を１つ64*64のサイズに分割
+                    Rect rect = new Rect(x * 64, 0, 64, 64);
+                    sprite[f, x] = Sprite.Create(texture, rect,
+                        new Vector2(0.5f, 0.5f), 1.0f, 0, SpriteMeshType.FullRect);
+                }
+            }
+        }
+
+            return sprite;
+        
+    } 
+
+    //public void Test(Sprite[,] sprite,int pageMax,int spliteMax,string path)
+    //{
+    //    if (pageMax == 0)
+    //    {
+    //        // 読み込みたい画像が1枚だけの場合
+    //        // Texture2Dとして画像を読み込む
+    //        string str = Application.streamingAssetsPath + path + ".png";
+    //        byte[] bytes = File.ReadAllBytes(str);
+    //        Texture2D texture = new Texture2D(64, 64);
+    //        texture.LoadImage(bytes);
+
+    //        for (int x = 0; x < spliteMax; x++)
+    //        {
+    //            // 取得した画像を１つ64*64のサイズに分割
+    //            Rect rect = new Rect(x * 64, 0, 64, 64);
+    //            sprite[0, x] = Sprite.Create(texture, rect,
+    //                new Vector2(0.5f, 0.5f), 1.0f, 0, SpriteMeshType.FullRect);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        for (int f = 0; f < pageMax; f++)
+    //        {
+    //            // Texture2Dとして画像を読み込む
+    //            string str = Application.streamingAssetsPath + path+ f + ".png";
+    //            byte[] bytes = File.ReadAllBytes(str);
+    //            Texture2D texture = new Texture2D(64, 64);
+    //            texture.LoadImage(bytes);
+
+    //            for (int x = 0; x < spliteMax; x++)
+    //            {
+    //                // 取得した画像を１つ64*64のサイズに分割
+    //                Rect rect = new Rect(x * 64, 0, 64, 64);
+    //                sprite[f, x] = Sprite.Create(texture, rect,
+    //                    new Vector2(0.5f, 0.5f), 1.0f, 0, SpriteMeshType.FullRect);
+    //            }
+    //        }
+    //    }
+    //}
 }

@@ -90,7 +90,7 @@ public class Bag_Materia : MonoBehaviour
             GameObject.Find("ItemBagMng/MateriaMng/Viewport/Content").transform);
         // 生成したプレハブの子になっているImageを見つける
         instanceImages_[0] = materiaBox_[0].transform.Find("MateriaIcon").GetComponent<Image>();
-        instanceImages_[0].sprite = ItemImageMng.materialIcon_[0, 5];
+        instanceImages_[0].sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][0, 5];
         // 生成したプレハブの子になっているTextを見つける
         instanceTexts_[0] = materiaBox_[0].transform.Find("MateriaNum").GetComponent<Text>();
         instanceTexts_[0].text = materiaCnt_[0].ToString();
@@ -107,7 +107,7 @@ public class Bag_Materia : MonoBehaviour
             GameObject.Find("ItemBagMng/MateriaMng/Viewport/Content").transform);
         // 生成したプレハブの子になっているImageを見つける
         instanceImages_[materiaNum_] = materiaBox_[materiaNum_].transform.Find("MateriaIcon").GetComponent<Image>();
-        instanceImages_[materiaNum_].sprite = ItemImageMng.materialIcon_[0, 0];
+        instanceImages_[materiaNum_].sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][0, 0];
         // 生成したプレハブの子になっているTextを見つける
         instanceTexts_[materiaNum_] = materiaBox_[materiaNum_].transform.Find("MateriaNum").GetComponent<Text>();
         instanceTexts_[materiaNum_].text = materiaCnt_[materiaNum_].ToString();
@@ -124,7 +124,7 @@ public class Bag_Materia : MonoBehaviour
             GameObject.Find("ItemBagMng/MateriaMng/Viewport/Content").transform);
         // 生成したプレハブの子になっているImageを見つける
         instanceImages_[materiaNum_] = materiaBox_[materiaNum_].transform.Find("MateriaIcon").GetComponent<Image>();
-        instanceImages_[materiaNum_].sprite = ItemImageMng.materialIcon_[0, 1];
+        instanceImages_[materiaNum_].sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][0, 1];
         // 生成したプレハブの子になっているTextを見つける
         instanceTexts_[materiaNum_] = materiaBox_[materiaNum_].transform.Find("MateriaNum").GetComponent<Text>();
         instanceTexts_[materiaNum_].text = materiaCnt_[materiaNum_].ToString();

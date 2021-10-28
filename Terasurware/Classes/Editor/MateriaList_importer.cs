@@ -7,10 +7,10 @@ using NPOI.HSSF.UserModel;
 using NPOI.XSSF.UserModel;
 using NPOI.SS.UserModel;
 
-public class MaterialList_importer : AssetPostprocessor
+public class MateriaList_importer : AssetPostprocessor
 {
-    private static readonly string filePath = "Assets/ExcelData/MaterialList.xls";
-    private static readonly string[] sheetNames = { "Field0","Field1","Field2","Field3","Field4", };
+    private static readonly string filePath = "Assets/ExcelData/MateriaList.xls";
+    private static readonly string[] sheetNames = { "M_Field0","M_Field1","M_Field2","M_Field3","M_Field4", };
     
     static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
     {
@@ -30,13 +30,13 @@ public class MaterialList_importer : AssetPostprocessor
 
                 foreach (string sheetName in sheetNames)
                 {
-                    var exportPath = "Assets/Resources/MaterialList/" + sheetName + ".asset";
+                    var exportPath = "Assets/Resources/MateriaList/" + sheetName + ".asset";
                     
                     // check scriptable object
-                    var data = (MaterialList)AssetDatabase.LoadAssetAtPath(exportPath, typeof(MaterialList));
+                    var data = (MateriaList)AssetDatabase.LoadAssetAtPath(exportPath, typeof(MateriaList));
                     if (data == null)
                     {
-                        data = ScriptableObject.CreateInstance<MaterialList>();
+                        data = ScriptableObject.CreateInstance<MateriaList>();
                         AssetDatabase.CreateAsset((ScriptableObject)data, exportPath);
                         data.hideFlags = HideFlags.NotEditable;
                     }
@@ -56,10 +56,12 @@ public class MaterialList_importer : AssetPostprocessor
                         IRow row = sheet.GetRow(i);
                         ICell cell = null;
                         
-                        var p = new MaterialList.Param();
+                        var p = new MateriaList.Param();
 			
 					cell = row.GetCell(0); p.MateriaName = (cell == null ? "" : cell.StringCellValue);
-					cell = row.GetCell(1); p.ImageName = (cell == null ? "" : cell.StringCellValue);
+					cell = row.GetCell(1); p.Price_Buy = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(2); p.Price_Sell = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(3); p.ImageName = (cell == null ? "" : cell.StringCellValue);
 
                         data.param.Add(p);
                     }

@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class MaterialList : ScriptableObject
+public class MateriaList : ScriptableObject
 {	
 	public List<Param> param = new List<Param> ();
 
@@ -11,6 +11,8 @@ public class MaterialList : ScriptableObject
 	{
 		
 		public string MateriaName;
+		public int Price_Buy;
+		public int Price_Sell;
 		public string ImageName;
 	}
 }

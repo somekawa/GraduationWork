@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 041483e12177250488be5e2e5c2043a8, type: 3}
+  m_Name: Story4
+  m_EditorClassIdentifier: 
+  param:
+  - BookName: "\u8D64\u30CE\u672C5"
+    Word: 
+    AddNum: Add5_3
+  - BookName: "\u9752\u30CE\u672C5"
+    Word: 
+    AddNum: Add5_2
+  - BookName: "\u7DD1\u30CE\u672C5"
+    Word: 
+    AddNum: Add5_6
+  - BookName: "\u9ED2\u30CE\u672C5"
+    Word: 
+    AddNum: Add5_5
+  - BookName: "\u767D\u30CE\u672C5"
+    Word: 
+    AddNum: Add5_4
+  - BookName: "\u571F\u30CE\u672C3"
+    Word: 
+    AddNum: Add5_1
