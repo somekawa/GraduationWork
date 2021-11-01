@@ -982,16 +982,184 @@ nullでエラーになる。
 
 これでPrefabフォルダにパッケージしなおす。
 
+------------------------------------------------
 
+<会話から街に戻ってきたときに、TimeGear.csで
+ エラーが発生する>------------------------------
 
+(原因)
+不明。
+target = Quaternion.Euler(new Vector3(0.0f, 0.0f, rotateTimeGearMap_[SceneMng.GetTimeGear()]));でエラーがでる。。。
+
+(対処法)
+でるときとでないときがあるからまだわかってない
+
+------------------------------------------------
+
+<クエスト内容を詳細化>--------------------------
+
+今は題名しかないから、詳細を書く
+
+題名の部分のテキスト名を[TitleText]にする
+※ヒエラルキーの方も変える
+　HouseInterior-Guild-QuestMng-InfomationPanel
+  -Textの部分
+
+InfomationPanelに[DetailText]を追加する。
+
+QuestInfo.xlsに[detail]という項目を追加する。
+
+[QuestInfo.cs]
+public string detail;を追加する。
+
+[QuesInfo_importer.cs]
+cell = row.GetCell(2); p.detail = (cell == null ? "" : cell.StringCellValue);
+を追加する。
+
+[DetailText]
+Pos X:-160 Y:200 Z:0
+FontSize:32
+
+------------------------------------------------
+
+<ステータス画面の調整をする>---------------------
+
+アトリエ風ゲームフォルダに入れたステータス画面参考画像をみて、同じように配置していく
+※まずはユニの画面分だけ
+
+StatusInfoのX座標を300,Y座標を120にして、
+そもそもの表示範囲枠(黄色い枠)をもう少し広げる。
+
+立ち絵を用意する。
+2Dの立ち絵をステータス値の左側に描画させるように
+する。
+portrait_kohaku_01_.pngをUni.pngという名前にして
+Pictureフォルダに入れる。
+
+StatusMngに[CharaImage(Image)]を用意して、
+試しにUni.pngを入れてみる。
+もともとのサイズがでかすぎたからペイント3Dで縮小
+→縦横のパーセントを20%にする
+(505*638)
+
+[CharaImage]
+Pos X:-8.5 Y:-98 Z:0
+Width:505 Height:638
+
+立ち絵の足部分が切れているから、下を模様か何かで
+隠したほうがいい。
+新規でStatusMngに[Panel(Panel)]を用意する。
+[Panel]
+アンカーポイント:中央
+Pos   X:105 Y:-320 Z:0
+Scale X:11  Y:1    Z:1
+α値:0.698
+(0.7にしようとしたら勝手にこの数値になる)
+
+上部にも同じようにパネルを設置したいから複製して
+PosYを320にする。
+
+左側にキャラ切替用のボタンを設置する
+[Topics]を複製してStatusMngの子にする。
+[Topics]
+Pos   X:-330 Y:235 Z:0
+Scale X:0.7  Y:0.7 Z:1
+
+[LeftBtn]
+Pos   X:-100 Y:-20 Z:0
+Scale X:0.7  Y:0.7 Z:1
+
+[RightBtn]
+Pos   X:300  Y:-20 Z:0
+Scale X:0.7  Y:0.7 Z:1
+
+アイテムとかそざいとかワードの切替と同じ要領で
+やりたいから、ItemBagMng.csのOnClickLeftArrowと
+OnClickRightArrowの関数に追加させてもらう
+
+矢印の内容を切り替えたいから、
+MenuActive.csのSelectCanvasActive関数のキャンバス状態を保存できるようにして、矢印の処理を切替れるようにしたい。
+
+[MenuActive.cs]
+新規で、private CANVAS nowCanvas_;を用意して
+SelectCanvasActive関数で
+nowCanvas_ = canvas;とする。
+GetNowMenuCanvas関数を作成してreturn nowCanvas_;
+とする。
+
+[ItemBagMng.cs]
+ステータス用のInit関数を別で作ったほうがよさそう
+→StatusInit関数作成してMenuActive.csでステータス
+　のときはこのinitを呼び出すようにする。
+
+(どちらのInitでも行う処理)
+menuActive_がnullならMenuActiveのついているSceneMngをFindする
+
+OnClickRight/Leftそれぞれに現在のメニューがBAGか
+STATUSかで処理を分けるようにする。
+
+※Init関数は複数回呼ばれるのでnull処理をいれた方
+　が処理回数を減らせる。
+
+<矢印を押すとキャラ名が変わるようにする>
+まず、そもそもキャラ名が入るようにする。
+[ItemBagMng.cs]
+charaNameTopicText_;
+charaStringNum_;
+charaTopicString_;
+の変数を追加する。
+StatusInit関数に処理をいれる。
+
+あとはOnClickRight/Left関数でcharaStringNumの
+増減処理をおこなう。
+
+<キャラ名が変わったときに各キャラのステータス値
+ がでるようにする>
+STATUSで呼び出しているViewStatus関数を、ItemBagMng.csから呼び出すように変更する。
+ViewStatus関数に引数でint charaNumを用意して、
+publicにしておく。
+
+ItemBagMng.csの
+StatusInit関数で
+menuActive_.ViewStatus(charaStringNum_);
+を呼び出し。
+OnClickRight/Left関数でも同様に呼び出す。
+
+<ジャックの立ち絵に切り替わるようにする>
+立ち絵の切替をシリアライズフィールドのprivateで
+外部アタッチするようにする。
+charaStringNum_に合わせて立ち絵が変わるように、
+charaImg_.sprite = CharaImage_[charaStringNum_];
+とする。
+
+新規でcharaImg_変数をつくり、findでCharaImageを取得する。
+
+portrait_jack_01.pngを[Jack.png]として
+Pictureフォルダに入れる。
+(408*750)
+
+画像に合わせて台紙側のサイズを変更しないとだめ。
+private RectTransform charaImgRect_;変数を
+用意し、StatusInit関数とOnClickRight/Left関数に
+
+charaImgRect_.sizeDelta = new Vector2(CharaImage_[charaStringNum_].rect.width, CharaImage_[charaStringNum_].rect.height);
+というのを追加する。
+
+<ジャックがパーティに入るまで切り替えられないよう
+ にしておく>
+進行度番号が8になったときにジャックのステータスが
+表示できるようにする。
+→chapterNumを7にしてギルドに入り、会話して
+　クエスト受けた後にステータス画面を開いたら
+　ジャックのステータスも見れるようになる。
 
 ------------------------------------------------
 
 
-メインクエストか、サブクエストかをExcelからよみこむようにする
-※あとで追加で必要になるタブ[報酬]
 
-クエスト受注画面から戻るアイコンをつける
+更新するときはStatusMngだけ更新しよ
+
+※あとで追加で必要になるタブ[報酬]
 
 *重要*
 タグの判別にはgameObject.tag == “string tag”もあるが、CompareTag()の方が早い

@@ -4,7 +4,9 @@ using UnityEngine.UI;
 
 public class ItemBagMng : MonoBehaviour
 {
-    // private GameObject itemBagCanvas_;// シーン遷移後も使いたいオブジェクトたちの親
+    [SerializeField]
+    private Sprite[] CharaImage_;
+
     private RectTransform itemBagMng_;// itemBag_の子
 
     public enum topic
@@ -21,62 +23,172 @@ public class ItemBagMng : MonoBehaviour
     private string[] topicString_ = new string[(int)topic.MAX] {
     "アイテム","そざい","わーど"};
 
+    // ステータス表示にでてくるトピック名
+    private Text charaNameTopicText_;
+    private RectTransform charaImgRect_;    // 台紙サイズ変更用
+    private Image charaImg_;
+    private int charaStringNum_ = (int)SceneMng.CHARACTERNUM.UNI;
+    private string[] charaTopicString_ = new string[(int)SceneMng.CHARACTERNUM.MAX] {
+    "ユニ","ジャック"};
+
     // ItemBox選択時
-    private RectTransform topicParent_;// 何を表示しているか
     private RectTransform[] mngs_ = new RectTransform[(int)topic.MAX];
     private Bag_Materia bagMateria_;
     private Bag_Item bagItem_;
     private Bag_Word bagWord_;
 
+    private MenuActive menuActive_;     // 現在のページ状態がどこかを取得する(矢印に使用する)
     private bool activeFlag_ = false;
 
     public void Init()
     {
-        // itemBag_ = BagCanvasUI.Instance;
-        itemBagMng_ = transform.GetComponent<RectTransform>();
-        mngs_[(int)topic.ITEM] = itemBagMng_.transform.Find("ItemMng").GetComponent<RectTransform>();
-        mngs_[(int)topic.MATERIA] = itemBagMng_.transform.Find("MateriaMng").GetComponent<RectTransform>();
-        mngs_[(int)topic.WORD] = itemBagMng_.transform.Find("WordMng").GetComponent<RectTransform>();
+        // 1度情報を取得したら参照しないようにする
+        if(itemBagMng_ == null)
+        {
+            itemBagMng_ = transform.GetComponent<RectTransform>();
+        }
 
-        bagItem_ = itemBagMng_.transform.Find("ItemMng").GetComponent<Bag_Item>();
-        bagMateria_ = itemBagMng_.transform.Find("MateriaMng").GetComponent<Bag_Materia>();
-        bagWord_ = itemBagMng_.transform.Find("WordMng").GetComponent<Bag_Word>();
+        if(mngs_[(int)topic.ITEM] == null)
+        {
+            mngs_[(int)topic.ITEM] = itemBagMng_.transform.Find("ItemMng").GetComponent<RectTransform>();
+        }
+        if (mngs_[(int)topic.MATERIA] == null)
+        {
+            mngs_[(int)topic.MATERIA] = itemBagMng_.transform.Find("MateriaMng").GetComponent<RectTransform>();
+        }
+        if (mngs_[(int)topic.WORD] == null)
+        {
+            mngs_[(int)topic.WORD] = itemBagMng_.transform.Find("WordMng").GetComponent<RectTransform>();
+        }
 
-        topicParent_ = itemBagMng_.transform.Find("Topics").GetComponent<RectTransform>();
-        topicText_ = topicParent_.transform.Find("TopicName").GetComponent<Text>();
-        topicText_.text = topicString_[(int)topic.ITEM];
+        if(bagItem_ == null)
+        {
+            bagItem_ = GameObject.Find("Managers").GetComponent<Bag_Item>();
+        }
+        if(bagMateria_ == null)
+        {
+            bagMateria_ = GameObject.Find("Managers").GetComponent<Bag_Materia>();
+        }
+        if(bagWord_ == null)
+        {
+            bagWord_ = GameObject.Find("Managers").GetComponent<Bag_Word>();
+        }
 
-        //for (int i = 0; i < (int)topic.MAX; i++)
-        //{
-        //    Debug.Log(stringNum_ + "      "+mngs_[i].gameObject.name);
-        //  //  Debug.Log();
-        //}
+        if(topicText_ == null)
+        {
+            RectTransform topicParent_ = itemBagMng_.transform.Find("Topics").GetComponent<RectTransform>();
+            topicText_ = topicParent_.transform.Find("TopicName").GetComponent<Text>();
+            topicText_.text = topicString_[(int)topic.ITEM];
+        }
+
+        if (menuActive_ == null)
+        {
+            menuActive_ = GameObject.Find("SceneMng").GetComponent<MenuActive>();
+        }
+
         StartCoroutine(ActiveRectTransform((int)topic.ITEM, true));
+    }
+
+    public void StatusInit()
+    {
+        if (menuActive_ == null)
+        {
+            menuActive_ = GameObject.Find("SceneMng").GetComponent<MenuActive>();
+        }
+
+        RectTransform topicParent_ = GameObject.Find("StatusMng").GetComponent<RectTransform>();
+        if (charaNameTopicText_ == null)
+        {
+            charaNameTopicText_ = topicParent_.transform.Find("Topics/TopicName").GetComponent<Text>();
+            charaNameTopicText_.text = charaTopicString_[(int)SceneMng.CHARACTERNUM.UNI];
+        }
+
+        if(charaImg_ == null)
+        {
+            charaImgRect_ = topicParent_.transform.Find("CharaImage").GetComponent<RectTransform>();
+            charaImg_ = topicParent_.transform.Find("CharaImage").GetComponent<Image>();
+        }
+
+        //サイズが変更して画像を切り替える
+        charaImgRect_.sizeDelta = new Vector2(CharaImage_[charaStringNum_].rect.width, CharaImage_[charaStringNum_].rect.height);
+        charaImg_.sprite = CharaImage_[charaStringNum_];
+
+        menuActive_.ViewStatus(charaStringNum_);
     }
 
     public void OnClickRightArrow()
     {
-        // 値を加算
-        stringNum_++;
-        if ((int)topic.WORD < stringNum_)
+        if (menuActive_.GetNowMenuCanvas() == MenuActive.CANVAS.BAG)
         {
-            stringNum_ = (int)topic.ITEM;
+            if ((int)topic.WORD < stringNum_++)
+            {
+                stringNum_ = (int)topic.ITEM;
+            }
+            topicText_.text = topicString_[stringNum_];
+            Debug.Log("右矢印をクリック" + stringNum_);
         }
-        //ActiveRectTransform();
-        topicText_.text = topicString_[stringNum_];
-        Debug.Log("右矢印をクリック" + stringNum_);
+        else if(menuActive_.GetNowMenuCanvas() == MenuActive.CANVAS.STATUS)
+        {
+            if(EventMng.GetChapterNum() < 8)
+            {
+                // ジャックのステータスは表示しない(まだ仲間になってないから)
+                return;
+            }
+
+            if (++charaStringNum_ >= (int)SceneMng.CHARACTERNUM.MAX)
+            {
+                charaStringNum_ = (int)SceneMng.CHARACTERNUM.UNI;
+            }
+            ArrowCommon();
+            Debug.Log("右矢印をクリック" + charaStringNum_);
+        }
+        else
+        {
+            // 何も処理を行わない
+        }
     }
 
     public void OnClickLeftArrow()
     {
-        stringNum_--;
-        if (stringNum_ < (int)topic.ITEM)
+        if (menuActive_.GetNowMenuCanvas() == MenuActive.CANVAS.BAG)
         {
-            stringNum_ = (int)topic.WORD;
+            if (--stringNum_ < (int)topic.ITEM)
+            {
+                stringNum_ = (int)topic.WORD;
+            }
+            topicText_.text = topicString_[stringNum_];
+            Debug.Log("左矢印をクリック" + stringNum_);
         }
-        topicText_.text = topicString_[stringNum_];
-        //ActiveRectTransform();
-        Debug.Log("左矢印をクリック" + stringNum_);
+        else if (menuActive_.GetNowMenuCanvas() == MenuActive.CANVAS.STATUS)
+        {
+            if (EventMng.GetChapterNum() < 8)
+            {
+                // ジャックのステータスは表示しない(まだ仲間になってないから)
+                return;
+            }
+
+            if (--charaStringNum_ < (int)SceneMng.CHARACTERNUM.UNI)
+            {
+                charaStringNum_ = (int)SceneMng.CHARACTERNUM.JACK;
+            }
+            ArrowCommon();
+            Debug.Log("左矢印をクリック" + charaStringNum_);
+        }
+        else
+        {
+            // 何も処理を行わない
+        }
+    }
+
+    // 矢印の共通処理部分
+    private void ArrowCommon()
+    {
+        charaNameTopicText_.text = charaTopicString_[charaStringNum_];
+        menuActive_.ViewStatus(charaStringNum_);
+
+        //サイズが変更して画像を切り替える
+        charaImgRect_.sizeDelta = new Vector2(CharaImage_[charaStringNum_].rect.width, CharaImage_[charaStringNum_].rect.height);
+        charaImg_.sprite = CharaImage_[charaStringNum_];
     }
 
     public IEnumerator ActiveRectTransform(int startNum, bool flag)

@@ -60,8 +60,8 @@ public class FieldMng : MonoBehaviour
         GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
 
         // バッグの画像がDontDestroyOnLoadされるオブジェクトのこのためその親から探す
-        var gameObject = DontDestroyMng.Instance;
-        bagImage_ = gameObject.transform.Find("DontDestroyCanvas/Menu/BagImage").GetComponent<Image>();
+        //var gameObject = DontDestroyMng.Instance;
+        bagImage_ = GameObject.Find("DontDestroyCanvas/Menu/BagImage").GetComponent<Image>();
     }
 
     void Update()

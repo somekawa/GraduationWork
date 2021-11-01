@@ -15,9 +15,10 @@ public class MenuActive : MonoBehaviour
 
     //--------------
     private EventSystem eventSystem;// ボタンクリックのためのイベント処理
-    private GameObject clickbtn_;    // どのボタンをクリックしたか代入する変数
+    private GameObject clickbtn_;   // どのボタンをクリックしたか代入する変数
 
-    private Image backPanel_;// 背景を暗くするためのパネル
+    private Image backPanel_;       // 背景を暗くするためのパネル
+    private CANVAS nowCanvas_;      // 現在開かれているメニューはどこであるかを保存する
 
     //private RectTransform itemBagMng_;// itemBag_の子
     //private RectTransform pictureMng_;// itemBag_の子
@@ -39,7 +40,8 @@ public class MenuActive : MonoBehaviour
         SAVE,   // セーブ用のボタン
         MAX
     }
-    public static RectTransform[] parentRectTrans_ = new RectTransform[(int)CANVAS.MAX];
+
+    private RectTransform[] parentRectTrans_ = new RectTransform[(int)CANVAS.MAX];
     private string[] btnName = new string[(int)CANVAS.MAX] {
     "Menu","ItemBox","Status","Other","Cancel","Load","Save"
     };
@@ -165,13 +167,13 @@ public class MenuActive : MonoBehaviour
         }
     }
 
-    private void SctiveStatus()
+    public void ViewStatus(int charaNum)
     {
         Debug.Log("ステータス確認ボタンが押された");
         //  buttons_.SetActive(false);
 
         // キャラのステータス値を表示させたい
-        var data = SceneMng.GetCharasSettings((int)SceneMng.CHARACTERNUM.UNI);
+        var data = SceneMng.GetCharasSettings(charaNum);
 
         // 表示する文字の作成
         string str = "名前  :" + data.name + "\n" +
@@ -321,6 +323,8 @@ public class MenuActive : MonoBehaviour
     private void SelectCanvasActive(CANVAS canvas)
     {
         Debug.Log(canvas + "を表示しています");
+        // 現在のページを保存
+        nowCanvas_ = canvas;
 
         parentRectTrans_[(int)canvas].gameObject.SetActive(true);
         switch (canvas)
@@ -328,20 +332,14 @@ public class MenuActive : MonoBehaviour
             case CANVAS.BAG:
                 // アイテムボタンが押されるとき
                 parentRectTrans_[(int)CANVAS.BAG].GetComponent<ItemBagMng>().Init();
-                // itemBagMngCS_.Init();
                 break;
-
             case CANVAS.STATUS:
-                SctiveStatus();
-                //Debug.Log("移動速度変更" + charaRunSpeed);
+                parentRectTrans_[(int)CANVAS.BAG].GetComponent<ItemBagMng>().StatusInit();
                 break;
-
             case CANVAS.OTHER:
                 // PictureAndQuestMng.csの初期化関数を呼ぶ
                 GameObject.Find("DontDestroyCanvas/OtherUI").GetComponent<PictureAndQuestMng>().Init();
-                //Debug.Log("移動速度変更" + charaRunSpeed);
                 break;
-
             default:
                 break;
         }
@@ -350,5 +348,10 @@ public class MenuActive : MonoBehaviour
         {
             itemBagMngCS_.SetActiveCanvas();
         }
+    }
+
+    public CANVAS GetNowMenuCanvas()
+    {
+        return nowCanvas_;
     }
 }
