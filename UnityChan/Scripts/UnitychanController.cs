@@ -16,6 +16,7 @@ public class UnitychanController : MonoBehaviour
     private KeyCode[] keyArray_ = new KeyCode[4] { KeyCode.UpArrow, KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow };
 
     private Vector3 moveDir_ = Vector3.zero;
+    private float height_ = 0.0f;
 
     void Start()
     {
@@ -63,6 +64,17 @@ public class UnitychanController : MonoBehaviour
             // 左キー or 右キー
             moveDir_.x = Input.GetAxis("Horizontal");
         }
+
+        // ユニが一定以上の高さにいるときはマイナスする
+        if(rigid_.position.y > 0.2f)
+        {
+            //Debug.Log("地面から離れています");
+            height_ = -1.0f;
+        }
+        else
+        {
+            height_ = 0.0f;
+        }
     }
 
     // rigidbodyを使用する移動計算は、FixedUpdateを利用して一定周期でおこなうようにする
@@ -92,8 +104,9 @@ public class UnitychanController : MonoBehaviour
 
         if (moveDir_ != Vector3.zero)
         {
-            // 速度ベクトルを作成（3次元用）Y座標は0.0fで必ず固定する
-            var speed = new Vector3(moveDir_.x, 0.0f, moveDir_.z);
+            // 速度ベクトルを作成（3次元用）Y座標は-1.0fで必ず固定する
+            // yを0.0fで固定してしまうと、少し浮いた時に地面に戻らなくなる
+            var speed = new Vector3(moveDir_.x, height_, moveDir_.z);
             // 速度に正規化したベクトルに、移動速度をかけて代入する
             rigid_.velocity = speed.normalized * SceneMng.charaRunSpeed;
 
@@ -123,5 +136,4 @@ public class UnitychanController : MonoBehaviour
             this.animator_.SetBool(runParamHash_, false);
         }
     }
-
 }

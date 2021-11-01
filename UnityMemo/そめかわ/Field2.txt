@@ -1,0 +1,74 @@
+必要な要素
+
+・暗闇
+→暗闇リンゴが生る場所
+
+・オアシス
+→清らかな水が取得できる場所
+　※画像検索して雰囲気大事にする
+
+------------------------------------------------
+
+①Uniを設置して、UniとMainCameraの座標を
+　ForestFieldと同じ値にそろえる。
+
+②地面の高さや位置を合わせるために、
+　EnvironmentのPosをX:-20 Y:0 Z:20
+  とする。
+
+③ForestFieldから[FieldMng][CameraController]
+  [ButtleCamera][WarpOut][DontDestroyCanvas]
+　[SceneMng][Jack][EventSystem]を
+  引っ張ってきてアタッチの設定をする。
+
+④MainCameraに[CameraSample.cs]をアタッチする
+　→これでUniにカメラが追従する
+
+⑤戦闘状態に遷移してほしくないから、
+　FieldMng.csのtime_+=Time.deltaTime;を
+　コメントアウトしておく(77行目付近)
+
+⑥unitychancontroller.csの値を一部修正
+
+⑦あとは、地面に設置するオブジェクトを複製して
+　それっぽくする
+
+⑧壁とか岩にコライダーをつける
+
+※RockとかのMeshColliderは全部外して、
+　大き目のやつにはCapsuleコライダーとかつける。
+
+※FieldMng.csの63行目でImageが取得できないバグ
+→bagImage_ = GameObject.Find("DontDestroyCanvas/Menu/BagImage").GetComponent<Image>();
+と記述したら一応大丈夫そうだけど。。。
+
+------------------------------------------------
+
+<オアシスについて>------------------------------
+
+まず、水を何かで囲まないといけない、、
+EnvironmentのTerrain_1のやつの、
+ScaleYを高くして、PosYを低くすることで尖った
+山脈部分だけを地上にだすようにする。
+
+Assets/Town/StandardAssets/Environment/Water/
+Water/PrefabsにあるWaterProDaytimeを置いて
+unpackした後、座標と大きさを決める。
+→これで水を囲めるようになった
+
+あとは周りに草木をはやしていく。
+
+------------------------------------------------
+
+<でこぼこ道でユニが浮いたままになる>-------------
+UnitychanController.csのUpdate関数で、
+一定値以上の高さにいるときはY座標をマイナスするようにした。
+
+------------------------------------------------
+
+<暗闇作るの忘れてたわ>--------------------------
+
+左上らへんに屋根ついたなんか場所つくった。
+りんご上からぶらさげたいなぁって感じ。
+
+------------------------------------------------
