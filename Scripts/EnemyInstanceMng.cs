@@ -8,7 +8,7 @@ public class EnemyInstanceMng : MonoBehaviour
     public GameObject enemyTest;                // テスト用の敵
     public GameObject enemyHPBar;               // 敵用のHPバー
     public EnemySelect enemySelectObj;          // 敵選択用アイコン
-                                                //　通常攻撃弾のプレハブ
+                                                // 通常攻撃弾のプレハブ
     [SerializeField]
     private GameObject kabosuAttackPrefab_;     // ユニの通常攻撃と同じものでテストする
     [SerializeField]
@@ -31,6 +31,9 @@ public class EnemyInstanceMng : MonoBehaviour
     private Vector3 enemyPos_;
     private Vector3 charaPos_;
     private int attackTarget_ = -1;             // 攻撃対象(敵からキャラの)
+
+    // Item1:イベントにより強制戦闘する際の敵の種類,Item2:敵の数
+    private (GameObject, int) eventEnemy_ = (null, -1);     
 
     void Start()
     {
@@ -141,23 +144,44 @@ public class EnemyInstanceMng : MonoBehaviour
     }
 
     // 敵のインスタンス処理(配置ポジションをButtleMng.csで指定できるように引数を用意している)
-    public void EnemyInstance(int mapNum,Canvas parentCanvas)
+    public int EnemyInstance(int mapNum,Canvas parentCanvas)
     {
+        // イベント用の変数が1以上の値だった場合、イベント用数値を優先する
+        if (eventEnemy_.Item2 >= 1)
+        {
+            mapNum_ = eventEnemy_.Item2;
+        }
+        else
+        {
+            mapNum_ = mapNum;
+        }
+
         // 毎回使用前に初期化する
-        mapNum_ = mapNum;
         enemyList_.Clear(); 
         enemyMap_.Clear();
 
         int num = 1;
         // 指定されたマップのリストを取り出して、foreach文で回す
-        foreach(Vector3 pos in enemyPosSetMap_[mapNum])
+        foreach(Vector3 pos in enemyPosSetMap_[mapNum_])
         {
             // 敵プレハブをインスタンス
-            GameObject enemy = Instantiate(enemyTest, pos, Quaternion.identity) as GameObject;
+            GameObject enemy = null;
+
+            if(eventEnemy_.Item1 == null)
+            {
+                // フィールド上の敵をランダムで出す
+                enemy = Instantiate(enemyTest, pos, Quaternion.identity) as GameObject;
+            }
+            else
+            {
+                // イベント用の敵を出す
+                enemy = Instantiate(eventEnemy_.Item1, pos, Quaternion.identity) as GameObject;
+            }
+
             enemy.name = num.ToString();
 
             // 敵HPをインスタンス
-            GameObject hpBar = Instantiate(enemyHPBar, enemyHPPos_[mapNum][num - 1], Quaternion.identity, parentCanvas.transform) as GameObject;
+            GameObject hpBar = Instantiate(enemyHPBar, enemyHPPos_[mapNum_][num - 1], Quaternion.identity, parentCanvas.transform) as GameObject;
             hpBar.name = "HPBar_"+num.ToString();
 
             // param[x]のxは出現させる敵の行番号(いまはカボス固定)
@@ -171,6 +195,14 @@ public class EnemyInstanceMng : MonoBehaviour
 
             num++;
         }
+
+        // 1度読み込んだらeventEnemy_をnullにする
+        if(eventEnemy_.Item1)
+        {
+            eventEnemy_ = (null, -1);
+        }
+
+        return mapNum_;
     }
 
     void AnimationChange(int num)
@@ -189,7 +221,7 @@ public class EnemyInstanceMng : MonoBehaviour
                 Attack(num);
                 break;
             case ANIMATION.AFTER:
-                AfterAttack();     // 攻撃終了後 
+                AfterAttack();        // 攻撃終了後 
                 break;
             //case ANIMATION.DEATH:
             //    break;
@@ -296,5 +328,10 @@ public class EnemyInstanceMng : MonoBehaviour
 
             Destroy(GameObject.Find(enemyList_[num].Item2.name));   // HPバーの削除
         }
+    }
+
+    public void SetEnemySpawn(GameObject obj,int num)
+    {
+        eventEnemy_ = (obj, num);
     }
 }

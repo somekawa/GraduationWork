@@ -33,6 +33,7 @@ public class FieldMng : MonoBehaviour
     private UnitychanController player_;           // プレイヤー情報格納用
     private CameraMng cameraMng_;
     private Image bagImage_;// 左下のバッグの画像
+
     void Start()
     {
         // 現在のシーンをFIELDとする
@@ -62,6 +63,55 @@ public class FieldMng : MonoBehaviour
         // バッグの画像がDontDestroyOnLoadされるオブジェクトのこのためその親から探す
         //var gameObject = DontDestroyMng.Instance;
         bagImage_ = GameObject.Find("DontDestroyCanvas/Menu/BagImage").GetComponent<Image>();
+
+        // イベント戦発生用の壁情報を取得する
+        var ParentObject = GameObject.Find("ButtleWall");
+        var ChildObject = new GameObject[ParentObject.transform.childCount];
+        for (int i = 0; i < ParentObject.transform.childCount; i++)
+        {
+            ChildObject[i] = ParentObject.transform.GetChild(i).gameObject;
+        }
+
+        // 現在受注中のクエスト情報を見る
+        var orderList = QuestClearCheck.GetOrderQuestsList();
+
+        // 1つもクエストを受注していない際は、全ての壁を非アクティブにする
+        if(orderList.Count <= 0)
+        {
+            for (int i = 0; i < ChildObject.Length; i++)
+            {
+                ChildObject[i].SetActive(false);
+            }
+        }
+
+        // 壁の個数でfor文を回す
+        for (int i = 0; i < ChildObject.Length; i++)
+        {
+            // 受注中クエスト個数でfor文を回す
+            for(int k = 0; k < orderList.Count; k++)
+            {
+                if(ChildObject[i].name == orderList[k].Item1.name)
+                {
+                    // 名前一致時の処理
+                    if (orderList[k].Item2)
+                    {
+                        // クリア済みクエストなら壁を非アクティブへ
+                        ChildObject[i].SetActive(false);
+                    }
+                    else
+                    {
+                        // 未クリアなら壁をアクティブへ
+                        ChildObject[i].SetActive(true);
+                    }
+                    break;
+                }
+                else
+                {
+                    // 名前不一致時の処理
+                    ChildObject[i].SetActive(false);
+                }
+            }
+        }
     }
 
     void Update()
@@ -74,7 +124,7 @@ public class FieldMng : MonoBehaviour
             // 探索中の時間加算処理
             if (player_.GetMoveFlag() && time_ < toButtleTime_)
             {
-                time_ += Time.deltaTime;
+                //time_ += Time.deltaTime;
             }
             else if (time_ >= toButtleTime_)
             {

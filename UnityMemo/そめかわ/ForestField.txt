@@ -2890,17 +2890,9 @@ adjustPosの計算にxとyは+forward.xと.yをしてたのを
 RigidbodyのConstraintsにある
 FreezeRotation XYZにチェックをいれる
 
-CapsuleColliderの
-CenterのYを0.8(他は0)
-Radius 0.8
-
 [Jack]
 RigidbodyのConstraintsにある
 FreezeRotation XYZにチェックをいれる
-
-CapsuleColliderの
-CenterのYを0.8(他は0)
-Radius 0.8
 
 もしかして、前の弾の目的地が次の弾の攻撃対象が
 他のキャラだったときに座標がそれてる？
@@ -3051,6 +3043,140 @@ do
 <UniとカボスのAnimMaxについて>------------------
 
 両方とも1.0に設定した
+
+------------------------------------------------
+
+<エンカウントの画像を追加/変更する>--------------
+[FieldUICamvas-Encounter]
+Pos X:-100 Y:100 Z:0
+Image:whiteFrameMask.png
+
+新規で、Encounterの子に[LogoImage(Image)]を追加
+[LogoImage]
+Pos X:-100 Y:100 Z:0
+Width:140 Height:121
+Image:Encount_Logo.png(新規画像)
+
+新規でEncounterの子に[FrameImage(Image)]を追加
+[FrameImage]
+Pos X:-100 Y:85  Z:0
+Width:250  Height:250
+Scale X:1  Y:1.1 Z:1
+Image:Encount_Frame.png(新規画像)
+※EncountColor.csは付けないように気を付ける
+外枠サイト↓
+https://www.free-frame.net/data/574.php
+
+[Encounter]
+Pos X:-115 Y:110 Z:0
+
+------------------------------------------------
+
+<フィールドの左奥へ進んだ時に強制ボス戦をする>---
+
+<壁の出す出さないを制御する>
+戦闘が発生するための見えない壁を用意しておいて、
+該当するクエストを受けてるときだけactiveにする。
+
+新規で空のオブジェクトで[ButtleWall]を作成する。
+その子として、[1(Cube)]を作成。
+数字はクエスト番号と一致する番号にする。
+
+今回の場合、1がギルドテストというクエストだから
+1で作成し、左奥に設置する。
+
+[1(Cube)]
+Pos      X:-24 Y:1   Z:50
+Rotation X:0   Y:-10 Z:0
+Scale    X:11  Y:5   Z:1
+※IsTriggerにチェックあり
+
+FieldMng.csでFindしてButtleWallを取得できるようにし、子の番号と現在受注中のクエスト番号を照合する。
+
+[FieldMng.cs]
+Start関数内に処理を追加する。
+①イベント戦発生用の壁情報を取得する
+　→保存しておきたい情報ではないからローカル変数
+　ButtleWallの子オブジェクトを配列で取得する
+
+②受注中のクエスト情報を取得する。
+　QuestClearCheck.csのGetOrderQuestsList関数が
+　staticになっているから、ここから情報をもらう。
+　
+③1つもクエストを受注していない際は、
+　全ての壁を非アクティブにする。
+　→②のCountを見たらわかる。
+
+④壁の個数と受注中クエスト個数で2重for文を回す。
+　名前が番号同士で一致していればアクティブへ、
+　不一致なら非アクティブにする。
+　→このとき、すでにクリア済み(boolがtrue)なら
+　　非アクティブ処理にする
+　→名前一致時の処理は、必ず最後breakで終わるよう
+　　にしておく。
+
+これで壁の出す出さないは制御できるようになった。
+
+<強制戦闘を発生させるScriptを新規で作成する>
+ForcedButtle.csを作成する。
+ButtleWallの子の壁にはすべてForcedButtle.csを
+アタッチするようにする。
+
+[ForcedButtle.cs]
+OnTriggerEnter関数を書く。
+接触したのがPlayerタグがついたもの(=ユニ)だった
+場合、nowModeをBUTTLEにする。
+→これで強制戦闘にできる
+
+また、戦闘終了後にまたEnter関数に入ってこないようにthis.gameObject.SetActive(false);を記述して
+非アクティブにしておく。
+
+あとは敵の種類が指定できるようにする。
+[EnemyInstanceMng.cs]
+private GameObject eventEnemy_; という変数を用意しておき、SetEnemySpawn関数を新規作成して、
+受け取った引数の内容をeventEnemy_に保存する。
+
+インスタンスするときにはeventEnemy_変数がnullかどうかで敵の生成を変えるようにする。
+→イベントの敵を出すときには必ずeventEnemy_を最後
+　はnullにする
+
+[ForcedButtle.cs]
+SetEnemySpawn関数をFindしてから呼び出し、
+public GameObject eventEnemy;
+という外部アタッチ用の変数を用意する。
+→ここにカボスとか特定の敵をアタッチする。
+
+これで、イベント戦闘での敵の指定ができた。
+
+<イベント戦闘の敵の数を指定する>
+eventEnemy_をpairにする。
+(GameObject,int)として、
+敵の種類と敵の数ということにする。
+※初期値をnullと-1にする
+
+SetEnemySpawn関数の引数に数値を追加する。
+EnemyInstance関数の頭で、
+イベント用の変数が1以上の値だった場合、イベント用数値を優先するように処理を変更する。
+
+いまのままでは、ButtleMngの敵数と値が異なってしまいバグがでる。
+→EnemyInstance関数の返り値をintにして、敵数を
+　返すようにする
+　(return mapNum_;)
+
+[ButtleMng.cs]
+返り値をcorrectEventNumというローカル変数に保存して、debugEnemyNumをつかって処理している部分を
+置き換える。
+
+これで強制戦闘時の敵の数を調整できるようになった
+
+------------------------------------------------
+
+<フィールドの左奥に宝箱を設置する>---------------
+学校から持ち帰ってきたデータの中にある、
+FSLootBoxesファイルが宝箱。
+これをAssets/Field/FSLootBoxes
+という階層にしてデータを入れる。
+
 
 ------------------------------------------------
 

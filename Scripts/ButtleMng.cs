@@ -56,10 +56,11 @@ public class ButtleMng : MonoBehaviour
             characterMng_.ButtleSetCallOnce();
 
             // 敵のインスタンス(1～4)
-            enemyInstanceMng_.EnemyInstance(debugEnemyNum, buttleUICanvas);
+            // イベント戦闘の場合、敵の数が異なる場合があるので返り値で正しい値を受け取るようにする
+            var correctEnemyNum = enemyInstanceMng_.EnemyInstance(debugEnemyNum, buttleUICanvas);
 
             // 敵の名前と行動速度を受け取ってリストに入れる
-            for (int i = 0; i < debugEnemyNum; i++)
+            for (int i = 0; i < correctEnemyNum; i++)
             {
                 moveTurnList_.Add(enemyInstanceMng_.EnemyTurnSpeed(i));
             }
@@ -74,7 +75,7 @@ public class ButtleMng : MonoBehaviour
             moveTurnList_.Reverse(); // 降順にするために逆転させる
 
             // Character管理クラスに敵の出現数を渡す
-            characterMng_.SetEnemyNum(debugEnemyNum);
+            characterMng_.SetEnemyNum(correctEnemyNum);
         }
 
         if(moveTurnList_[moveTurnCnt_].Item2 == "Uni" || moveTurnList_[moveTurnCnt_].Item2 == "Jack")
