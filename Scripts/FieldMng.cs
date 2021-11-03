@@ -14,6 +14,9 @@ public class FieldMng : MonoBehaviour
     // 様々なクラスからMODEの状態は見られることになるから、nowMode_はstatic変数にしたほうがいい
     // このクラスは画面状態の遷移を管理するだけで、それ以外の画面処理は他のScriptで行う
 
+    [SerializeField]
+    private GameObject fieldUICanvasPopUp_; // FieldUICanvasの中にあるPopUpという空のオブジェクトを外部アタッチする
+
     // 画面状態一覧
     public enum MODE
     {
@@ -32,7 +35,13 @@ public class FieldMng : MonoBehaviour
 
     private UnitychanController player_;           // プレイヤー情報格納用
     private CameraMng cameraMng_;
-    private Image bagImage_;// 左下のバッグの画像
+    private Image bagImage_;                       // 左下のバッグの画像
+
+    private TMPro.TextMeshProUGUI titleInfo_;      // 宝箱か壁かで表示内容を変更する
+    private TMPro.TextMeshProUGUI getChestsInfo_;  // 宝箱から獲得したアイテム内容の表示先
+
+    private GameObject DataPopPrefab_;
+    private ChestList  popChestList_;
 
     void Start()
     {
@@ -64,51 +73,71 @@ public class FieldMng : MonoBehaviour
         //var gameObject = DontDestroyMng.Instance;
         bagImage_ = GameObject.Find("DontDestroyCanvas/Menu/BagImage").GetComponent<Image>();
 
-        // イベント戦発生用の壁情報を取得する
-        var ParentObject = GameObject.Find("ButtleWall");
-        var ChildObject = new GameObject[ParentObject.transform.childCount];
-        for (int i = 0; i < ParentObject.transform.childCount; i++)
-        {
-            ChildObject[i] = ParentObject.transform.GetChild(i).gameObject;
-        }
+        // イベント戦発生用の宝箱/壁情報を取得する
+        CheckWallAndChestActive("ButtleWall");
+        CheckWallAndChestActive("Chests");
 
+        // Chest.xlsから宝箱内容の取得を行う
+        DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        popChestList_  = DataPopPrefab_.GetComponent<PopList>().GetData<ChestList>(PopList.ListData.CHEST);
+
+        // 内容のタイトル
+        titleInfo_ = fieldUICanvasPopUp_.transform.Find("TitleInfo").GetComponent<TMPro.TextMeshProUGUI>();
+        // 宝箱の文字描画先
+        getChestsInfo_ = fieldUICanvasPopUp_.transform.Find("GetChestsInfo").GetComponent<TMPro.TextMeshProUGUI>();
+    }
+
+    // クエストの受注状況に合わせて、壁や宝箱のアクティブ状態を判別する
+    private void CheckWallAndChestActive(string parentName)
+    {
         // 現在受注中のクエスト情報を見る
         var orderList = QuestClearCheck.GetOrderQuestsList();
 
-        // 1つもクエストを受注していない際は、全ての壁を非アクティブにする
-        if(orderList.Count <= 0)
+        // イベント用の宝箱情報を取得する
+        var objParent = GameObject.Find(parentName);
+        var objChild = new GameObject[objParent.transform.childCount];
+        for (int i = 0; i < objParent.transform.childCount; i++)
         {
-            for (int i = 0; i < ChildObject.Length; i++)
+            objChild[i] = objParent.transform.GetChild(i).gameObject;
+        }
+
+        // 1つもクエストを受注していない際は、全ての宝箱/壁を非アクティブにする
+        if (orderList.Count <= 0)
+        {
+            for (int i = 0; i < objChild.Length; i++)
             {
-                ChildObject[i].SetActive(false);
+                objChild[i].SetActive(false);    
             }
         }
 
-        // 壁の個数でfor文を回す
-        for (int i = 0; i < ChildObject.Length; i++)
+        // 宝箱/壁の個数でfor文を回す
+        for (int i = 0; i < objChild.Length; i++)
         {
             // 受注中クエスト個数でfor文を回す
-            for(int k = 0; k < orderList.Count; k++)
+            for (int k = 0; k < orderList.Count; k++)
             {
-                if(ChildObject[i].name == orderList[k].Item1.name)
+                // 名前が[クエスト番号 - 配置番号]となっているから、ここで分割してあげる
+                string[] arr = objChild[i].name.Split('-');
+
+                if (arr[0] == orderList[k].Item1.name)
                 {
                     // 名前一致時の処理
                     if (orderList[k].Item2)
                     {
-                        // クリア済みクエストなら壁を非アクティブへ
-                        ChildObject[i].SetActive(false);
+                        // クリア済みクエストなら宝箱/壁を非アクティブへ
+                        objChild[i].SetActive(false);
                     }
                     else
                     {
-                        // 未クリアなら壁をアクティブへ
-                        ChildObject[i].SetActive(true);
+                        // 未クリアなら宝箱/壁をアクティブへ
+                        objChild[i].SetActive(true);
                     }
                     break;
                 }
                 else
                 {
                     // 名前不一致時の処理
-                    ChildObject[i].SetActive(false);
+                    objChild[i].SetActive(false);
                 }
             }
         }
@@ -130,6 +159,12 @@ public class FieldMng : MonoBehaviour
             {
                 nowMode = MODE.BUTTLE;
                 time_ = 0.0f;
+
+                // まだポップアップ中であったら、非アクティブにする
+                if(fieldUICanvasPopUp_.activeSelf)
+                {
+                    fieldUICanvasPopUp_.SetActive(false);
+                }
             }
             else
             {
@@ -179,4 +214,78 @@ public class FieldMng : MonoBehaviour
     {
         return time_ / toButtleTime_;
     }
+
+    // flagは、true->宝箱,false->壁(強制戦闘)の処理という風に使い分ける
+    public void ChangeFieldUICanvasPopUpActive(int num1,int num2,bool flag)
+    {
+        if(flag)
+        {
+            // 宝箱関連処理
+            // 表示する文字を決定する
+            for (int i = 0; i < popChestList_.param.Count; i++)
+            {
+                // どちらの数字も一致していたら
+                if (popChestList_.param[i].num1 == num1 &&
+                   popChestList_.param[i].num2 == num2)
+                {
+                    // ExcelのgetItem内容を書き込み、タイトルもGetItemにする
+                    titleInfo_.text = "GetItem";
+                    getChestsInfo_.text = popChestList_.param[i].getItem;
+                }
+            }
+
+            fieldUICanvasPopUp_.SetActive(true);
+            // 選択肢は非表示にする
+            // 処理回数的にFindを適時行っても問題なさそうなので、この書き方にしています。
+            fieldUICanvasPopUp_.transform.Find("Select").gameObject.SetActive(false);
+
+            StartCoroutine(PopUpMessage());
+        }
+        else
+        {
+            // 壁(強制戦闘)関連処理
+            titleInfo_.text = "Danger!!";
+            getChestsInfo_.text = "モンスターの気配がする…\n先に進みますか？";
+
+            // すでにアクティブ状態ならば、非アクティブになるし、
+            // 非アクティブならば、アクティブにする(処理順逆にすると選択肢出てこないから注意)
+            // 処理回数的にFindを適時行っても問題なさそうなので、この書き方にしています。
+            fieldUICanvasPopUp_.transform.Find("Select").gameObject.SetActive(!fieldUICanvasPopUp_.activeSelf);
+            fieldUICanvasPopUp_.SetActive(!fieldUICanvasPopUp_.activeSelf);
+        }
+    }
+
+    private IEnumerator PopUpMessage()
+    {
+        float time = 0.0f;
+        while (fieldUICanvasPopUp_.activeSelf)
+        {
+            yield return null;
+
+            if(time >= 3.0f)
+            {
+                fieldUICanvasPopUp_.SetActive(false);
+            }
+            else
+            {
+                time += Time.deltaTime;
+            }
+        }
+    }
+
+    public void MoveArrowIcon(bool flag)
+    {
+        // 処理回数的にFindを適時行っても問題なさそうなので、この書き方にしています。
+        if(flag)
+        {
+            // はい
+            fieldUICanvasPopUp_.transform.Find("Select/Icon").transform.localPosition = new Vector3(-160.0f, -60.0f, 0.0f);
+        }
+        else
+        {
+            // いいえ
+            fieldUICanvasPopUp_.transform.Find("Select/Icon").transform.localPosition = new Vector3(40.0f, -60.0f, 0.0f);
+        }
+    }
+
 }

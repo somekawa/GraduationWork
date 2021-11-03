@@ -3177,6 +3177,383 @@ FSLootBoxesファイルが宝箱。
 これをAssets/Field/FSLootBoxes
 という階層にしてデータを入れる。
 
+Demo3の宝箱をAssets/Field/FSLootBoxes/Assets/Prefabsに
+プレハブ化する。
+(もともと入っていたほうの宝箱のプレハブは削除)
+
+ためしにフィールドに配置してみる。
+※TreasureChestPrefabについているRigidbodyの
+　IsKinematicにチェックをいれる！！
+　→ユニと衝突時に、ユニが宝箱の上に乗り上げるの
+　　を防ぐため。
+
+また、TreasureChestPrefabの子のOutsideCoinsは
+今回は使用しないのでdeleteしとく。
+それ以外はなにもいじってない。
+
+今は接触中にスペースキーを押したら開くようになってる。
+
+<該当クエスト中のみアクティブにする>
+ButtleWallとかと同じ要領で、受注中クエストに関連する宝箱のみアクティブになるようにする。
+
+TreasureChestPrefabを[TreasureChest]と名称変更。
+その子供のChestを[該当クエストの番号]に名称変更。
+→今回の場合はChestが[1]となる。
+
+[FieldMng.cs]
+最初にFindするのを("TreasureChest")にするぐらいで
+他は壁と同じ処理。
+※むしろまっったく同じだから関数に
+　まとめたほうがいい。
+　→CheckWallAndChestActive関数を新規作成
+
+これで該当クエストの番号と一致させられた。
+
+<設置位置を調整する>
+[1](左奥の座標)
+Pos      X:-24 Y:0    Z:54
+Rotation X:0   Y:180  Z:0
+Scale    X:1   Y:1    Z:1
+
+<Chestの部分を番号にしたらアニメーションしなくな るバグ>
+番号部分がChestじゃないと反応しない・・・？
+
+階層の大幅な変更をする
+Chests(空のオブジェクト)
+　-番号
+   --Chest
+
+とする。これにより、FieldMng.csの変更も必要。
+CheckWallAndChestActive("Chests");にする。
+
+変更したものについてまとめ
+・番号のRigidbodyのIsKinematicにチェックをいれる
+・LootBox.csのCloseOnExitのチェックをはずす
+・Chests-番号-宝箱の中身系 という階層にした
+　→これにより、FieldMng.csの関数の引数も
+　　"Chests"へ変更した
+
+------------------------------------------------
+
+<宝箱を開けたら、ワードと合格証を入手する>-------
+
+テロップで、
+○○を手に入れた！
+みたいにする。
+
+<入手できるもの>
+・ギルドテスト合格証
+・ワード「単体(ヘッド)」
+・ワード「炎(エレメント)」
+・ワード「小(テイル)」
+
+テロップを出すときに使うキャンバスは、
+[FieldUICanvas]を使う。
+→エンカウント率をだしてるところ
+
+[FieldUICanvas]の子に[GetChestsInfo(TMPText)]をいれる。
+[GetChestsInfo]
+Pos X:-120 Y:100 Z:0
+Width:200  Height:50
+FontAsset:NewMplus1-MediumSDF
+FontSize :36
+→ここに、宝箱から取得した内容物を記載する
+今回の場合は<入手できるもの>の4つを書く。
+
+[FieldUICanvas]の子に[BackImage(Image)]を入れる
+[BackImage]
+Pos X:0 Y:16 Z:0
+Width:782 Height:198
+Scale:X:0.8 Y:1.5 Z:1
+Image:frame_text.png
+これは、入手した情報&強制戦闘始まる合図
+の背景に使える。
+
+[FieldUICanvas]の子に[TitleBackImage(Image)]を
+入れる
+[TitleBackImage]
+Pos X:0 Y:180 Z:0
+Width:260 Height:68
+Scale:X:1.2 Y:1.2 Z:1
+Image:frame_name.png
+これは、入手した情報&強制戦闘始まる合図
+のタイトル背景として使える。
+
+[FieldUICanvas]の子に[TitleInfo(TMPText)]を
+いれる
+[TitleInfo]
+Pos X:-120 Y:185 Z:0
+Width:200  Height:50
+FontAsset:NewMplus1-MediumSDF
+FontSize :36
+Alignment:上の段のやつを[中央]にする
+これは、入手した情報&強制戦闘始まるときに
+GetItemとかDangerとか出すテロップにする。
+
+[BackImage][TitleBackImage][GetChestsInfo]
+[TitleInfo]の親として、[PopUp]という空のオブジェクトを用意する。
+
+<宝箱を開けたときに特定の文字と背景を出す>
+とりあえず文字はこのまま固定で考えておいて、
+宝箱を開けたときにアクティブになるようにする。
+
+①FieldMng.cs
+SerializeFieldで、
+private GameObject fieldUICanvasPopUp_;という
+変数を用意する。
+→ここにFieldUICanvasの中にあるPopUpという
+  空のオブジェクトを外部アタッチする
+※PopUpは最初非アクティブにしておく。
+
+②FieldMng.cs
+ChangeFieldUICanvasPopUpActive関数を作成して、
+fieldUICanvasPopUp_.SetActive(true);
+という内部処理をいれる。
+
+③LootBox.cs
+Open関数内でisOpen=true;の後ろで
+GameObject.Find("FieldMng").
+GetComponent<FieldMng().
+ChangeFieldUICanvasPopUpActive();
+という処理を行う。
+
+④FieldMng.cs
+ChangeFieldUICanvasPopUpActive関数で
+StartCoroutine(PopUpMessage());
+を呼ぶようにする。
+→PopUpMessage関数は、アクティブ状態になってから　3.0秒以内なら表示し続け、上限を超えたら非アクテ　ィブにするようにしている
+
+⑤FieldMng.cs
+Update関数で、nowModeがSEARCHのときに時間の関係で
+BUTTLEに切り替わる時、まだポップアップ中だったら
+SetActiveをfalseにするように記述する
+→たぶんここでfalseにするからまだコルーチン中でも
+　activeselfの判定でwhile文を抜けてくれるはず
+
+
+<特定の文字ではなく、条件にあったときの文字を
+ 出せるようにする>
+分割しないExcelをつかってつくる。
+方法はノートで図解してるからそれ見て思い出して。
+※だいたいの内容はここにも書きます
+
+[ChestInfo.xlsの作成]
+QuestInfo.xlsを複製して名前変更する。
+num1,num2,getItemという項目で作成する。
+
+今回の場合
+num1->1
+num2->1
+getItem->・ギルドテスト合格証
+         ・ワード「単体(ヘッド)」
+         ・ワード「炎(エレメント)」
+         ・ワード「小(テイル)」
+と入力する
+
+Importするときは
+class name->ChestList
+sepalate sheet->チェックあり
+int
+int
+string
+にする。
+
+いつもどおりChestInfo_importer.csのexportPathを
+変更してreimportを押す。
+
+Excelから宝箱情報の読み込みを行う。
+①FieldMng.cs
+private GameObject DataPopPrefab_;
+private ChestList  popChestList_;
+を新規作成する。
+
+②PopList.cs
+ListDataのenumにCHESTを追加する。
+GetData関数のswitchにもCHESTを追加して、
+tmpStr = "Chest";
+return (T)(object)GetList<ChestList>(tmpStr);
+とする。
+
+③FieldMng.cs
+Start関数で、
+DataPopPrefab_ =
+Resources.Load("DataPop") as GameObject;
+popChestList_  = DataPopPrefab_.GetComponent<PopList>().GetData<ChestList>(PopList.ListData.CHEST);
+とする。
+
+これで情報を受け取るところまではできた。
+
+クエスト番号が1つに対して複数宝箱を設置する場合について考える。
+
+[1]としている宝箱の名前を[1-1]にする。
+この影響で名前一致判定をしている処理がうまくいかなくなるから、名前一致判定のまえにハイフンの前後で数字を区切って、前の数値の方を判定に採用する。
+
+string[] arr = objChild[i].name.Split('-');
+としてから、
+if(arr[0] == orderList[k].Item1.name)
+
+※これで、一気に3つ配置するとかになっても
+　[クエスト番号 - 1,2,3]で対応できるから安心
+
+※ついでにButtleWallの方も[1-1]とかの置き方にした
+
+あとは、開けられた宝箱の名前を取得してきて
+表示する文字が選択できるようにする。
+
+その前に、宝箱内容の文字描画先を変数で取得しとく
+FieldMng.csで、
+private TMPro.TextMeshProUGUI getChestsInfo_;
+という変数を作成してStart関数で
+getChestsInfo_ = fieldUICanvasPopUp_.transform.Find("GetChestsInfo").GetComponent
+<TMPro.TextMeshProUGUI>();とする。
+
+①FieldMng.cs
+ChangeFieldUICanvasPopUpActive関数の引数で
+int num1,int num2を追加する。
+
+②LootBox.cs
+ChangeFieldUICanvasPopUpActive関数を呼び出しているところで自分の名前をハイフンの前後で区切る。
+それをそれぞれの引数に入れるようにする。
+
+③FieldMng.cs
+ChangeFieldUICanvasPopUpActive関数の引数でもらってきた番号とpopChestList_変数を照合する。
+一致したときに、 (if文で一致してるか確認する)     getChestsInfo_.text =
+popChestList_.param[i].getItem;
+という処理を行う。
+
+これで、宝箱を開けたら、ワードと合格証を入手するのもできたし、他の宝箱の設定をしようとすればできるようになった。
+
+あ、TitleInfoの内容も書き換えれるようにしとかな。
+getChestsInfo_の要領でtitleInfo_を作成。
+ChangeFieldUICanvasPopUpActive関数で一致しているときに、titleInfo_.text = "GetItem";という処理を
+する。
+
+------------------------------------------------
+
+<強制戦闘前に、確認テロップをだす>---------------
+
+Townから、はい/いいえのやつと、矢印をコピーして
+FieldUICanvasのPopUpの子にする。
+(Yes/No/Icon)そして座標調整をする。
+[Yes]
+Pos   X:-100 Y:-60 Z:0
+Width:260 Height:68
+Scale X:0.6 Y:0.6 Z:1
+
+[No]
+Pos   X:100 Y:-60 Z:0
+Width:260 Height:68
+Scale X:0.6 Y:0.6 Z:1
+
+[Icon]
+(「はい」の方のとき)
+Pos   X:-160 Y:-60 Z:0
+(「いいえ」の方のとき)
+Pos   X:40   Y:-60 Z:0
+
+Width:132 Height:148
+Scale X:0.25 Y:0.25 Z:1
+
+<壁に当たった時、ユニの操作状態を切替可能にする>
+ForcedButtle.csでStart関数を用意し、
+UnitychanControllerをFindする。
+コルーチンを用意して、そのなかでコントローラーの
+enableをfalseにしたりtrueにしたり切り替えれるようにしておく
+
+<はい/いいえを選択する処理をつくる>
+ForcedButtle.csに、HouseInteriorMng.csを参考にしたコルーチン処理をつくる。
+→SelectForcedButtle関数とする
+
+while文の条件をcontroller_のenabledにしておき、
+SPACEキー押下で操作可能にすると同時にwhile文を抜けられるようにする。
+
+bool tmpFlgをつくり、はい->true,いいえ->false
+にして、左右キーでフラグを切り替えるようにし、
+SPACEキーを押下した時点でのフラグの状態をみて
+ユニの位置を下げたり、敵の種類と数の設定をする。
+
+<そもそもの描画処理>
+※Yes/No/Iconを、[Select]という空のオブジェクトに
+　入れるようにする。
+
+FieldMng.csから描画状態は制御したほうがいい
+→すでにpopupをアタッチで取得してるから。
+
+①ForcedButtle.cs
+FieldMng情報を取得できるように変数を用意して
+Start関数でFindする。
+
+②FieldMng.cs
+ChangeFieldUICanvasPopUpActive関数の引数にboolで
+フラグを付け加える。
+true:宝箱処理 false:壁処理
+として、中の処理をif文で分けるようにする。
+→LootBox.csにはtrueという引数を書く必要がある。
+
+③ForcedButtle.cs
+コルーチンの最初で
+ChangeFieldUICanvasPopUpActive関数を呼び出す。
+引数は(-1,-1,false)とする。
+
+④FieldMng.cs
+ChangeFieldUICanvasPopUpActive関数の宝箱処理では
+fieldUICanvasPopUp_.transform.Find("Select").gameObject.SetActive(false);として、
+強制戦闘側では、
+fieldUICanvasPopUp_.transform.Find("Select").gameObject.SetActive(true);とする。
+
+また、すでにアクティブなら非アクティブにし、
+非アクティブならアクティブにするために、
+fieldUICanvasPopUp_.transform.Find("Select").gameObject.
+SetActive(!fieldUICanvasPopUp_.activeSelf);
+
+fieldUICanvasPopUp_.
+SetActive(!fieldUICanvasPopUp_.activeSelf);
+とする。
+※処理順逆にしたら選択肢出てこないから注意
+
+⑤ForcedButtle.cs
+SPACEキー押下後に、もう一度
+ChangeFieldUICanvasPopUpActive関数を呼び出す。
+→非アクティブにするため
+
+<矢印を動かす処理>
+FieldMng.csにMoveArrowIcon関数を作成して、
+引数で受け取ったフラグ状態をみてIconの座標を
+ずらすようにする。
+ForcedButtle.csのコルーチンにある左右キー処理の
+中で呼び出すようにする。
+→Findを使ってるけど、呼び出し回数的に最初から
+　取得しておく必要もなさそうだから
+　必要なときにFindするようにしている。
+
+<テロップを出しているときはユニアニメーションを
+ 止める>
+ForcedButtle.csのコルーチン内で、enabledをfalseにする前に、controller_.StopUniRunAnim();を
+呼び出す。
+
+<テロップの文章を書き換える>
+ChangeFieldUICanvasPopUpActive関数の戦闘処理側に
+titleInfo_.text = "Danger!!";
+getChestsInfo_.text =
+ "モンスターの気配がする…\n先に進みますか？";
+という文章を記載しておく。
+
+<いいえの処理をつくる>
+ユニの座標を少し後ろに戻したい。
+ForcedButtle.cs
+private GameObject uniChan_;
+という変数を用意する。
+コルーチン処理でSPACEキー押下時にいいえだった時に
+Vector3 velocity =
+(-gameObject.transform.forward) * 3.0f;
+uniChan_.transform.position += velocity;
+という処理を付け加える。
+
+座標の戻し方については、
+https://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q14185459249
+上記をみて考える。
+
+これで強制戦闘前にテロップをだして案内表記できる
 
 ------------------------------------------------
 

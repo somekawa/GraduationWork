@@ -8,6 +8,7 @@ public class PopList : MonoBehaviour
         CHARACTER,      // キャラクター初期情報(あとで、すべてCSV形式からの読み込み書き出しに変えるかも)
         ENEMY,          // 敵情報
         QUESTINFO,      // クエスト情報
+        CHEST,          // 宝箱情報
         MAX
     }
 
@@ -45,6 +46,10 @@ public class PopList : MonoBehaviour
             case ListData.QUESTINFO:
                 tmpStr = "Quest" + num;
                 return (T)(object)GetList<QuestInfo>(tmpStr);
+
+            case ListData.CHEST:
+                tmpStr = "Chest";
+                return (T)(object)GetList<ChestList>(tmpStr);
 
             default:
                 return default(T);
