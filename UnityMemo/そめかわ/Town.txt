@@ -1126,8 +1126,12 @@ menuActive_.ViewStatus(charaStringNum_);
 OnClickRight/Left関数でも同様に呼び出す。
 
 <ジャックの立ち絵に切り替わるようにする>
+[ItemBagMng.cs]
 立ち絵の切替をシリアライズフィールドのprivateで
 外部アタッチするようにする。
+※配列数を[2]にして[Uni.png][Jack.png]の順に
+　アタッチする
+
 charaStringNum_に合わせて立ち絵が変わるように、
 charaImg_.sprite = CharaImage_[charaStringNum_];
 とする。
@@ -1155,11 +1159,157 @@ charaImgRect_.sizeDelta = new Vector2(CharaImage_[charaStringNum_].rect.width, C
 
 ------------------------------------------------
 
+<クエスト報告時にハンコが押される表現をする>-----
 
+学校から持ち帰ってきたデータにCanvas.prefabと
+Picture/test.pngがあるからそれを使って実装する。
 
-更新するときはStatusMngだけ更新しよ
+まずはCanvasの内容をギルドの台紙に移動させる。
+Guild/QuestMng/QuestUI/InfomationPanelに、
+[RectMask2D]をアタッチする。
+そして、その子として[Stamp]をアタッチして、
+Imageをtest.pngにする。
 
-※あとで追加で必要になるタブ[報酬]
+[Stamp]
+アンカーポイント:右下
+Pos X:-65 Y:120 Z:0
+Width:315 Height:309
+Scaleは全て1
+
+とりあえず最初からスタンプ押下状態にはなった。
+
+次に、クエスト報告ボタンが押された時だけ出てくるようにする。
+
+[QuestMng.cs]
+private Image stampImg_変数を作成する。
+Start関数内でFindする。
+ClickLookQuest関数やClickReportQuest関数では、
+関数の最後尾で
+// ハンコを非アクティブにする
+stampImg_.gameObject.SetActive(false);
+そして、ClickReportButton関数では、
+// ハンコをアクティブにする
+stampImg_.gameObject.SetActive(true);
+にする。
+
+------------------------------------------------
+
+<クエストクリア報酬について>---------------------
+まず報酬内容をクエストの紙に記載するようにする。
+そのために、QuestInfo.xlsに報酬の欄を追加する。
+
+rewardという項目を追加して
+各クエストに報酬を記入する。
+
+<QuestInfo.cs>
+public string reward;を追加する
+
+<QuestInfo_importer.cs>
+67行目に
+cell = row.GetCell(6); p.reward = 
+(cell == null ? "" : cell.StringCellValue);
+を追加する。
+
+これで報酬内容を読み込めるようになった。
+
+QuestMng/QuestUI/InfomationPanelの子に、
+[RewardText(Text)]を追加する。
+[RewardText]
+Pos X:-160 Y:-30 Z:0
+Width:160 Height:30
+
+[QuestMng.cs]
+private Text questInfoText3_;
+という変数を作成する。
+
+Start関数で
+questInfoText3_ = questUI.transform.Find("InfomationPanel/RewardText").
+GetComponent<Text>();
+とする。
+
+SetSelectQuest関数に、
+questInfoText3_.text =
+"報酬\n" + popQuestInfo_.param[num].reward;
+を追加する。
+
+これでクリア報酬の内容を表示することができた。
+
+<もっと報酬受け取りを目立たせたい>
+ForestFieldで実装したポップアップをもってくる。
+QuestUIの子として
+PopUp -BackImage,TitleBackImage,GetReward,TitleInfo
+という階層で実装する。
+
+[QuestMng.cs]
+private GameObject popUpReward_;と
+private TMPro.TextMeshProUGUI rewardText_;
+という変数を作成。
+
+Start関数でFindする。
+
+ClickReportButton関数で報酬内容を記載したあとに
+ポップアップをアクティブにする
+rewardText_.text =
+popQuestInfo_.param[questNum_].reward;
+popUpReward_.SetActive(true);
+
+ポップアップ内容は時間経過でfalseにしたいから、
+FieldMng.csのPopUpMessage関数をもってきて
+ClickReportButton関数でコルーチンを呼ぶようにする
+
+------------------------------------------------
+
+<ポップアップのα値とか決めたい>-----------------
+ほわんとだしてほわんと消したい。
+
+新規でα値を調整するScriptを作成したほうがいい。
+[AlphaChange.cs]というスクリプトを作成して、
+PopUpにアタッチする。
+
+[AlphaChange.cs]
+3つのprivate変数を用意する。
+private float alpha_ = 0.0f;
+private float alphaChangeSpeed_ = 0.01f;
+private (GameObject,bool)[] chiledObj_;
+
+OnEnable関数内でalpha_変数を初期化し、
+chiledObj_変数の設定をfor文内で行う。
+→ここのfor文内でcolorの設定を(1,1,1,0)にして
+　α値を0にする。
+
+最後の行でコルーチンを呼び出す。
+(PopUpAlpha関数)
+alpha_変数が1.0fより小さい間はwhile文を回り続ける
+内部ではalpha_変数を加算しつつ、ImageとTMProの見分けをboolでして、値を変更する。
+
+<ForestFieldのPopUpにつけたらエラーでたわ>
+(原因)
+ImageでもTMProでもないやつがelseに入ってたから。
+(対処法)
+α値の加算を飛ばす子供の番号を入れるリストを作成する。
+
+private List<int> notAlphaChangeList_ =
+new List<int>();を用意する。
+
+OnEnable関数でelseにきたものをAdd(i)とする。
+
+コルーチンのfor文でnotAlphaChangeList_にいれた数字と一致したiならbreak処理をする。
+→さらに、breakに入ったときにtmpFlgをfalseにして
+　falseならα値加算処理に入らないようにif文を
+　つける。
+
+------------------------------------------------
+
+<他の報告クエストを押したときにハンコが消えない>-
+
+[QuestMng.cs]
+SetSelectQuest関数のelse ifにある
+REPORT_QUEST内に、ハンコを非アクティブにする処理を追加する。
+
+ハンコの画像の名前を
+[Stamp.png]に変更する。
+------------------------------------------------
+
 
 *重要*
 タグの判別にはgameObject.tag == “string tag”もあるが、CompareTag()の方が早い

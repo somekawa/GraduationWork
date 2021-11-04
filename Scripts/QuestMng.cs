@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Collections;
 
 // クエスト管理スクリプト
 
@@ -33,10 +34,16 @@ public class QuestMng : MonoBehaviour
     private Transform questContent_;                 // クエストを表示するUIのコンテンツ
     private Text questInfoText_;                     // クエスト情報の題名テキスト
     private Text questInfoText2_;                    // クエスト情報の詳細テキスト
+    private Text questInfoText3_;                    // クエスト情報の報酬テキスト
+    private Image stampImg_;                         // ハンコの画像
     private GameObject questOrderButton_;            // クエスト受注ボタン
     private GameObject questReportButton_;           // クエスト報告ボタン
     private GameObject backButton_;                  // 前の画面に戻るボタン
     private GameObject questCanvas_;                 // クエストキャンバス
+
+    private GameObject popUpReward_;                 // クリア報酬のポップアップ
+    private TMPro.TextMeshProUGUI rewardText_;       // クリア報酬のテキスト
+
     private QuestButton[] questButton_;
 
     private int totalQuestNum_;                      // 全クエストの数
@@ -71,9 +78,12 @@ public class QuestMng : MonoBehaviour
         // ギルドスクリプトのインスタンス
         guild_ = new Guild();
 
-        //　クエスト情報の表示先テキスト
+        // クエスト情報の表示先テキスト
         questInfoText_ = questUI.transform.Find("InfomationPanel/TitleText").GetComponent<Text>();
         questInfoText2_ = questUI.transform.Find("InfomationPanel/DetailText").GetComponent<Text>();
+        questInfoText3_ = questUI.transform.Find("InfomationPanel/RewardText").GetComponent<Text>();
+        // ハンコの画像
+        stampImg_ = questUI.transform.Find("InfomationPanel/Stamp").GetComponent<Image>();
 
         questOrderButton_ = questUI.transform.Find("OrderButton").gameObject;
         questReportButton_ = questUI.transform.Find("ReportButton").gameObject;
@@ -86,6 +96,9 @@ public class QuestMng : MonoBehaviour
 		questContent_ = transform.Find("QuestUI/Background/Scroll View/Viewport/Content");
 
         questButton_ = new QuestButton[tmpQuestNum];
+
+        popUpReward_ = transform.Find("QuestUI/PopUp").gameObject;
+        rewardText_ = transform.Find("QuestUI/PopUp/GetReward").GetComponent<TMPro.TextMeshProUGUI>();
 
         for (var i = 0; i < tmpQuestNum; i++)
 		{
@@ -172,6 +185,9 @@ public class QuestMng : MonoBehaviour
                 questContent_.GetChild(k).gameObject.SetActive(false);
             }
         }
+
+        // ハンコを非アクティブにする
+        stampImg_.gameObject.SetActive(false);
     }
 
     // クエストを受注するとき
@@ -216,12 +232,27 @@ public class QuestMng : MonoBehaviour
         questOrderButton_.SetActive(false);     // 受注ボタンは非表示
         questReportButton_.SetActive(false);    // 報告ボタンは非表示
         backButton_.SetActive(true);
+
+        // ハンコを非アクティブにする
+        stampImg_.gameObject.SetActive(false);
     }
 
     // クリアクエストの報告をする
     public void ClickReportButton()
     {
         //@ 報酬処理
+
+        // ハンコをアクティブにする
+        stampImg_.gameObject.SetActive(true);
+
+        // 報酬内容を記載する
+        rewardText_.text = popQuestInfo_.param[questNum_].reward;
+
+        // ポップアップをアクティブにする
+        popUpReward_.SetActive(true);
+
+        // ポップアップが時間経過で消えるようにコルーチンを呼び出す
+        StartCoroutine(PopUpMessage());
 
         // そのクエストに対するクリア回数を加算する
         questClearCnt_[questNum_]++;
@@ -248,6 +279,24 @@ public class QuestMng : MonoBehaviour
         guild_.GuildQuestEvent(questNum_,true);
 
         Debug.Log("クエストを報告しました");
+    }
+
+    private IEnumerator PopUpMessage()
+    {
+        float time = 0.0f;
+        while (popUpReward_.activeSelf)
+        {
+            yield return null;
+
+            if (time >= 3.0f)
+            {
+                popUpReward_.SetActive(false);
+            }
+            else
+            {
+                time += Time.deltaTime;
+            }
+        }
     }
 
     // クリアクエストの更新(報告時にも非表示切り替えが発生するため)
@@ -302,8 +351,8 @@ public class QuestMng : MonoBehaviour
         questNum_ = num;
         // クエスト説明を描画する(画面右側の所)
         questInfoText_.text = popQuestInfo_.param[num].info;
-
         questInfoText2_.text = popQuestInfo_.param[num].detail;
+        questInfoText3_.text = "報酬\n" + popQuestInfo_.param[num].reward;
 
         Debug.Log("QuestMngで" + num + "を受け取りました");
 
@@ -316,6 +365,12 @@ public class QuestMng : MonoBehaviour
         {
             // クエストを選択したため報告ボタン表示
             questReportButton_.SetActive(true);
+            // ハンコを非アクティブにする
+            stampImg_.gameObject.SetActive(false);
+        }
+        else
+        {
+            // 何も処理を行わない
         }
     }
 }

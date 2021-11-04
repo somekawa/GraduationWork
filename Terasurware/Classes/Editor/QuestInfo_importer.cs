@@ -58,11 +58,13 @@ public class QuestInfo_importer : AssetPostprocessor
                         
                         var p = new QuestInfo.Param();
 			
-					cell = row.GetCell(0); p.num = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(1); p.info = (cell == null ? "" : cell.StringCellValue);
-					cell = row.GetCell(2); p.clear = (int)(cell == null ? 0 : cell.NumericCellValue);
-                    cell = row.GetCell(3); p.eventNum = (int)(cell == null ? 0 : cell.NumericCellValue);
-                    cell = row.GetCell(4); p.type = (cell == null ? "" : cell.StringCellValue);
+					    cell = row.GetCell(0); p.num    = (int)(cell == null ? 0 : cell.NumericCellValue);
+					    cell = row.GetCell(1); p.info   = (cell == null ? "" : cell.StringCellValue);
+                        cell = row.GetCell(2); p.detail = (cell == null ? "" : cell.StringCellValue);
+                        cell = row.GetCell(3); p.clear  = (int)(cell == null ? 0 : cell.NumericCellValue);
+                        cell = row.GetCell(4); p.eventNum = (int)(cell == null ? 0 : cell.NumericCellValue);
+                        cell = row.GetCell(5); p.type   = (cell == null ? "" : cell.StringCellValue);
+                        cell = row.GetCell(6); p.reward = (cell == null ? "" : cell.StringCellValue);
 
                         data.param.Add(p);
                     }
