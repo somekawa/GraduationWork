@@ -1,3 +1,8 @@
+2021/11/02更新
+　ManagersーBag_Materia.cs【MateriaParent_　： ItemBagMng-MateriaMng-Viewport-『Content』】
+	　　Bag_Item.cs【itemUIPrefabーitemBox】
+		　　　　【itemParent_ ItemBagMng-ItemMng-Viewport-『Content』】
+ーーーーーーーーーーーーーーーーーーーーー
 10/28更新
 アタッチ先
 DontDestroyCanvasーDontDestroyMng.cs

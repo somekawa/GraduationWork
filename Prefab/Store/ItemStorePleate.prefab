@@ -93,7 +93,7 @@ GameObject:
   - component: {fileID: 4180923830878562502}
   - component: {fileID: 204856048243250112}
   m_Layer: 5
-  m_Name: NamePlate
+  m_Name: ItemStorePleate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

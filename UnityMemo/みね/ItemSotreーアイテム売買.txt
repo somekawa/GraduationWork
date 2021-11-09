@@ -1,0 +1,47 @@
+アイテム売買　2021/11/01更新
+
+HouseInterior
+　ーInHouseCanvas
+　　ーItemStore
+　　　ーHouseInfo
+　　　ーBuyButton（追加：Pos（0,-50,0））
+	ButtonのOnclick()のselectObjectにItemStoreオブジェクトを入れて
+	ItemStoreMng.csのOnClickBuyBtn()を選択
+　　　ーSellButton（追加：Pos(0,-100,0)）
+	ButtonのOnclick()のselectObjectにItemStoreオブジェクトを入れて
+	ItemStoreMng.csのOnClickSellBtn()を選択
+　　　ーExitButton（Pos(0､-150,0)）
+　ーItemStore
+　　ーTradeCanvas（追加）
+　　　ーCheckArea
+　　　　ーCountMng
+　　　　　ーCountUp
+	　　ButtonのOnclick()のselectObjectにItemStoreオブジェクトを入れて
+	　　ItemStoreMng.csのOnClickCountUp()を選択
+　　　　　ーCountDown
+	　　ButtonのOnclick()のselectObjectにItemStoreオブジェクトを入れて
+	　　ItemStoreMng.csのOnClickCountDown()を選択
+　　　　ーShoppingButton
+	　ButtonのOnclick()のselectObjectにItemStoreオブジェクトを入れて
+	　ItemStoreMng.csのOnClickShopping()を選択
+　　　　ーCancelBtn
+	　ButtonのOnclick()のselectObjectにItemStoreオブジェクトを入れて
+	　ItemStoreMng.csのOnClickCancelBtn()を選択
+●ItemStore
+・ItemStoreMng.cs
+・Trade_Buy.cs
+	buyParent_：BuyMngーViewportー【Content】
+・Trade_Sell.cs
+	sellParent_：SellMngーViewportー【Content】
+
+●Prefabフォルダ
+ItemStorePleate
+	Event_ItemStore.csアタッチ
+	ButtonのOnclick()のselectObjectに自分自身を入れて
+	Event_ItemStore.csのOnClickSelectItemBtn()を選択
+
+
+
+
+
+

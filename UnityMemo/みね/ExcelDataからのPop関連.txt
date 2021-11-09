@@ -1,0 +1,12 @@
+2021/11/01更新
+
+
+SceneMngオブジェクトに
+PopMateriaList.csをアタッチ
+　materiaUIPrefab：PrefabフォルダーBagUIフォルダー【MateriaBox】
+　itemUIPrefab：PrefabフォルダーBagUIフォルダー【ItemBox】
+　itemStorePrefab：PrefabフォルダーStoreフォルダー【ItemStorePleate】
+
+アイテム売買で表示するボタンと
+バッグで表示する素材のデータを読み込んでおいて
+他Scriptで使用する
