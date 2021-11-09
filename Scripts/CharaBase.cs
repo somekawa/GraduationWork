@@ -30,6 +30,9 @@ public abstract class CharaBase : object
         // 敵用の情報
         public int Exp;             // この敵を倒した際にキャラが得られる経験値
         public string Drop;         // この敵を倒した際にキャラが得られるドロップ素材
+        public float MoveTime;      // 移動時にdeltaTimeを割る値
+        public float MoveDistance;  // キャラとの距離許容範囲
+        public string WeaponTagObjName;  // CheckAttackHit.csがアタッチされているオブジェクトの名前
     }
 
     public enum ANIMATION
@@ -87,6 +90,9 @@ public abstract class CharaBase : object
 
             setting_.Exp = param.Exp;
             setting_.Drop = param.Drop;
+            setting_.MoveTime = param.MoveTime;
+            setting_.MoveDistance = param.MoveDistance;
+            setting_.WeaponTagObjName = param.WeaponTagObjName;
 
             setting_.animator = animator;
             setting_.isMove = false;
@@ -110,6 +116,7 @@ public abstract class CharaBase : object
     public abstract void Magic();
     public abstract void Item();
     public abstract bool ChangeNextChara(); // 次のキャラの操作に切り替える為の準備処理
+    public abstract void DamageAnim();      // 攻撃を受けたときのモーション処理
 
     //// override出来る関数
     //public virtual void Talk(string talk)

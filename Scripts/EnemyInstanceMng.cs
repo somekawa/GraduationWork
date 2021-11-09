@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static CharaBase;
@@ -33,7 +34,9 @@ public class EnemyInstanceMng : MonoBehaviour
     private int attackTarget_ = -1;             // 攻撃対象(敵からキャラの)
 
     // Item1:イベントにより強制戦闘する際の敵の種類,Item2:敵の数
-    private (GameObject, int) eventEnemy_ = (null, -1);     
+    private (GameObject, int) eventEnemy_ = (null, -1);
+
+    private BoxCollider changeEnableBoxCollider_;
 
     void Start()
     {
@@ -102,6 +105,12 @@ public class EnemyInstanceMng : MonoBehaviour
             anim_ = ANIMATION.BEFORE;
         }
 
+        // AnimMaxの半分の値に到達したらtrueにする
+        if (enemyList_[num].Item1.HalfAttackAnimTime())
+        {
+            changeEnableBoxCollider_.enabled = true;
+        }
+
         if (anim_ == ANIMATION.ATTACK && enemyList_[num].Item1.ChangeNextChara())
         {
             anim_ = ANIMATION.AFTER;
@@ -116,9 +125,10 @@ public class EnemyInstanceMng : MonoBehaviour
 
     private void BeforeAttack(int num)
     {
-        if(enemyMap_[num + 1] == null)
+        // すでに死亡フラグが立っていたらreturnする
+        if (!enemyMap_[num + 1].activeSelf || enemyList_[num].Item1.GetDeathFlg())
         {
-            // 死亡しているからDestroyされている
+            // 死亡しているから非表示にされている
             anim_ = ANIMATION.IDLE;
             return;
         }
@@ -131,7 +141,10 @@ public class EnemyInstanceMng : MonoBehaviour
         {
             attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
         } while (SceneMng.charasList_[attackTarget_].HP() <= 0);
-        //attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);
+        //attackTarget_ = (int)SceneMng.CHARACTERNUM.JACK;
+
+        // ダメージを渡す
+        buttleMng_.SetDamageNum(enemyList_[num].Item1.Damage());
 
         charaPos_ = SceneMng.charasList_[attackTarget_].GetButtlePos();
 
@@ -140,7 +153,86 @@ public class EnemyInstanceMng : MonoBehaviour
         // 行動中の敵が、攻撃対象の方向に体を向ける
         enemyMap_[num + 1].transform.localRotation = Quaternion.LookRotation(charaPos_ - enemyPos_);
 
-        anim_ = ANIMATION.ATTACK;    
+
+        // 遠距離攻撃型の敵が使う魔法の弾生成
+        if (enemyList_[num].Item1.MoveTime() < 0)
+        {
+            // 通常攻撃弾の方向の計算
+            var dir = (charaPos_ - enemyPos_).normalized;
+            // エフェクトの発生位置高さ調整
+            // キャラとエフェクトの発生方向が逆だから、forwardの減算に気を付ける事(Z軸はマイナスしないとだめ)
+            var adjustPos = new Vector3(enemyPos_.x, enemyPos_.y + 0.3f, enemyPos_.z - transform.forward.z);
+
+            // 通常攻撃弾プレハブをインスタンス化
+            var uniAttackInstance = Instantiate(kabosuAttackPrefab_, adjustPos, Quaternion.identity);
+            MagicMove magicMove = uniAttackInstance.GetComponent<MagicMove>();
+            // 通常攻撃弾の飛んでいく方向を指定
+            magicMove.SetDirection(dir);
+        }
+
+        // [Weapon]のタグがついているオブジェクトを全て検索する
+        var weaponTagObj = GameObject.FindGameObjectsWithTag("Weapon");
+        int tryParseNum = -1;
+        for (int i = 0; i < weaponTagObj.Length; i++)
+        {
+            // 見つけたオブジェクトの名前を比較して、今回攻撃に扱う武器についているCheckAttackHit関数の設定を行う
+            if (weaponTagObj[i].name == enemyList_[num].Item1.WeaponTagObjName())
+            {
+                // int型に変換できたか確認する
+                bool checkChangeInt = int.TryParse(weaponTagObj[i].transform.root.gameObject.name, out tryParseNum);
+
+                if(checkChangeInt)
+                {
+                    // 変換ができた(近距離攻撃型)
+                    // 見つけたものが自分であるか、親の番号を見て判定する
+                    if (tryParseNum == (num + 1))
+                    {
+                        changeEnableBoxCollider_ = weaponTagObj[i].GetComponent<BoxCollider>();
+
+                        // 攻撃対象のキャラの番号を渡す
+                        weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(attackTarget_);
+                    }
+                }
+                else
+                {
+                    // 変換が出来なかった(遠距離攻撃型)
+                    changeEnableBoxCollider_ = weaponTagObj[i].GetComponent<BoxCollider>();
+
+                    // 攻撃対象のキャラの番号を渡す
+                    weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(attackTarget_);
+                }
+            }
+        }
+
+        // 攻撃対象に向かって走る処理
+        StartCoroutine(MoveToPlayerPos(num));
+    }
+
+    // 攻撃への移動コルーチン  
+    private IEnumerator MoveToPlayerPos(int num)
+    {
+        bool flag = false;
+
+        // 遠距離攻撃型の敵は移動が必要ないから
+        if (enemyList_[num].Item1.MoveTime() < 0)
+        {
+            flag = true;
+        }
+
+        float time = 0.0f;
+        while (!flag)
+        {
+            yield return null;
+
+            time += Time.deltaTime / enemyList_[num].Item1.MoveTime();  // deltaTimeだけだと移動が速すぎるため、任意の値で割る
+
+            var tmp = enemyList_[num].Item1.RunMove(time, enemyMap_[num + 1].transform.localPosition, charaPos_);
+            flag = tmp.Item2;   // while文を抜けるかフラグを代入する
+            enemyMap_[num + 1].transform.localPosition = tmp.Item1;     // 座標を代入する
+        }
+
+        anim_ = ANIMATION.ATTACK;    // 攻撃モーション移行確認切替
+
     }
 
     // 敵のインスタンス処理(配置ポジションをButtleMng.csで指定できるように引数を用意している)
@@ -167,15 +259,25 @@ public class EnemyInstanceMng : MonoBehaviour
             // 敵プレハブをインスタンス
             GameObject enemy = null;
 
-            if(eventEnemy_.Item1 == null)
+            // 番号でどの敵をインスタンスするか決める
+            int enemyNum = Random.Range(0, enemyTest.transform.childCount);
+            //enemyNum = 3;   // ハチ固定
+
+            if (eventEnemy_.Item1 == null)
             {
                 // フィールド上の敵をランダムで出す
-                enemy = Instantiate(enemyTest, pos, Quaternion.identity) as GameObject;
+                // 子の順とエクセル番号も合わせる必要がある
+                enemy = Instantiate(enemyTest.transform.GetChild(enemyNum).gameObject,
+                                    pos, Quaternion.identity) as GameObject;
+                // 敵の体の向きを変える
+                enemy.transform.Rotate(0, 180, 0);
             }
             else
             {
                 // イベント用の敵を出す
                 enemy = Instantiate(eventEnemy_.Item1, pos, Quaternion.identity) as GameObject;
+                // イベント用の敵の番号部分をenemyNumとして適用する(エクセル番号も合わせる必要がある)
+                enemyNum = int.Parse(eventEnemy_.Item1.name.Split('_')[1]);
             }
 
             enemy.name = num.ToString();
@@ -184,8 +286,16 @@ public class EnemyInstanceMng : MonoBehaviour
             GameObject hpBar = Instantiate(enemyHPBar, enemyHPPos_[mapNum_][num - 1], Quaternion.identity, parentCanvas.transform) as GameObject;
             hpBar.name = "HPBar_"+num.ToString();
 
-            // param[x]のxは出現させる敵の行番号(いまはカボス固定)
-            enemyList_.Add((new Enemy(num.ToString(), 1,null,enemyData_.param[0]), hpBar.GetComponent<HPBar>()));
+            // param[x]のxは出現させる敵の行番号
+            // Animatorがアタッチされているか確認(カボスはないからnullをいれる)
+            if(enemy.GetComponent<Animator>() == null)
+            {
+                enemyList_.Add((new Enemy(num.ToString(), 1, null, enemyData_.param[enemyNum]), hpBar.GetComponent<HPBar>()));
+            }
+            else
+            {
+                enemyList_.Add((new Enemy(num.ToString(), 1, enemy.GetComponent<Animator>(), enemyData_.param[enemyNum]), hpBar.GetComponent<HPBar>()));
+            }
 
             // 敵HPの設定
             enemyList_[num - 1].Item2.SetHPBar(enemyList_[num - 1].Item1.HP(), enemyList_[num - 1].Item1.MaxHP());
@@ -210,6 +320,9 @@ public class EnemyInstanceMng : MonoBehaviour
         switch (anim_)
         {
             case ANIMATION.IDLE:
+                // 有効にしていたダメージ用コライダーをfalseに戻す
+                changeEnableBoxCollider_.enabled = false;
+
                 // 行動が終わったからターンを移す
                 buttleMng_.SetMoveTurn();
                 anim_ = ANIMATION.NON;
@@ -221,7 +334,7 @@ public class EnemyInstanceMng : MonoBehaviour
                 Attack(num);
                 break;
             case ANIMATION.AFTER:
-                AfterAttack();        // 攻撃終了後 
+                AfterAttack(num);        // 攻撃終了後 
                 break;
             //case ANIMATION.DEATH:
             //    break;
@@ -238,54 +351,39 @@ public class EnemyInstanceMng : MonoBehaviour
     private void Attack(int num)
     {
         enemyList_[num].Item1.Attack();
-
-        AttackStart(num);
     }
 
-    private void AttackStart(int num)
+    void AfterAttack(int num)
     {
-        // ダメージを渡す
-        buttleMng_.SetDamageNum(enemyList_[num].Item1.Damage());
-
-        string str = "";
-
-        // 通常攻撃弾の方向の計算
-        var dir = (charaPos_ - enemyPos_).normalized;
-        // エフェクトの発生位置高さ調整
-        // キャラとエフェクトの発生方向が逆だから、forwardの減算に気を付ける事(Z軸はマイナスしないとだめ)
-        var adjustPos = new Vector3(enemyPos_.x, enemyPos_.y + 0.3f, enemyPos_.z - transform.forward.z);
-
-        // 通常攻撃弾プレハブをインスタンス化
-        var uniAttackInstance = Instantiate(kabosuAttackPrefab_, adjustPos, Quaternion.identity);
-        MagicMove magicMove = uniAttackInstance.GetComponent<MagicMove>();
-        // 通常攻撃弾の飛んでいく方向を指定
-        magicMove.SetDirection(dir);
-
-        // 名前の設定
-        str = "KabosuAttack(Clone)";
-
-        if (str == "")
-        {
-            Debug.Log("エラー：文字が入っていません");
-            return; // 文字が入っていない場合はreturnする
-        }
-
-        // [Weapon]のタグがついているオブジェクトを全て検索する
-        var weaponTagObj = GameObject.FindGameObjectsWithTag("Weapon");
-        for (int i = 0; i < weaponTagObj.Length; i++)
-        {
-            // 見つけたオブジェクトの名前を比較して、今回攻撃に扱う武器についているCheckAttackHit関数の設定を行う
-            if (weaponTagObj[i].name == str)
-            {
-                // 攻撃対象のキャラの番号を渡す
-                weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(attackTarget_);
-            }
-        }
+        // 元いた位置に戻る処理
+        StartCoroutine(MoveToInitPos(num));
     }
 
-    void AfterAttack()
+    // 攻撃から戻ってくるコルーチン  
+    private IEnumerator MoveToInitPos(int num)
     {
+        bool flag = false;
+
+        // 遠距離攻撃型の敵は移動が必要ないから
+        if (enemyList_[num].Item1.MoveTime() < 0)
+        {
+            flag = true;
+        }
+
+        float time = 0.0f;
+        while (!flag)
+        {
+            yield return null;
+
+            time += Time.deltaTime / (enemyList_[num].Item1.MoveTime() / 2.0f);  // deltaTimeだけだと移動が速すぎるため、任意の値で割る
+
+            var tmp = enemyList_[num].Item1.BackMove(time, enemyMap_[num + 1].transform.localPosition, enemyPosSetMap_[mapNum_][num]);
+            flag = tmp.Item2;   // while文を抜けるかフラグを代入する
+            enemyMap_[num + 1].transform.localPosition = tmp.Item1;     // 座標を代入する
+        }
+
         anim_ = ANIMATION.IDLE;
+
     }
 
     // CharacterMng.csに座標情報を渡す
@@ -320,9 +418,11 @@ public class EnemyInstanceMng : MonoBehaviour
                 if (int.Parse(obj.name) == num + 1)
                 {
                     // エフェクトの生成
-                    Instantiate(soulEffect_, enemyMap_[num + 1].transform.position, Quaternion.identity);
+                    //Instantiate(soulEffect_, enemyMap_[num + 1].transform.position, Quaternion.identity);
+                    //Destroy(obj);   // 敵の削除
 
-                    Destroy(obj);   // 敵の削除
+                    // 死亡用のフラグを立てる
+                    enemyList_[num].Item1.SetDeathFlg(true);
                 }
             }
 
@@ -333,5 +433,55 @@ public class EnemyInstanceMng : MonoBehaviour
     public void SetEnemySpawn(GameObject obj,int num)
     {
         eventEnemy_ = (obj, num);
+    }
+
+    public void NotMyTurn()
+    {
+        // ダメージを受けたときのモーションを規定時間で終了させる
+        for (int i = 0; i < enemyMap_.Count; i++)
+        {
+            enemyList_[i].Item1.DamageAnim();
+        }
+
+        // 敵の死亡処理
+        foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Enemy"))
+        {
+            // すでに非表示にされたものは飛ばす
+            if(obj.activeSelf)
+            {
+                if (enemyList_[int.Parse(obj.name) - 1].Item1.GetDeathFlg() && enemyList_[int.Parse(obj.name) - 1].Item1.DeathAnim())
+                {
+                    // エフェクトの生成
+                    Instantiate(soulEffect_, enemyMap_[int.Parse(obj.name)].transform.position, Quaternion.identity);
+
+                    // 直ぐに削除せずに、非表示切替にする
+                    obj.SetActive(false);
+                }
+            }
+        }
+    }
+
+    public void DeleteEnemy()
+    {
+        // 敵の削除処理
+        for(int i = 0; i < enemyMap_.Count; i++)
+        {
+            Destroy(enemyMap_[i + 1]);
+        }
+    }
+
+    public bool AllAnimationFin()
+    {
+        for (int i = 0; i < enemyMap_.Count; i++)
+        {
+            // まだ1体でも死亡アニメーション中ならfalseで返す
+            if(enemyMap_[i + 1].activeSelf)
+            {
+                return false;
+            }
+        }
+
+        // 全ての敵が死亡アニメーションまで終了したらtrueで返す
+        return true;
     }
 }

@@ -229,10 +229,13 @@ public class CharacterMng : MonoBehaviour
         if (!selectFlg_ && Input.GetKeyDown(KeyCode.LeftShift))
         {
             // 敵オブジェクトを削除する(タグ検索)
-            foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Enemy"))
-            {
-                Destroy(obj);
-            }
+            //foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Enemy"))
+            //{
+            //    Destroy(obj);
+            //}
+
+            buttleMng_.CallDeleteEnemy();
+
             FieldMng.nowMode = FieldMng.MODE.SEARCH;
             charMap_[CHARACTERNUM.UNI].gameObject.transform.position = keepFieldPos_;
 
@@ -309,6 +312,15 @@ public class CharacterMng : MonoBehaviour
         if (anim_ == ANIMATION.ATTACK && charasList_[(int)nowTurnChar_].ChangeNextChara())
         {
             anim_ = ANIMATION.AFTER;
+        }
+    }
+
+    public void NotMyTurn()
+    {
+        // ダメージを受けたときのモーションを規定時間で終了させる
+        for(int i = 0; i < (int)CHARACTERNUM.MAX; i++)
+        {
+            charasList_[i].DamageAnim();
         }
     }
 

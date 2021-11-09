@@ -3,7 +3,11 @@ using UnityEngine;
 //　抽象クラス(CharaBase)とインタフェース(InterfaceButtle)を継承してCharaクラスを作成
 public class Chara : CharaBase,InterfaceButtle
 {
-    private const string key_isAttack = "isAttack"; // 攻撃モーション(全キャラで名前を揃える必要がある)
+    private int key_isAttack = Animator.StringToHash("isAttack");// 攻撃モーション(全キャラで名前を揃える必要がある)
+    private int key_isRun = Animator.StringToHash("isRun");      // 移動モーション(全キャラで名前を揃える必要がある)
+    private int key_isDamage = Animator.StringToHash("isDamage");// ダメージモーション(全キャラで名前を揃える必要がある)
+    private int key_isDeath = Animator.StringToHash("isDeath");  // 死亡モーション(全キャラで名前を揃える必要がある)
+
     private CharacterSetting set_;                  // キャラ毎の情報   
     private int barrierNum_ = 0;                    // 防御時に値が入る
     private bool deathFlg_ = false;                 // 死亡状態か確認する変数
@@ -48,9 +52,9 @@ public class Chara : CharaBase,InterfaceButtle
 
     public (Vector3,bool) RunMove(float time,Vector3 myPos, Vector3 targetPos)
     {
-        if (!set_.animator.GetBool("isRun"))
+        if (!set_.animator.GetBool(key_isRun))
         {
-            set_.animator.SetBool("isRun", true);
+            set_.animator.SetBool(key_isRun, true);
         }
 
         float distance = Vector3.Distance(myPos, targetPos);
@@ -59,7 +63,7 @@ public class Chara : CharaBase,InterfaceButtle
         {
             // 指定箇所まできたらtrueを返す
             Debug.Log("ジャック目的敵到着");
-            set_.animator.SetBool("isRun", false);
+            set_.animator.SetBool(key_isRun, false);
             return (Vector3.Lerp(myPos, targetPos, time), true);
         }
         else
@@ -71,9 +75,9 @@ public class Chara : CharaBase,InterfaceButtle
 
     public (Vector3, bool) BackMove(float time, Vector3 myPos, Vector3 targetPos)
     {
-        if (!set_.animator.GetBool("isRun"))
+        if (!set_.animator.GetBool(key_isRun))
         {
-            set_.animator.SetBool("isRun", true);
+            set_.animator.SetBool(key_isRun, true);
         }
 
         float distance = Vector3.Distance(myPos, targetPos);
@@ -82,7 +86,7 @@ public class Chara : CharaBase,InterfaceButtle
         {
             // 指定箇所まできたらtrueを返す
             Debug.Log("ジャック目的敵到着");
-            set_.animator.SetBool("isRun", false);
+            set_.animator.SetBool(key_isRun, false);
             return (Vector3.Lerp(myPos, targetPos, 1.0f),true);
         }
         else
@@ -118,10 +122,14 @@ public class Chara : CharaBase,InterfaceButtle
     {
         Debug.Log("武器切替！");
     }
+
     public override int Defence()
     {
+        // 被ダメージアニメーションを開始
+        set_.animator.SetBool(key_isDamage, true);
         return set_.Defence + barrierNum_;
     }
+
     public override void Magic()
     {
         Debug.Log("魔法！");
@@ -237,6 +245,29 @@ public class Chara : CharaBase,InterfaceButtle
 
     public void SetDeathFlg(bool flag)
     {
+        // 死亡アニメーションに切り替える
+        set_.animator.SetBool(key_isDeath, true);
         deathFlg_ = flag;
+    }
+
+    public override void DamageAnim()
+    {
+        // そもそもダメージを受けてないときは処理を抜ける
+        if (!set_.animator.GetBool(key_isDamage))
+        {
+            return;
+        }
+
+        // 時間でモーションを終了させるか判定する
+        if (set_.animTime < set_.AnimMax)
+        {
+            set_.animTime += Time.deltaTime;
+        }
+        else
+        {
+            // 被ダメージアニメーションを終了
+            set_.animator.SetBool(key_isDamage, false);
+            set_.animTime = 0.0f;
+        }
     }
 }

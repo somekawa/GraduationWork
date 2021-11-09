@@ -63,12 +63,16 @@ public class Enemy_importer : AssetPostprocessor
 					cell = row.GetCell(2); p.HP = (int)(cell == null ? 0 : cell.NumericCellValue);
 					cell = row.GetCell(3); p.MP = (int)(cell == null ? 0 : cell.NumericCellValue);
 					cell = row.GetCell(4); p.Attack = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(5); p.Defence = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(6); p.Speed = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(7); p.Luck = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(8); p.AnimMax = (float)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(9); p.Exp = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(10); p.Drop = (cell == null ? "" : cell.StringCellValue);
+                    cell = row.GetCell(5); p.MagicAttack = (int)(cell == null ? 0 : cell.NumericCellValue);
+                    cell = row.GetCell(6); p.Defence = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(7); p.Speed = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(8); p.Luck = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(9); p.AnimMax = (float)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(10); p.Exp = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(11); p.Drop = (cell == null ? "" : cell.StringCellValue);
+                    cell = row.GetCell(12); p.MoveTime = (float)(cell == null ? 0 : cell.NumericCellValue);
+                    cell = row.GetCell(13); p.MoveDistance = (float)(cell == null ? 0 : cell.NumericCellValue);
+                    cell = row.GetCell(14); p.WeaponTagObjName = (cell == null ? "" : cell.StringCellValue);
 
                         data.param.Add(p);
                     }
