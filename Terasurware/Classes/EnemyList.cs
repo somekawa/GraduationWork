@@ -15,11 +15,16 @@ public class EnemyList : ScriptableObject
 		public int HP;
 		public int MP;
 		public int Attack;
+        public int MagicAttack;
 		public int Defence;
 		public int Speed;
 		public int Luck;
 		public float AnimMax;
 		public int Exp;
 		public string Drop;
-	}
+        public float MoveTime;
+        public float MoveDistance;
+        public string WeaponTagObjName;
+
+    }
 }

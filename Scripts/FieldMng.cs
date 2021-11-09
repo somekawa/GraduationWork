@@ -153,7 +153,7 @@ public class FieldMng : MonoBehaviour
             // ’Tõ’†‚ÌŠÔ‰ÁZˆ—
             if (player_.GetMoveFlag() && time_ < toButtleTime_)
             {
-                //time_ += Time.deltaTime;
+                time_ += Time.deltaTime;
             }
             else if (time_ >= toButtleTime_)
             {

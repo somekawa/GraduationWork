@@ -4,6 +4,7 @@ using UnityEngine;
 public class ForcedButtle : MonoBehaviour
 {
     public GameObject eventEnemy;                // 強制戦闘時の敵をアタッチする
+    public int eventEnemyNum;                    // 強制戦闘時の敵の数を外部から指定する
 
     private GameObject uniChan_;                 // ユニ
     private UnitychanController controller_;     // ユニの操作状態
@@ -75,7 +76,7 @@ public class ForcedButtle : MonoBehaviour
                 {
                     // はい
                     // 敵の種類と数を指定する
-                    GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().SetEnemySpawn(eventEnemy, 1);
+                    GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().SetEnemySpawn(eventEnemy, eventEnemyNum);
 
                     // 強制戦闘が発生する
                     FieldMng.nowMode = FieldMng.MODE.BUTTLE;

@@ -78,7 +78,11 @@ public class ButtleMng : MonoBehaviour
             characterMng_.SetEnemyNum(correctEnemyNum);
         }
 
-        if(moveTurnList_[moveTurnCnt_].Item2 == "Uni" || moveTurnList_[moveTurnCnt_].Item2 == "Jack")
+        // 自分の行動外のときにも呼ばれる関数
+        characterMng_.NotMyTurn();
+        enemyInstanceMng_.NotMyTurn();
+
+        if (moveTurnList_[moveTurnCnt_].Item2 == "Uni" || moveTurnList_[moveTurnCnt_].Item2 == "Jack")
         {
             // キャラクターの行動
             characterMng_.Buttle();
@@ -88,11 +92,20 @@ public class ButtleMng : MonoBehaviour
             // キャラクターの攻撃対象が最後の敵だった時
             if (characterMng_.GetLastEnemyToAttackFlg())
             {
-                // Enemyタグの数を見て該当する物がない(= 0)なら、MODEを探索に切り替える
-                if (GameObject.FindGameObjectsWithTag("Enemy").Length == 0)
+                if(enemyInstanceMng_.AllAnimationFin())
                 {
+                    enemyInstanceMng_.DeleteEnemy();
+
                     FieldMng.nowMode = FieldMng.MODE.SEARCH;
                     characterMng_.SetCharaFieldPos();
+
+                    //// Enemyタグの数を見て該当する物がない(= 0)なら、MODEを探索に切り替える
+                    //if (GameObject.FindGameObjectsWithTag("Enemy").Length == 0)
+                    //{
+                    //    FieldMng.nowMode = FieldMng.MODE.SEARCH;
+                    //    characterMng_.SetCharaFieldPos();
+                    //}
+
                 }
             }
         }
@@ -124,5 +137,11 @@ public class ButtleMng : MonoBehaviour
     {
         Debug.Log("***GetDamageNum" + damageNum_);
         return damageNum_;
+    }
+
+    // ユニたちが逃げる処理の時に使用する
+    public void CallDeleteEnemy()
+    {
+        enemyInstanceMng_.DeleteEnemy();
     }
 }

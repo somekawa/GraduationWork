@@ -5,7 +5,7 @@ using UnityEngine;
 public class CheckAttackHit : MonoBehaviour
 {
     // 目標の敵か判別する番号
-    private int targetNum_;
+    private int targetNum_ = -1;
 
     public void SetTargetNum(int num)
     {
@@ -40,10 +40,18 @@ public class CheckAttackHit : MonoBehaviour
                     // 武器コライダーの有効化(多段ヒットを防ぐ)
                     this.gameObject.GetComponent<BoxCollider>().enabled = false;
                 }
+
+                targetNum_ = -1;
             }
         }
         else if (col.CompareTag("Player"))
         {
+            // targetNum_が-1ということは、攻撃対象が設定されていない状態だから、returnを返す
+            if(targetNum_ < 0)
+            {
+                return;
+            }
+
             if (this.gameObject.name == "UniAttack(Clone)")
             {
                 return;
@@ -62,6 +70,8 @@ public class CheckAttackHit : MonoBehaviour
                 {
                     Destroy(this.gameObject);
                 }
+
+                targetNum_ = -1;
             }
         }
 
