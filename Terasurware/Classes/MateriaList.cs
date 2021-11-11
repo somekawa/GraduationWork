@@ -14,5 +14,6 @@ public class MateriaList : ScriptableObject
 		public int Price_Buy;
 		public int Price_Sell;
 		public string ImageName;
+		public string Explanation;
 	}
 }

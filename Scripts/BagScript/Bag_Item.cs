@@ -1,158 +1,154 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.IO;
+using System.Text;
+using System;
 
 public class Bag_Item : MonoBehaviour
 {
-    private enum EVENT_ITEM
-    {
-        NON=-1,
-        FREE_MATERIA,
-        BEGINNER_RECIPE,
-        MAX
-    }
-    private string[] itemName= new string[30];
-
     [SerializeField]
-    private GameObject itemUIPrefab;
+    private SaveCSV_HaveItem saveCsvSc_;    // 素材を拾ったときに生成されるプレハブ
+
+    // データ系
+    //private SaveCSV_Magic saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
+    private const string saveDataFilePath_ = @"Assets/Resources/HaveItemList.csv";
+    List<string[]> csvDatas = new List<string[]>(); // CSVの中身を入れるリスト;
+
+
     [SerializeField]
     private RectTransform itemParent_;    // 素材を拾ったときに生成されるプレハブ
+                                          
+    // すべてのアイテム数
+    private PopMateriaList popMateriaList_;
+    private int maxCnt_ = 0;
 
-    private static GameObject[] itemBox_ = new GameObject[30];
-    private Image[] instanceImages_ = new Image[30];
-    private Text[] instanceTexts_ = new Text[30];
-    //private int instanceNum_ = 0;
-    private static int itemNum_ = 0;// 何番目の生成なのか
-    private static int[] itemCnt_ = new int[30];// 1つの素材に対するの所持数
-    private static string[] saveItemName_ = new string[(int)EVENT_ITEM.MAX];    // 拾った素材の名前を保存
-    private static int[] saveItemNum_ = new int[30];    // 何番目を拾ったか保存
-    private static int[] saveChapterNum_ = new int[(int)EVENT_ITEM.MAX];
-    private static int chapterCnt_ = 0;
-    // 表示する画像のX座標
-    private static float[] boxPosX_ = new float[5] {
-        -285.0f,-95.0f,100.0f,290.0f,490.0f
-    };
-    private static float[] boxPosY_ = new float[2] {
-        150.0f,-50.0f
-    };
-    private static int xCount_ = 0;// X座標をずらすためのカウント
-    private static int yCount_ = 0;// Y座標をずらすためのカウント
-
-    void Start()
+    public struct ItemData
     {
-        //menuActive_ = menuActive;
-
-        //  itemBox_ = transform.Find("ItemBox").GetComponent<Image>();
-       // gameObject.SetActive(false);
-
-        // StartCoroutine(ActiveItem(menuActive));
+        public GameObject box;  // 生成しておいたオブジェクトを代入
+        public Image image;     // アイテム画像
+        public Text cntText;    // 所持数を表示
+        public int haveCnt;     // 指定アイテムの所持数
+        public string name;     // アイテムの名前
+        public bool getFlag;    // 所持しているかどうか
     }
+    public static ItemData[] itemState;
+    public static ItemData[] data_ = new ItemData[50];
 
-    public IEnumerator ActiveItem(ItemBagMng itemBagMng)
+
+    public void Init()
+    // void Start()
     {
-        gameObject.SetActive(true);
-        Debug.Log("Item表示中です");
-        while (true)
+        popMateriaList_ = GameObject.Find("SceneMng").GetComponent<PopMateriaList>();
+        maxCnt_ = popMateriaList_.SetMaxItemCount();
+
+        itemState = new ItemData[maxCnt_];
+        for (int i = 0; i < maxCnt_; i++)
         {
-            yield return null;
-            if (itemBagMng.GetStringNumber() != (int)ItemBagMng.topic.ITEM)
+            itemState[i] = new ItemData
             {
-                gameObject.SetActive(false);
-                yield break;
-            }
-        }
-    }
-
-    // public void ItemGetCheck(int chapterNum)
-    public void ItemGetCheck(string itemName)
-    {
-        if (saveItemName_[0] == null)
-        {
-            saveItemName_[0] = itemName;
-            //saveItemNum_[0] = itemNum;
-            itemCnt_[0]++;// 所持数を加算
-
-            Debug.Log(saveItemName_[0] + "を作りました");
-            // 画像を生成　(元になるprefab、座標、回転、親)
-            itemBox_[0] = Instantiate(itemUIPrefab,
-                new Vector2(0, 0), Quaternion.identity,
-                itemParent_);
+                box = PopMateriaList.itemBox_[i],
+                name = PopMateriaList.itemBox_[i].name,
+                haveCnt = 0,
+            };
+            Debug.Log(itemState[i].name);
+            //itemBox_[i] = PopMateriaList.itemBox_[i];
+            itemState[i].box.transform.SetParent(itemParent_.transform);
+            itemState[i].box.name = itemState[i].name;
 
             // 生成したプレハブの子になっているImageを見つける
-            instanceImages_[0] = itemBox_[0].transform.Find("ItemIcon").GetComponent<Image>();
-            instanceImages_[0].sprite =  ItemImageMng.spriteMap_[ItemImageMng.IMAGE.ITEM][0, 1];
-
+            itemState[i].image = itemState[i].box.transform.Find("ItemIcon").GetComponent<Image>();
+            itemState[i].image.sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.ITEM][i];
             // 生成したプレハブの子になっているTextを見つける
-            instanceTexts_[0] = itemBox_[0].transform.Find("ItemNum").GetComponent<Text>();
-            instanceTexts_[0].text = itemCnt_[0].ToString();
+            itemState[i].cntText = itemState[i].box.transform.Find("ItemNum").GetComponent<Text>();
+            itemState[i].cntText.text = itemState[i].haveCnt.ToString();
+            //itemCnt_[i] = 0;// すべてのアイテムの所持数を0にする
 
-            // 名前を設定
-            itemBox_[itemNum_].GetComponent<OwnedMateria>().SetMyName(itemName);
-            // picture_.GetMateriakinds(fieldNum, itemNum);
+            if (0 < itemState[i].haveCnt)
+            {
+                itemState[i].getFlag = false;
+                itemState[i].box.SetActive(false);// 非表示にする
+            }
+            else
+            {
+                itemState[i].getFlag = true;
+                itemState[i].box.SetActive(true);// 1つでも持っているものは表示
+            }
         }
 
-
-
-        //for (int chapterCnt_ = 0; chapterCnt_ < (int)ItemBagMng.topic.MAX; chapterCnt_++)
-        //{
-        //    if (saveChapterNum_[chapterCnt_] < EventMng.GetChapterNum())
-        //    {
-        //        itemName[chapterCnt_] = saveItemName_[chapterCnt_];
-        //        //saveItemNum_[0] = itemNum;
-        //        itemCnt_[chapterCnt_] = 5;
-        //        // 画像を生成　(元になるprefab、座標、回転、親)
-        //        itemBox_[chapterCnt_] = Instantiate(itemUIPrefab,
-        //            new Vector2(0, 0), Quaternion.identity, this.transform.Find("Viewport/Content"));
-        //        // 表示位置をずらす
-        //        itemBox_[chapterCnt_].transform.localPosition = new Vector2(boxPosX_[chapterCnt_], boxPosY_[0]);
-
-        //        // 生成したプレハブの子になっているImageを見つける
-        //        instanceImages_[chapterCnt_] = itemBox_[chapterCnt_].transform.Find("ItemIcon").GetComponent<Image>();
-        //        instanceImages_[chapterCnt_].sprite = ItemImageMng.itemIcon_[1, 0];
-
-        //        // 生成したプレハブの子になっているTextを見つける
-        //        instanceTexts_[chapterCnt_] = itemBox_[chapterCnt_].transform.Find("ItemNum").GetComponent<Text>();
-        //        instanceTexts_[chapterCnt_].text = itemCnt_[chapterCnt_].ToString();
-        //       // chapterCnt_++;
-        //    }
-        //}
-
-
-
-        //if (saveChapterNum_[chapterCnt_] < EventMng.GetChapterNum())
-        //{
-        //    itemName[0] = saveItemName_[0];
-        //    //saveItemNum_[0] = itemNum;
-        //    itemCnt_[0] = 5;
-        //    // 画像を生成　(元になるprefab、座標、回転、親)
-        //    itemBox_[0] = Instantiate(itemUIPrefab,
-        //        new Vector2(0, 0), Quaternion.identity, this.transform);
-        //    // 表示位置をずらす
-        //    itemBox_[0].transform.localPosition = new Vector2(boxPosX_[1], boxPosY_[0]);
-
-        //    // 生成したプレハブの子になっているImageを見つける
-        //    instanceImages_[0] = itemBox_[0].transform.Find("ItemIcon").GetComponent<Image>();
-        //    instanceImages_[0].sprite = ItemImageMng.materialIcon_[1, 0];
-
-        //    // 生成したプレハブの子になっているTextを見つける
-        //    instanceTexts_[0] = itemBox_[0].transform.Find("ItemNum").GetComponent<Text>();
-        //    instanceTexts_[0].text = itemCnt_[0].ToString();
-        //}
-        // chapterCnt_++;
-
-    }
-
-    public void SetItemKinds(ItemList list)
-    {
-        // 素材名のリストを取得
-        if (list != null)
+        // デバッグ用 全部の素材を5個取得した状態で始まる
+        for (int i = 0; i < maxCnt_; i++)
         {
-            for (int i = 0; i < (int)EVENT_ITEM.MAX; i++)
-            {
-                // 現在フィールドの素材名を保存
-                saveItemName_[i] = list.param[i].ItemName;
-                saveChapterNum_[i] = list.param[i].ChapterNumber;
-            }
-        }        
+            ItemGetCheck(i, itemState[i].name, 1);
+            // Debug.Log(i + "番目の素材" + materiaBox_[i].name);
+        }
+
     }
+
+    public void ItemGetCheck(int itemNum,string itemName,int createCnt)
+    {
+        itemState[itemNum].haveCnt += createCnt;
+        if(0< itemState[itemNum].haveCnt)
+        {
+            itemState[itemNum].box.SetActive(true);
+            itemState[itemNum].getFlag = true;
+            Debug.Log(itemName + "を取得しました");
+        }
+        else
+        {
+            itemState[itemNum].box.SetActive(false);
+            itemState[itemNum].getFlag = false;
+        }
+        itemState[itemNum].cntText.text = itemState[itemNum].haveCnt.ToString();
+
+
+        data_[itemNum].name = itemName;
+        data_[itemNum].haveCnt = itemState[itemNum].haveCnt;
+        DataSave();
+    }
+
+    public void DataLoad()
+    {
+        Debug.Log("ロードします");
+
+        csvDatas.Clear();
+
+        // 行分けだけにとどめる
+        string[] texts = File.ReadAllText(saveDataFilePath_).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+        for (int i = 0; i < texts.Length; i++)
+        {
+            // カンマ区切りでリストへ登録していく(2次元配列状態になる[行番号][カンマ区切り])
+            csvDatas.Add(texts[i].Split(','));
+        }
+        Debug.Log("データ数" + csvDatas.Count);
+
+
+        // アイテム個数分回す
+        for (int i = 1; i <= maxCnt_; i++)
+        {
+            ItemData set = new ItemData
+            {
+                name = csvDatas[i + 1][0],// name自体はこのScriptをアタッチ指定オブジェクト名が入ってる
+                haveCnt = int.Parse(csvDatas[i + 1][1]),
+            };
+        }
+        Init();
+    }
+
+    private void DataSave()
+    {
+        Debug.Log("魔法が生成されました。セーブします");
+
+        saveCsvSc_.SaveStart();
+
+        // 魔法の個数分回す
+        for (int i = 0; i < maxCnt_; i++)
+        {
+            saveCsvSc_.SaveItemData(data_[i]);
+        }
+        saveCsvSc_.SaveEnd();
+    }
+
 }

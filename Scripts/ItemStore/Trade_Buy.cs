@@ -5,30 +5,57 @@ using UnityEngine.UI;
 
 public class Trade_Buy : MonoBehaviour
 {
+    private PopListInTown popItemsList_;
+
     [SerializeField]
-    private GameObject merchandisePrefab;    // 素材を拾ったときに生成されるプレハブ
+    private RectTransform buyParent_;   // 表示位置の親
 
-    public static GameObject[,] merchandise_ = new GameObject[5, 30];
-    public static Text[,] merchandiseName_ = new Text[5, 30];
-    private MateriaList materiaList_;
-    private int nowFieldNum_ = 1;// どのフィールドまで進んでいるか。
+    private GameObject[] activeObj_;    //プレハブ生成時に使用
+    private Text[] activePrice_;        // 表示する値段
+    private Text[] activeText_;         // 表示する素材の名前
 
-    public void Init()
+    private int maxCnt_ = 0;            // すべての素材数
+    private int singleCnt_ = 0;         // 1つのシートに記載されてる最大個数
+
+    private int nowFieldNum_ = 2;       // 現在のフィールド
+
+    private void Start()
     {
-        for (int f = 0; f <= nowFieldNum_; f++)
+        popItemsList_ = GameObject.Find("SceneMng").GetComponent<PopListInTown>();
+     
+        maxCnt_ = popItemsList_.SetMaxItemsCount();
+        singleCnt_ = popItemsList_.SetSingleItemsCount();
+        activeObj_ = new GameObject[maxCnt_];
+        activePrice_ = new Text[maxCnt_];
+        activeText_ = new Text[maxCnt_];
+        
+        for (int i = 0; i < maxCnt_; i++)
         {
-            materiaList_ = Resources.Load("MaterialList/Field" + f) as MateriaList;
-            for (int m = 0; m < materiaList_.param.Count; m++)
-            {
-                merchandise_[f, m] = Instantiate(merchandisePrefab,
-                new Vector2(0, 0), Quaternion.identity,
-                GameObject.Find("TradeCanvas/BuyMng/Viewport/Content").transform);
-                merchandiseName_[f, m] = merchandise_[f, m].transform.Find("Name").GetComponent<Text>();
-                merchandiseName_[f, m].text = materiaList_.param[m].MateriaName;
-                merchandise_[f, m].name = materiaList_.param[m].MateriaName;
-            }
-        }
+            //  Debug.Log("店で買えるもの" + PopMateriaList.activeObj_[i].name);
+            activeObj_[i] = PopListInTown.activeObj_[i];
 
+            // 表示する名前を変更する
+            activeText_[i] = activeObj_[i].transform.Find("Name").GetComponent<Text>();
+            activeText_[i].text = activeObj_[i].name;
+
+            // 料金を表示するText
+            activePrice_[i] = activeObj_[i].transform.Find("Price").GetComponent<Text>();
+        }
     }
 
+    public void SetActiveBuy()
+    {
+        // 現在進行しているフィールドの素材しか表示しないようにする
+        for (int i = 0; i < singleCnt_ * nowFieldNum_; i++)
+        {
+            // 親位置を変える
+            activeObj_[i].transform.SetParent(buyParent_.transform);
+          
+            // 表示する料金を買い値に変更
+            activePrice_[i].text = PopListInTown.mateiraBuyPrice_[i].ToString() + "ビット";
+
+            // すべてアクティブ状態にする
+            activeObj_[i].SetActive(true);
+        }
+    }
 }

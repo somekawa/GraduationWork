@@ -14,7 +14,7 @@ public class MovePoint : MonoBehaviour
         MAX
     }
     private JUDGE judge_ = JUDGE.NON;
-    private CreateMng createMng_;
+
 
     // カウントダウン表示
     private Image countImage_;
@@ -40,40 +40,46 @@ public class MovePoint : MonoBehaviour
     private Vector2 savePointPos_;
     private float pos_;
     private float speed_ = 1.0f;
-    private bool stopFlag_ = false;
     private Vector2 pointMax_ = new Vector2(200.0f, 0.0f);
     private Vector2 pointMin_ = new Vector2(-200.0f, 0.0f);
 
-    void Start()
+
+    public void Init()
     {
-        createMng_ = GameObject.Find("Mng").GetComponent<CreateMng>();
+
         // カウントダウン関連
-        countImage_ = GameObject.Find("MiniGameCanvas/CountImage").GetComponent<Image>();
+        countImage_ = transform.Find("CountImage").GetComponent<Image>();
         countText_ = countImage_.transform.Find("Count").GetComponent<Text>();
-        countText_.text = "3";
         countImage_.gameObject.SetActive(false);
         // ミニゲーム関連
-        gameGauge_ = GameObject.Find("MiniGameCanvas/BackImage").GetComponent<RectTransform>();
+        gameGauge_ = this.transform.Find("BackImage").GetComponent<RectTransform>();
         gaugeOffsetMin_ = gameGauge_.anchorMin.x;
         gaugeOffsetMax_ = gameGauge_.anchorMax.x;
         Debug.Log("黄色ゲージの最小" + gaugeOffsetMin_ + "最大" + gaugeOffsetMax_);
         // スペシャルゲージ
         specialGauge_ = gameGauge_.transform.Find("SpecialImage").GetComponent<RectTransform>();
+
+        // ポイント
+        pointImage_ = gameGauge_.transform.Find("Point").GetComponent<Image>();
+        pointImage_.gameObject.SetActive(false);
+        // StartCoroutine(CountDown());
+    }
+
+    public IEnumerator CountDown()
+    {
+        if (specialGauge_ == null)
+        {
+            Init();
+        }
+        // 大成功位置と幅を決める
         specialGauge_.sizeDelta = new Vector2(sizeDeltaX_[(Random.Range(0, 3))], 0.0f);
         specialGauge_.transform.localPosition = new Vector2(specialPosX_[(Random.Range(0, 4))], 0.0f);
         specialMin_ = specialGauge_.transform.localPosition.x - 50.0f;
         specialMax_ = specialGauge_.transform.localPosition.x + 50.0f;
         Debug.Log("スペシャルゲージの最小" + specialMin_ + "最大" + specialMax_);
-
-        // ポイント
-        pointImage_ = gameGauge_.transform.Find("Point").GetComponent<Image>();
-        pointImage_.gameObject.SetActive(false);
-        //  StartCoroutine(CountDown());
-    }
-
-    public IEnumerator CountDown()
-    {
-        countImage_.gameObject.SetActive(true);
+        countImage_.gameObject.SetActive(true);     
+        
+        countText_.text = "3";
         yield return new WaitForSeconds(1.0f);
         countText_.text = "2";
         yield return new WaitForSeconds(1.0f);
@@ -85,28 +91,36 @@ public class MovePoint : MonoBehaviour
         while (true)
         {
             yield return null;
-            if (stopFlag_ == false)
-            {
                 // pos_=speed_*time
                 pointImage_.transform.localPosition = new Vector3(Mathf.Sin(Time.time) * 200.0f, 0, 0);
                 // Debug.Log("ポイントを移動" + pointImage_.transform.localPosition);
-            }
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                stopFlag_ = true;
                 savePointPos_ = pointImage_.transform.localPosition;
                 Debug.Log("座標を保存" + savePointPos_);
-                createMng_.GetJudgeCheck(JUDGE.NORMAL);
-
+                // createMng_.GetJudgeCheck(JUDGE.NORMAL);
+                judge_ = JUDGE.NORMAL;
                 // 大成功の場合
                 if (specialMin_ < savePointPos_.x && savePointPos_.x < specialMax_)
                 {
-                    createMng_.GetJudgeCheck(JUDGE.GOOD);
+                    //createMng_.GetJudgeCheck(JUDGE.GOOD);
+                    judge_ = JUDGE.GOOD;
                 }
+               // finishFlag_ = true;
                 yield break;
             }
         }
+    }
+
+    public JUDGE GetMiniGameJudge()
+    {
+        return judge_;
+    }
+
+    public void SetMiniGameJudge(JUDGE judge)
+    {
+        judge_= judge;
     }
 
 }

@@ -13,5 +13,6 @@ public class BookList : ScriptableObject
 		public string BookName;
 		public string Word;
 		public string AddNum;
+		public int Price;
 	}
 }

@@ -1,0 +1,100 @@
+2021/11/11更新
+
+対象シーン：InHouseAndUniHouse
+
+・魔法作成とアイテム合成のボタンを追加
+
+HouseInteriorーUniHouseCanvas
+		ーSleepButton（X_850、Y_150、Z_0）
+		ーAlchemyBtn（X_900、Y_50、Z_0）
+			UniHouseMng.csのClickAlchemyButton
+		ーMagicCreateBtn（X_950、Y_-50、Z_0）
+			UniHouseMng.csのClickMagicCreateButton
+		ーExitButton（X_1000、Y_-150、Z_0）
+
+・UniHouseMng.cs
+alchemyMng_にHouseInteriorーInHouseCanvasー【AlchemyMng】をアタッチ
+magicCreateMng_にHouseInteriorーInHouseCanvasー【MagicCreateMng】をアタッチ
+uniHouseCanvas_にHouseInteriorーUniHouseー【UniHouseCanvas】をアタッチ
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+ーミニゲーム　
+　MiniGameMngオブジェクト
+　MovePoint.cs
+
+・MovePoint.cs
+MiniGameMngオブジェクトにアタッチ
+
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+●アイテム合成
+　AlchemyMngオブジェクト
+　ItemCreateMng.cs　
+　SaveCSV_HaveItem.cs
+　Bag_Materia.cs
+　Bag_Item.cs
+　　RecipeBtnプレハブ
+　　Event_RecipeClick.cs
+
+・AlchemyMngオブジェクト
+HouseInteriorーInHouseCanvasの子にする
+
+・ItemCreateMng.cs
+AlchemyMngオブジェクトにアタッチ
+uniHouseCanvas_にUniHouseCanvasをアタッチ
+miniGameParent_にMiniGameMngをアタッチ
+itemRecipePleate_にPrefabフォルダーStoreフォルダーRecipeBtnプレハブをアタッチ
+
+・SaveCSV_HaveItem.cs
+AlchemyMngオブジェクトにアタッチ
+（処理）データの保存先は【 @"Assets/Resources/HaveItemList.csv"】
+
+・Bag_Materia.cs
+DontDestroyCanvasーManagersオブジェクトにアタッチ
+materiaParent_にItemBagMngー『MateriaMng』ーViewportー【Content】をアタッチ
+
+・Bag_Item.cs
+DontDestroyCanvasーManagersオブジェクトにアタッチ
+saveCsvSc_に【SaveCSV_HaveItem.cs】をアタッチ
+materiaParent_にItemBagMngー『ItemMng』ーViewportー【Content】をアタッチ
+
+・Event_RecipeClick.cs
+RecipeBtnにアタッチ
+RecipeBtnのOnClick()に自身を代入してEvent_RecipeClick.csのOnClickItemRecipeBtn()を選択
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+●魔法作成
+　MagicCreateMngオブジェクト
+　MagicCreate.cs
+　SaveCSV_Magic.cs
+　Bag_Word.cs
+　Bag_Magic.cs
+　　WordBtnプレハブ
+　　Event_WordClick.cs
+
+・MagicCreateMngオブジェクト
+HouseInteriorーInHouseCanvasの子にする
+
+・MagicCreate.cs
+uniHouseCanvas_にUniHouseCanvasをアタッチ
+miniGameParent_にMiniGameMngをアタッチ
+magicCreateParent_にMagicCreateMngーScrollViewーViewportー【Content】をアタッチ
+
+・SaveCSV_Magic.cs
+MagicCreateMngオブジェクトにアタッチ
+（処理）データの保存先は【 @"Assets/Resources/magicData.csv"】
+
+・Bag_Word.cs
+DontDestroyCanvasーManagersオブジェクトにアタッチ
+materiaParent_にItemBagMngー『WordMng』ーViewportー【Content】をアタッチ
+
+・Bag_Magic.cs
+DontDestroyCanvasーManagersオブジェクトにアタッチ
+saveCsvSc_に【SaveCSV_HaveItem.cs】をアタッチ
+magicUIPrefabにPrefabフォルダーBagフォルダーMagicPleateプレハブをアタッチ
+magicParent_にItemBagMngー『MagicMng』ーViewportー【Content】をアタッチ
+
+
+・Event_WordClick.cs
+WordBtnにアタッチ
+WordBtnのOnClick()に自身を代入してEvent_RecipeClick.csのOnClickWordBtn()を選択

@@ -5,33 +5,67 @@ using UnityEngine.UI;
 
 public class Trade_Sell : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject merchandisePrefab;    // 素材を拾ったときに生成されるプレハブ
-    private static GameObject[,] merchandise_ = new GameObject[5, 30];
-    private static Text[,] merchandiseName_ = new Text[5, 30];
-    private MateriaList materiaList_;
-    private int nowFieldNum_ = 1;// どのフィールドまで進んでいるか。
+    private PopListInTown popItemsList_; 
 
-    public void Init()
+    [SerializeField]
+    private RectTransform sellParent_;  // 表示位置の親
+
+    private GameObject[] activeObj_;    //プレハブ生成時に使用
+    private Text[] activePrice_;        // 表示する値段
+    private Text[] activeText_;         // 表示する素材の名前
+
+    private int maxCnt_ = 0;            // すべての素材数
+
+    private void Start()
     {
-        for (int f = 0; f <= nowFieldNum_; f++)
+        popItemsList_ = GameObject.Find("SceneMng").GetComponent<PopListInTown>();
+       
+        maxCnt_ = popItemsList_.SetMaxItemsCount();
+        activeObj_ = new GameObject[maxCnt_];//プレハブ生成時に使用
+        activePrice_ = new Text[maxCnt_];
+        activeText_ = new Text[maxCnt_];
+
+        for (int i = 0; i < maxCnt_; i++)
         {
-            materiaList_ = Resources.Load("MaterialList/Field" + f) as MateriaList;
-            for (int m = 0; m < materiaList_.param.Count; m++)
+            activeObj_[i] = PopListInTown.activeObj_[i];
+            //  Debug.Log("バッグの中身" + PopMateriaList.activeObj_[i].name);
+            // 表示する名前を変更する
+            activeText_[i] = activeObj_[i].transform.Find("Name").GetComponent<Text>();
+            activeText_[i].text = activeObj_[i].name;
+
+            // 料金を表示するText
+            activePrice_[i] = activeObj_[i].transform.Find("Price").GetComponent<Text>();
+            activeObj_[i].SetActive(false);
+        }
+    }
+
+    public void SetActiveSell()
+    {
+        // Debug.Log(objParent_.transform.childCount);
+        for (int i = 0; i < maxCnt_; i++)
+        {
+            // 親位置を変える
+            activeObj_[i].transform.SetParent(sellParent_.transform);
+
+            // 表示する料金を売値に変更
+            activePrice_[i].text = PopListInTown.mateiraSellPrice_[i].ToString() + "ビット";
+
+            // 所持数が0以上でバッグの中身と同じものがあれば表示
+            if (0 < Bag_Materia.materiaState[i].haveCnt)
             {
-                merchandise_[f, m] = Instantiate(merchandisePrefab,
-                new Vector2(0, 0), Quaternion.identity,
-                GameObject.Find("TradeCanvas/BuyMng/Viewport/Content").transform);
-                merchandiseName_[f, m] = merchandise_[f, m].transform.Find("Name").GetComponent<Text>();
-                merchandiseName_[f, m].text = materiaList_.param[m].MateriaName;
-                merchandise_[f, m].name = materiaList_.param[m].MateriaName;
+                activeObj_[i].SetActive(true);
+            }
+            else
+            {
+                activeObj_[i].SetActive(false);
             }
         }
-
     }
 
-    public void SetSelectItemName(string name)
+    public void SetHaveCntCheck(int materiaNum)
     {
-
+        // 指定素材の所持数が0個になったら呼び出される
+       activeObj_[materiaNum].SetActive(false);
     }
 }
+

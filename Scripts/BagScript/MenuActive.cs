@@ -15,15 +15,9 @@ public class MenuActive : MonoBehaviour
 
     //--------------
     private EventSystem eventSystem;// ボタンクリックのためのイベント処理
-    private GameObject clickbtn_;   // どのボタンをクリックしたか代入する変数
+    private GameObject clickbtn_;    // どのボタンをクリックしたか代入する変数
 
-    private Image backPanel_;       // 背景を暗くするためのパネル
-    private CANVAS nowCanvas_;      // 現在開かれているメニューはどこであるかを保存する
-
-    //private RectTransform itemBagMng_;// itemBag_の子
-    //private RectTransform pictureMng_;// itemBag_の子
-    //private RectTransform[] otherMng_ = new RectTransform[2];
-
+    private Image backPanel_;// 背景を暗くするためのパネル
 
     private Canvas parentCanvas_;
 
@@ -40,7 +34,6 @@ public class MenuActive : MonoBehaviour
         SAVE,   // セーブ用のボタン
         MAX
     }
-
     private RectTransform[] parentRectTrans_ = new RectTransform[(int)CANVAS.MAX];
     private string[] btnName = new string[(int)CANVAS.MAX] {
     "Menu","ItemBox","Status","Other","Cancel","Load","Save"
@@ -55,10 +48,6 @@ public class MenuActive : MonoBehaviour
 
     //// ItemBox選択時
     private ItemBagMng itemBagMngCS_;
-    private Bag_Materia bagMateria_;
-    //  private bool chapterCheck_ = false;
-    private Bag_Item bagItem_;
-    private Bag_Word bagWord_;
 
     // バッグ使用中かどうか
     private bool activeFlag_ = false;
@@ -66,11 +55,13 @@ public class MenuActive : MonoBehaviour
     // ワープ中かどうか
     private WarpField warpField_;
 
+
+    private HouseInteriorMng interiorMng_;
     void Awake()
     {
         saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveCSV>();
         eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
-        Debug.Log(eventSystem.name + "をクリック");
+        //  Debug.Log(eventSystem.name + "をクリック");
         warpField_ = GameObject.Find("WarpOut").GetComponent<WarpField>();
 
         parentCanvas_ = GameObject.Find("DontDestroyCanvas").GetComponent<Canvas>();
@@ -95,15 +86,31 @@ public class MenuActive : MonoBehaviour
 
         // アイテム、ワード、素材表示キャンバス
         itemBagMngCS_ = parentCanvas_.transform.Find("ItemBagMng").GetComponent<ItemBagMng>();
-        bagItem_ = parentRectTrans_[(int)CANVAS.BAG].transform.Find("ItemMng").GetComponent<Bag_Item>();
-        bagMateria_ = parentCanvas_.transform.Find("Managers").GetComponent<Bag_Materia>();
-        bagWord_ = parentRectTrans_[(int)CANVAS.BAG].transform.Find("WordMng").GetComponent<Bag_Word>();
 
         backPanel_.gameObject.SetActive(false);
         // メニューの子であるBagは常時表示しておきたいためBagスタート
         for (int i = (int)CANVAS.BAG; i < (int)CANVAS.CANCEL; i++)
         {
             parentRectTrans_[i].gameObject.SetActive(false);
+        }
+
+        if ((int)SceneMng.nowScene == (int)SceneMng.SCENE.TOWN)
+        {
+            // ギルドにいる場合はバッグを非表示に
+            interiorMng_ = GameObject.Find("HouseInterior").GetComponent<HouseInteriorMng>();
+            if (interiorMng_.GetInHouseName() == "Guild")
+            {
+                parentCanvas_.gameObject.SetActive(false);
+            }
+        }
+        else if((int)SceneMng.nowScene == (int)SceneMng.SCENE.CONVERSATION)
+        {
+            // 会話シーンならバッグを非表示に
+            parentCanvas_.gameObject.SetActive(false);
+        }
+        else
+        {
+            return;
         }
     }
 
@@ -126,7 +133,7 @@ public class MenuActive : MonoBehaviour
                 Debug.Log("メニュー画面を表示します");
                 FieldMng.nowMode = FieldMng.MODE.MENU;  // ユニが歩行できないようにモードを切り替える  activeFlag_ = true;
                 bagImage_.color = new Color(0.5f, 1.0f, 0.5f, 1.0f);
-                parentRectTrans_[(int)CANVAS.MENU].gameObject.SetActive(true);
+               // parentRectTrans_[(int)CANVAS.MENU].gameObject.SetActive(true);
                 StartCoroutine(MoveMenuButtons(1));
             }
         }
@@ -167,13 +174,13 @@ public class MenuActive : MonoBehaviour
         }
     }
 
-    public void ViewStatus(int charaNum)
+    private void SctiveStatus()
     {
         Debug.Log("ステータス確認ボタンが押された");
         //  buttons_.SetActive(false);
 
         // キャラのステータス値を表示させたい
-        var data = SceneMng.GetCharasSettings(charaNum);
+        var data = SceneMng.GetCharasSettings((int)SceneMng.CHARACTERNUM.UNI);
 
         // 表示する文字の作成
         string str = "名前  :" + data.name + "\n" +
@@ -220,20 +227,6 @@ public class MenuActive : MonoBehaviour
 
         Debug.Log("データ数" + csvDatas.Count);
 
-        // csvDatas[行][列]を指定して値を自由に取り出す方法
-        //Debug.Log(csvDatas[0][1]);
-
-        // 列を見た後に次の行へ進むようにする(デバッグ用)
-        for (int y = 0; y < csvDatas.Count; y++) // 全ての行文で回す
-        {
-            for (int x = 0; x < csvDatas[y].Length; x++) // 1行当たりに対する列の数で回す
-            {
-                // ゲームを閉じた後とかじゃないと反映されてない可能性あり
-                // SaveCSV.csからデータを直接もらってきたほうがいい?
-                Debug.Log(csvDatas[y][x]);
-            }
-        }
-
         // キャラクター数分のfor文を回す
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
         {
@@ -250,6 +243,7 @@ public class MenuActive : MonoBehaviour
                 Luck = int.Parse(csvDatas[i + 1][8]),
                 AnimMax = float.Parse(csvDatas[i + 1][9])
             };
+            Debug.Log(csvDatas[i + 1][0] + "            キャラデータをロード中。残り" + i);
             SceneMng.SetCharasSettings(i, set);
         }
     }
@@ -257,16 +251,6 @@ public class MenuActive : MonoBehaviour
     public bool GetActiveFlag()
     {
         return activeFlag_;
-    }
-
-    public Bag_Materia GetBagMateria()
-    {
-        return bagMateria_;
-    }
-
-    public Bag_Item GetBagItem()
-    {
-        return bagItem_;
     }
 
     public void OnClickMenuBtn()
@@ -323,8 +307,6 @@ public class MenuActive : MonoBehaviour
     private void SelectCanvasActive(CANVAS canvas)
     {
         Debug.Log(canvas + "を表示しています");
-        // 現在のページを保存
-        nowCanvas_ = canvas;
 
         parentRectTrans_[(int)canvas].gameObject.SetActive(true);
         switch (canvas)
@@ -332,26 +314,25 @@ public class MenuActive : MonoBehaviour
             case CANVAS.BAG:
                 // アイテムボタンが押されるとき
                 parentRectTrans_[(int)CANVAS.BAG].GetComponent<ItemBagMng>().Init();
+                // itemBagMngCS_.Init();
                 break;
+
             case CANVAS.STATUS:
-                parentRectTrans_[(int)CANVAS.BAG].GetComponent<ItemBagMng>().StatusInit();
+                SctiveStatus();
                 break;
+
             case CANVAS.OTHER:
                 // PictureAndQuestMng.csの初期化関数を呼ぶ
                 GameObject.Find("DontDestroyCanvas/OtherUI").GetComponent<PictureAndQuestMng>().Init();
                 break;
+
             default:
                 break;
         }
 
         if (clickbtn_.name != btnName[(int)CANVAS.BAG])
         {
-            itemBagMngCS_.SetActiveCanvas();
+            itemBagMngCS_.ActiveRectTransform();
         }
-    }
-
-    public CANVAS GetNowMenuCanvas()
-    {
-        return nowCanvas_;
     }
 }

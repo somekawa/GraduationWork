@@ -60,6 +60,7 @@ public class ItemList_importer : AssetPostprocessor
 			
 					cell = row.GetCell(0); p.ItemName = (cell == null ? "" : cell.StringCellValue);
 					cell = row.GetCell(1); p.ChapterNumber = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(2); p.Price_Sell = (int)(cell == null ? 0 : cell.NumericCellValue);
 
                         data.param.Add(p);
                     }

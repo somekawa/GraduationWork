@@ -203,7 +203,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 7860674890141954229}
         m_TargetAssemblyTypeName: Event_RecipeClick, Assembly-CSharp
-        m_MethodName: OnClickRecipeBtn
+        m_MethodName: OnClickItemRecipeBtn
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

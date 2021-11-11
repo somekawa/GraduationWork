@@ -1,0 +1,102 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5a569a8a8aad0343b4eefa5063d7f7a, type: 3}
+  m_Name: WordList0
+  m_EditorClassIdentifier: 
+  param:
+  - Word: "\u5358\u4F53"
+    ListNumber: 0
+    KindsNumber: 0
+  - Word: "\u708E"
+    ListNumber: 0
+    KindsNumber: 3
+  - Word: "\u5C0F"
+    ListNumber: 0
+    KindsNumber: 4
+  - Word: HP
+    ListNumber: 0
+    KindsNumber: 6
+  - Word: "\u5473\u65B9"
+    ListNumber: 0
+    KindsNumber: 5
+  - Word: "\u8907\u6570\u56DE"
+    ListNumber: 1
+    KindsNumber: 0
+  - Word: "\u56DE\u5FA9"
+    ListNumber: 1
+    KindsNumber: 1
+  - Word: "\u6C34"
+    ListNumber: 1
+    KindsNumber: 3
+  - Word: "\u6BD2"
+    ListNumber: 1
+    KindsNumber: 7
+  - Word: "\u6697\u95C7"
+    ListNumber: 1
+    KindsNumber: 7
+  - Word: "\u4E0A\u6607"
+    ListNumber: 1
+    KindsNumber: 8
+  - Word: "\u5168\u4F53"
+    ListNumber: 2
+    KindsNumber: 0
+  - Word: "\u88DC\u52A9"
+    ListNumber: 2
+    KindsNumber: 2
+  - Word: "\u571F"
+    ListNumber: 2
+    KindsNumber: 3
+  - Word: "\u4E2D"
+    ListNumber: 2
+    KindsNumber: 4
+  - Word: "\u7269\u7406\u653B\u6483"
+    ListNumber: 2
+    KindsNumber: 6
+  - Word: "\u9B54\u6CD5\u653B\u6483"
+    ListNumber: 2
+    KindsNumber: 6
+  - Word: "\u9632\u5FA1\u529B"
+    ListNumber: 2
+    KindsNumber: 6
+  - Word: "\u4F4E\u4E0B"
+    ListNumber: 2
+    KindsNumber: 8
+  - Word: "\u6575"
+    ListNumber: 2
+    KindsNumber: 5
+  - Word: "\u5FC5\u4E2D"
+    ListNumber: 2
+    KindsNumber: 8
+  - Word: "\u98A8"
+    ListNumber: 3
+    KindsNumber: 3
+  - Word: "\u5927"
+    ListNumber: 3
+    KindsNumber: 4
+  - Word: "\u9EBB\u75FA"
+    ListNumber: 3
+    KindsNumber: 7
+  - Word: "\u53CD\u5C04"
+    ListNumber: 3
+    KindsNumber: 8
+  - Word: "\u5373\u6B7B"
+    ListNumber: 3
+    KindsNumber: 7
+  - Word: "\u5438\u53CE"
+    ListNumber: 3
+    KindsNumber: 9
+  - Word: "\u9F8D"
+    ListNumber: 4
+    KindsNumber: 3
+  - Word: "\u6975\u5927"
+    ListNumber: 4
+    KindsNumber: 4

@@ -8,8 +8,10 @@ public class ItemList : ScriptableObject
 
 	[System.SerializableAttribute]
 	public class Param
-	{		
+	{
+		
 		public string ItemName;
 		public int ChapterNumber;
+		public int Price_Sell;
 	}
 }

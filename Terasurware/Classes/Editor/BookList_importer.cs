@@ -10,7 +10,7 @@ using NPOI.SS.UserModel;
 public class BookList_importer : AssetPostprocessor
 {
     private static readonly string filePath = "Assets/ExcelData/BookList.xls";
-    private static readonly string[] sheetNames = { "Story0","Story1","Story2","Story3","Story4","StatusUpSheet","Recipe", };
+    private static readonly string[] sheetNames = { "BookList0","BookList1","BookList2","BookList3","BookList4", };
     
     static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
     {
@@ -61,6 +61,7 @@ public class BookList_importer : AssetPostprocessor
 					cell = row.GetCell(0); p.BookName = (cell == null ? "" : cell.StringCellValue);
 					cell = row.GetCell(1); p.Word = (cell == null ? "" : cell.StringCellValue);
 					cell = row.GetCell(2); p.AddNum = (cell == null ? "" : cell.StringCellValue);
+					cell = row.GetCell(3); p.Price = (int)(cell == null ? 0 : cell.NumericCellValue);
 
                         data.param.Add(p);
                     }
