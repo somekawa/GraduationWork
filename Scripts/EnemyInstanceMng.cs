@@ -321,7 +321,10 @@ public class EnemyInstanceMng : MonoBehaviour
         {
             case ANIMATION.IDLE:
                 // 有効にしていたダメージ用コライダーをfalseに戻す
-                changeEnableBoxCollider_.enabled = false;
+                if(changeEnableBoxCollider_ != null)
+                {
+                    changeEnableBoxCollider_.enabled = false;
+                }
 
                 // 行動が終わったからターンを移す
                 buttleMng_.SetMoveTurn();

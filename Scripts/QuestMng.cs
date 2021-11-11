@@ -275,9 +275,6 @@ public class QuestMng : MonoBehaviour
 
         ClearQuestUpdate();
 
-        // クエストの達成報告でイベントが進行するか判断する
-        guild_.GuildQuestEvent(questNum_,true);
-
         Debug.Log("クエストを報告しました");
     }
 
@@ -288,7 +285,7 @@ public class QuestMng : MonoBehaviour
         {
             yield return null;
 
-            if (time >= 3.0f)
+            if (time >= 1.5f)
             {
                 popUpReward_.SetActive(false);
             }
@@ -297,6 +294,11 @@ public class QuestMng : MonoBehaviour
                 time += Time.deltaTime;
             }
         }
+
+        // クエストの達成報告でイベントが進行するか判断する
+        // ポップアップ後にイベントが発生してほしいからここで行う
+        guild_.GuildQuestEvent(questNum_, true);
+
     }
 
     // クリアクエストの更新(報告時にも非表示切り替えが発生するため)

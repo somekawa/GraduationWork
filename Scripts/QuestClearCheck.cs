@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// クエストクリア関数を作成して、宝箱を取得したらチュートリアルクエストをクリア状態にできるようにする
+
 public class QuestClearCheck : MonoBehaviour
 {
     private int deleteNum_ = -1;
@@ -117,6 +119,28 @@ public class QuestClearCheck : MonoBehaviour
         return false;   // 新規クエストを受けられない
     }
 
+    // クリア処理用の関数
+    public static bool QuestClear(int questNum)
+    {
+        for (int i = 0; i < orderQuestsList_.Count; i++)
+        {
+            if (int.Parse(orderQuestsList_[i].Item1.name) == questNum)
+            {
+                // エラーのでる書き方
+                // completeQuestsList[i].Item2 = true;
+
+                // 一時変数に保存してから代入する方法で対処する
+                (GameObject, bool) tmpData = orderQuestsList_[i];
+                tmpData.Item2 = true;
+                orderQuestsList_[i] = tmpData;
+                return true;
+            }
+        }
+
+        Debug.Log("該当するクエスト番号のクエストを、受注していません");
+        return false;
+    }
+
     public static void SetBuildName(string name)
     {
         // 0番のクエストを受けていなければreturnする
@@ -159,26 +183,14 @@ public class QuestClearCheck : MonoBehaviour
         // 全ての建物へあいさつ回りができた(建物名が6箇所分入っている)
         if(buildList.Count >= 6)
         {
-            for(int i = 0; i < orderQuestsList_.Count; i++)
+            if(QuestClear(0))
             {
-                if(int.Parse(orderQuestsList_[i].Item1.name) == 0)
-                {
-                    // エラーのでる書き方
-                    // completeQuestsList[i].Item2 = true;
-
-                    // 一時変数に保存してから代入する方法で対処する
-                    (GameObject, bool) tmpData = orderQuestsList_[i];
-                    tmpData.Item2 = true;
-                    orderQuestsList_[i] = tmpData;
-
-                    // イベント進行度を6にする
-                    EventMng.SetChapterNum(6, SceneMng.SCENE.NON);
-                }
+                // イベント進行度を6にする
+                EventMng.SetChapterNum(6, SceneMng.SCENE.NON);
+                // クリア条件処理は終了したので、リストを削除して使えないようにしておく
+                buildList.Clear();
+                buildList = null;
             }
-
-            // クリア条件処理は終了したので、リストを削除して使えないようにしておく
-            buildList.Clear();
-            buildList = null;
         }
     }
 }

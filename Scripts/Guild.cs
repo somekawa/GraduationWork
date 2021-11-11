@@ -16,6 +16,10 @@ public class Guild : HouseBase
             // 時間帯を条件に入れないと、挨拶クエスト終了直後に発生する可能性が高い
             EventMng.SetChapterNum(7, SceneMng.SCENE.CONVERSATION); 
         }
+        else if (EventMng.GetChapterNum() == 10 && SceneMng.GetTimeGear() == SceneMng.TIMEGEAR.MORNING)
+        {
+            EventMng.SetChapterNum(10, SceneMng.SCENE.CONVERSATION);
+        }
         return false;
     }
 
@@ -34,6 +38,14 @@ public class Guild : HouseBase
             {
                 SceneMng.SetTimeGear(SceneMng.TIMEGEAR.EVENING);    // 時間経過
                 EventMng.SetChapterNum(6, SceneMng.SCENE.CONVERSATION);
+            }
+        }
+        else if(EventMng.GetChapterNum() == 9 && questNum == 1) // 現在の進行度が8で、クエスト1番を達成したら
+        {
+            if (clearFlg)
+            {
+                SceneMng.SetTimeGear(SceneMng.TIMEGEAR.EVENING);    // 時間経過
+                EventMng.SetChapterNum(9, SceneMng.SCENE.CONVERSATION);
             }
         }
     }
