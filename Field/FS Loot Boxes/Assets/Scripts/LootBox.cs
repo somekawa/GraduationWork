@@ -132,6 +132,8 @@ public class LootBox : MonoBehaviour
         string[] arr = name.Split('-');
         // FieldMngを取得して、アクティブ状態にする
         GameObject.Find("FieldMng").GetComponent<FieldMng>().ChangeFieldUICanvasPopUpActive(int.Parse(arr[0]),int.Parse(arr[1]),true);
+        // 宝箱を開けることが、クエストのクリア条件であるか調べる
+        QuestCheck(int.Parse(arr[0]), int.Parse(arr[1]));
 
         // play the open animation
         if (animator) animator.Play("Open");
@@ -162,6 +164,14 @@ public class LootBox : MonoBehaviour
         // calls the OnBoxOpen event and deliver the
         // earned GameObjects on temp list
         OnBoxOpen?.Invoke(loots.ToArray());
+    }
+
+    private void QuestCheck(int num1,int num2)
+    {
+        if(num1 == 1 && num2 == 1)  // チュートリアルクエストクリア
+        {
+            QuestClearCheck.QuestClear(1);
+        }
     }
 
     /// <summary>
