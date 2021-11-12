@@ -220,6 +220,11 @@ public class HouseInteriorMng : MonoBehaviour
         nowInHouseName = name;
     }
 
+    public string GetInHouseName()
+    {
+        return nowInHouseName;
+    }
+
     // 建物からの出口処理テスト
     public void ExitButton()
     {

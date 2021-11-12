@@ -17,30 +17,30 @@ public class PictureBookCheck : MonoBehaviour
     void Start()
     //    public void Init()
     {
-        activePicture_ = new GameObject[(int)ItemGet.items.MAX];
-        posX_ = new float[(int)ItemGet.items.MAX] {
+        activePicture_ = new GameObject[(int)DropFieldMateria.items.MAX];
+        posX_ = new float[(int)DropFieldMateria.items.MAX] {
         -400.0f,-200.0f,0.0f,200.0f,400.0f };
        //gameObject.SetActive(false);
 
     }
 
-    public void GetMateriakinds(int fieldNum, int itemNum)
-    {
-        activePicture_[itemNum] = Instantiate(pictureUI,
-                        new Vector2(0, 0), 
-                        Quaternion.identity,
-                        transform.Find("DontDestroyCanvas/OtherUI/PictureBookMng").GetComponent<RectTransform>());
-        // 表示位置をずらす
-        activePicture_[itemNum].transform.localPosition = new Vector2(posX_[itemNum], 0.0f);
-        Debug.Log("フィールド番号：" + fieldNum + "     アイテム番号：" + itemNum);
-        // 生成したプレハブの子になっているImageを見つける
-        instanceImages_[itemNum] = activePicture_[itemNum].GetComponent<Image>();
-        instanceImages_[itemNum].sprite =  ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][fieldNum, itemNum];
+    //public void GetMateriakinds(int fieldNum, int itemNum)
+    //{
+    //    activePicture_[itemNum] = Instantiate(pictureUI,
+    //                    new Vector2(0, 0), 
+    //                    Quaternion.identity,
+    //                    transform.Find("DontDestroyCanvas/OtherUI/PictureBookMng").GetComponent<RectTransform>());
+    //    // 表示位置をずらす
+    //    activePicture_[itemNum].transform.localPosition = new Vector2(posX_[itemNum], 0.0f);
+    //    Debug.Log("フィールド番号：" + fieldNum + "     アイテム番号：" + itemNum);
+    //    // 生成したプレハブの子になっているImageを見つける
+    //    instanceImages_[itemNum] = activePicture_[itemNum].GetComponent<Image>();
+    //    instanceImages_[itemNum].sprite =  ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][fieldNum* itemNum + itemNum];
 
-        // var prefab = Instantiate(materiaUIPrefab);
-        // クエスト番号の設定
-        // activePicture_[materiaNum_].GetComponent<OwnedMateria>().SetMyName(materiaName);
+    //    // var prefab = Instantiate(materiaUIPrefab);
+    //    // クエスト番号の設定
+    //    // activePicture_[materiaNum_].GetComponent<OwnedMateria>().SetMyName(materiaName);
 
 
-    }
+    //}
 }

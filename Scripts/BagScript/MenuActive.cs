@@ -326,7 +326,7 @@ public class MenuActive : MonoBehaviour
 
             case CANVAS.OTHER:
                 // PictureAndQuestMng.csの初期化関数を呼ぶ
-                GameObject.Find("DontDestroyCanvas/OtherUI").GetComponent<PictureAndQuestMng>().Init();
+               // GameObject.Find("DontDestroyCanvas/OtherUI").GetComponent<PictureAndQuestMng>().Init();
                 break;
 
             default:
