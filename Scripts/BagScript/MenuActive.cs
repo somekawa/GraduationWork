@@ -15,9 +15,10 @@ public class MenuActive : MonoBehaviour
 
     //--------------
     private EventSystem eventSystem;// ボタンクリックのためのイベント処理
-    private GameObject clickbtn_;    // どのボタンをクリックしたか代入する変数
+    private GameObject clickbtn_;   // どのボタンをクリックしたか代入する変数
 
-    private Image backPanel_;// 背景を暗くするためのパネル
+    private Image backPanel_;       // 背景を暗くするためのパネル
+    private CANVAS nowCanvas_;      // 現在開かれているメニューはどこであるかを保存する
 
     private Canvas parentCanvas_;
 
@@ -34,6 +35,7 @@ public class MenuActive : MonoBehaviour
         SAVE,   // セーブ用のボタン
         MAX
     }
+
     private RectTransform[] parentRectTrans_ = new RectTransform[(int)CANVAS.MAX];
     private string[] btnName = new string[(int)CANVAS.MAX] {
     "Menu","ItemBox","Status","Other","Cancel","Load","Save"
@@ -174,13 +176,14 @@ public class MenuActive : MonoBehaviour
         }
     }
 
-    private void SctiveStatus()
+
+    public void ViewStatus(int charaNum)
     {
         Debug.Log("ステータス確認ボタンが押された");
         //  buttons_.SetActive(false);
 
         // キャラのステータス値を表示させたい
-        var data = SceneMng.GetCharasSettings((int)SceneMng.CHARACTERNUM.UNI);
+        var data = SceneMng.GetCharasSettings(charaNum);
 
         // 表示する文字の作成
         string str = "名前  :" + data.name + "\n" +
@@ -318,7 +321,7 @@ public class MenuActive : MonoBehaviour
                 break;
 
             case CANVAS.STATUS:
-                SctiveStatus();
+                parentRectTrans_[(int)CANVAS.BAG].GetComponent<ItemBagMng>().StatusInit();
                 break;
 
             case CANVAS.OTHER:
@@ -334,5 +337,9 @@ public class MenuActive : MonoBehaviour
         {
             itemBagMngCS_.ActiveRectTransform();
         }
+    }
+    public CANVAS GetNowMenuCanvas()
+    {
+        return nowCanvas_;
     }
 }
