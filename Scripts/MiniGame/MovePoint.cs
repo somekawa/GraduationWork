@@ -24,12 +24,10 @@ public class MovePoint : MonoBehaviour
     private float gaugeOffsetMin_;
     private float gaugeOffsetMax_;
     private RectTransform specialGauge_;
-    private float[] sizeDeltaX_ = new float[4]
-    {
+    private float[] sizeDeltaX_ = new float[4]{
         30.0f,50.0f,70.0f,100.0f
     };
-    private float[] specialPosX_ = new float[5]
-        {
+    private float[] specialPosX_ = new float[5]{
             -200.0f,-100.0f,70.0f,100.0f,200.0f
         };
 
@@ -38,15 +36,9 @@ public class MovePoint : MonoBehaviour
 
     private Image pointImage_;
     private Vector2 savePointPos_;
-    private float pos_;
-    private float speed_ = 1.0f;
-    private Vector2 pointMax_ = new Vector2(200.0f, 0.0f);
-    private Vector2 pointMin_ = new Vector2(-200.0f, 0.0f);
-
 
     public void Init()
     {
-
         // カウントダウン関連
         countImage_ = transform.Find("CountImage").GetComponent<Image>();
         countText_ = countImage_.transform.Find("Count").GetComponent<Text>();
@@ -62,7 +54,6 @@ public class MovePoint : MonoBehaviour
         // ポイント
         pointImage_ = gameGauge_.transform.Find("Point").GetComponent<Image>();
         pointImage_.gameObject.SetActive(false);
-        // StartCoroutine(CountDown());
     }
 
     public IEnumerator CountDown()
@@ -77,8 +68,8 @@ public class MovePoint : MonoBehaviour
         specialMin_ = specialGauge_.transform.localPosition.x - 50.0f;
         specialMax_ = specialGauge_.transform.localPosition.x + 50.0f;
         Debug.Log("スペシャルゲージの最小" + specialMin_ + "最大" + specialMax_);
-        countImage_.gameObject.SetActive(true);     
-        
+        countImage_.gameObject.SetActive(true);
+
         countText_.text = "3";
         yield return new WaitForSeconds(1.0f);
         countText_.text = "2";
@@ -91,9 +82,9 @@ public class MovePoint : MonoBehaviour
         while (true)
         {
             yield return null;
-                // pos_=speed_*time
-                pointImage_.transform.localPosition = new Vector3(Mathf.Sin(Time.time) * 200.0f, 0, 0);
-                // Debug.Log("ポイントを移動" + pointImage_.transform.localPosition);
+            // pos_=speed_*time
+            pointImage_.transform.localPosition = new Vector3(Mathf.Sin(Time.time) * 200.0f, 0, 0);
+            // Debug.Log("ポイントを移動" + pointImage_.transform.localPosition);
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -107,7 +98,7 @@ public class MovePoint : MonoBehaviour
                     //createMng_.GetJudgeCheck(JUDGE.GOOD);
                     judge_ = JUDGE.GOOD;
                 }
-               // finishFlag_ = true;
+                // finishFlag_ = true;
                 yield break;
             }
         }
@@ -120,7 +111,6 @@ public class MovePoint : MonoBehaviour
 
     public void SetMiniGameJudge(JUDGE judge)
     {
-        judge_= judge;
+        judge_ = judge;
     }
-
 }

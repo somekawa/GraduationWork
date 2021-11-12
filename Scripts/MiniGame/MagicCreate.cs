@@ -6,13 +6,13 @@ using UnityEngine.UI;
 public class MagicCreate : MonoBehaviour
 {
     [SerializeField]
-    private Canvas uniHouseCanvas_;
+    private Canvas uniHouseCanvas;
 
     [SerializeField]
-    private RectTransform miniGameParent_;    // ミニゲーム表示用
+    private RectTransform miniGameParent;    // ミニゲーム表示用
 
     [SerializeField]
-    private RectTransform magicCreateParent_;    // 素材を拾ったときに生成されるプレハブ
+    private RectTransform magicCreateParent;    // 素材を拾ったときに生成されるプレハブ
 
     // ワードの最大個数取得用
     private InitPopList popWordList_;
@@ -65,11 +65,11 @@ public class MagicCreate : MonoBehaviour
         cancelBtn_ = transform.Find("InfoMng/CancelBtn").GetComponent<Button>();
 
         // ミニゲーム処理
-        movePoint_ = miniGameParent_.transform.GetComponent<MovePoint>();
+        movePoint_ = miniGameParent.transform.GetComponent<MovePoint>();
         judeBack_ = transform.Find("JudgBack").GetComponent<Image>();
         judgText_ = judeBack_.transform.Find("Text").GetComponent<Text>();
         judeBack_.gameObject.SetActive(false);
-        miniGameParent_.gameObject.SetActive(false);
+        miniGameParent.gameObject.SetActive(false);
         judgText_.text = "";
 
         // ScrollView/TopicBtnまでの階層
@@ -95,17 +95,17 @@ public class MagicCreate : MonoBehaviour
         if (0 < Bag_Materia.materiaState[materiaNum_].haveCnt)
         {
             // 空のマテリアを1つでも持っていれば表示
-            materiaImage_.sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][materiaNum_];
+            materiaImage_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][materiaNum_];
             materiaCntText_.text = Bag_Materia.materiaState[materiaNum_].haveCnt.ToString();
         }
         ResetCommon();
 
         // ワードたちを魔法合成用の親の子に移動させる
-        if (Bag_Word.wordState_[0].pleate.transform.parent != magicCreateParent_.transform)
+        if (Bag_Word.wordState[0].pleate.transform.parent != magicCreateParent.transform)
         {
             for (int i = 0; i < maxCnt_; i++)
             {
-                Bag_Word.wordState_[i].pleate.transform.SetParent(magicCreateParent_.transform);
+                Bag_Word.wordState[i].pleate.transform.SetParent(magicCreateParent.transform);
             }
             //  Debug.Log("親の位置をずらしました。");
         }
@@ -119,7 +119,7 @@ public class MagicCreate : MonoBehaviour
          && selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != "補助")
         {
             // 攻撃系Elementを選択時に必中をもっていなかったらSub2でストップ
-            if (Bag_Word.wordState_[targetWordNum_].getFlag == false)
+            if (Bag_Word.wordState[targetWordNum_].getFlag == false)
             {
                 if ((int)Bag_Word.WORD_MNG.SUB2 <= stringNum_)
                 {
@@ -148,15 +148,15 @@ public class MagicCreate : MonoBehaviour
         // ワード種別を1つ戻るときにその種類のワードを選択していれば
         //  Debug.Log("1つ前の種類に戻ります。");
         // ボタンを押下できるようにして色を元に戻す
-        Bag_Word.wordState_[saveNumber_[stringNum_]].btn.image.color = Color.white;
-        Bag_Word.wordState_[saveNumber_[stringNum_]].btn.interactable = true;
+        Bag_Word.wordState[saveNumber_[stringNum_]].btn.image.color = Color.white;
+        Bag_Word.wordState[saveNumber_[stringNum_]].btn.interactable = true;
         selectWord_[stringNum_] = null;
         oldNumber_[stringNum_] = -1;
 
         stringNum_--;
 
-        Bag_Word.wordState_[saveNumber_[stringNum_]].btn.image.color = Color.green;
-        Bag_Word.wordState_[saveNumber_[stringNum_]].btn.interactable = false;
+        Bag_Word.wordState[saveNumber_[stringNum_]].btn.image.color = Color.green;
+        Bag_Word.wordState[saveNumber_[stringNum_]].btn.interactable = false;
 
         infoText_.text = selectWord_[(int)Bag_Word.WORD_MNG.HEAD] +
           "\n" + selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] +
@@ -199,9 +199,9 @@ public class MagicCreate : MonoBehaviour
         for (int i = 0; i < maxCnt_; i++)
         {
             // 全て非表示にしておく
-            Bag_Word.wordState_[i].pleate.SetActive(false);
+            Bag_Word.wordState[i].pleate.SetActive(false);
             // 取得しているか
-            if (Bag_Word.wordState_[i].getFlag == true)
+            if (Bag_Word.wordState[i].getFlag == true)
             {
                 // ワードの種類と一致している番号だけ表示
                 SelectWordKindCheck(i, (Bag_Word.WORD_MNG)stringNum_);
@@ -226,7 +226,7 @@ public class MagicCreate : MonoBehaviour
         // すでに選択状態のボタンは押下できないようにする
         if (selectWord_[stringNum_] != null)
         {
-            Bag_Word.wordState_[saveNumber_[stringNum_]].btn.interactable = false;
+            Bag_Word.wordState[saveNumber_[stringNum_]].btn.interactable = false;
         }
     }
 
@@ -235,57 +235,57 @@ public class MagicCreate : MonoBehaviour
         switch (wordKind)
         {
             case Bag_Word.WORD_MNG.HEAD:
-                if (Bag_Word.wordState_[wordNum].kinds == InitPopList.WORD.HEAD)
+                if (Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.HEAD)
                 {
-                    Bag_Word.wordState_[wordNum].btn.interactable = true;//#
-                    Bag_Word.wordState_[wordNum].pleate.SetActive(true);
+                    Bag_Word.wordState[wordNum].btn.interactable = true;//#
+                    Bag_Word.wordState[wordNum].pleate.SetActive(true);
                 }
                 break;
 
             case Bag_Word.WORD_MNG.ELEMENT:
-                if (Bag_Word.wordState_[wordNum].kinds == InitPopList.WORD.ELEMENT_ASSIST
-                 || Bag_Word.wordState_[wordNum].kinds == InitPopList.WORD.ELEMENT_HEAL
-                 || Bag_Word.wordState_[wordNum].kinds == InitPopList.WORD.ELEMENT_ATTACK)
+                if (Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ELEMENT_ASSIST
+                 || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ELEMENT_HEAL
+                 || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ELEMENT_ATTACK)
                 {
-                    Bag_Word.wordState_[wordNum].btn.interactable = true;//#
-                    Bag_Word.wordState_[wordNum].pleate.SetActive(true);
+                    Bag_Word.wordState[wordNum].btn.interactable = true;//#
+                    Bag_Word.wordState[wordNum].pleate.SetActive(true);
                 }
                 break;
 
             case Bag_Word.WORD_MNG.TAIL:
-                if (Bag_Word.wordState_[wordNum].kinds == InitPopList.WORD.TAIL)
+                if (Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.TAIL)
                 {
-                    Bag_Word.wordState_[wordNum].btn.interactable = true;//#
-                    Bag_Word.wordState_[wordNum].pleate.SetActive(true);
+                    Bag_Word.wordState[wordNum].btn.interactable = true;//#
+                    Bag_Word.wordState[wordNum].pleate.SetActive(true);
                 }
                 break;
 
             case Bag_Word.WORD_MNG.SUB1:
-                if (Bag_Word.wordState_[wordNum].kinds == InitPopList.WORD.SUB1
-                 || Bag_Word.wordState_[wordNum].kinds == InitPopList.WORD.SUB1_AND_SUB2
-                 || Bag_Word.wordState_[wordNum].kinds == InitPopList.WORD.ALL_SUB)
+                if (Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.SUB1
+                 || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.SUB1_AND_SUB2
+                 || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ALL_SUB)
                 {
-                    Bag_Word.wordState_[wordNum].btn.interactable = false;//#
-                    Bag_Word.wordState_[wordNum].pleate.SetActive(true);
+                    Bag_Word.wordState[wordNum].btn.interactable = false;//#
+                    Bag_Word.wordState[wordNum].pleate.SetActive(true);
                 }
                 break;
 
             case Bag_Word.WORD_MNG.SUB2:
-                if (Bag_Word.wordState_[wordNum].kinds == InitPopList.WORD.SUB2
-                 || Bag_Word.wordState_[wordNum].kinds == InitPopList.WORD.SUB1_AND_SUB2
-                 || Bag_Word.wordState_[wordNum].kinds == InitPopList.WORD.ALL_SUB)
+                if (Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.SUB2
+                 || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.SUB1_AND_SUB2
+                 || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ALL_SUB)
                 {
-                    Bag_Word.wordState_[wordNum].btn.interactable = false;//#
-                    Bag_Word.wordState_[wordNum].pleate.SetActive(true);
+                    Bag_Word.wordState[wordNum].btn.interactable = false;//#
+                    Bag_Word.wordState[wordNum].pleate.SetActive(true);
                 }
                 break;
 
             case Bag_Word.WORD_MNG.SUB3:
-                if (Bag_Word.wordState_[wordNum].kinds == InitPopList.WORD.SUB3
-                 || Bag_Word.wordState_[wordNum].kinds == InitPopList.WORD.ALL_SUB)
+                if (Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.SUB3
+                 || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ALL_SUB)
                 {
-                    Bag_Word.wordState_[wordNum].btn.interactable = false;//#
-                    Bag_Word.wordState_[wordNum].pleate.SetActive(true);
+                    Bag_Word.wordState[wordNum].btn.interactable = false;//#
+                    Bag_Word.wordState[wordNum].pleate.SetActive(true);
                 }
                 break;
 
@@ -351,9 +351,9 @@ public class MagicCreate : MonoBehaviour
                 for (int i = 0; i < maxCnt_; i++)
                 {
                     // 敵と味方のワードだけ押下可能
-                    if (Bag_Word.wordState_[i].kinds == InitPopList.WORD.SUB1)
+                    if (Bag_Word.wordState[i].kinds == InitPopList.WORD.SUB1)
                     {
-                        Bag_Word.wordState_[i].btn.interactable = true;
+                        Bag_Word.wordState[i].btn.interactable = true;
                     }
                 }
                 break;
@@ -380,15 +380,15 @@ public class MagicCreate : MonoBehaviour
                         }
                         else
                         {
-                            if (Bag_Word.wordState_[i].kinds == InitPopList.WORD.SUB3
-                             || Bag_Word.wordState_[i].kinds == InitPopList.WORD.ALL_SUB)
+                            if (Bag_Word.wordState[i].kinds == InitPopList.WORD.SUB3
+                             || Bag_Word.wordState[i].kinds == InitPopList.WORD.ALL_SUB)
                             {
                                 // 低下以外を押下可能
-                                if (Bag_Word.wordState_[i].name == "上昇"
-                                    || Bag_Word.wordState_[i].name == "反射"
-                                    || Bag_Word.wordState_[i].name == "吸収")
+                                if (Bag_Word.wordState[i].name == "上昇"
+                                    || Bag_Word.wordState[i].name == "反射"
+                                    || Bag_Word.wordState[i].name == "吸収")
                                 {
-                                    Bag_Word.wordState_[i].btn.interactable = true;
+                                    Bag_Word.wordState[i].btn.interactable = true;
                                 }
                             }
                         }
@@ -410,10 +410,10 @@ public class MagicCreate : MonoBehaviour
                 // InteractableWordPleate(null, PopMateriaList.WORD.SUB1, PopMateriaList.WORD.SUB1_AND_SUB2);
                 for (int i = 0; i < maxCnt_; i++)
                 {
-                    if (Bag_Word.wordState_[i].kinds == InitPopList.WORD.SUB1_AND_SUB2
-                        || Bag_Word.wordState_[i].kinds == InitPopList.WORD.ALL_SUB)
+                    if (Bag_Word.wordState[i].kinds == InitPopList.WORD.SUB1_AND_SUB2
+                        || Bag_Word.wordState[i].kinds == InitPopList.WORD.ALL_SUB)
                     {
-                        Bag_Word.wordState_[i].btn.interactable = true;
+                        Bag_Word.wordState[i].btn.interactable = true;
                     }
                 }
                 break;
@@ -423,13 +423,13 @@ public class MagicCreate : MonoBehaviour
                 // InteractableWordPleate("HP", PopMateriaList.WORD.SUB2, PopMateriaList.WORD.SUB1_AND_SUB2);
                 for (int i = 0; i < maxCnt_; i++)
                 {
-                    if (Bag_Word.wordState_[i].kinds == InitPopList.WORD.SUB1_AND_SUB2
-                    || Bag_Word.wordState_[i].kinds == InitPopList.WORD.ALL_SUB)
+                    if (Bag_Word.wordState[i].kinds == InitPopList.WORD.SUB1_AND_SUB2
+                    || Bag_Word.wordState[i].kinds == InitPopList.WORD.ALL_SUB)
                     {
-                        if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] != Bag_Word.wordState_[i].name)
+                        if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] != Bag_Word.wordState[i].name)
                         {
                             // Sub1で選択したワード以外を押下可能に
-                            Bag_Word.wordState_[i].btn.interactable = true;
+                            Bag_Word.wordState[i].btn.interactable = true;
                         }
                     }
                 }
@@ -439,10 +439,10 @@ public class MagicCreate : MonoBehaviour
 
             case Bag_Word.WORD_MNG.SUB3:
                 // 必中を持っていたら
-                if (Bag_Word.wordState_[targetWordNum_].getFlag == true)
+                if (Bag_Word.wordState[targetWordNum_].getFlag == true)
                 {
                     // 必中を表示
-                    Bag_Word.wordState_[targetWordNum_].btn.interactable = true;
+                    Bag_Word.wordState[targetWordNum_].btn.interactable = true;
                 }
                 // 作成開始ボタンを押下可能状態にする
                 createBtn_.interactable = true;
@@ -457,22 +457,22 @@ public class MagicCreate : MonoBehaviour
         // nameを==で判断する場合はflagがtrue
         if (flag == true)
         {
-            if (Bag_Word.wordState_[number].kinds == word)
+            if (Bag_Word.wordState[number].kinds == word)
             {
                 // 上昇のみ押下できる
-                if (Bag_Word.wordState_[number].name == num)
+                if (Bag_Word.wordState[number].name == num)
                 {
-                    Bag_Word.wordState_[number].btn.interactable = true;
+                    Bag_Word.wordState[number].btn.interactable = true;
                 }
             }
         }
         else
         {
-            if (Bag_Word.wordState_[number].kinds == word)
+            if (Bag_Word.wordState[number].kinds == word)
             {
-                if (Bag_Word.wordState_[number].name != num)
+                if (Bag_Word.wordState[number].name != num)
                 {
-                    Bag_Word.wordState_[number].btn.interactable = true;
+                    Bag_Word.wordState[number].btn.interactable = true;
                 }
             }
         }
@@ -493,7 +493,7 @@ public class MagicCreate : MonoBehaviour
         if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != "回復"
          && selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != "補助")
         {
-            if (Bag_Word.wordState_[targetWordNum_].getFlag == false)
+            if (Bag_Word.wordState[targetWordNum_].getFlag == false)
             {
                 if ((int)Bag_Word.WORD_MNG.SUB2 <= stringNum_)
                 {
@@ -518,7 +518,7 @@ public class MagicCreate : MonoBehaviour
         for (int i = 0; i < maxCnt_; i++)
         {
             // どの種類の時にどのワードが押下されたか
-            if (word == Bag_Word.wordState_[i].name)
+            if (word == Bag_Word.wordState[i].name)
             {
                 // 押下されたワードの番号を代入する
                 saveNumber_[stringNum_] = i;
@@ -530,25 +530,25 @@ public class MagicCreate : MonoBehaviour
         if (oldNumber_[stringNum_] != -1)
         {
             // 1つ前に押されたボタンは初期状態に戻す
-            Bag_Word.wordState_[oldNumber_[stringNum_]].btn.image.color = Color.white;
-            Bag_Word.wordState_[oldNumber_[stringNum_]].btn.interactable = true;
+            Bag_Word.wordState[oldNumber_[stringNum_]].btn.image.color = Color.white;
+            Bag_Word.wordState[oldNumber_[stringNum_]].btn.interactable = true;
         }
 
         // Sub2を選択中
         if (stringNum_ == (int)Bag_Word.WORD_MNG.SUB2)
         {
             // 1つ前のSubで選択していたものは押下状態のままにする
-            Bag_Word.wordState_[saveNumber_[stringNum_ - 1]].btn.image.color = Color.green;
-            Bag_Word.wordState_[saveNumber_[stringNum_ - 1]].btn.interactable = false;
+            Bag_Word.wordState[saveNumber_[stringNum_ - 1]].btn.image.color = Color.green;
+            Bag_Word.wordState[saveNumber_[stringNum_ - 1]].btn.interactable = false;
         }
         //Debug.Log(Bag_Word.wordState_[saveNumber_[stringNum_]].btn.name);
 
         // 選択したワードの色を緑にして選択できないようにする
-        Bag_Word.wordState_[saveNumber_[stringNum_]].btn.image.color = Color.green;
-        Bag_Word.wordState_[saveNumber_[stringNum_]].btn.interactable = false;
+        Bag_Word.wordState[saveNumber_[stringNum_]].btn.image.color = Color.green;
+        Bag_Word.wordState[saveNumber_[stringNum_]].btn.interactable = false;
 
         // トピックからどの種類の時に選ばれたワードなのかを見る
-        selectWord_[stringNum_] = Bag_Word.wordState_[saveNumber_[stringNum_]].name;
+        selectWord_[stringNum_] = Bag_Word.wordState[saveNumber_[stringNum_]].name;
         infoText_.text = selectWord_[(int)Bag_Word.WORD_MNG.HEAD] +
                   "\n" + selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] +
                   "\n" + selectWord_[(int)Bag_Word.WORD_MNG.TAIL] +
@@ -575,7 +575,7 @@ public class MagicCreate : MonoBehaviour
 
         for (int i = 0; i < bagMagic_.MagicNumber(); i++)
         {
-            if (allName_ == Bag_Magic.data_[0].name)
+            if (allName_ == Bag_Magic.data[0].name)
             {
                 Debug.Log(allName_ + "はすでに生成されています");
                 return;
@@ -588,7 +588,7 @@ public class MagicCreate : MonoBehaviour
 
         StartCoroutine(movePoint_.CountDown());
         StartCoroutine(ResultMagicCreate());
-        miniGameParent_.gameObject.SetActive(true);
+        miniGameParent.gameObject.SetActive(true);
 
         // ゲームが始まるため押下できないようにする
         createBtn_.interactable = false;
@@ -622,7 +622,7 @@ public class MagicCreate : MonoBehaviour
                 yield return new WaitForSeconds(2.0f);
                 cancelBtn_.interactable = true;
                 judeBack_.gameObject.SetActive(false);
-                miniGameParent_.gameObject.SetActive(false);
+                miniGameParent.gameObject.SetActive(false);
                 judgText_.text = "";
 
                 if (Bag_Materia.materiaState[materiaNum_].haveCnt < 1)
@@ -643,13 +643,13 @@ public class MagicCreate : MonoBehaviour
         // 魔法の合成をやめる
         ResetCommon();
         this.gameObject.SetActive(false);
-        uniHouseCanvas_.gameObject.SetActive(true);
+        uniHouseCanvas.gameObject.SetActive(true);
     }
 
     private void ResetCommon()
     {
         // Init()とワード合成後とワード合成終了時に呼ぶ
-        miniGameParent_.localPosition = new Vector3(0.0f, -180.0f, 0.0f);
+        miniGameParent.localPosition = new Vector3(0.0f, -180.0f, 0.0f);
 
         arrowBtn_[0].interactable = false;
         arrowBtn_[1].interactable = false;
@@ -663,7 +663,7 @@ public class MagicCreate : MonoBehaviour
             // 一度でも代入されたことがあるなら初期化する
             if (saveNumber_[i] != -1)
             {
-                Bag_Word.wordState_[saveNumber_[i]].btn.image.color = Color.white;
+                Bag_Word.wordState[saveNumber_[i]].btn.image.color = Color.white;
                 selectWord_[i] = null;
                 // 誰にも該当しない番号を入れる
                 saveNumber_[i] = -1;
@@ -673,16 +673,16 @@ public class MagicCreate : MonoBehaviour
 
         for (int i = 0; i < maxCnt_; i++)
         {
-            Bag_Word.wordState_[i].pleate.gameObject.SetActive(false);//#
-            Bag_Word.wordState_[i].btn.interactable = false;//#
+            Bag_Word.wordState[i].pleate.gameObject.SetActive(false);//#
+            Bag_Word.wordState[i].btn.interactable = false;//#
 
-            if (Bag_Word.wordState_[i].getFlag == true)
+            if (Bag_Word.wordState[i].getFlag == true)
             {
                 // ワードの種類と一致しているか
-                if (InitPopList.WORD.HEAD == Bag_Word.wordState_[i].kinds)
+                if (InitPopList.WORD.HEAD == Bag_Word.wordState[i].kinds)
                 {
-                    Bag_Word.wordState_[i].pleate.gameObject.SetActive(true);
-                    Bag_Word.wordState_[i].btn.interactable = true;//#
+                    Bag_Word.wordState[i].pleate.gameObject.SetActive(true);
+                    Bag_Word.wordState[i].btn.interactable = true;//#
                     //Bag_Word.wordState_[i].btn.image.color = Color.clear;
                 }
             }

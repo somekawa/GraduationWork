@@ -6,13 +6,13 @@ public class UniHouseMng : MonoBehaviour
     private GameObject nightLights; // 街頭
 
     [SerializeField]
-    private RectTransform alchemyMng_;
+    private RectTransform alchemyMng;
 
     [SerializeField]
-    private RectTransform magicCreateMng_;
+    private RectTransform magicCreateMng;
 
     [SerializeField]
-    private Canvas uniHouseCanvas_;
+    private Canvas uniHouseCanvas;
 
     void Start()
     {
@@ -46,8 +46,8 @@ public class UniHouseMng : MonoBehaviour
         cameraMng_.SetChangeCamera(false);
 
         // 合成時のミニゲーム用Mng
-        alchemyMng_.gameObject.SetActive(false);
-        magicCreateMng_.gameObject.SetActive(false);
+        alchemyMng.gameObject.SetActive(false);
+        magicCreateMng.gameObject.SetActive(false);
     }
 
     public void ClickSleepButton()
@@ -64,8 +64,8 @@ public class UniHouseMng : MonoBehaviour
 
     public void ClickAlchemyButton()
     {
-        alchemyMng_.gameObject.SetActive(true);
-        uniHouseCanvas_.gameObject.SetActive(false);
+        alchemyMng.gameObject.SetActive(true);
+        uniHouseCanvas.gameObject.SetActive(false);
         Debug.Log("合成ボタンが押下されました");
     }
 
@@ -74,8 +74,8 @@ public class UniHouseMng : MonoBehaviour
         // 空のマテリアを1つ以上持っていたらワード合成ができる
         if (0 < Bag_Materia.materiaState[Bag_Materia.emptyMateriaNum].haveCnt)
         {
-            magicCreateMng_.gameObject.SetActive(true);
-            uniHouseCanvas_.gameObject.SetActive(false);
+            magicCreateMng.gameObject.SetActive(true);
+            uniHouseCanvas.gameObject.SetActive(false);
             GameObject.Find("MagicCreateMng").GetComponent<MagicCreate>().Init();
         }
         Debug.Log("ワード合成ボタンが押下されました");

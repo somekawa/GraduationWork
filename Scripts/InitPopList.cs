@@ -41,7 +41,7 @@ public class InitPopList : MonoBehaviour
     private int fieldNumber_ = (int)FIELD_NUM.FOREST;  // 現在いるフィールドの番号
 
     [SerializeField]
-    private GameObject materiaUIBox_;     // 素材を拾ったときに生成されるプレハブ
+    private GameObject materiaUIBox;     // 素材を拾ったときに生成されるプレハブ
     private int maxMateriaCnt_ = 0;         //配列の最大値を保存
     private int singleMateriaCnt_ = 0;         // シートに記載されてる個数
     public static GameObject[] materiaBox_; // 生成したプレハブを保存
@@ -111,7 +111,7 @@ public class InitPopList : MonoBehaviour
             itemList_ = DataPopPrefab_.GetComponent<PopList>().GetData<ItemList>(PopList.ListData.ITEM);
             maxItemCnt_ = itemList_.param.Count;
             itemData = new ItemData[maxItemCnt_];
-            // Debug.Log("あいてむのしゅるい" + maxItemCnt_);
+             Debug.Log("あいてむのしゅるい" + maxItemCnt_);
             for (int i = 0; i < maxItemCnt_; i++)
             {
                 itemData[i].box = Instantiate(itemUIBox,
@@ -136,7 +136,7 @@ public class InitPopList : MonoBehaviour
                 for (int i = 0; i < singleMateriaCnt_; i++)
                 {
                     number = f * singleMateriaCnt_ + i;
-                    materiaData[number].box = Instantiate(materiaUIBox_,
+                    materiaData[number].box = Instantiate(materiaUIBox,
                         new Vector2(0, 0), Quaternion.identity, this.transform);
                     materiaData[number].name = materiaList_.param[i].MateriaName;
                     materiaData[number].buyPrice = materiaList_.param[i].Price_Buy;

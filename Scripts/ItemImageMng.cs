@@ -15,7 +15,7 @@ public class ItemImageMng : MonoBehaviour
         RESTAURANT,
         MAX
     }
-    public static Dictionary<IMAGE, Sprite[]> spriteMap_ = new Dictionary<IMAGE, Sprite[]>();
+    public static Dictionary<IMAGE, Sprite[]> spriteMap = new Dictionary<IMAGE, Sprite[]>();
     private static bool onceFlag_ = false;
 
     void Awake()
@@ -26,10 +26,10 @@ public class ItemImageMng : MonoBehaviour
             return;
         }
 
-        spriteMap_[IMAGE.ITEM] = ImageMng(1, 7, "/Item/Items01");
+        spriteMap[IMAGE.ITEM] = ImageMng(1, 7, "/Item/Items01");
 
         // 読み込みたいシート数、シート枚の大きさ、読み込みたい画像
-        spriteMap_[IMAGE.MATERIA] = ImageMng(6, 7, "/Materia/Materia_Field");
+        spriteMap[IMAGE.MATERIA] = ImageMng(6, 7, "/Materia/Materia_Field");
         //spriteMap_[IMAGE.MATERIA] = ImageMng(5, 7, "/Materia/Materia_Field");
         onceFlag_ = true;
     }

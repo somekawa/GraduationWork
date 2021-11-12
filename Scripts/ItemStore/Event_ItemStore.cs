@@ -7,24 +7,17 @@ using UnityEngine.EventSystems;
 public class Event_ItemStore : MonoBehaviour
 {
     private ItemStoreMng materiaCheck_;    // どのボタンをクリックしたか代入する変数
-
-    private EventSystem eventSystem;// ボタンクリックのためのイベント処理
+    private EventSystem eventSystem_;// ボタンクリックのためのイベント処理
     private GameObject clickbtn_;    // どのボタンをクリックしたか代入する変数
-
-    //void Start()
-    //{
-    //    eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
-    //    materiaCheck_ = GameObject.Find("HouseInterior/ItemStore").GetComponent<ItemStoreMng>();
-    //}
 
     public void OnClickSelectItemBtn()
     {
-        if (eventSystem == null)
+        if (eventSystem_ == null)
         {
-            eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
+            eventSystem_ = GameObject.Find("EventSystem").GetComponent<EventSystem>();
             materiaCheck_ = GameObject.Find("HouseInterior/ItemStore").GetComponent<ItemStoreMng>();
         }
-        clickbtn_ = eventSystem.currentSelectedGameObject;
+        clickbtn_ = eventSystem_.currentSelectedGameObject;
         materiaCheck_.SetSelectItemName(clickbtn_.name);
     }
 }

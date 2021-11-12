@@ -7,7 +7,7 @@ public class Bag_Materia : MonoBehaviour
     private InitPopList popMateriaList_;
 
     [SerializeField]
-    private RectTransform materiaParent_;    // 素材を拾ったときに生成されるプレハブ
+    private RectTransform materiaParent;    // 素材を拾ったときに生成されるプレハブ
 
     public struct materia
     {
@@ -46,12 +46,12 @@ public class Bag_Materia : MonoBehaviour
                 };
                 materiaState[i].name = InitPopList.materiaData[i].name;
 
-                materiaState[i].box.transform.SetParent(materiaParent_.transform);
+                materiaState[i].box.transform.SetParent(materiaParent.transform);
                 materiaState[i].box.name = materiaState[i].name;
 
                 // 生成したプレハブの子になっているImageを見つける
                 materiaState[i].image= materiaState[i].box.transform.Find("MateriaIcon").GetComponent<Image>();
-                materiaState[i].image.sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][i];
+                materiaState[i].image.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][i];
 
                 // 生成したプレハブの子になっているTextを見つける
                 materiaState[i].cntText = materiaState[i].box.transform.Find("MateriaNum").GetComponent<Text>();
@@ -65,11 +65,11 @@ public class Bag_Materia : MonoBehaviour
                 materiaState[i].box.SetActive(false);// すべて非表示にする
             }
         }
-        if (materiaState[0].box.transform.parent != materiaParent_.transform)
+        if (materiaState[0].box.transform.parent != materiaParent.transform)
         {
             for (int i = 0; i < maxCnt_; i++)
             {
-                materiaState[i].box.transform.SetParent(materiaParent_.transform);
+                materiaState[i].box.transform.SetParent(materiaParent.transform);
             }
         }
 
@@ -114,6 +114,6 @@ public class Bag_Materia : MonoBehaviour
 
     public int GetMaxHaveMateriaCnt()
     {
-        return materiaParent_.transform.childCount;
+        return materiaParent.transform.childCount;
     }
 }

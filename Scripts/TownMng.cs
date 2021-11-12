@@ -46,6 +46,11 @@ public class TownMng : MonoBehaviour
         GameObject.Find("WarpInTown").GetComponent<WarpTown>().Init();
         // WarpField.csの初期化関数を先に呼ぶ
         GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
+        // バッグ関連
+        GameObject.Find("Managers").GetComponent<Bag_Word>().Init();
+        GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
+        GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
+        GameObject.Find("Managers").GetComponent<Bag_Materia>().Init();
 
         var cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
 

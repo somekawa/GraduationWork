@@ -9,16 +9,15 @@ using System;
 public class Bag_Item : MonoBehaviour
 {
     [SerializeField]
-    private SaveCSV_HaveItem saveCsvSc_;    // 素材を拾ったときに生成されるプレハブ
+    private SaveCSV_HaveItem saveCsvSc;    // 素材を拾ったときに生成されるプレハブ
+
+    [SerializeField]
+    private RectTransform itemParent;    // 素材を拾ったときに生成されるプレハブ
 
     // データ系
     //private SaveCSV_Magic saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
-    private const string saveDataFilePath_ = @"Assets/Resources/HaveItemList.csv";
+    private const string saveDataFilePath = @"Assets/Resources/HaveItemList.csv";
     List<string[]> csvDatas = new List<string[]>(); // CSVの中身を入れるリスト;
-
-
-    [SerializeField]
-    private RectTransform itemParent_;    // 素材を拾ったときに生成されるプレハブ
                                           
     // すべてのアイテム数
     private InitPopList popItemList_;
@@ -34,13 +33,14 @@ public class Bag_Item : MonoBehaviour
         public bool getFlag;    // 所持しているかどうか
     }
     public static ItemData[] itemState;
-    public static ItemData[] data_ = new ItemData[50];
+    public static ItemData[] data = new ItemData[50];
 
 
     public void Init()
     // void Start()
     {
         popItemList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
+       
         maxCnt_ = popItemList_.SetMaxItemCount();
 
         itemState = new ItemData[maxCnt_];
@@ -54,12 +54,12 @@ public class Bag_Item : MonoBehaviour
             };
             Debug.Log(itemState[i].name);
             //itemBox_[i] = PopMateriaList.itemBox_[i];
-            itemState[i].box.transform.SetParent(itemParent_.transform);
+            itemState[i].box.transform.SetParent(itemParent.transform);
             itemState[i].box.name = itemState[i].name;
 
             // 生成したプレハブの子になっているImageを見つける
             itemState[i].image = itemState[i].box.transform.Find("ItemIcon").GetComponent<Image>();
-            itemState[i].image.sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.ITEM][i];
+            itemState[i].image.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.ITEM][i];
             // 生成したプレハブの子になっているTextを見つける
             itemState[i].cntText = itemState[i].box.transform.Find("ItemNum").GetComponent<Text>();
             itemState[i].cntText.text = itemState[i].haveCnt.ToString();
@@ -81,7 +81,7 @@ public class Bag_Item : MonoBehaviour
         for (int i = 0; i < maxCnt_; i++)
         {
             ItemGetCheck(i, itemState[i].name, 1);
-            // Debug.Log(i + "番目の素材" + materiaBox_[i].name);
+            Debug.Log(i + "番目の素材" + itemState[i].name);
         }
 
     }
@@ -93,7 +93,7 @@ public class Bag_Item : MonoBehaviour
         {
             itemState[itemNum].box.SetActive(true);
             itemState[itemNum].getFlag = true;
-            Debug.Log(itemName + "を取得しました");
+           // Debug.Log(itemName + "を取得しました");
         }
         else
         {
@@ -103,8 +103,8 @@ public class Bag_Item : MonoBehaviour
         itemState[itemNum].cntText.text = itemState[itemNum].haveCnt.ToString();
 
 
-        data_[itemNum].name = itemName;
-        data_[itemNum].haveCnt = itemState[itemNum].haveCnt;
+        data[itemNum].name = itemName;
+        data[itemNum].haveCnt = itemState[itemNum].haveCnt;
         DataSave();
     }
 
@@ -115,7 +115,7 @@ public class Bag_Item : MonoBehaviour
         csvDatas.Clear();
 
         // 行分けだけにとどめる
-        string[] texts = File.ReadAllText(saveDataFilePath_).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] texts = File.ReadAllText(saveDataFilePath).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
         for (int i = 0; i < texts.Length; i++)
         {
@@ -141,14 +141,14 @@ public class Bag_Item : MonoBehaviour
     {
         Debug.Log("魔法が生成されました。セーブします");
 
-        saveCsvSc_.SaveStart();
+        saveCsvSc.SaveStart();
 
         // 魔法の個数分回す
         for (int i = 0; i < maxCnt_; i++)
         {
-            saveCsvSc_.SaveItemData(data_[i]);
+            saveCsvSc.SaveItemData(data[i]);
         }
-        saveCsvSc_.SaveEnd();
+        saveCsvSc.SaveEnd();
     }
 
 }

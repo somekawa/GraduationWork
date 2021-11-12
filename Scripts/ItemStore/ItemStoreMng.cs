@@ -41,7 +41,7 @@ public class ItemStoreMng : MonoBehaviour
 
     // 所持金
     private Text haveMoneyText_;
-    private int haveMoney_ = 9990;
+    private int haveMoney_ = 9990;// デバッグ用
 
     // 持っているアイテムの数
     private Text haveMateriaText_;
@@ -126,7 +126,7 @@ public class ItemStoreMng : MonoBehaviour
                 itemInfo_.text = InitPopList.materiaData[i].info;
 
                 // 画像
-                selectItemIcon_.sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][i];
+                selectItemIcon_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][i];
                 saveItemsNum_ = i;
                 saveName_ = name;
                 Debug.Log(saveName_ + "を選びました");

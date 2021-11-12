@@ -10,11 +10,11 @@ public class MenuActive : MonoBehaviour
 {
     // データ系
     private SaveCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
-    private const string saveDataFilePath_ = @"Assets/Resources/data.csv";
+    private const string saveDataFilePath = @"Assets/Resources/data.csv";
     List<string[]> csvDatas = new List<string[]>(); // CSVの中身を入れるリスト;
 
     //--------------
-    private EventSystem eventSystem;// ボタンクリックのためのイベント処理
+    private EventSystem eventSystem_;// ボタンクリックのためのイベント処理
     private GameObject clickbtn_;   // どのボタンをクリックしたか代入する変数
 
     private Image backPanel_;       // 背景を暗くするためのパネル
@@ -37,7 +37,7 @@ public class MenuActive : MonoBehaviour
     }
 
     private RectTransform[] parentRectTrans_ = new RectTransform[(int)CANVAS.MAX];
-    private string[] btnName = new string[(int)CANVAS.MAX] {
+    private string[] btnName_ = new string[(int)CANVAS.MAX] {
     "Menu","ItemBox","Status","Other","Cancel","Load","Save"
     };
     // バッグ使用中はずっとアクティブにしたいCanvasのため別で取得
@@ -62,7 +62,7 @@ public class MenuActive : MonoBehaviour
     void Awake()
     {
         saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveCSV>();
-        eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
+        eventSystem_ = GameObject.Find("EventSystem").GetComponent<EventSystem>();
         //  Debug.Log(eventSystem.name + "をクリック");
         warpField_ = GameObject.Find("WarpOut").GetComponent<WarpField>();
 
@@ -220,7 +220,7 @@ public class MenuActive : MonoBehaviour
         csvDatas.Clear();
 
         // 行分けだけにとどめる
-        string[] texts = File.ReadAllText(saveDataFilePath_).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] texts = File.ReadAllText(saveDataFilePath).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
         for (int i = 0; i < texts.Length; i++)
         {
@@ -258,14 +258,14 @@ public class MenuActive : MonoBehaviour
 
     public void OnClickMenuBtn()
     {
-        Debug.Log(eventSystem.currentSelectedGameObject + "をクリック");
-        if (eventSystem == null)
+        Debug.Log(eventSystem_.currentSelectedGameObject + "をクリック");
+        if (eventSystem_ == null)
         {
-            eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
+            eventSystem_ = GameObject.Find("EventSystem").GetComponent<EventSystem>();
         }
 
-        clickbtn_ = eventSystem.currentSelectedGameObject;
-        if (clickbtn_.name == btnName[(int)CANVAS.CANCEL])
+        clickbtn_ = eventSystem_.currentSelectedGameObject;
+        if (clickbtn_.name == btnName_[(int)CANVAS.CANCEL])
         {
             backPanel_.gameObject.SetActive(false);
             StartCoroutine(MoveMenuButtons(-1));
@@ -280,12 +280,12 @@ public class MenuActive : MonoBehaviour
 
         // キャンセル以外だった場合
         backPanel_.gameObject.SetActive(true);
-        if (clickbtn_.name == btnName[(int)CANVAS.SAVE])
+        if (clickbtn_.name == btnName_[(int)CANVAS.SAVE])
         {
             DataSave();
             return;
         }
-        else if (clickbtn_.name == btnName[(int)CANVAS.LOAD])
+        else if (clickbtn_.name == btnName_[(int)CANVAS.LOAD])
         {
             DataLoad();
         }
@@ -293,7 +293,7 @@ public class MenuActive : MonoBehaviour
         {
             for (int i = (int)CANVAS.BAG; i < (int)CANVAS.CANCEL; i++)
             {
-                if (clickbtn_.name == btnName[i])
+                if (clickbtn_.name == btnName_[i])
                 {
                     //Debug.Log(clickbtn_.name);
                     // クリックしたボタンの名前と一致していたら
@@ -310,6 +310,8 @@ public class MenuActive : MonoBehaviour
     private void SelectCanvasActive(CANVAS canvas)
     {
         Debug.Log(canvas + "を表示しています");
+        // 現在のページを保存
+        nowCanvas_ = canvas;
 
         parentRectTrans_[(int)canvas].gameObject.SetActive(true);
         switch (canvas)
@@ -333,11 +335,12 @@ public class MenuActive : MonoBehaviour
                 break;
         }
 
-        if (clickbtn_.name != btnName[(int)CANVAS.BAG])
+        if (clickbtn_.name != btnName_[(int)CANVAS.BAG])
         {
             itemBagMngCS_.ActiveRectTransform();
         }
     }
+
     public CANVAS GetNowMenuCanvas()
     {
         return nowCanvas_;

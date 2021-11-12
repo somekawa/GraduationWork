@@ -9,7 +9,7 @@ using System;
 public class Bag_Magic : MonoBehaviour
 {
     [SerializeField]
-    private SaveCSV_Magic saveCsvSc_;    // 素材を拾ったときに生成されるプレハブ
+    private SaveCSV_Magic saveCsvSc;    // 素材を拾ったときに生成されるプレハブ
 
     // データ系
     //private SaveCSV_Magic saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
@@ -23,13 +23,13 @@ public class Bag_Magic : MonoBehaviour
         public int rate;
         public int ability;
     }
-    public static MagicData[] data_ = new MagicData[50];
+    public static MagicData[] data = new MagicData[50];
 
     [SerializeField]
     private GameObject magicUIPrefab;     // 素材を拾ったときに生成されるプレハブ
 
     [SerializeField]
-    private RectTransform magicParent_;
+    private RectTransform magicParent;
 
     public static GameObject[] magicObject = new GameObject[50];
     private Text[] magicName_ = new Text[50];
@@ -51,14 +51,14 @@ public class Bag_Magic : MonoBehaviour
                 for (int i = 0; i < number_; i++)
                 {
                     magicObject[i] = Instantiate(magicUIPrefab,
-                             new Vector2(0, 0), Quaternion.identity, magicParent_.transform);
+                             new Vector2(0, 0), Quaternion.identity, magicParent.transform);
                     magicName_[i] = magicObject[i].transform.Find("Word").GetComponent<Text>();
                     magicName_[i].text = csvDatas[i + 1][0];
-                    data_[i].name = csvDatas[i + 1][0];
-                    data_[i].power = int.Parse(csvDatas[i + 1][1]);
-                    data_[i].ability = int.Parse(csvDatas[i + 1][1]);
-                    data_[i].rate = int.Parse(csvDatas[i + 1][1]);
-                    Debug.Log(data_[i].name + "            残り" + i);
+                    data[i].name = csvDatas[i + 1][0];
+                    data[i].power = int.Parse(csvDatas[i + 1][1]);
+                    data[i].ability = int.Parse(csvDatas[i + 1][1]);
+                    data[i].rate = int.Parse(csvDatas[i + 1][1]);
+                    Debug.Log(data[i].name + "            残り" + i);
                 }
             }
         }
@@ -67,14 +67,14 @@ public class Bag_Magic : MonoBehaviour
     public void MagicCreateCheck(string magic, int pow, int rateNum, int abilityNum)
     {
         magicObject[number_] = Instantiate(magicUIPrefab,
-              new Vector2(0, 0), Quaternion.identity, magicParent_.transform);
+              new Vector2(0, 0), Quaternion.identity, magicParent.transform);
         magicName_[number_] = magicObject[number_].transform.Find("Word").GetComponent<Text>();
         magicName_[number_].text = magic;
-        data_[number_].name = magic;
-        data_[number_].power = pow;
-        data_[number_].rate = rateNum;
-        data_[number_].ability = abilityNum;
-        Debug.Log(data_[number_].name + "  " + data_[number_].power + "  " + data_[number_].rate + "  " + data_[number_].ability);
+        data[number_].name = magic;
+        data[number_].power = pow;
+        data[number_].rate = rateNum;
+        data[number_].ability = abilityNum;
+        Debug.Log(data[number_].name + "  " + data[number_].power + "  " + data[number_].rate + "  " + data[number_].ability);
         number_++;
         DataSave();
 
@@ -122,15 +122,15 @@ public class Bag_Magic : MonoBehaviour
     {
         Debug.Log("魔法が生成されました。セーブします");
 
-        saveCsvSc_.SaveStart();
+        saveCsvSc.SaveStart();
 
         // 魔法の個数分回す
         for (int i = 0; i < number_; i++)
         {
-            saveCsvSc_.SaveMagicData(data_[i]);
-            Debug.Log(data_[i].name);
+            saveCsvSc.SaveMagicData(data[i]);
+            Debug.Log(data[i].name);
         }
-        saveCsvSc_.SaveEnd();
+        saveCsvSc.SaveEnd();
     }
 
 

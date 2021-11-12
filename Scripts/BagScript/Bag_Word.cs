@@ -7,9 +7,8 @@ public class Bag_Word : MonoBehaviour
 {
     private InitPopList popWordList_;
     private int maxCnt_ = 0;
-
     [SerializeField]
-    private RectTransform wordParent_;    // 素材を拾ったときに生成されるプレハブ
+    private RectTransform wordParent;    // 素材を拾ったときに生成されるプレハブ
     public enum WORD_MNG
     {
         NON = -1,
@@ -38,52 +37,50 @@ public class Bag_Word : MonoBehaviour
         public string name;
         public bool getFlag;
     }
-    public static word[] wordState_;
+    public static word[] wordState;
     // 他Scriptで指定するワードは番号を取得しておく
     public static int targetWordNum;// 必中
 
     //   void Start()
     public void Init()
     {
-
         eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
         popWordList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
 
-
         if (maxCnt_ == 0)
         {
-            maxCnt_ = popWordList_.SetMaxWordCount();
-            wordState_ = new word[maxCnt_];
+            maxCnt_ = popWordList_.SetMaxWordCount();// 最大値を更新
+            wordState = new word[maxCnt_];
 
             for (int i = 0; i < maxCnt_; i++)
             {
-                wordState_[i] = new word
+                wordState[i] = new word
                 {
                     pleate = InitPopList.wordData[i].pleate,// 生成しておいたオブジェクトを代入
                     kinds = InitPopList.wordData[i].kinds,// 取得しておいたワードの種類を代入
                     getFlag = false,// すべて持ってない状態にしておく
                 };
-                wordState_[i].nameText = wordState_[i].pleate.transform.Find("Word").GetComponent<Text>();
-                wordState_[i].btn = wordState_[i].pleate.GetComponent<Button>();
+                wordState[i].nameText = wordState[i].pleate.transform.Find("Word").GetComponent<Text>();
+                wordState[i].btn = wordState[i].pleate.GetComponent<Button>();
 
-                wordState_[i].name = wordState_[i].pleate.name;// ワード（名前）を代入
-                wordState_[i].pleate.name = wordState_[i].name;
-                wordState_[i].nameText.text = wordState_[i].name;
+                wordState[i].name = wordState[i].pleate.name;// ワード（名前）を代入
+                wordState[i].pleate.name = wordState[i].name;
+                wordState[i].nameText.text = wordState[i].name;
                 //Debug.Log(i + "番目のワードの名前：" + wordState_[i].name);
 
-                if(wordState_[i].name=="必中")
+                if(wordState[i].name=="必中")
                 {
                    targetWordNum = i;
                 }
 
-                wordState_[i].pleate.SetActive(false);// すべて非表示に
+                wordState[i].pleate.SetActive(false);// すべて非表示に
             }
         }
-        if (wordState_[0].pleate.transform.parent != wordParent_.transform)
+        if (wordState[0].pleate.transform.parent != wordParent.transform)
         {
             for (int i = 0; i < maxCnt_; i++)
             {
-                wordState_[i].pleate.transform.SetParent(wordParent_.transform);
+                wordState[i].pleate.transform.SetParent(wordParent.transform);
             }
         }
 
@@ -91,7 +88,7 @@ public class Bag_Word : MonoBehaviour
         for (int i = 0; i < maxCnt_; i++)
         {
 
-            WordGetCheck(i, wordState_[i].pleate.name, wordState_[i].kinds);
+            WordGetCheck(i, wordState[i].pleate.name, wordState[i].kinds);
 
         }
 
@@ -100,7 +97,7 @@ public class Bag_Word : MonoBehaviour
 
     public void WordGetCheck(int wordNum, string word, InitPopList.WORD kinds)
     {
-        wordState_[wordNum].getFlag = true;
+        wordState[wordNum].getFlag = true;
         //wordState_[wordNum].wordPleate.SetActive(true);
     }
 
@@ -137,43 +134,43 @@ public class Bag_Word : MonoBehaviour
             for (int i = 0; i < maxCnt_; i++)
             {
                 // すべて非表示にしておく
-                wordState_[i].pleate.SetActive(false);
+                wordState[i].pleate.SetActive(false);
 
                 // 取得しているか
-                if (wordState_[i].getFlag == true)
+                if (wordState[i].getFlag == true)
                 {
                     if (kinds == WORD_MNG.HEAD)
                     {
-                        if (wordState_[i].kinds == InitPopList.WORD.HEAD)
+                        if (wordState[i].kinds == InitPopList.WORD.HEAD)
                         {
-                            wordState_[i].pleate.SetActive(true);
+                            wordState[i].pleate.SetActive(true);
                         }
                     }
                     else if (kinds == WORD_MNG.ELEMENT)
                     {
-                        if (wordState_[i].kinds == InitPopList.WORD.ELEMENT_ASSIST
-                            || wordState_[i].kinds == InitPopList.WORD.ELEMENT_ATTACK
-                            || wordState_[i].kinds == InitPopList.WORD.ELEMENT_HEAL)
+                        if (wordState[i].kinds == InitPopList.WORD.ELEMENT_ASSIST
+                            || wordState[i].kinds == InitPopList.WORD.ELEMENT_ATTACK
+                            || wordState[i].kinds == InitPopList.WORD.ELEMENT_HEAL)
                         {
-                            wordState_[i].pleate.SetActive(true);
+                            wordState[i].pleate.SetActive(true);
                         }
                     }
                     else if (kinds == WORD_MNG.TAIL)
                     {
-                        if (wordState_[i].kinds == InitPopList.WORD.TAIL)
+                        if (wordState[i].kinds == InitPopList.WORD.TAIL)
                         {
-                            wordState_[i].pleate.SetActive(true);
+                            wordState[i].pleate.SetActive(true);
                         }
                     }
                     else if (kinds == WORD_MNG.SUB1)
                     {
-                        if (wordState_[i].kinds == InitPopList.WORD.SUB1
-                         || wordState_[i].kinds == InitPopList.WORD.SUB2
-                         || wordState_[i].kinds == InitPopList.WORD.SUB1_AND_SUB2
-                        || wordState_[i].kinds == InitPopList.WORD.SUB3
-                        || wordState_[i].kinds == InitPopList.WORD.ALL_SUB)
+                        if (wordState[i].kinds == InitPopList.WORD.SUB1
+                         || wordState[i].kinds == InitPopList.WORD.SUB2
+                         || wordState[i].kinds == InitPopList.WORD.SUB1_AND_SUB2
+                        || wordState[i].kinds == InitPopList.WORD.SUB3
+                        || wordState[i].kinds == InitPopList.WORD.ALL_SUB)
                         {
-                            wordState_[i].pleate.SetActive(true);
+                            wordState[i].pleate.SetActive(true);
                         }
                     }
                     else

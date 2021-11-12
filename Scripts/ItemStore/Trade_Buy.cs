@@ -8,7 +8,7 @@ public class Trade_Buy : MonoBehaviour
     private InitPopList popItemsList_;
 
     [SerializeField]
-    private RectTransform buyParent_;   // 表示位置の親
+    private RectTransform buyParent;   // 表示位置の親
 
     private GameObject[] activeObj_;    //プレハブ生成時に使用
     private Text[] activePrice_;        // 表示する値段
@@ -48,7 +48,7 @@ public class Trade_Buy : MonoBehaviour
         for (int i = 0; i < singleCnt_ * nowFieldNum_; i++)
         {
             // 親位置を変える
-            activeObj_[i].transform.SetParent(buyParent_.transform);
+            activeObj_[i].transform.SetParent(buyParent.transform);
           
             // 表示する料金を買い値に変更
             activePrice_[i].text = InitPopList.materiaData[i].buyPrice.ToString() + "ビット";

@@ -114,7 +114,7 @@ public class DropFieldMateria : MonoBehaviour
         
         
         
-        materiaImage_.sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][fieldNumber_* itemNumberCheck_ + itemNumberCheck_];
+        materiaImage_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][fieldNumber_* itemNumberCheck_ + itemNumberCheck_];
        
         
         

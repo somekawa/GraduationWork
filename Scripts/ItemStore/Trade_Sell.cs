@@ -8,7 +8,7 @@ public class Trade_Sell : MonoBehaviour
     private InitPopList popItemsList_; 
 
     [SerializeField]
-    private RectTransform sellParent_;  // 表示位置の親
+    private RectTransform sellParent;  // 表示位置の親
 
     private GameObject[] activeObj_;    //プレハブ生成時に使用
     private Text[] activePrice_;        // 表示する値段
@@ -45,7 +45,7 @@ public class Trade_Sell : MonoBehaviour
         for (int i = 0; i < maxCnt_; i++)
         {
             // 親位置を変える
-            activeObj_[i].transform.SetParent(sellParent_.transform);
+            activeObj_[i].transform.SetParent(sellParent.transform);
 
             // 表示する料金を売値に変更
             activePrice_[i].text = InitPopList.materiaData[i].sellPrice.ToString() + "ビット";
@@ -68,4 +68,3 @@ public class Trade_Sell : MonoBehaviour
        activeObj_[materiaNum].SetActive(false);
     }
 }
-
