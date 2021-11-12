@@ -34,6 +34,7 @@ public class MagicCreate : MonoBehaviour
     private Text materiaCntText_;// 空のマテリアの所持数を描画
 
     //  0.作成開始ボタン　1.魔法合成終了ボタン
+    private bool createFlag_ = false;
     private Button createBtn_;
     private Button cancelBtn_;
     private Bag_Magic bagMagic_;
@@ -149,9 +150,12 @@ public class MagicCreate : MonoBehaviour
         // ワード種別を1つ戻るときにその種類のワードを選択していれば
         //  Debug.Log("1つ前の種類に戻ります。");
         // ボタンを押下できるようにして色を元に戻す
-        Bag_Word.wordState[saveNumber_[stringNum_]].btn.image.color = Color.white;
-        Bag_Word.wordState[saveNumber_[stringNum_]].btn.interactable = true;
-        selectWord_[stringNum_] = null;
+        if (saveNumber_[stringNum_] != -1)
+        {
+            Bag_Word.wordState[saveNumber_[stringNum_]].btn.image.color = Color.white;
+            Bag_Word.wordState[saveNumber_[stringNum_]].btn.interactable = true;
+            selectWord_[stringNum_] = null;
+        }
         oldNumber_[stringNum_] = -1;
 
         stringNum_--;
@@ -207,15 +211,6 @@ public class MagicCreate : MonoBehaviour
                 // ワードの種類と一致している番号だけ表示
                 SelectWordKindCheck(i, (Bag_Word.WORD_MNG)stringNum_);
             }
-        }
-
-        if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] == null)
-        {
-            createBtn_.interactable = true;
-        }
-        else
-        {
-            createBtn_.interactable = false;
         }
 
         // Elementに何らかのワードが入っていたらサブで表示するワードをチェックする
@@ -332,7 +327,8 @@ public class MagicCreate : MonoBehaviour
                     SetInteractableCheck(i, "即死", false, InitPopList.WORD.SUB1_AND_SUB2);
                 }
                 // 作成開始ボタンを押下可能状態にする
-                createBtn_.interactable = true;
+                createFlag_ = true;
+                //createBtn_.interactable = true;
                 break;
 
             case Bag_Word.WORD_MNG.SUB3:
@@ -395,7 +391,8 @@ public class MagicCreate : MonoBehaviour
                         }
                     }
                 }
-                createBtn_.interactable = true;
+                createFlag_ = true;
+                //createBtn_.interactable = true;
                 break;
 
             default:
@@ -435,7 +432,8 @@ public class MagicCreate : MonoBehaviour
                     }
                 }
                 // 作成ボタン押下可能にする
-                createBtn_.interactable = true;
+                createFlag_ = true;
+                //createBtn_.interactable = true;
                 break;
 
             case Bag_Word.WORD_MNG.SUB3:
@@ -446,7 +444,8 @@ public class MagicCreate : MonoBehaviour
                     Bag_Word.wordState[targetWordNum_].btn.interactable = true;
                 }
                 // 作成開始ボタンを押下可能状態にする
-                createBtn_.interactable = true;
+                createFlag_ = true;
+                //createBtn_.interactable = true;
                 break;
 
             default:
@@ -514,8 +513,8 @@ public class MagicCreate : MonoBehaviour
             // 何もしない
         }
 
+
         // ワードのボタンを押下したら呼び出す
-        //int number = 0;
         for (int i = 0; i < maxCnt_; i++)
         {
             // どの種類の時にどのワードが押下されたか
@@ -563,6 +562,37 @@ public class MagicCreate : MonoBehaviour
                   selectWord_[(int)Bag_Word.WORD_MNG.SUB1] +
                   selectWord_[(int)Bag_Word.WORD_MNG.SUB2] +
                   selectWord_[(int)Bag_Word.WORD_MNG.SUB3];// 作られた名前を保存しておく
+
+        if (stringNum_ == (int)Bag_Word.WORD_MNG.TAIL)
+        {
+            if (selectWord_[(int)Bag_Word.WORD_MNG.HEAD] != null
+                && selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != null
+                && selectWord_[(int)Bag_Word.WORD_MNG.TAIL] != null)
+            {
+                createFlag_ = true;
+            }
+        }
+        if (stringNum_ == (int)Bag_Word.WORD_MNG.SUB1)
+        {
+            if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] != null)
+            {
+                createFlag_ = false;
+            }
+        }
+
+        if (createFlag_ == true)
+        {
+            Debug.Log("作成開始ボタンを押せます");
+            createBtn_.interactable = true;
+        }
+        else
+        {
+            Debug.Log("作成開始ボタンを押せないです");
+            createBtn_.interactable = false;
+        }
+
+
+
         oldNumber_[stringNum_] = saveNumber_[stringNum_];
     }
 
@@ -651,6 +681,8 @@ public class MagicCreate : MonoBehaviour
     {
         // Init()とワード合成後とワード合成終了時に呼ぶ
         miniGameMng.localPosition = new Vector3(0.0f, -180.0f, 0.0f);
+
+        createFlag_ = false;
 
         arrowBtn_[0].interactable = false;
         arrowBtn_[1].interactable = false;
