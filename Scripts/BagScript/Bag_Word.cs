@@ -7,6 +7,7 @@ public class Bag_Word : MonoBehaviour
 {
     private InitPopList popWordList_;
     private int maxCnt_ = 0;
+
     [SerializeField]
     private RectTransform wordParent_;    // ‘fŞ‚ğE‚Á‚½‚Æ‚«‚É¶¬‚³‚ê‚éƒvƒŒƒnƒu
     public enum WORD_MNG
