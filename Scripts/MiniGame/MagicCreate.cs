@@ -154,8 +154,8 @@ public class MagicCreate : MonoBehaviour
         {
             Bag_Word.wordState[saveNumber_[stringNum_]].btn.image.color = Color.white;
             Bag_Word.wordState[saveNumber_[stringNum_]].btn.interactable = true;
-            selectWord_[stringNum_] = null;
         }
+        selectWord_[stringNum_] = null;
         oldNumber_[stringNum_] = -1;
 
         stringNum_--;
@@ -171,6 +171,8 @@ public class MagicCreate : MonoBehaviour
           "\n" + selectWord_[(int)Bag_Word.WORD_MNG.SUB3];
 
         ActiveKindsCheck((Bag_Word.WORD_MNG)stringNum_, true);
+
+
         Debug.Log("ç∂ñÓàÛÇÉNÉäÉbÉN" + stringNum_);
     }
 
@@ -233,6 +235,7 @@ public class MagicCreate : MonoBehaviour
             case Bag_Word.WORD_MNG.HEAD:
                 if (Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.HEAD)
                 {
+                    createBtn_.interactable = false;
                     Bag_Word.wordState[wordNum].btn.interactable = true;//#
                     Bag_Word.wordState[wordNum].pleate.SetActive(true);
                 }
@@ -243,6 +246,7 @@ public class MagicCreate : MonoBehaviour
                  || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ELEMENT_HEAL
                  || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ELEMENT_ATTACK)
                 {
+                    createBtn_.interactable = false;
                     Bag_Word.wordState[wordNum].btn.interactable = true;//#
                     Bag_Word.wordState[wordNum].pleate.SetActive(true);
                 }
@@ -253,6 +257,16 @@ public class MagicCreate : MonoBehaviour
                 {
                     Bag_Word.wordState[wordNum].btn.interactable = true;//#
                     Bag_Word.wordState[wordNum].pleate.SetActive(true);
+                    if (selectWord_[(int)Bag_Word.WORD_MNG.HEAD] != null
+                    && selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != null
+                    && selectWord_[(int)Bag_Word.WORD_MNG.TAIL] != null)
+                    {
+                        createBtn_.interactable = true;
+                    }
+                    else
+                    {
+                        createBtn_.interactable = false;
+                    }
                 }
                 break;
 
