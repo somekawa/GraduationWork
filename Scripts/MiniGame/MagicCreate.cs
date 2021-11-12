@@ -456,11 +456,8 @@ public class MagicCreate : MonoBehaviour
                         Bag_Word.wordState[i].btn.interactable = true;
                     }
                 }
-                if (arrowBtn_[1].interactable == false)
-                {
-                    createFlag_ = false;
-                    createBtn_.interactable = false;
-                }
+                createFlag_ = true;
+                createBtn_.interactable = true;
                 break;
 
             case Bag_Word.WORD_MNG.SUB2:
@@ -478,8 +475,6 @@ public class MagicCreate : MonoBehaviour
                         }
                     }
                 }
-                createFlag_ = true;
-
                 break;
 
             case Bag_Word.WORD_MNG.SUB3:
@@ -489,9 +484,6 @@ public class MagicCreate : MonoBehaviour
                     // 必中を表示
                     Bag_Word.wordState[targetWordNum_].btn.interactable = true;
                 }
-                // 作成開始ボタンを押下可能状態にする
-                createFlag_ = true;
-                //createBtn_.interactable = true;
                 break;
 
             default:
@@ -622,9 +614,13 @@ public class MagicCreate : MonoBehaviour
 
         if (stringNum_ == (int)Bag_Word.WORD_MNG.SUB1)
         {
-            if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] != null)
+            if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] == "回復"
+             || selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] == "補助")
             {
-                createFlag_ = false;
+                if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] != null)
+                {
+                    createFlag_ = false;
+                }
             }
         }
 
