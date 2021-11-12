@@ -71,7 +71,7 @@ public class ItemCreateMng : MonoBehaviour
         bagMateria_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>();
 
         DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
-        popItemRecipeList_ = (RecipeList)DataPopPrefab_.GetComponent<PopList>().GetData<RecipeList>(PopList.ListData.ITEM_RECIPE, 0);
+        popItemRecipeList_ = (RecipeList)DataPopPrefab_.GetComponent<PopList>().GetData<RecipeList>(PopList.ListData.ITEM, 0);
         singleCnt_ = popItemRecipeList_.param.Count;
         maxCnt_ = (int)RECIPE.MAX* singleCnt_;
         itemRecipeState_ = new itemRecipe[maxCnt_];
@@ -80,7 +80,7 @@ public class ItemCreateMng : MonoBehaviour
         for (int p = (int)RECIPE.PAGE0; p < (int)RECIPE.MAX; p++)
         {
             // 0番目から3番目のページを見たいためfor文で回す
-            popItemRecipeList_ = (RecipeList)DataPopPrefab_.GetComponent<PopList>().GetData<RecipeList>(PopList.ListData.ITEM_RECIPE, p);
+            popItemRecipeList_ = (RecipeList)DataPopPrefab_.GetComponent<PopList>().GetData<RecipeList>(PopList.ListData.ITEM, p);
 
             for (int i = 0; i < singleCnt_; i++)
             {

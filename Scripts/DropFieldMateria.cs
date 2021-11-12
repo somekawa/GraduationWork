@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
 
-public class ItemGet : MonoBehaviour
+public class DropFieldMateria : MonoBehaviour
 {
     public enum items
     {
@@ -47,18 +47,26 @@ public class ItemGet : MonoBehaviour
     private Camera mainCamera;      // 座標空間変更時に使用
 
     // アイテムを取得した回数
-    private MenuActive menuActive_;
+   // private MenuActive menuActive_;
     private Bag_Materia materia_;
     private int itemNumberCheck_;
     private int fieldNumber_;
 
+    private InitPopList materiaList_;
+
     void Start()
     {
+        materiaList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
+        fieldNumber_ = materiaList_.SetNowFieldMateriaList();
+
         uniCtl_ = GameObject.Find("Uni").GetComponent<UnitychanController>();
         mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
         parentCanvas_ = GameObject.Find("ItemCanvas").GetComponent<RectTransform>();
         materiaImage_ = parentCanvas_.transform.Find("MaterialImage").GetComponent<Image>();
-        menuActive_ = GameObject.Find("SceneMng").GetComponent<MenuActive>();
+      //  menuActive_ = GameObject.Find("SceneMng").GetComponent<MenuActive>();
+        var gameObject = DontDestroyMng.Instance;
+        materia_ = gameObject.transform.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>();
+
 
         telopImage_ = parentCanvas_.transform.Find("TelopBackImage").GetComponent<Image>();
         telopImage_.color = new Color(1.0f, 1.0f, 1.0f, telopAlpha_);
@@ -74,6 +82,8 @@ public class ItemGet : MonoBehaviour
         {
             itemPointChildren_[i] = this.transform.GetChild(i).gameObject;
         }
+
+
         // Debug.Log(telopImage_.transform.localPosition);
     }
 
@@ -89,18 +99,26 @@ public class ItemGet : MonoBehaviour
     {
         itemNumberCheck_ = num;
 
-        if (materia_ == null)
-        {
-            materia_ = menuActive_.GetBagMateria();
-        }
-        materia_.MateriaGetCheck(fieldNumber_, itemNumberCheck_, getMaterial_[num]);
+        //if (materia_ == null)
+        //{
+        //    materia_ = menuActive_.GetBagMateria();
+        //}
+        materia_.MateriaGetCheck( itemNumberCheck_, getMaterial_[num],3);
 
         telopText_.text = getMaterial_[num];
         materiaImage_.gameObject.SetActive(true);
         telopImage_.gameObject.SetActive(true);
         uniCtl_.enabled = false;
         // materiaImage_.sprite = materialIcon_[num];
-        materiaImage_.sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][fieldNumber_, itemNumberCheck_];
+        
+        
+        
+        
+        materiaImage_.sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][fieldNumber_* itemNumberCheck_ + itemNumberCheck_];
+       
+        
+        
+        
         itemPointChildren_[num].SetActive(false);
 
         // オブジェクトのワールド空間positionをビューポート空間に変換
@@ -192,19 +210,5 @@ public class ItemGet : MonoBehaviour
         telopImage_.color = new Color(1.0f, 1.0f, 1.0f, telopAlpha_);
         telopText_.color = new Color(1.0f, 0.0f, 0.7f, telopAlpha_);
         telopImage_.transform.localScale = new Vector3(telopScale_, telopScale_, telopScale_);
-    }
-
-    public void SetMaterialKinds(int fieldNum, MateriaList list)
-    {
-        // 素材名のリストを取得
-        if (list != null)
-        {
-            for (int i = 0; i < (int)items.MAX; i++)
-            {
-                // 現在フィールドの素材名を保存
-                getMaterial_[i] = list.param[i].MateriaName;
-            }
-        }
-        fieldNumber_ = fieldNum;
     }
 }

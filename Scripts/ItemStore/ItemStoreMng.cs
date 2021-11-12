@@ -52,7 +52,7 @@ public class ItemStoreMng : MonoBehaviour
         materia_ = gameObject.transform.Find("Managers").GetComponent<Bag_Materia>();
 
         // ”„”ƒ—p‚Ìe
-        tradeCanvas_ = GameObject.Find("TradeCanvas").GetComponent<Canvas>();
+        tradeCanvas_ = GameObject.Find("ItemShoppingMng").GetComponent<Canvas>();
         tradeMng_[(int)STORE.BUY] = tradeCanvas_.transform.Find("BuyMng").GetComponent<RectTransform>();
         tradeMng_[(int)STORE.SELL] = tradeCanvas_.transform.Find("SellMng").GetComponent<RectTransform>();
 
@@ -120,10 +120,10 @@ public class ItemStoreMng : MonoBehaviour
         for (int i = 0; i < materia_.GetMaxHaveMateriaCnt(); i++)
         {
             // name‚ªm”Ô–Ú‚ÌMateriaName‚Æ“¯‚¶‚È‚ç
-            if (name == PopListInTown.activeObj_[i].name)
+            if (name == InitPopList.materiaData[i].name)
             {
                 // à–¾—“
-                itemInfo_.text = PopListInTown.materiaInfo_[i];
+                itemInfo_.text = InitPopList.materiaData[i].info;
 
                 // ‰æ‘œ
                 selectItemIcon_.sprite = ItemImageMng.spriteMap_[ItemImageMng.IMAGE.MATERIA][i];
@@ -137,11 +137,11 @@ public class ItemStoreMng : MonoBehaviour
 
                 if (storeActive_ == STORE.BUY)
                 {
-                    savePrice_ = PopListInTown.mateiraBuyPrice_[i];
+                    savePrice_ = InitPopList.materiaData[i].buyPrice;
                 }
                 else if (storeActive_ == STORE.SELL)
                 {
-                    savePrice_ = PopListInTown.mateiraSellPrice_[i];
+                    savePrice_ = InitPopList.materiaData[i].sellPrice;
                 }
                 else
                 {

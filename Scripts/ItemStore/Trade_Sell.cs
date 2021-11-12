@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class Trade_Sell : MonoBehaviour
 {
-    private PopListInTown popItemsList_; 
+    private InitPopList popItemsList_; 
 
     [SerializeField]
     private RectTransform sellParent_;  // 表示位置の親
@@ -18,16 +18,16 @@ public class Trade_Sell : MonoBehaviour
 
     private void Start()
     {
-        popItemsList_ = GameObject.Find("SceneMng").GetComponent<PopListInTown>();
+        popItemsList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
        
-        maxCnt_ = popItemsList_.SetMaxItemsCount();
+        maxCnt_ = popItemsList_.SetMaxMateriaCount();
         activeObj_ = new GameObject[maxCnt_];//プレハブ生成時に使用
         activePrice_ = new Text[maxCnt_];
         activeText_ = new Text[maxCnt_];
 
         for (int i = 0; i < maxCnt_; i++)
         {
-            activeObj_[i] = PopListInTown.activeObj_[i];
+            activeObj_[i] = PopListInTown.materiaPleate[i];
             //  Debug.Log("バッグの中身" + PopMateriaList.activeObj_[i].name);
             // 表示する名前を変更する
             activeText_[i] = activeObj_[i].transform.Find("Name").GetComponent<Text>();
@@ -48,7 +48,7 @@ public class Trade_Sell : MonoBehaviour
             activeObj_[i].transform.SetParent(sellParent_.transform);
 
             // 表示する料金を売値に変更
-            activePrice_[i].text = PopListInTown.mateiraSellPrice_[i].ToString() + "ビット";
+            activePrice_[i].text = InitPopList.materiaData[i].sellPrice.ToString() + "ビット";
 
             // 所持数が0以上でバッグの中身と同じものがあれば表示
             if (0 < Bag_Materia.materiaState[i].haveCnt)

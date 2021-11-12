@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class Trade_Buy : MonoBehaviour
 {
-    private PopListInTown popItemsList_;
+    private InitPopList popItemsList_;
 
     [SerializeField]
     private RectTransform buyParent_;   // 表示位置の親
@@ -21,10 +21,9 @@ public class Trade_Buy : MonoBehaviour
 
     private void Start()
     {
-        popItemsList_ = GameObject.Find("SceneMng").GetComponent<PopListInTown>();
+        popItemsList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
      
-        maxCnt_ = popItemsList_.SetMaxItemsCount();
-        singleCnt_ = popItemsList_.SetSingleItemsCount();
+        maxCnt_ = popItemsList_.SetMaxItemCount();
         activeObj_ = new GameObject[maxCnt_];
         activePrice_ = new Text[maxCnt_];
         activeText_ = new Text[maxCnt_];
@@ -32,7 +31,7 @@ public class Trade_Buy : MonoBehaviour
         for (int i = 0; i < maxCnt_; i++)
         {
             //  Debug.Log("店で買えるもの" + PopMateriaList.activeObj_[i].name);
-            activeObj_[i] = PopListInTown.activeObj_[i];
+            activeObj_[i] = PopListInTown.materiaPleate[i];
 
             // 表示する名前を変更する
             activeText_[i] = activeObj_[i].transform.Find("Name").GetComponent<Text>();
@@ -52,7 +51,7 @@ public class Trade_Buy : MonoBehaviour
             activeObj_[i].transform.SetParent(buyParent_.transform);
           
             // 表示する料金を買い値に変更
-            activePrice_[i].text = PopListInTown.mateiraBuyPrice_[i].ToString() + "ビット";
+            activePrice_[i].text = InitPopList.materiaData[i].buyPrice.ToString() + "ビット";
 
             // すべてアクティブ状態にする
             activeObj_[i].SetActive(true);

@@ -10,8 +10,9 @@ public class PopList : MonoBehaviour
         QUESTINFO,      // クエスト情報
         CHEST,          // 宝箱情報
         MATERIA,
+        ITEM,
+        WORD,
         BOOK_STORE,
-        ITEM_RECIPE,
         MAX
     }
 
@@ -55,16 +56,21 @@ public class PopList : MonoBehaviour
                 return (T)(object)GetList<ChestList>(tmpStr);
 
             case ListData.MATERIA:
-                tmpStr = "MateriaList/Materia"+num;
+                tmpStr = "MateriaList/M_Field"+num;
                 return (T)(object)GetList<MateriaList>(tmpStr);
+
+            case ListData.ITEM:
+                tmpStr = "ItemList/ItemList";
+                return (T)(object)GetList<ItemList>(tmpStr);
+
+            case ListData.WORD:
+                tmpStr = "WordList/WordList0";
+                return (T)(object)GetList<WordList>(tmpStr);
 
             case ListData.BOOK_STORE:
                 tmpStr = "BookList/BookList" + num;
                 return (T)(object)GetList<BookList>(tmpStr);
 
-            case ListData.ITEM_RECIPE:
-                tmpStr = "RecipeList/Recipe" + num;
-                return (T)(object)GetList<RecipeList>(tmpStr);
 
             default:
                 return default(T);
