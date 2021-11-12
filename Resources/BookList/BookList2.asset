@@ -17,23 +17,29 @@ MonoBehaviour:
     Word: non
     AddNum: Add3_6
     Price: 3000
+    Info: "\u7D4C\u9A13\u5024+250"
   - BookName: "\u9752\u30CE\u672C3"
     Word: non
-    AddNum: Add3_4
+    AddNum: Add3_5
     Price: 3000
+    Info: "\u5E78\u904B+5"
   - BookName: "\u7DD1\u30CE\u672C3"
     Word: "\u6575"
     AddNum: non
     Price: 3000
+    Info: "\u30B5\u30D6\u30EF\u30FC\u30C9\u3010\u6575\u3011"
   - BookName: "\u9ED2\u30CE\u672C3"
     Word: "\u4F4E\u4E0B"
     AddNum: non
     Price: 3000
+    Info: "\u30B5\u30D6\u30EF\u30FC\u30C9\u3010\u4F4E\u4E0B\u3011"
   - BookName: "\u767D\u30CE\u672C3"
     Word: non
-    AddNum: Add3_3
+    AddNum: Add3_0
     Price: 3000
+    Info: HP+10
   - BookName: "\u571F\u30CE\u672C1"
     Word: non
     AddNum: Add3_1
     Price: 3000
+    Info: MP+10

@@ -17,23 +17,29 @@ MonoBehaviour:
     Word: non
     AddNum: Add2_1
     Price: 2000
+    Info: MP+10
   - BookName: "\u9752\u30CE\u672C2"
     Word: "\u6697\u95C7"
     AddNum: non
     Price: 2000
+    Info: "\u30B5\u30D6\u30EF\u30FC\u30C9\u3010\u6697\u95C7\u3011"
   - BookName: "\u7DD1\u30CE\u672C2"
     Word: non
-    AddNum: Add2_2
+    AddNum: Add2_4
     Price: 2000
+    Info: "\u30B9\u30D4\u30FC\u30C9+10"
   - BookName: "\u9ED2\u30CE\u672C2"
     Word: "\u4E0A\u6607"
     AddNum: non
     Price: 2000
+    Info: "\u30B5\u30D6\u30EF\u30FC\u30C9\u3010\u4E0A\u6607\u3011"
   - BookName: "\u767D\u30CE\u672C2"
     Word: non
     AddNum: Add2_3
     Price: 2000
+    Info: "\u9632\u5FA1\u529B+5"
   - BookName: non
     Word: non
     AddNum: non
     Price: 0
+    Info: non

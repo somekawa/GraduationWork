@@ -16,35 +16,28 @@ MonoBehaviour:
   - MateriaName: "\u9162\u306E\u6A58"
     Price_Buy: 500
     Price_Sell: 250
-    ImageName: Material_Field0
     Explanation: "\u30AB\u30DC\u30B9\u3067\u3059\u3002\u3059\u3063\u3071\u3044\u3002"
   - MateriaName: "B\u30CB\u30FC\u30C9\u30EB"
     Price_Buy: 400
     Price_Sell: 200
-    ImageName: non
     Explanation: "\u8702\u306E\u30CF\u30EA\u3067\u3059\u3002\u3068\u304C\u3063\u3066\u308B\u3002"
   - MateriaName: "\u82B1\u306E\u871C"
     Price_Buy: 300
     Price_Sell: 150
-    ImageName: non
     Explanation: "\u7518\u304F\u3066\u304A\u3044\u3057\u3044\u82B1\u306E\u871C\u3002"
   - MateriaName: "\u304D\u306E\u3053"
     Price_Buy: 200
     Price_Sell: 100
-    ImageName: non
     Explanation: "\u304D\u306E\u3053\u3063\u306E\u3053\uFF5E\u306E\u3053\u3052\u3093\u304D\u306E\u3053\u3002"
   - MateriaName: "\u5996\u7CBE\u306E\u7FBD"
     Price_Buy: 100
     Price_Sell: 50
-    ImageName: non
     Explanation: "\u63DA\u3052\u308B\u3068\u304A\u3044\u3057\u3044\u3067\u3059\u3002"
   - MateriaName: "\u30B9\u30E9\u30A4\u30E0\u306E\u6838"
     Price_Buy: 200
     Price_Sell: 100
-    ImageName: non
     Explanation: "\u304A\u3044\u3057\u304F\u306A\u3044\u3067\u3059\u3002"
   - MateriaName: "\u8449\u306E\u5E3D\u5B50"
     Price_Buy: 400
     Price_Sell: 200
-    ImageName: non
     Explanation: "\u3061\u3087\u3063\u3068\u304B\u3063\u3053\u3044\u3044\u3067\u3059\u3002"

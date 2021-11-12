@@ -10,7 +10,7 @@ using NPOI.SS.UserModel;
 public class ItemList_importer : AssetPostprocessor
 {
     private static readonly string filePath = "Assets/ExcelData/ItemList.xls";
-    private static readonly string[] sheetNames = { "ItemSheet1", };
+    private static readonly string[] sheetNames = { "ItemList", };
     
     static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
     {
@@ -59,8 +59,11 @@ public class ItemList_importer : AssetPostprocessor
                         var p = new ItemList.Param();
 			
 					cell = row.GetCell(0); p.ItemName = (cell == null ? "" : cell.StringCellValue);
-					cell = row.GetCell(1); p.ChapterNumber = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(1); p.ChapterNum = (cell == null ? 0.0 : cell.NumericCellValue);
 					cell = row.GetCell(2); p.Price_Sell = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(3); p.WantMateria1 = (cell == null ? "" : cell.StringCellValue);
+					cell = row.GetCell(4); p.WantMateria2 = (cell == null ? "" : cell.StringCellValue);
+					cell = row.GetCell(5); p.WantMateria3 = (cell == null ? "" : cell.StringCellValue);
 
                         data.param.Add(p);
                     }

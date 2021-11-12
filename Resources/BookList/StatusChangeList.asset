@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a39cef17ee4e23d4c98d532f04a3dacc, type: 3}
+  m_Name: StatusChangeList
+  m_EditorClassIdentifier: 
+  sheets:
+  - name: StatusChangeList0
+    list:
+    - StatusName: HP
+      Add1: 10
+      Add2: 0
+      Add3: 10
+      Add4: 0
+      Add5: 10
+    - StatusName: MP
+      Add1: 10
+      Add2: 10
+      Add3: 10
+      Add4: 0
+      Add5: 10
+    - StatusName: "\u653B\u6483\u529B"
+      Add1: 5
+      Add2: 0
+      Add3: 0
+      Add4: 5
+      Add5: 5
+    - StatusName: "\u9632\u5FA1\u529B"
+      Add1: 0
+      Add2: 5
+      Add3: 0
+      Add4: 5
+      Add5: 5
+    - StatusName: "\u30B9\u30D4\u30FC\u30C9"
+      Add1: 0
+      Add2: 10
+      Add3: 0
+      Add4: 10
+      Add5: 10
+    - StatusName: "\u5E78\u904B"
+      Add1: 0
+      Add2: 0
+      Add3: 5
+      Add4: 5
+      Add5: 5
+    - StatusName: "\u7D4C\u9A13\u5024"
+      Add1: 100
+      Add2: 0
+      Add3: 250
+      Add4: 0
+      Add5: 0

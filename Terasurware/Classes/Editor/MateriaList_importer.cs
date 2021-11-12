@@ -61,8 +61,7 @@ public class MateriaList_importer : AssetPostprocessor
 					cell = row.GetCell(0); p.MateriaName = (cell == null ? "" : cell.StringCellValue);
 					cell = row.GetCell(1); p.Price_Buy = (int)(cell == null ? 0 : cell.NumericCellValue);
 					cell = row.GetCell(2); p.Price_Sell = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(3); p.ImageName = (cell == null ? "" : cell.StringCellValue);
-					cell = row.GetCell(4); p.Explanation = (cell == null ? "" : cell.StringCellValue);
+					cell = row.GetCell(3); p.Explanation = (cell == null ? "" : cell.StringCellValue);
 
                         data.param.Add(p);
                     }
