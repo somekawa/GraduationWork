@@ -156,6 +156,7 @@ public class MagicCreate : MonoBehaviour
             Bag_Word.wordState[saveNumber_[stringNum_]].btn.interactable = true;
         }
         selectWord_[stringNum_] = null;
+        Debug.Log(stringNum_ + "番目のワードは" + selectWord_[stringNum_]);
         oldNumber_[stringNum_] = -1;
 
         stringNum_--;
@@ -169,6 +170,14 @@ public class MagicCreate : MonoBehaviour
           "\n" + selectWord_[(int)Bag_Word.WORD_MNG.SUB1] +
           "\n" + selectWord_[(int)Bag_Word.WORD_MNG.SUB2] +
           "\n" + selectWord_[(int)Bag_Word.WORD_MNG.SUB3];
+
+
+        if (arrowBtn_[1].interactable == true)
+        {
+            createFlag_ = true;
+            createBtn_.interactable = true;
+        }
+
 
         ActiveKindsCheck((Bag_Word.WORD_MNG)stringNum_, true);
 
@@ -235,6 +244,7 @@ public class MagicCreate : MonoBehaviour
             case Bag_Word.WORD_MNG.HEAD:
                 if (Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.HEAD)
                 {
+                    createFlag_ = false;
                     createBtn_.interactable = false;
                     Bag_Word.wordState[wordNum].btn.interactable = true;//#
                     Bag_Word.wordState[wordNum].pleate.SetActive(true);
@@ -246,6 +256,7 @@ public class MagicCreate : MonoBehaviour
                  || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ELEMENT_HEAL
                  || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ELEMENT_ATTACK)
                 {
+                    createFlag_ = false;
                     createBtn_.interactable = false;
                     Bag_Word.wordState[wordNum].btn.interactable = true;//#
                     Bag_Word.wordState[wordNum].pleate.SetActive(true);
@@ -261,10 +272,12 @@ public class MagicCreate : MonoBehaviour
                     && selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != null
                     && selectWord_[(int)Bag_Word.WORD_MNG.TAIL] != null)
                     {
+                        createFlag_ = true;
                         createBtn_.interactable = true;
                     }
                     else
                     {
+                        createFlag_ = false;
                         createBtn_.interactable = false;
                     }
                 }
@@ -275,6 +288,8 @@ public class MagicCreate : MonoBehaviour
                  || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.SUB1_AND_SUB2
                  || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ALL_SUB)
                 {
+                    createFlag_ = false;
+                    createBtn_.interactable = false;
                     Bag_Word.wordState[wordNum].btn.interactable = false;//#
                     Bag_Word.wordState[wordNum].pleate.SetActive(true);
                 }
@@ -288,6 +303,7 @@ public class MagicCreate : MonoBehaviour
                     Bag_Word.wordState[wordNum].btn.interactable = false;//#
                     Bag_Word.wordState[wordNum].pleate.SetActive(true);
                 }
+
                 break;
 
             case Bag_Word.WORD_MNG.SUB3:
@@ -332,6 +348,11 @@ public class MagicCreate : MonoBehaviour
                 {
                     SetInteractableCheck(i, "味方", true, InitPopList.WORD.SUB1);
                 }
+                if (arrowBtn_[1].interactable == false)
+                {
+                    createFlag_ = false;
+                    createBtn_.interactable = false;
+                }
                 break;
 
             case Bag_Word.WORD_MNG.SUB2:
@@ -367,6 +388,11 @@ public class MagicCreate : MonoBehaviour
                         Bag_Word.wordState[i].btn.interactable = true;
                     }
                 }
+                if (arrowBtn_[1].interactable == false)
+                {
+                    createFlag_ = false;
+                    createBtn_.interactable = false;
+                }
                 break;
 
             case Bag_Word.WORD_MNG.SUB2:
@@ -374,6 +400,8 @@ public class MagicCreate : MonoBehaviour
                 {
                     SetInteractableCheck(i, "HP", false, InitPopList.WORD.SUB2);
                 }
+                createFlag_ = false;
+                createBtn_.interactable = false;
                 break;
 
             case Bag_Word.WORD_MNG.SUB3:
@@ -428,6 +456,11 @@ public class MagicCreate : MonoBehaviour
                         Bag_Word.wordState[i].btn.interactable = true;
                     }
                 }
+                if (arrowBtn_[1].interactable == false)
+                {
+                    createFlag_ = false;
+                    createBtn_.interactable = false;
+                }
                 break;
 
             case Bag_Word.WORD_MNG.SUB2:
@@ -445,9 +478,8 @@ public class MagicCreate : MonoBehaviour
                         }
                     }
                 }
-                // 作成ボタン押下可能にする
                 createFlag_ = true;
-                //createBtn_.interactable = true;
+
                 break;
 
             case Bag_Word.WORD_MNG.SUB3:
@@ -466,6 +498,7 @@ public class MagicCreate : MonoBehaviour
                 break;
         }
     }
+
     private void SetInteractableCheck(int number, string num, bool flag, InitPopList.WORD word)
     {
         // nameを==で判断する場合はflagがtrue
@@ -586,6 +619,7 @@ public class MagicCreate : MonoBehaviour
                 createFlag_ = true;
             }
         }
+
         if (stringNum_ == (int)Bag_Word.WORD_MNG.SUB1)
         {
             if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] != null)
