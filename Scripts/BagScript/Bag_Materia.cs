@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class Bag_Materia : MonoBehaviour
 {
-    private PopMateriaList popMateriaList_;
+    private InitPopList popMateriaList_;
 
     [SerializeField]
     private RectTransform materiaParent_;    // ëfçﬁÇèEÇ¡ÇΩÇ∆Ç´Ç…ê∂ê¨Ç≥ÇÍÇÈÉvÉåÉnÉu
@@ -30,7 +30,7 @@ public class Bag_Materia : MonoBehaviour
 
     public void Init()
     {
-        popMateriaList_ = GameObject.Find("SceneMng").GetComponent<PopMateriaList>();
+        popMateriaList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
 
         if (maxCnt_ == 0)
         {
@@ -40,11 +40,11 @@ public class Bag_Materia : MonoBehaviour
             {
                 materiaState[i] = new materia
                 {
-                    box = PopMateriaList.materiaBox_[i],
+                    box = InitPopList.materiaData[i].box,
                     getFlag=false,
                     haveCnt = 0,
                 };
-                materiaState[i].name = PopMateriaList.materiaBox_[i].name;
+                materiaState[i].name = InitPopList.materiaData[i].name;
 
                 materiaState[i].box.transform.SetParent(materiaParent_.transform);
                 materiaState[i].box.name = materiaState[i].name;

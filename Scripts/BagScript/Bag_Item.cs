@@ -21,7 +21,7 @@ public class Bag_Item : MonoBehaviour
     private RectTransform itemParent_;    // 素材を拾ったときに生成されるプレハブ
                                           
     // すべてのアイテム数
-    private PopMateriaList popMateriaList_;
+    private InitPopList popItemList_;
     private int maxCnt_ = 0;
 
     public struct ItemData
@@ -40,16 +40,16 @@ public class Bag_Item : MonoBehaviour
     public void Init()
     // void Start()
     {
-        popMateriaList_ = GameObject.Find("SceneMng").GetComponent<PopMateriaList>();
-        maxCnt_ = popMateriaList_.SetMaxItemCount();
+        popItemList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
+        maxCnt_ = popItemList_.SetMaxItemCount();
 
         itemState = new ItemData[maxCnt_];
         for (int i = 0; i < maxCnt_; i++)
         {
             itemState[i] = new ItemData
             {
-                box = PopMateriaList.itemBox_[i],
-                name = PopMateriaList.itemBox_[i].name,
+                box = InitPopList.itemData[i].box,
+                name = InitPopList.itemData[i].name,
                 haveCnt = 0,
             };
             Debug.Log(itemState[i].name);

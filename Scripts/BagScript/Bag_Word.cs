@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 public class Bag_Word : MonoBehaviour
 {
-    private PopMateriaList popMateriaList_;
+    private InitPopList popWordList_;
     private int maxCnt_ = 0;
     [SerializeField]
     private RectTransform wordParent_;    // 素材を拾ったときに生成されるプレハブ
@@ -21,11 +21,6 @@ public class Bag_Word : MonoBehaviour
         MAX
     }
 
-    //  private PopMateriaList.WORD nowWord_ = PopMateriaList.WORD.NON;
-    //public static GameObject[] wordPleate;
-    //public static Text[] wordText;
-    //  private bool[] activeFlag_;
-
     private EventSystem eventSystem;// ボタンクリックのためのイベント処理
     private GameObject clickbtn_;    // どのボタンをクリックしたか代入する変数
     private Button kindsBtn_;
@@ -38,7 +33,7 @@ public class Bag_Word : MonoBehaviour
         public GameObject pleate;
         public Text nameText;
         public Button btn;
-        public PopMateriaList.WORD kinds;
+        public InitPopList.WORD kinds;
         public string name;
         public bool getFlag;
     }
@@ -51,20 +46,20 @@ public class Bag_Word : MonoBehaviour
     {
 
         eventSystem = GameObject.Find("EventSystem").GetComponent<EventSystem>();
-        popMateriaList_ = GameObject.Find("SceneMng").GetComponent<PopMateriaList>();
+        popWordList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
 
 
         if (maxCnt_ == 0)
         {
-            maxCnt_ = popMateriaList_.SetMaxWordCount();
+            maxCnt_ = popWordList_.SetMaxWordCount();
             wordState_ = new word[maxCnt_];
 
             for (int i = 0; i < maxCnt_; i++)
             {
                 wordState_[i] = new word
                 {
-                    pleate = PopMateriaList.wordPleate_[i],// 生成しておいたオブジェクトを代入
-                    kinds = PopMateriaList.wordKinds_[i],// 取得しておいたワードの種類を代入
+                    pleate = InitPopList.wordData[i].pleate,// 生成しておいたオブジェクトを代入
+                    kinds = InitPopList.wordData[i].kinds,// 取得しておいたワードの種類を代入
                     getFlag = false,// すべて持ってない状態にしておく
                 };
                 wordState_[i].nameText = wordState_[i].pleate.transform.Find("Word").GetComponent<Text>();
@@ -102,7 +97,7 @@ public class Bag_Word : MonoBehaviour
         ActiveCheck(WORD_MNG.HEAD);
     }
 
-    public void WordGetCheck(int wordNum, string word, PopMateriaList.WORD kinds)
+    public void WordGetCheck(int wordNum, string word, InitPopList.WORD kinds)
     {
         wordState_[wordNum].getFlag = true;
         //wordState_[wordNum].wordPleate.SetActive(true);
@@ -136,51 +131,54 @@ public class Bag_Word : MonoBehaviour
 
     private void ActiveCheck(WORD_MNG kinds)
     {
-        for (int i = 0; i < maxCnt_; i++)
+        for (int w = 0; w < (int)InitPopList.WORD.MAX; w++)
         {
-            // すべて非表示にしておく
-            wordState_[i].pleate.SetActive(false);
-
-            // 取得しているか
-            if (wordState_[i].getFlag == true)
+            for (int i = 0; i < maxCnt_; i++)
             {
-                if (kinds == WORD_MNG.HEAD)
+                // すべて非表示にしておく
+                wordState_[i].pleate.SetActive(false);
+
+                // 取得しているか
+                if (wordState_[i].getFlag == true)
                 {
-                    if (wordState_[i].kinds == PopMateriaList.WORD.HEAD)
+                    if (kinds == WORD_MNG.HEAD)
                     {
-                        wordState_[i].pleate.SetActive(true);
+                        if (wordState_[i].kinds == InitPopList.WORD.HEAD)
+                        {
+                            wordState_[i].pleate.SetActive(true);
+                        }
                     }
-                }
-                else if (kinds == WORD_MNG.ELEMENT)
-                {
-                    if (wordState_[i].kinds == PopMateriaList.WORD.ELEMENT_ASSIST
-                        || wordState_[i].kinds == PopMateriaList.WORD.ELEMENT_ATTACK
-                        || wordState_[i].kinds == PopMateriaList.WORD.ELEMENT_HEAL)
+                    else if (kinds == WORD_MNG.ELEMENT)
                     {
-                        wordState_[i].pleate.SetActive(true);
+                        if (wordState_[i].kinds == InitPopList.WORD.ELEMENT_ASSIST
+                            || wordState_[i].kinds == InitPopList.WORD.ELEMENT_ATTACK
+                            || wordState_[i].kinds == InitPopList.WORD.ELEMENT_HEAL)
+                        {
+                            wordState_[i].pleate.SetActive(true);
+                        }
                     }
-                }
-                else if (kinds == WORD_MNG.TAIL)
-                {
-                    if (wordState_[i].kinds == PopMateriaList.WORD.TAIL)
+                    else if (kinds == WORD_MNG.TAIL)
                     {
-                        wordState_[i].pleate.SetActive(true);
+                        if (wordState_[i].kinds == InitPopList.WORD.TAIL)
+                        {
+                            wordState_[i].pleate.SetActive(true);
+                        }
                     }
-                }
-                else if (kinds == WORD_MNG.SUB1)
-                {
-                    if (wordState_[i].kinds == PopMateriaList.WORD.SUB1
-                     || wordState_[i].kinds == PopMateriaList.WORD.SUB2
-                     || wordState_[i].kinds == PopMateriaList.WORD.SUB1_AND_SUB2
-                    || wordState_[i].kinds == PopMateriaList.WORD.SUB3
-                    || wordState_[i].kinds == PopMateriaList.WORD.ALL_SUB)
+                    else if (kinds == WORD_MNG.SUB1)
                     {
-                        wordState_[i].pleate.SetActive(true);
+                        if (wordState_[i].kinds == InitPopList.WORD.SUB1
+                         || wordState_[i].kinds == InitPopList.WORD.SUB2
+                         || wordState_[i].kinds == InitPopList.WORD.SUB1_AND_SUB2
+                        || wordState_[i].kinds == InitPopList.WORD.SUB3
+                        || wordState_[i].kinds == InitPopList.WORD.ALL_SUB)
+                        {
+                            wordState_[i].pleate.SetActive(true);
+                        }
                     }
-                }
-                else
-                {
-                    // 何もしない
+                    else
+                    {
+                        // 何もしない
+                    }
                 }
             }
         }

@@ -1,11 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class OtherCollision : MonoBehaviour
 {
-    private ItemGet itemGet_;
+    private DropFieldMateria itemGet_;
     private string saveObjName_;
 
     private RectTransform parentCanvas_;    // アイテム関連を表示するキャンバス
@@ -19,7 +17,7 @@ public class OtherCollision : MonoBehaviour
         parentCanvas_ = GameObject.Find("ItemCanvas").GetComponent<RectTransform>();
         itemNearImage_ = parentCanvas_.gameObject.transform.Find("ActionImage").GetComponent<Image>();
         itemNearImage_.gameObject.SetActive(false);
-        itemGet_ = GameObject.Find("ItemPoints").transform.GetComponent<ItemGet>();
+        itemGet_ = GameObject.Find("ItemPoints").transform.GetComponent<DropFieldMateria>();
         mainCamera_ = GameObject.Find("MainCamera").GetComponent<Camera>();
         uniChan_ = GameObject.Find("Uni");
 
@@ -36,9 +34,9 @@ public class OtherCollision : MonoBehaviour
         //}
         if (Input.GetKey(KeyCode.Space))
         {
-            for (int i = 0; i < (int)ItemGet.items.MAX; i++)
+            for (int i = 0; i < (int)DropFieldMateria.items.MAX; i++)
             {
-                if (ItemGet.objName[i] == other.name)
+                if (DropFieldMateria.objName[i] == other.name)
                 {
                  //   Debug.Log("FrontColliderと接触したオブジェクト" + other.name);
                     itemGet_.SetItemName(i, other.name, true);
