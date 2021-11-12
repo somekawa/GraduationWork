@@ -9,13 +9,13 @@ public class ItemCreateMng : MonoBehaviour
     private Canvas uniHouseCanvas;
 
     [SerializeField]
-    private RectTransform miniGameParent;    // ミニゲーム表示用
+    private RectTransform miniGameMng;    // ミニゲーム表示用
 
     [SerializeField]
     private GameObject itemRecipePleate;    // 素材を拾ったときに生成されるプレハブ
 
     private InitPopList popItemRecipeList_;
-    private int maxCnt_=0;
+    private int maxCnt_ = 0;
 
     private Bag_Item bagItem_;// 所持しているアイテムを確認
 
@@ -41,8 +41,8 @@ public class ItemCreateMng : MonoBehaviour
     // ミニゲーム関連
     private MovePoint movePoint_;
     private MovePoint.JUDGE judge_ = MovePoint.JUDGE.NON;
-    private Image judeBack_;
-    private Text judgText_;
+    private Image judgeBack_;
+    private Text judgeText_;
 
     private Button createBtn_;  // 作成開始ボタン
     private Button cancelBtn_;  // 合成終了開始ボタン
@@ -53,7 +53,7 @@ public class ItemCreateMng : MonoBehaviour
 
     void Start()
     {
-        itemRecipeParent_ = this.transform.Find("ScrollView/Viewport/Content").GetComponent<RectTransform>();
+        itemRecipeParent_ = transform.Find("ScrollView/Viewport/Content").GetComponent<RectTransform>();
         bagMateria_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>();
 
         popItemRecipeList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
@@ -62,8 +62,7 @@ public class ItemCreateMng : MonoBehaviour
 
         for (int i = 0; i < maxCnt_; i++)
         {
-
-            itemRecipeState[i].pleate =  Instantiate(itemRecipePleate,
+            itemRecipeState[i].pleate = Instantiate(itemRecipePleate,
             new Vector2(0, 0), Quaternion.identity, itemRecipeParent_.transform);
             itemRecipeState[i].name = InitPopList.itemData[i].name;
             itemRecipeState[i].pleate.name = itemRecipeState[i].name;
@@ -78,18 +77,18 @@ public class ItemCreateMng : MonoBehaviour
             itemRecipeState[i].materia3 = InitPopList.itemData[i].materia3;
         }
 
-                //GameObject.Find("DontDestroyCanvas/ItemBagMng").GetComponent<ItemBagMng>().Init();
-                bagItem_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>();
-        
+        //GameObject.Find("DontDestroyCanvas/ItemBagMng").GetComponent<ItemBagMng>().Init();
+        bagItem_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>();
+
         // ミニゲーム
-        movePoint_ = miniGameParent.transform.GetComponent<MovePoint>();
-        miniGameParent.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+        movePoint_ = miniGameMng.transform.GetComponent<MovePoint>();
+        miniGameMng.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
         // miniGameMng_= GameObject.Find("MiniGameMng").GetComponent<RectTransform>();
-        judeBack_ = miniGameParent.transform.Find("JudgBack").GetComponent<Image>();
-        judgText_ = judeBack_.transform.Find("Text").GetComponent<Text>();
-        judgText_.text = "";
-        judeBack_.gameObject.SetActive(false);
-        miniGameParent.gameObject.SetActive(false);
+        judgeBack_ = miniGameMng.transform.Find("JudgeBack").GetComponent<Image>();
+        judgeText_ = judgeBack_.transform.Find("Text").GetComponent<Text>();
+        judgeText_.text = "";
+        judgeBack_.gameObject.SetActive(false);
+        miniGameMng.gameObject.SetActive(false);
 
         cancelBtn_ = transform.Find("CancelBtn").GetComponent<Button>();
         createBtn_ = transform.Find("CreateBtn").GetComponent<Button>();
@@ -106,7 +105,7 @@ public class ItemCreateMng : MonoBehaviour
     {
         while (true)
         {
-                yield return null;
+            yield return null;
 
             if (movePoint_.GetMiniGameJudge() == MovePoint.JUDGE.NON)
             {
@@ -124,7 +123,11 @@ public class ItemCreateMng : MonoBehaviour
                         SetActiveRecipe(i, saveBtnName_);
                         saveBtn_ = itemRecipeState[i].btn;
                         saveItemNum_ = i;// 番号を保存
-                        createBtn_.interactable = true;
+
+                        if (miniGameMng.gameObject.activeSelf == false)
+                        {
+                            createBtn_.interactable = true;
+                        }
                     }
                 }
             }
@@ -132,17 +135,17 @@ public class ItemCreateMng : MonoBehaviour
             {
                 if (movePoint_.GetMiniGameJudge() == MovePoint.JUDGE.NORMAL)
                 {
-                    judgText_.text = "成功";
+                    judgeText_.text = "成功";
                 }
                 else
                 {
-                    judgText_.text = "大成功";
+                    judgeText_.text = "大成功";
                 }
-                judeBack_.gameObject.SetActive(true);
+                judgeBack_.gameObject.SetActive(true);
                 bagItem_.ItemGetCheck(saveItemNum_, saveBtnName_, 1);
                 // 何らかの判定をされた場合
                 cancelBtn_.interactable = true;
-                createBtn_.interactable = true;
+                createBtn_.interactable = false;
                 saveBtn_.interactable = true;
                 saveBtnName_ = "";
                 // 判定をリセット
@@ -150,10 +153,9 @@ public class ItemCreateMng : MonoBehaviour
                 movePoint_.SetMiniGameJudge(judge_);
 
                 yield return new WaitForSeconds(2.0f);
-                judeBack_.gameObject.SetActive(false);
-                miniGameParent.gameObject.SetActive(false);
-                judgText_.text = "";
-
+                judgeBack_.gameObject.SetActive(false);
+                miniGameMng.gameObject.SetActive(false);
+                judgeText_.text = "";
             }
         }
     }
@@ -165,14 +167,14 @@ public class ItemCreateMng : MonoBehaviour
         {
             wantMateria_.text = "必要素材\n" +
                  itemRecipeState[recipeNum].materia1 +
-                " " + itemRecipeState[recipeNum].materia2;
+           " " + itemRecipeState[recipeNum].materia2;
         }
         else
         {
             wantMateria_.text = "必要素材\n" +
                  itemRecipeState[recipeNum].materia1 +
-                " " + itemRecipeState[recipeNum].materia2 +
-                " " + itemRecipeState[recipeNum].materia3;
+           " " + itemRecipeState[recipeNum].materia2 +
+           " " + itemRecipeState[recipeNum].materia3;
         }
     }
 
@@ -206,7 +208,7 @@ public class ItemCreateMng : MonoBehaviour
             number[1] = HaveMateriaCheck(recipeNum, itemRecipeState[recipeNum].materia2);
 
             Debug.Log("number[0]:" + number[0] + "   number[1]:" + number[1] + "   number[2]:" + number[2]);
-            if (itemRecipeState[number[2]].materia3 == "non")
+            if (itemRecipeState[recipeNum].materia3 == "non")
             {
                 Bag_Materia.materiaState[number[0]].haveCnt--;
                 Bag_Materia.materiaState[number[1]].haveCnt--;
@@ -223,7 +225,7 @@ public class ItemCreateMng : MonoBehaviour
     private int HaveMateriaCheck(int recipeNum, string wantMateria)
     {
         int haveMateriaNum = 0;
-        Debug.Log("必要素材"+wantMateria);
+        Debug.Log("必要素材" + wantMateria);
 
         for (int i = 0; i <= bagMateria_.GetMaxHaveMateriaCnt(); i++)
         {
@@ -237,7 +239,7 @@ public class ItemCreateMng : MonoBehaviour
             {
                 if (Bag_Materia.materiaState[i].name == wantMateria)
                 {
-                    Debug.Log(Bag_Materia.materiaState[i].name+"を持ってます");
+                    Debug.Log(Bag_Materia.materiaState[i].name + "を持ってます");
                     haveMateriaNum = i;
                     if (Bag_Materia.materiaState[i].haveCnt < 1)
                     {
@@ -249,8 +251,8 @@ public class ItemCreateMng : MonoBehaviour
                         if (wantMateria == itemRecipeState[recipeNum].materia2)
                         {
                             createBtn_.interactable = false;
+                            miniGameMng.gameObject.SetActive(true);
                             StartCoroutine(movePoint_.CountDown());
-                            miniGameParent.gameObject.SetActive(true);
                             cancelBtn_.interactable = false;
                             Debug.Log(Bag_Materia.materiaState[i].name + "を持っていました。ゲームを始めます");
                         }

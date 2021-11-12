@@ -9,9 +9,9 @@ public class MagicCreate : MonoBehaviour
     private Canvas uniHouseCanvas;
 
     [SerializeField]
-    private RectTransform miniGameParent;    // ミニゲーム表示用
+    private RectTransform miniGameMng;    // ミニゲーム表示用
 
-    [SerializeField]
+ //   [SerializeField]
     private RectTransform magicCreateParent;    // 素材を拾ったときに生成されるプレハブ
 
     // ワードの最大個数取得用
@@ -46,11 +46,12 @@ public class MagicCreate : MonoBehaviour
 
     // ミニゲームスタート用
     private MovePoint movePoint_;
-    private Image judeBack_;
-    private Text judgText_;
+    private Image judgeBack_;
+    private Text judgeText_;
 
     public void Init()
     {
+        magicCreateParent = transform.Find("ScrollView/Viewport/Content").GetComponent<RectTransform>();
         // ワードの最大個数を取得
         popWordList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
         maxCnt_ = popWordList_.SetMaxWordCount();
@@ -65,12 +66,12 @@ public class MagicCreate : MonoBehaviour
         cancelBtn_ = transform.Find("InfoMng/CancelBtn").GetComponent<Button>();
 
         // ミニゲーム処理
-        movePoint_ = miniGameParent.transform.GetComponent<MovePoint>();
-        judeBack_ = transform.Find("JudgBack").GetComponent<Image>();
-        judgText_ = judeBack_.transform.Find("Text").GetComponent<Text>();
-        judeBack_.gameObject.SetActive(false);
-        miniGameParent.gameObject.SetActive(false);
-        judgText_.text = "";
+        movePoint_ = miniGameMng.transform.GetComponent<MovePoint>();
+        judgeBack_ = movePoint_.transform.Find("JudgeBack").GetComponent<Image>();
+        judgeText_ = judgeBack_.transform.Find("Text").GetComponent<Text>();
+        judgeBack_.gameObject.SetActive(false);
+        miniGameMng.gameObject.SetActive(false);
+        judgeText_.text = "";
 
         // ScrollView/TopicBtnまでの階層
         RectTransform viewParent_ = transform.Find("ScrollView/TopicBtn").GetComponent<RectTransform>();
@@ -588,7 +589,7 @@ public class MagicCreate : MonoBehaviour
 
         StartCoroutine(movePoint_.CountDown());
         StartCoroutine(ResultMagicCreate());
-        miniGameParent.gameObject.SetActive(true);
+        miniGameMng.gameObject.SetActive(true);
 
         // ゲームが始まるため押下できないようにする
         createBtn_.interactable = false;
@@ -608,22 +609,22 @@ public class MagicCreate : MonoBehaviour
 
                 if (movePoint_.GetMiniGameJudge() == MovePoint.JUDGE.NORMAL)
                 {
-                    judgText_.text = "成功";
+                    judgeText_.text = "成功";
                 }
                 else
                 {
-                    judgText_.text = "大成功";
+                    judgeText_.text = "大成功";
                 }
-                judeBack_.gameObject.SetActive(true);
+                judgeBack_.gameObject.SetActive(true);
 
                 movePoint_.SetMiniGameJudge(MovePoint.JUDGE.NON);// 初期化しておく
                 bagMagic_.MagicCreateCheck(allName_, 100, 5, 5);// 出来上がった魔法を保存
 
                 yield return new WaitForSeconds(2.0f);
                 cancelBtn_.interactable = true;
-                judeBack_.gameObject.SetActive(false);
-                miniGameParent.gameObject.SetActive(false);
-                judgText_.text = "";
+                judgeBack_.gameObject.SetActive(false);
+                miniGameMng.gameObject.SetActive(false);
+                judgeText_.text = "";
 
                 if (Bag_Materia.materiaState[materiaNum_].haveCnt < 1)
                 {
@@ -649,7 +650,7 @@ public class MagicCreate : MonoBehaviour
     private void ResetCommon()
     {
         // Init()とワード合成後とワード合成終了時に呼ぶ
-        miniGameParent.localPosition = new Vector3(0.0f, -180.0f, 0.0f);
+        miniGameMng.localPosition = new Vector3(0.0f, -180.0f, 0.0f);
 
         arrowBtn_[0].interactable = false;
         arrowBtn_[1].interactable = false;
