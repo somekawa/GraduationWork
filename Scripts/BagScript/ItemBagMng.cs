@@ -7,6 +7,7 @@ public class ItemBagMng : MonoBehaviour
     [SerializeField]
     private Sprite[] CharaImage_;
     private RectTransform itemBagChild_;// itemBag_の子
+
     public enum TOPIC
     {
         NON = -1,
@@ -31,10 +32,10 @@ public class ItemBagMng : MonoBehaviour
     "ユニ","ジャック"};
 
     // ItemBox選択時
-  //  private RectTransform topicParent_;// 何を表示しているか
     private RectTransform[] mngs_ = new RectTransform[(int)TOPIC.MAX];
 
     private MenuActive menuActive_;     // 現在のページ状態がどこかを取得する(矢印に使用する)
+
     public void Init()
     {
         // 1度情報を取得したら参照しないようにする
@@ -42,12 +43,13 @@ public class ItemBagMng : MonoBehaviour
         {
             itemBagChild_ = transform.GetComponent<RectTransform>();
         }
+
         if (mngs_[(int)TOPIC.ITEM] == null)
         {
-            mngs_[(int)TOPIC.ITEM] = this.transform.Find("ItemMng").GetComponent<RectTransform>();
-            mngs_[(int)TOPIC.MATERIA] = this.transform.Find("MateriaMng").GetComponent<RectTransform>();
-            mngs_[(int)TOPIC.WORD] = this.transform.Find("WordMng").GetComponent<RectTransform>();
-            mngs_[(int)TOPIC.MAGIC] = this.transform.Find("MagicMng").GetComponent<RectTransform>();
+            mngs_[(int)TOPIC.ITEM] = transform.Find("ItemMng").GetComponent<RectTransform>();
+            mngs_[(int)TOPIC.MATERIA] = transform.Find("MateriaMng").GetComponent<RectTransform>();
+            mngs_[(int)TOPIC.WORD] = transform.Find("WordMng").GetComponent<RectTransform>();
+            mngs_[(int)TOPIC.MAGIC] = transform.Find("MagicMng").GetComponent<RectTransform>();
         }
 
         if (topicText_ == null)
@@ -62,6 +64,7 @@ public class ItemBagMng : MonoBehaviour
         }
         ActiveRectTransform();
     }
+
     public void StatusInit()
     {
         if (menuActive_ == null)
@@ -88,7 +91,6 @@ public class ItemBagMng : MonoBehaviour
 
         menuActive_.ViewStatus(charaStringNum_);
     }
-
 
     public void OnClickRightArrow()
     {
@@ -119,6 +121,11 @@ public class ItemBagMng : MonoBehaviour
         else
         {
             // 何も処理を行わない
+        }
+
+        if (gameObject.activeSelf == true)
+        {
+            ActiveRectTransform();
         }
     }
 
@@ -152,6 +159,11 @@ public class ItemBagMng : MonoBehaviour
         {
             // 何も処理を行わない
         }
+
+        if (gameObject.activeSelf == true)
+        {
+            ActiveRectTransform();
+        }
     }
 
     // 矢印の共通処理部分
@@ -165,26 +177,24 @@ public class ItemBagMng : MonoBehaviour
         charaImg_.sprite = CharaImage_[charaStringNum_];
     }
 
-
     public void ActiveRectTransform()
     {
-      //  bool activeFlag_ = false;
-        //while (flag)
-        //{
-         //   yield return null;
-            for (int i = 0; i < (int)TOPIC.MAX; i++)
+        Debug.Log(mngs_[stringNum_].gameObject.name + "を表示します               "+ stringNum_);
+
+        for (int i = 0; i < (int)TOPIC.MAX; i++)
+        {
+            if (stringNum_ == i)
             {
-                if (stringNum_ == i)
-                {
-                    // 選択のものを表示
-                    mngs_[i].gameObject.SetActive(true);
-                }
-                else
-                {
-                    // 選択中のもの以外は非表示に
-                    mngs_[i].gameObject.SetActive(false);
-                }
+                // 選択のものを表示
+                mngs_[i].gameObject.SetActive(true);
+                Debug.Log(mngs_[i].gameObject.name+"を表示しています");
             }
+            else
+            {
+                // 選択中のもの以外は非表示に
+                mngs_[i].gameObject.SetActive(false);
+            }
+        }
 
         if (stringNum_ == (int)TOPIC.WORD)
         {
@@ -196,11 +206,5 @@ public class ItemBagMng : MonoBehaviour
             // 魔法合成からバッグのワードを開くと親の場所がずれてしまうため
             GameObject.Find("Managers").GetComponent<Bag_Materia>().Init();
         }
-        //  }
     }
-
-    //public void SetActiveCanvas()
-    //{
-    //    StopCoroutine(ActiveRectTransform(false));
-    //}
 }

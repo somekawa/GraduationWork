@@ -334,11 +334,6 @@ public class MenuActive : MonoBehaviour
             default:
                 break;
         }
-
-        if (clickbtn_.name != btnName_[(int)CANVAS.BAG])
-        {
-            itemBagMngCS_.ActiveRectTransform();
-        }
     }
 
     public CANVAS GetNowMenuCanvas()
