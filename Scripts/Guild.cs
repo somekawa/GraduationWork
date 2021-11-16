@@ -1,5 +1,7 @@
 
 // HouseBaseを継承している町長の家を管理するクラス
+using System.Collections.Generic;
+
 public class Guild : HouseBase
 {
     public override bool CheckEvent()
@@ -25,27 +27,56 @@ public class Guild : HouseBase
 
     // クエストを受注でイベントが進行するときに使用
     // QuestMngでインスタンスして呼び出す
-    public void GuildQuestEvent(int questNum,bool clearFlg = false)
+    public void GuildQuestEvent(int questNum,bool clearFlg, Dictionary<int, int> clearNum)
     {
-        if (EventMng.GetChapterNum() == 2 && questNum == 0) // 現在の進行度が2で、クエスト0番を受注したら
+        if(!clearFlg)   // クエスト受注タイミング
         {
-            // シーン遷移無し
-            EventMng.SetChapterNum(3, SceneMng.SCENE.NON);
-        }
-        else if(EventMng.GetChapterNum() == 6 && questNum == 0) // 現在の進行度が6で、クエスト0番を達成したら
-        {
-            if(clearFlg)
+            switch (EventMng.GetChapterNum())
             {
-                SceneMng.SetTimeGear(SceneMng.TIMEGEAR.EVENING);    // 時間経過
-                EventMng.SetChapterNum(6, SceneMng.SCENE.CONVERSATION);
+                case 2: // 現在の進行度が2で、クエスト0番を受注したら
+                    if (questNum == 0)
+                    {
+                        // シーン遷移無しで進行度を3にする。
+                        EventMng.SetChapterNum(3, SceneMng.SCENE.NON);
+                    }
+                    break;
+                case 12:// 現在の進行度が12で、クエスト4番を受注したら
+                    if (questNum == 4)
+                    {
+                        EventMng.SetChapterNum(12, SceneMng.SCENE.CONVERSATION);
+                    }
+                    break;
+                default:
+                    break;
             }
         }
-        else if(EventMng.GetChapterNum() == 9 && questNum == 1) // 現在の進行度が8で、クエスト1番を達成したら
+        else　　　　　　// クエスト報告タイミング
         {
-            if (clearFlg)
+            switch (EventMng.GetChapterNum())
             {
-                SceneMng.SetTimeGear(SceneMng.TIMEGEAR.EVENING);    // 時間経過
-                EventMng.SetChapterNum(9, SceneMng.SCENE.CONVERSATION);
+                case 6: // 現在の進行度が6で、クエスト0番を達成したら
+                    if (questNum == 0)
+                    {
+                        SceneMng.SetTimeGear(SceneMng.TIMEGEAR.EVENING);    // 時間経過
+                        EventMng.SetChapterNum(6, SceneMng.SCENE.CONVERSATION);
+                    }
+                    break;
+                case 8: // 現在の進行度が8で、クエスト1番を達成したら
+                    if (questNum == 1)
+                    {
+                        SceneMng.SetTimeGear(SceneMng.TIMEGEAR.EVENING);    // 時間経過
+                        EventMng.SetChapterNum(9, SceneMng.SCENE.CONVERSATION);
+                    }
+                    break;
+                case 11:// 現在の進行度が11のとき
+                    if (clearNum[2] >= 1 && clearNum[3] >= 1)
+                    {
+                        SceneMng.SetTimeGear(SceneMng.TIMEGEAR.NOON);      // 時間経過
+                        EventMng.SetChapterNum(11, SceneMng.SCENE.CONVERSATION);
+                    }
+                    break;
+                default:
+                    break;
             }
         }
     }

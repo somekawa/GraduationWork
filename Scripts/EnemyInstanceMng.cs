@@ -11,13 +11,14 @@ public class EnemyInstanceMng : MonoBehaviour
     public EnemySelect enemySelectObj;          // 敵選択用アイコン
                                                 // 通常攻撃弾のプレハブ
     [SerializeField]
-    private GameObject kabosuAttackPrefab_;     // ユニの通常攻撃と同じものでテストする
+    private GameObject enemyAttackPrefab_;     // ユニの通常攻撃と同じものでテストする
     [SerializeField]
     private GameObject soulEffect_;             // 敵死亡時の魂的な何か(エフェクト)
 
     // キーがint , valueがList Vector3の[各ワープポイントの数]のmapがいいかも
     private Dictionary<int, List<Vector3>> enemyPosSetMap_ = new Dictionary<int, List<Vector3>>();
     private Dictionary<int, Vector3[]> enemyHPPos_         = new Dictionary<int, Vector3[]>();
+    private Vector3 enemyHPPosOffset_;          // 高い位置の敵用にオフセットできるようにしておく
     private Dictionary<int, GameObject> enemyMap_ = new Dictionary<int, GameObject>();
 
     private GameObject DataPopPrefab_;
@@ -87,7 +88,7 @@ public class EnemyInstanceMng : MonoBehaviour
         // 敵(数字がフィールドによって書き換えられるようにしとかないといけない)
         if (enemyData_ == null)
         {
-            enemyData_ = DataPopPrefab_.GetComponent<PopList>().GetData<EnemyList>(PopList.ListData.ENEMY, 0, name);
+            enemyData_ = DataPopPrefab_.GetComponent<PopList>().GetData<EnemyList>(PopList.ListData.ENEMY, 1, name);
         }
 
         buttleMng_ = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
@@ -108,7 +109,10 @@ public class EnemyInstanceMng : MonoBehaviour
         // AnimMaxの半分の値に到達したらtrueにする
         if (enemyList_[num].Item1.HalfAttackAnimTime())
         {
-            changeEnableBoxCollider_.enabled = true;
+            if(changeEnableBoxCollider_ != null)
+            {
+                changeEnableBoxCollider_.enabled = true;
+            }
         }
 
         if (anim_ == ANIMATION.ATTACK && enemyList_[num].Item1.ChangeNextChara())
@@ -137,14 +141,16 @@ public class EnemyInstanceMng : MonoBehaviour
         enemyPos_ = enemyPosSetMap_[mapNum_][num];
 
         // ランダムなキャラを取得する(ただし、死亡したキャラは除外する)
-        do
-        {
-            attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
-        } while (SceneMng.charasList_[attackTarget_].HP() <= 0);
-        //attackTarget_ = (int)SceneMng.CHARACTERNUM.JACK;
+        //do
+        //{
+        //    attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
+        //} while (SceneMng.charasList_[attackTarget_].HP() <= 0);
+        attackTarget_ = (int)SceneMng.CHARACTERNUM.UNI;
 
-        // ダメージを渡す
+        // ダメージと速度を渡す
         buttleMng_.SetDamageNum(enemyList_[num].Item1.Damage());
+        buttleMng_.SetSpeedNum(enemyList_[num].Item1.Speed());
+        buttleMng_.SetLuckNum(enemyList_[num].Item1.Luck());
 
         charaPos_ = SceneMng.charasList_[attackTarget_].GetButtlePos();
 
@@ -157,17 +163,35 @@ public class EnemyInstanceMng : MonoBehaviour
         // 遠距離攻撃型の敵が使う魔法の弾生成
         if (enemyList_[num].Item1.MoveTime() < 0)
         {
-            // 通常攻撃弾の方向の計算
-            var dir = (charaPos_ - enemyPos_).normalized;
-            // エフェクトの発生位置高さ調整
-            // キャラとエフェクトの発生方向が逆だから、forwardの減算に気を付ける事(Z軸はマイナスしないとだめ)
-            var adjustPos = new Vector3(enemyPos_.x, enemyPos_.y + 0.3f, enemyPos_.z - transform.forward.z);
+            GameObject obj = null;
+            // enemyAttackPrefab_の子から、今回の敵が使用するエフェクトを名前で探し出す
+            for (int m = 0; m < enemyAttackPrefab_.transform.childCount; m++)
+            {
+                // Excel側では(Clone)まで付けて名前保存してるから名前+(Clone)とする
+                var name = enemyAttackPrefab_.transform.GetChild(m).gameObject.name + "(Clone)";
+                if (name == enemyList_[num].Item1.WeaponTagObjName())
+                {
+                    // 今回使用するエフェクトが見つかったときは、そのエフェクトをobj変数に保存する
+                    obj = enemyAttackPrefab_.transform.GetChild(m).gameObject;
+                    break;
+                }
+            }
 
-            // 通常攻撃弾プレハブをインスタンス化
-            var uniAttackInstance = Instantiate(kabosuAttackPrefab_, adjustPos, Quaternion.identity);
-            MagicMove magicMove = uniAttackInstance.GetComponent<MagicMove>();
-            // 通常攻撃弾の飛んでいく方向を指定
-            magicMove.SetDirection(dir);
+            // 遠距離攻撃型の敵が使う魔法の弾生成
+            if (enemyList_[num].Item1.MoveTime() < 0)
+            {
+                // 通常攻撃弾の方向の計算
+                var dir = (charaPos_ - enemyPos_).normalized;
+                // エフェクトの発生位置高さ調整
+                // キャラとエフェクトの発生方向が逆だから、forwardの減算に気を付ける事(Z軸はマイナスしないとだめ)
+                var adjustPos = new Vector3(enemyPos_.x, enemyPos_.y + 0.3f, enemyPos_.z - transform.forward.z);
+
+                // 通常攻撃弾プレハブをインスタンス化(保存していたobj変数のオブジェクトを使用する)
+                var uniAttackInstance = Instantiate(obj, adjustPos, Quaternion.identity);
+                MagicMove magicMove = uniAttackInstance.GetComponent<MagicMove>();
+                // 通常攻撃弾の飛んでいく方向を指定
+                magicMove.SetDirection(dir);
+            }
         }
 
         // [Weapon]のタグがついているオブジェクトを全て検索する
@@ -196,8 +220,6 @@ public class EnemyInstanceMng : MonoBehaviour
                 else
                 {
                     // 変換が出来なかった(遠距離攻撃型)
-                    changeEnableBoxCollider_ = weaponTagObj[i].GetComponent<BoxCollider>();
-
                     // 攻撃対象のキャラの番号を渡す
                     weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(attackTarget_);
                 }
@@ -258,10 +280,11 @@ public class EnemyInstanceMng : MonoBehaviour
         {
             // 敵プレハブをインスタンス
             GameObject enemy = null;
+            enemyHPPosOffset_ = Vector3.zero;
 
             // 番号でどの敵をインスタンスするか決める
             int enemyNum = Random.Range(0, enemyTest.transform.childCount);
-            //enemyNum = 3;   // ハチ固定
+            enemyNum = 3;   // イーグル固定
 
             if (eventEnemy_.Item1 == null)
             {
@@ -271,6 +294,13 @@ public class EnemyInstanceMng : MonoBehaviour
                                     pos, Quaternion.identity) as GameObject;
                 // 敵の体の向きを変える
                 enemy.transform.Rotate(0, 180, 0);
+
+                // 敵がEagleのときは、HPバーの高さを上のほうに調整しないといけない
+                if(enemyTest.transform.GetChild(enemyNum).gameObject.name == "Enemy_Eagle")
+                {
+                    enemyHPPosOffset_ = new Vector3(0.0f, 60.0f,0.0f);
+                }
+
             }
             else
             {
@@ -283,7 +313,7 @@ public class EnemyInstanceMng : MonoBehaviour
             enemy.name = num.ToString();
 
             // 敵HPをインスタンス
-            GameObject hpBar = Instantiate(enemyHPBar, enemyHPPos_[mapNum_][num - 1], Quaternion.identity, parentCanvas.transform) as GameObject;
+            GameObject hpBar = Instantiate(enemyHPBar, enemyHPPos_[mapNum_][num - 1] + enemyHPPosOffset_, Quaternion.identity, parentCanvas.transform) as GameObject;
             hpBar.name = "HPBar_"+num.ToString();
 
             // param[x]のxは出現させる敵の行番号
@@ -367,8 +397,8 @@ public class EnemyInstanceMng : MonoBehaviour
     {
         bool flag = false;
 
-        // 遠距離攻撃型の敵は移動が必要ないから
-        if (enemyList_[num].Item1.MoveTime() < 0)
+        // 遠距離攻撃型の敵は移動が必要ないから または、攻撃後自爆してHPが0の敵は移動が必要ない
+        if (enemyList_[num].Item1.MoveTime() < 0 || enemyList_[num].Item1.HP() <= 0)
         {
             flag = true;
         }
@@ -397,8 +427,53 @@ public class EnemyInstanceMng : MonoBehaviour
 
     public void HPdecrease(int num)
     {
+        var damage = 0;
+
+        // クリティカルの計算をする(基礎値と幸運値で上限を狭める)
+        int criticalRand = Random.Range(0, 100 - (10 + buttleMng_.GetLuckNum()));
+        if (criticalRand <= 10 + buttleMng_.GetLuckNum())
+        {
+            // クリティカル発生(必中+ダメージ2倍)10はクリティカルの基礎値
+            Debug.Log(criticalRand + "<=" + (10 + buttleMng_.GetLuckNum()) + "なので、キャラの攻撃がクリティカル！");
+            // クリティカルダメージ
+            damage = (buttleMng_.GetDamageNum() * 2) - enemyList_[num].Item1.Defence();
+        }
+        else
+        {
+            // クリティカルじゃないとき
+            Debug.Log(criticalRand + ">" + (10 + buttleMng_.GetLuckNum()) + "なので、キャラの攻撃はクリティカルではない");
+
+            // 命中計算をする
+            // ①攻撃する側のSpeed / 攻撃される側のSpeed * 100 = ％の出力
+            var hitProbability = (int)((float)buttleMng_.GetSpeedNum() / (float)enemyList_[num].Item1.Speed() * 100.0f);
+            // ②キャラも敵も+10％の補正値を入れてキャラ側だけに(自分のLuck * 5)％をプラスする。
+            var hitProbabilityOffset = hitProbability + 10 + (buttleMng_.GetLuckNum() * 5);
+            // ③hitProbabilityOffsetが100以上なら自動命中で、それ以下ならランダム値を取る。
+            if (hitProbabilityOffset < 100)
+            {
+                int rand = Random.Range(0, 100);
+                Debug.Log("命中率" + hitProbabilityOffset + "ランダム値" + rand);
+
+                if (rand <= hitProbabilityOffset)
+                {
+                    // 命中
+                    Debug.Log(rand + "<=" + hitProbabilityOffset + "なので、命中");
+                }
+                else
+                {
+                    // 回避
+                    Debug.Log(rand + ">" + hitProbabilityOffset + "なので、回避");
+                    return;
+                }
+            }
+            else
+            {
+                Debug.Log("命中率" + hitProbabilityOffset + "が100以上ならので、自動命中");
+            }
+        }
+
         // ダメージ値の算出
-        var damage = buttleMng_.GetDamageNum() - enemyList_[num].Item1.Defence();
+        damage = buttleMng_.GetDamageNum() - enemyList_[num].Item1.Defence();
         if(damage <= 0)
         {
             Debug.Log("キャラの攻撃力より敵の防御力が上回ったのでダメージが0になりました");
@@ -483,6 +558,13 @@ public class EnemyInstanceMng : MonoBehaviour
                 return false;
             }
         }
+
+        // Finishタグがついているものを検索して、あるときはfalseで返す
+        if (GameObject.FindGameObjectsWithTag("Finish").Length > 0)
+        {
+            return false;
+        }
+
 
         // 全ての敵が死亡アニメーションまで終了したらtrueで返す
         return true;

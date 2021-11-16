@@ -378,8 +378,10 @@ public class CharacterMng : MonoBehaviour
             case ANIMATION.ATTACK:
                 if (charasList_[(int)nowTurnChar_].Attack())
                 {
-                    // ここでキャラの攻撃力をButtleMng.csに渡す
+                    // ここでキャラの攻撃力と速度と幸運をButtleMng.csに渡す
                     buttleMng_.SetDamageNum(charasList_[(int)nowTurnChar_].Damage());
+                    buttleMng_.SetSpeedNum(charasList_[(int)nowTurnChar_].Speed());
+                    buttleMng_.SetLuckNum(charasList_[(int)nowTurnChar_].Luck());
 
                     AttackStart((int)nowTurnChar_);
                     buttleCommandRotate_.SetRotaFlg(true);
@@ -561,7 +563,79 @@ public class CharacterMng : MonoBehaviour
     public void HPdecrease(int num)
     {
         // ダメージ値の算出
-        var damage = buttleMng_.GetDamageNum() - charasList_[num].Defence();
+        var damage = 0;
+
+        // クリティカルの計算をする(基礎値と幸運値で上限を狭める)
+        int criticalRand = Random.Range(0, 100 - (10 + buttleMng_.GetLuckNum()));
+        if(criticalRand <= 10 + buttleMng_.GetLuckNum())
+        {
+            // クリティカル発生(必中+ダメージ2倍)10はクリティカルの基礎値
+            Debug.Log(criticalRand + "<=" + (10 + buttleMng_.GetLuckNum()) + "なので、敵の攻撃がクリティカル！");
+            // クリティカルダメージ
+            damage = (buttleMng_.GetDamageNum() * 2) - charasList_[num].Defence();
+        }
+        else
+        {
+            // クリティカルじゃないとき
+            Debug.Log(criticalRand + ">" + (10 + charasList_[(int)nowTurnChar_].Luck()) + "なので、敵の攻撃はクリティカルではない");
+
+            // 命中計算をする
+            // ①攻撃する側のSpeed / 攻撃される側のSpeed * 100 = ％の出力
+            var hitProbability = (int)((float)buttleMng_.GetSpeedNum() / (float)charasList_[(int)nowTurnChar_].Speed() * 100.0f);
+            // ②キャラも敵も+10％の補正値を入れる。
+            var hitProbabilityOffset = hitProbability + 10;
+            // ③hitProbabilityOffsetが100以上なら自動命中で、それ以下ならランダム値を取る。
+            if (hitProbabilityOffset < 100)
+            {
+                int rand = Random.Range(0, 100);
+                Debug.Log("命中率" + hitProbabilityOffset + "ランダム値" + rand);
+
+                if (rand <= hitProbabilityOffset)
+                {
+                    // 命中
+                    Debug.Log(rand + "<=" + hitProbabilityOffset + "なので、命中");
+                }
+                else
+                {
+                    // 回避
+                    Debug.Log(rand + ">" + hitProbabilityOffset + "なので、回避");
+                    return;
+                }
+            }
+            else
+            {
+                Debug.Log("命中率" + hitProbabilityOffset + "が100以上ならので、自動命中");
+            }
+
+            int tmpLuck = 0;
+
+            // 命中時にはLuckで回避判定をする
+            // 判定の範囲は、100 - 現在のLuckを最大値にして、より回避成功に近づける
+            if (charasList_[(int)nowTurnChar_].Luck() <= 10)
+            {
+                tmpLuck = 10;
+                Debug.Log("Luckが10以下なので、10を適用して回避判定をします");
+            }
+            else
+            {
+                tmpLuck = charasList_[(int)nowTurnChar_].Luck();
+                Debug.Log("Luckが10以上なので、現在のステータスのLuckを使って回避判定をします");
+            }
+
+            int randLuck = Random.Range(0, 100 - tmpLuck);
+            if (randLuck <= tmpLuck)
+            {
+                Debug.Log(randLuck + "<=" + tmpLuck + "以下なので、回避成功");
+                return;
+            }
+            else
+            {
+                Debug.Log(randLuck + ">" + tmpLuck + "以下なので、回避失敗");
+            }
+        }
+
+        // 通常ダメージ
+        damage = buttleMng_.GetDamageNum() - charasList_[num].Defence();
         if (damage <= 0)
         {
             Debug.Log("敵の攻撃力よりキャラの防御力が上回ったのでダメージが0になりました");

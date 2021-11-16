@@ -210,7 +210,7 @@ public class QuestMng : MonoBehaviour
             QuestClearCheck.SetOrderQuestsList(prefab);
 
             // クエストの受注でイベントが進行するか判断する
-            guild_.GuildQuestEvent(questNum_);
+            guild_.GuildQuestEvent(questNum_,false, questClearCnt_);
 
             Debug.Log("クエストを受注しました");
 
@@ -251,12 +251,12 @@ public class QuestMng : MonoBehaviour
         // ポップアップをアクティブにする
         popUpReward_.SetActive(true);
 
-        // ポップアップが時間経過で消えるようにコルーチンを呼び出す
-        StartCoroutine(PopUpMessage());
-
         // そのクエストに対するクリア回数を加算する
         questClearCnt_[questNum_]++;
         Debug.Log(questNum_ + "番のクリア回数が" + questClearCnt_[questNum_] + "になりました");
+
+        // ポップアップが時間経過で消えるようにコルーチンを呼び出す
+        StartCoroutine(PopUpMessage());
 
         // CompleteQuestのクリア報告用リストから報告した番号のオブジェクトを削除する
         QuestClearCheck.SetClearedQuestsList(questNum_);
@@ -297,7 +297,7 @@ public class QuestMng : MonoBehaviour
 
         // クエストの達成報告でイベントが進行するか判断する
         // ポップアップ後にイベントが発生してほしいからここで行う
-        guild_.GuildQuestEvent(questNum_, true);
+        guild_.GuildQuestEvent(questNum_, true, questClearCnt_);
 
     }
 

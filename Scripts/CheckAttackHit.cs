@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 // 攻撃が当たったかの確認用
@@ -6,6 +7,12 @@ public class CheckAttackHit : MonoBehaviour
 {
     // 目標の敵か判別する番号
     private int targetNum_ = -1;
+
+    // 敵エフェクトの削除リスト
+    private readonly List<string> enemyEffectDeleteList_ = new List<string>()
+    {
+        "KabosuAttack(Clone)","SpiderAttack(Clone)"
+    };
 
     public void SetTargetNum(int num)
     {
@@ -17,9 +24,12 @@ public class CheckAttackHit : MonoBehaviour
         // 敵に当たった場合(col.tag == "Enemy"と書くより、処理が速い)
         if (col.CompareTag("Enemy"))
         {
-            if (this.gameObject.name == "KabosuAttack(Clone)")
+            for(int i = 0; i < enemyEffectDeleteList_.Count; i++)
             {
-                return;
+                if (this.gameObject.name == enemyEffectDeleteList_[i])
+                {
+                    return;
+                }
             }
 
             // 目標の敵に当たった場合
@@ -65,10 +75,19 @@ public class CheckAttackHit : MonoBehaviour
                 // HP減少処理
                 GameObject.Find("CharacterMng").GetComponent<CharacterMng>().HPdecrease(targetNum_);
 
-                // 魔法の弾の時だけ魔法の弾を削除する
-                if (this.gameObject.name == "KabosuAttack(Clone)")
+                // 自分の名前がBombMonsterであれば、自爆して自分も削除する
+                if (gameObject.name == "BombMonster")
                 {
-                    Destroy(this.gameObject);
+                    GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().HPdecrease(int.Parse(transform.root.gameObject.name) - 1);
+                }
+
+                for (int i = 0; i < enemyEffectDeleteList_.Count; i++)
+                {
+                    // 魔法の弾の時だけ魔法の弾を削除する
+                    if (this.gameObject.name == enemyEffectDeleteList_[i])
+                    {
+                        Destroy(this.gameObject);
+                    }
                 }
 
                 targetNum_ = -1;

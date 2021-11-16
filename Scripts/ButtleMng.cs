@@ -19,7 +19,9 @@ public class ButtleMng : MonoBehaviour
 
     private List<(int,string)> moveTurnList_ = new List<(int, string)>();   // キャラと敵の行動順をまとめるリスト
     private int moveTurnCnt_ = 0;           // 自分の行動が終わったら値を増やす
-    private int damageNum_ = 0;
+    private int damageNum_ = 0;             // ダメージの値
+    private int speedNum_ = 0;              // 命中判定用の値
+    private int luckNum_ = 0;               // 幸運値の値
 
     void Start()
     {
@@ -137,6 +139,30 @@ public class ButtleMng : MonoBehaviour
     {
         Debug.Log("***GetDamageNum" + damageNum_);
         return damageNum_;
+    }
+
+    public void SetSpeedNum(int num)
+    {
+        Debug.Log("*SetSpeedNum" + num);
+        speedNum_ = num;
+    }
+
+    public int GetSpeedNum()
+    {
+        Debug.Log("***GetSpeedNum" + speedNum_);
+        return speedNum_;
+    }
+
+    public void SetLuckNum(int num)
+    {
+        Debug.Log("*SetLuckNum" + num);
+        luckNum_ = num;
+    }
+
+    public int GetLuckNum()
+    {
+        Debug.Log("***GetLuckNum" + luckNum_);
+        return luckNum_;
     }
 
     // ユニたちが逃げる処理の時に使用する

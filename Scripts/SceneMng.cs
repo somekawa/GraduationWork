@@ -153,6 +153,15 @@ public class SceneMng : MonoBehaviour
                 default:
                     break;
             }
+
+            // sceneでnowSceneを上書き前に、今まで動いていたシーンがフィールドであれば時間経過させる
+            if(nowScene != SCENE.TOWN && nowScene != SCENE.UNIHOUSE && nowScene != SCENE.NON)    
+            {
+                // タウンでもユニハウスでもNONでもない = どこかのフィールド
+                SetTimeGear(timeGrar_ + 1);
+            }
+
+
             nowScene = scene;
         }
     }
@@ -188,7 +197,14 @@ public class SceneMng : MonoBehaviour
 
     public static void SetTimeGear(TIMEGEAR dayTime)
     {
-        timeGrar_ = dayTime;
+        if (dayTime > TIMEGEAR.NIGHT) // 今が夜なら、朝が入るようにする
+        {
+            timeGrar_ = TIMEGEAR.MORNING;
+        }
+        else
+        {
+            timeGrar_ = dayTime;
+        }
     }
 
     public static TIMEGEAR GetTimeGear()

@@ -200,6 +200,11 @@ public class Enemy : CharaBase, InterfaceButtle
         return set_.Speed;
     }
 
+    public int Luck()
+    {
+        return set_.Luck;
+    }
+
     public string Name()
     {
         return set_.name;

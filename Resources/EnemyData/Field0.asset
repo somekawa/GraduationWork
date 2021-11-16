@@ -60,13 +60,13 @@ MonoBehaviour:
     WeaponTagObjName: Monster_1
   - Name: Bee
     Level: 3
-    HP: 10
+    HP: 8
     MP: 3
     Attack: 7
     MagicAttack: 1
-    Defence: 2
-    Speed: 3
-    Luck: 2
+    Defence: 1
+    Speed: 4
+    Luck: 1
     AnimMax: 1
     Exp: 30
     Drop: "B\u30CB\u30FC\u30C9\u30EB"
