@@ -10,7 +10,7 @@ using NPOI.SS.UserModel;
 public class Enemy_importer : AssetPostprocessor
 {
     private static readonly string filePath = "Assets/ExcelData/Enemy.xls";
-    private static readonly string[] sheetNames = { "Field0", };
+    private static readonly string[] sheetNames = { "Field0", "Field1" };
     
     static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
     {
