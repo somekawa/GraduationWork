@@ -11,15 +11,14 @@ public class MagicCreate : MonoBehaviour
     [SerializeField]
     private RectTransform miniGameMng;    // ミニゲーム表示用
 
- //   [SerializeField]
-    private RectTransform magicCreateParent;    // 素材を拾ったときに生成されるプレハブ
+    // ワードを表示するための親の位置
+    private RectTransform magicCreateParent;
 
-    // ワードの最大個数取得用
-    private InitPopList popWordList_;
-    private int maxCnt_ = 0;
+    //ワードの最大個数取得用
+    private int[] selectKindMaxCnt_ = new int[(int)InitPopList.WORD.INFO];
 
-    // バッグの中身（ワード）
-    private int stringNum_ = (int)Bag_Word.WORD_MNG.HEAD;
+    // 選択中のワード種類
+    private int kindNum_ = (int)Bag_Word.WORD_MNG.HEAD;
     // 画面下部、説明関連
     private string[] topicString_ = new string[(int)Bag_Word.WORD_MNG.MAX] {
     "Head","Element","Tail","Sub1","Sub2","Sub3"};
@@ -33,7 +32,7 @@ public class MagicCreate : MonoBehaviour
     private Image materiaImage_;// 空のマテリア画像描画
     private Text materiaCntText_;// 空のマテリアの所持数を描画
 
-    //  0.作成開始ボタン　1.魔法合成終了ボタン
+    //   0.作成開始ボタン　1.魔法合成終了ボタン
     private bool createFlag_ = false;
     private Button createBtn_;
     private Button cancelBtn_;
@@ -41,23 +40,148 @@ public class MagicCreate : MonoBehaviour
     private string allName_ = "";
     private int[] saveNumber_ = new int[(int)Bag_Word.WORD_MNG.MAX];// 選択したワードの番号を保存
     private int[] oldNumber_ = new int[(int)Bag_Word.WORD_MNG.MAX];
+    private int saveElementKind_ = 0;
 
     // 矢印ボタン
     private Button[] arrowBtn_ = new Button[2];
 
-    // ミニゲームスタート用
+    //ミニゲームスタート用
     private MovePoint movePoint_;
     private Image judgeBack_;
     private Text judgeText_;
 
+    public struct MagicCreateData
+    {
+        public GameObject pleate;   // インスタンスしたオブジェクトを保存
+        public string name;         // ワード名
+        public Button btn;
+        public bool getFlag;
+    }
+    public static Dictionary<Bag_Word.WORD_MNG, MagicCreateData[]> mCreateData = new Dictionary<Bag_Word.WORD_MNG, MagicCreateData[]>();
+    private int[] mngMaxCnt = new int[(int)Bag_Word.WORD_MNG.MAX];
+
+    private MagicCreateData[] InitCheck(Bag_Word.WORD_MNG kind)
+    {
+        int maxCnt = 0;
+        int startNum = 0;
+        int maxNum = 0;
+        switch (kind)
+        {
+            case Bag_Word.WORD_MNG.HEAD:
+                maxCnt = selectKindMaxCnt_[(int)InitPopList.WORD.HEAD];
+                maxNum = (int)InitPopList.WORD.HEAD;
+                break;
+
+            case Bag_Word.WORD_MNG.ELEMENT:
+                maxCnt = selectKindMaxCnt_[(int)InitPopList.WORD.ELEMENT_ASSIST] +
+                         selectKindMaxCnt_[(int)InitPopList.WORD.ELEMENT_ATTACK] +
+                         selectKindMaxCnt_[(int)InitPopList.WORD.ELEMENT_HEAL];
+                startNum = (int)InitPopList.WORD.ELEMENT_HEAL;
+                maxNum = (int)InitPopList.WORD.TAIL;
+                break;
+
+            case Bag_Word.WORD_MNG.TAIL:
+                maxCnt = selectKindMaxCnt_[(int)InitPopList.WORD.TAIL];
+                maxNum = (int)InitPopList.WORD.TAIL;
+                break;
+
+            case Bag_Word.WORD_MNG.SUB1:
+                maxCnt = selectKindMaxCnt_[(int)InitPopList.WORD.SUB1] +
+                         selectKindMaxCnt_[(int)InitPopList.WORD.SUB1_AND_SUB2] +
+                         selectKindMaxCnt_[(int)InitPopList.WORD.ALL_SUB];
+                startNum = (int)InitPopList.WORD.SUB1;
+                break;
+
+            case Bag_Word.WORD_MNG.SUB2:
+                maxCnt = selectKindMaxCnt_[(int)InitPopList.WORD.SUB2] +
+                         selectKindMaxCnt_[(int)InitPopList.WORD.SUB1_AND_SUB2] +
+                         selectKindMaxCnt_[(int)InitPopList.WORD.ALL_SUB];
+                startNum = (int)InitPopList.WORD.SUB2;
+                break;
+
+            case Bag_Word.WORD_MNG.SUB3:
+                maxCnt = selectKindMaxCnt_[(int)InitPopList.WORD.SUB3] +
+                         selectKindMaxCnt_[(int)InitPopList.WORD.ALL_SUB];
+                startNum = (int)InitPopList.WORD.SUB3;
+                maxNum = (int)InitPopList.WORD.INFO;
+                break;
+
+            default:
+                break;
+        }
+        mngMaxCnt[(int)kind] = maxCnt;
+        //  Debug.Log(kind + "            "+maxCntCheck_[(int)kind]);
+        var state = new MagicCreateData[maxCnt];
+        int count = 0;
+        if (kind == Bag_Word.WORD_MNG.SUB1
+            || kind == Bag_Word.WORD_MNG.SUB2)
+        {
+            // Sub1かSub2の時
+            for (int k = startNum; k < (int)InitPopList.WORD.MAX; k++)
+            {
+                if (k == startNum
+                || k == (int)InitPopList.WORD.SUB1_AND_SUB2
+                || k == (int)InitPopList.WORD.ALL_SUB)
+                {
+                    for (int i = 0; i < selectKindMaxCnt_[k]; i++)
+                    {
+                        CommonInitCheck(state, count, (InitPopList.WORD)k, i);
+                       // Debug.Log(state[count].name);
+                        count++;
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (startNum == 0)
+            {
+                // HEAD,TAIL用
+                for (int i = 0; i < maxCnt; i++)
+                {
+                    CommonInitCheck(state, count, (InitPopList.WORD)maxNum, i);
+                    count++;
+                }
+            }
+            else
+            {
+                for (int k = startNum; k < maxNum; k++)
+                {
+                    // ELEMENT,SUB3用
+                    for (int i = 0; i < selectKindMaxCnt_[k]; i++)
+                    {
+                        CommonInitCheck(state, count, (InitPopList.WORD)k, i);
+                        count++;
+                    }
+                }
+            }
+        }
+        return state;
+    }
+
+    private void CommonInitCheck(MagicCreateData[] data, int count, InitPopList.WORD kind, int dataNum)
+    {
+        data[count].name = Bag_Word.wordState[kind][dataNum].name;
+        data[count].pleate = Bag_Word.wordState[kind][dataNum].pleate;
+        data[count].btn = Bag_Word.wordState[kind][dataNum].btn;
+        data[count].getFlag = Bag_Word.wordState[kind][dataNum].getFlag;
+    }
+
     public void Init()
     {
-        magicCreateParent = transform.Find("ScrollView/Viewport/Content").GetComponent<RectTransform>();
+        magicCreateParent = transform.Find("ScrollView/Viewport/WordParent").GetComponent<RectTransform>();
         // ワードの最大個数を取得
-        popWordList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
-        maxCnt_ = popWordList_.SetMaxWordCount();
-        bagMagic_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Magic>();
+        for (int i = 0; i < (int)InitPopList.WORD.INFO; i++)
+        {
+            selectKindMaxCnt_[i] = InitPopList.maxWordCnt[i];
+        }
 
+        for (int i = 0; i < (int)Bag_Word.WORD_MNG.MAX; i++)
+        {
+            mCreateData[(Bag_Word.WORD_MNG)i] = InitCheck((Bag_Word.WORD_MNG)i);
+        }
+
+        bagMagic_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Magic>();
 
         // 作成開始ボタン
         createBtn_ = transform.Find("InfoMng/CreateBtn").GetComponent<Button>();
@@ -103,37 +227,39 @@ public class MagicCreate : MonoBehaviour
         ResetCommon();
 
         // ワードたちを魔法合成用の親の子に移動させる
-        if (Bag_Word.wordState[0].pleate.transform.parent != magicCreateParent.transform)
+        if (Bag_Word.wordState[InitPopList.WORD.HEAD][0].pleate.transform.parent != magicCreateParent.transform)
         {
-            for (int i = 0; i < maxCnt_; i++)
+            for (int k = 0; k < (int)InitPopList.WORD.INFO; k++)
             {
-                Bag_Word.wordState[i].pleate.transform.SetParent(magicCreateParent.transform);
+                for (int i = 0; i < selectKindMaxCnt_[k]; i++)
+                {
+                    Bag_Word.wordState[(InitPopList.WORD)k][i].pleate.transform.SetParent(magicCreateParent.transform);
+                }
             }
-            //  Debug.Log("親の位置をずらしました。");
+           // Debug.Log("親の位置をずらしました。");
         }
     }
 
     public void OnClickRightArrow()
     {
         // 値を加算
-        stringNum_++;
-        if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != "回復"
-         && selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != "補助")
+        kindNum_++;
+        if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] == "回復")
         {
-            // 攻撃系Elementを選択時に必中をもっていなかったらSub2でストップ
-            if (Bag_Word.wordState[targetWordNum_].getFlag == false)
+            if ((int)Bag_Word.WORD_MNG.SUB2 <= kindNum_)
             {
-                if ((int)Bag_Word.WORD_MNG.SUB2 <= stringNum_)
-                {
-                    stringNum_ = (int)Bag_Word.WORD_MNG.SUB2;
-                }
+                kindNum_ = (int)Bag_Word.WORD_MNG.SUB2;
             }
         }
-        else if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] == "回復")
+        else if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != "補助")
         {
-            if ((int)Bag_Word.WORD_MNG.SUB2 <= stringNum_)
+            // 攻撃系Elementを選択時に必中をもっていなかったらSub2でストップ
+            if (Bag_Word.wordState[InitPopList.WORD.SUB3][targetWordNum_].getFlag == false)
             {
-                stringNum_ = (int)Bag_Word.WORD_MNG.SUB2;
+                if ((int)Bag_Word.WORD_MNG.SUB2 <= kindNum_)
+                {
+                    kindNum_ = (int)Bag_Word.WORD_MNG.SUB2;
+                }
             }
         }
         else
@@ -141,28 +267,23 @@ public class MagicCreate : MonoBehaviour
             // 何もしない
         }
         // Debug.Log(selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT]);
-        ActiveKindsCheck((Bag_Word.WORD_MNG)stringNum_, false);
+        ActiveKindsCheck((Bag_Word.WORD_MNG)kindNum_, false);
         //  Debug.Log("右矢印をクリック" + stringNum_);
     }
 
     public void OnClickLeftArrow()
     {
         // ワード種別を1つ戻るときにその種類のワードを選択していれば
-        //  Debug.Log("1つ前の種類に戻ります。");
         // ボタンを押下できるようにして色を元に戻す
-        if (saveNumber_[stringNum_] != -1)
+        if (saveNumber_[kindNum_] != -1)
         {
-            Bag_Word.wordState[saveNumber_[stringNum_]].btn.image.color = Color.white;
-            Bag_Word.wordState[saveNumber_[stringNum_]].btn.interactable = true;
+            mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].btn.image.color = Color.white;
+            mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].btn.interactable = true;
         }
-        selectWord_[stringNum_] = null;
-        Debug.Log(stringNum_ + "番目のワードは" + selectWord_[stringNum_]);
-        oldNumber_[stringNum_] = -1;
+        selectWord_[kindNum_] = null;
+        oldNumber_[kindNum_] = -1;
 
-        stringNum_--;
-
-        Bag_Word.wordState[saveNumber_[stringNum_]].btn.image.color = Color.green;
-        Bag_Word.wordState[saveNumber_[stringNum_]].btn.interactable = false;
+        kindNum_--;
 
         infoText_.text = selectWord_[(int)Bag_Word.WORD_MNG.HEAD] +
           "\n" + selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] +
@@ -171,18 +292,8 @@ public class MagicCreate : MonoBehaviour
           "\n" + selectWord_[(int)Bag_Word.WORD_MNG.SUB2] +
           "\n" + selectWord_[(int)Bag_Word.WORD_MNG.SUB3];
 
-
-        if (arrowBtn_[1].interactable == true)
-        {
-            createFlag_ = true;
-            createBtn_.interactable = true;
-        }
-
-
-        ActiveKindsCheck((Bag_Word.WORD_MNG)stringNum_, true);
-
-
-        Debug.Log("左矢印をクリック" + stringNum_);
+        ActiveKindsCheck((Bag_Word.WORD_MNG)kindNum_, true);
+        Debug.Log("左矢印をクリック" + kindNum_);
     }
 
     public void ActiveKindsCheck(Bag_Word.WORD_MNG kind, bool leftFlag)
@@ -192,9 +303,9 @@ public class MagicCreate : MonoBehaviour
         if (leftFlag == true)
         {
             // 左矢印が動ける最大位置
-            if (stringNum_ <= (int)Bag_Word.WORD_MNG.HEAD)
+            if (kindNum_ <= (int)Bag_Word.WORD_MNG.HEAD)
             {
-                stringNum_ = (int)Bag_Word.WORD_MNG.HEAD;
+                kindNum_ = (int)Bag_Word.WORD_MNG.HEAD;
                 // Headの時は押下できないようにする
                 arrowBtn_[0].interactable = false;
             }
@@ -203,126 +314,99 @@ public class MagicCreate : MonoBehaviour
         else
         {
             // 右矢印が動ける最大位置
-            if ((int)Bag_Word.WORD_MNG.SUB3 <= stringNum_)
+            if ((int)Bag_Word.WORD_MNG.SUB3 <= kindNum_)
             {
-                stringNum_ = (int)Bag_Word.WORD_MNG.SUB3;
+                kindNum_ = (int)Bag_Word.WORD_MNG.SUB3;
             }
             arrowBtn_[0].interactable = true;
             arrowBtn_[1].interactable = false;// 右矢印を押したら必ずfalse
         }
-
-        Debug.Log(topicText_.text);
-        for (int i = 0; i < maxCnt_; i++)
-        {
-            // 全て非表示にしておく
-            Bag_Word.wordState[i].pleate.SetActive(false);
-            // 取得しているか
-            if (Bag_Word.wordState[i].getFlag == true)
-            {
-                // ワードの種類と一致している番号だけ表示
-                SelectWordKindCheck(i, (Bag_Word.WORD_MNG)stringNum_);
-            }
-        }
-
-        // Elementに何らかのワードが入っていたらサブで表示するワードをチェックする
-        if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != null)
-        {
-            ElementCheck(kind);
-        }
+        // ワードの種類と一致している番号だけ表示
+        SelectWordKindCheck((Bag_Word.WORD_MNG)kindNum_);
 
         // すでに選択状態のボタンは押下できないようにする
-        if (selectWord_[stringNum_] != null)
+        if (selectWord_[kindNum_] != null)
         {
-            Bag_Word.wordState[saveNumber_[stringNum_]].btn.interactable = false;
+            mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].btn.image.color = Color.green;
+            mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].btn.interactable = false;
         }
     }
 
-    private void SelectWordKindCheck(int wordNum, Bag_Word.WORD_MNG wordKind)
+    private void SelectWordKindCheck(Bag_Word.WORD_MNG wordKind)
     {
+        for (int k = 0; k < (int)Bag_Word.WORD_MNG.MAX; k++)
+        {
+            for (int i = 0; i < mngMaxCnt[k]; i++)
+            {
+                // すべて非表示にしておく
+                mCreateData[(Bag_Word.WORD_MNG)k][i].pleate.SetActive(false);
+            }
+        }
+
         switch (wordKind)
         {
             case Bag_Word.WORD_MNG.HEAD:
-                if (Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.HEAD)
+                for (int i = 0; i < mngMaxCnt[(int)Bag_Word.WORD_MNG.HEAD]; i++)
                 {
-                    createFlag_ = false;
-                    createBtn_.interactable = false;
-                    Bag_Word.wordState[wordNum].btn.interactable = true;//#
-                    Bag_Word.wordState[wordNum].pleate.SetActive(true);
+                    if (mCreateData[(Bag_Word.WORD_MNG)kindNum_][i].getFlag == false)
+                    {
+                        continue;// 持っていないワードは表示しない
+                    }
+                    mCreateData[Bag_Word.WORD_MNG.HEAD][i].btn.interactable = true;
+                    mCreateData[Bag_Word.WORD_MNG.HEAD][i].pleate.SetActive(true);
                 }
+                createFlag_ = false;
                 break;
 
             case Bag_Word.WORD_MNG.ELEMENT:
-                if (Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ELEMENT_ASSIST
-                 || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ELEMENT_HEAL
-                 || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ELEMENT_ATTACK)
+                for (int i = 0; i < mngMaxCnt[(int)Bag_Word.WORD_MNG.ELEMENT]; i++)
                 {
-                    createFlag_ = false;
-                    createBtn_.interactable = false;
-                    Bag_Word.wordState[wordNum].btn.interactable = true;//#
-                    Bag_Word.wordState[wordNum].pleate.SetActive(true);
+                    if (mCreateData[(Bag_Word.WORD_MNG)kindNum_][i].getFlag == false)
+                    {
+                        continue; // 持っていないワードは表示しない
+                    }
+                    mCreateData[Bag_Word.WORD_MNG.ELEMENT][i].btn.interactable = true;
+                    mCreateData[Bag_Word.WORD_MNG.ELEMENT][i].pleate.SetActive(true);
                 }
+                createFlag_ = false;
                 break;
 
             case Bag_Word.WORD_MNG.TAIL:
-                if (Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.TAIL)
+                for (int i = 0; i < mngMaxCnt[(int)Bag_Word.WORD_MNG.TAIL]; i++)
                 {
-                    Bag_Word.wordState[wordNum].btn.interactable = true;//#
-                    Bag_Word.wordState[wordNum].pleate.SetActive(true);
-                    if (selectWord_[(int)Bag_Word.WORD_MNG.HEAD] != null
-                    && selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != null
-                    && selectWord_[(int)Bag_Word.WORD_MNG.TAIL] != null)
+                    if (mCreateData[(Bag_Word.WORD_MNG)kindNum_][i].getFlag == false)
                     {
-                        createFlag_ = true;
-                        createBtn_.interactable = true;
+                        continue; // 持っていないワードは表示しない
                     }
-                    else
-                    {
-                        createFlag_ = false;
-                        createBtn_.interactable = false;
-                    }
+                    mCreateData[Bag_Word.WORD_MNG.TAIL][i].btn.interactable = true;
+                    mCreateData[Bag_Word.WORD_MNG.TAIL][i].pleate.SetActive(true);
                 }
+                createFlag_ = selectWord_[(int)Bag_Word.WORD_MNG.TAIL] != null ? true : false;
                 break;
 
             case Bag_Word.WORD_MNG.SUB1:
-                if (Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.SUB1
-                 || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.SUB1_AND_SUB2
-                 || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ALL_SUB)
-                {
-                    createFlag_ = false;
-                    createBtn_.interactable = false;
-                    Bag_Word.wordState[wordNum].btn.interactable = false;//#
-                    Bag_Word.wordState[wordNum].pleate.SetActive(true);
-                }
+                ElementCheck(Bag_Word.WORD_MNG.SUB1, selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT]);
+                createFlag_ = false;
                 break;
 
             case Bag_Word.WORD_MNG.SUB2:
-                if (Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.SUB2
-                 || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.SUB1_AND_SUB2
-                 || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ALL_SUB)
-                {
-                    Bag_Word.wordState[wordNum].btn.interactable = false;//#
-                    Bag_Word.wordState[wordNum].pleate.SetActive(true);
-                }
-
+                ElementCheck(Bag_Word.WORD_MNG.SUB2, selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT]);
+                createFlag_ = false;
                 break;
 
             case Bag_Word.WORD_MNG.SUB3:
-                if (Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.SUB3
-                 || Bag_Word.wordState[wordNum].kinds == InitPopList.WORD.ALL_SUB)
-                {
-                    Bag_Word.wordState[wordNum].btn.interactable = false;//#
-                    Bag_Word.wordState[wordNum].pleate.SetActive(true);
-                }
+                ElementCheck(Bag_Word.WORD_MNG.SUB3, selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT]);
+                createFlag_ = false;
                 break;
 
             default:
                 break;
         }
+        createBtn_.interactable = createFlag_;
     }
 
-    public void ElementCheck(Bag_Word.WORD_MNG kind)
+    public void ElementCheck(Bag_Word.WORD_MNG kind, string selectWord)
     {
-        // Debug.Log("選択したElementのワード："+selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT]);
         // エレメントの属性チェック
         if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] == "回復")
         {
@@ -343,31 +427,24 @@ public class MagicCreate : MonoBehaviour
         switch (kind)
         {
             case Bag_Word.WORD_MNG.SUB1:
-                Debug.Log("interactableをtrueにしておく");
-                for (int i = 0; i < maxCnt_; i++)
+                for (int i = 0; i < selectKindMaxCnt_[(int)InitPopList.WORD.SUB1]; i++)
                 {
-                    SetInteractableCheck(i, "味方", true, InitPopList.WORD.SUB1);
-                }
-                if (arrowBtn_[1].interactable == false)
-                {
-                    createFlag_ = false;
-                    createBtn_.interactable = false;
+                    CommonButtonCheck(true, "味方", Bag_Word.WORD_MNG.SUB1, i);
                 }
                 break;
 
             case Bag_Word.WORD_MNG.SUB2:
-                for (int i = 0; i < maxCnt_; i++)
+                for (int i = 0; i < mngMaxCnt[(int)Bag_Word.WORD_MNG.SUB2]; i++)
                 {
-                    SetInteractableCheck(i, "HP", true, InitPopList.WORD.SUB2);
-                    SetInteractableCheck(i, "即死", false, InitPopList.WORD.SUB1_AND_SUB2);
+                    if (mCreateData[Bag_Word.WORD_MNG.SUB2][i].name == "HP"
+                    || mCreateData[Bag_Word.WORD_MNG.SUB2][i].name == "麻痺"
+                    || mCreateData[Bag_Word.WORD_MNG.SUB2][i].name == "暗闇"
+                    || mCreateData[Bag_Word.WORD_MNG.SUB2][i].name == "毒")
+                    {
+                        mCreateData[Bag_Word.WORD_MNG.SUB2][i].btn.interactable = true;
+                        mCreateData[Bag_Word.WORD_MNG.SUB2][i].pleate.SetActive(true);
+                    }
                 }
-                // 作成開始ボタンを押下可能状態にする
-                createFlag_ = true;
-                //createBtn_.interactable = true;
-                break;
-
-            case Bag_Word.WORD_MNG.SUB3:
-                // Elementで回復選択時にSub3で選択できるものはない
                 break;
 
             default:
@@ -380,61 +457,45 @@ public class MagicCreate : MonoBehaviour
         switch (kind)
         {
             case Bag_Word.WORD_MNG.SUB1:
-                for (int i = 0; i < maxCnt_; i++)
+                for (int i = 0; i < selectKindMaxCnt_[(int)InitPopList.WORD.SUB1]; i++)
                 {
                     // 敵と味方のワードだけ押下可能
-                    if (Bag_Word.wordState[i].kinds == InitPopList.WORD.SUB1)
-                    {
-                        Bag_Word.wordState[i].btn.interactable = true;
-                    }
-                }
-                if (arrowBtn_[1].interactable == false)
-                {
-                    createFlag_ = false;
-                    createBtn_.interactable = false;
+                    mCreateData[Bag_Word.WORD_MNG.SUB1][i].btn.interactable = true;
+                    mCreateData[Bag_Word.WORD_MNG.SUB1][i].pleate.SetActive(true);
                 }
                 break;
 
             case Bag_Word.WORD_MNG.SUB2:
-                for (int i = 0; i < maxCnt_; i++)
+                for (int i = 0; i < selectKindMaxCnt_[(int)InitPopList.WORD.SUB2]; i++)
                 {
-                    SetInteractableCheck(i, "HP", false, InitPopList.WORD.SUB2);
+                    CommonButtonCheck(false, "HP", Bag_Word.WORD_MNG.SUB2, i);
                 }
-                createFlag_ = false;
-                createBtn_.interactable = false;
                 break;
 
             case Bag_Word.WORD_MNG.SUB3:
-                for (int i = 0; i < maxCnt_; i++)
+                for (int i = 0; i < mngMaxCnt[(int)Bag_Word.WORD_MNG.SUB3]; i++)
                 {
                     if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] == "敵")
                     {
-                        SetInteractableCheck(i, "低下", true, InitPopList.WORD.SUB3);
+                        CommonButtonCheck(true, "低下", Bag_Word.WORD_MNG.SUB3, i);
                     }
                     else
                     {
                         if (selectWord_[(int)Bag_Word.WORD_MNG.SUB2] == "防御力")
                         {
-                            SetInteractableCheck(i, "上昇", true, InitPopList.WORD.SUB3);
+                            CommonButtonCheck(true, "上昇", Bag_Word.WORD_MNG.SUB3, i);
                         }
                         else
                         {
-                            if (Bag_Word.wordState[i].kinds == InitPopList.WORD.SUB3
-                             || Bag_Word.wordState[i].kinds == InitPopList.WORD.ALL_SUB)
+                            CommonButtonCheck(false, "低下", Bag_Word.WORD_MNG.SUB3, i);
+                            if (mCreateData[Bag_Word.WORD_MNG.SUB3][i].name == "必中")
                             {
-                                // 低下以外を押下可能
-                                if (Bag_Word.wordState[i].name == "上昇"
-                                    || Bag_Word.wordState[i].name == "反射"
-                                    || Bag_Word.wordState[i].name == "吸収")
-                                {
-                                    Bag_Word.wordState[i].btn.interactable = true;
-                                }
+                                mCreateData[Bag_Word.WORD_MNG.SUB3][i].btn.interactable = false;
+                                mCreateData[Bag_Word.WORD_MNG.SUB3][i].pleate.SetActive(false);
                             }
                         }
                     }
                 }
-                createFlag_ = true;
-                //createBtn_.interactable = true;
                 break;
 
             default:
@@ -447,42 +508,42 @@ public class MagicCreate : MonoBehaviour
         switch (kind)
         {
             case Bag_Word.WORD_MNG.SUB1:
-                // InteractableWordPleate(null, PopMateriaList.WORD.SUB1, PopMateriaList.WORD.SUB1_AND_SUB2);
-                for (int i = 0; i < maxCnt_; i++)
+                for (int i = selectKindMaxCnt_[(int)InitPopList.WORD.SUB1]; i < mngMaxCnt[(int)Bag_Word.WORD_MNG.SUB1]; i++)
                 {
-                    if (Bag_Word.wordState[i].kinds == InitPopList.WORD.SUB1_AND_SUB2
-                        || Bag_Word.wordState[i].kinds == InitPopList.WORD.ALL_SUB)
-                    {
-                        Bag_Word.wordState[i].btn.interactable = true;
-                    }
+                    CommonButtonCheck(false, "必中", Bag_Word.WORD_MNG.SUB1, i);
                 }
-                createFlag_ = true;
-                createBtn_.interactable = true;
                 break;
 
             case Bag_Word.WORD_MNG.SUB2:
-                // HPだけ押下できない状態に
-                // InteractableWordPleate("HP", PopMateriaList.WORD.SUB2, PopMateriaList.WORD.SUB1_AND_SUB2);
-                for (int i = 0; i < maxCnt_; i++)
+                for (int i = selectKindMaxCnt_[(int)InitPopList.WORD.SUB2]; i < mngMaxCnt[(int)Bag_Word.WORD_MNG.SUB2]; i++)
                 {
-                    if (Bag_Word.wordState[i].kinds == InitPopList.WORD.SUB1_AND_SUB2
-                    || Bag_Word.wordState[i].kinds == InitPopList.WORD.ALL_SUB)
+                    if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] != mCreateData[Bag_Word.WORD_MNG.SUB2][i].name)
                     {
-                        if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] != Bag_Word.wordState[i].name)
-                        {
-                            // Sub1で選択したワード以外を押下可能に
-                            Bag_Word.wordState[i].btn.interactable = true;
-                        }
+                        mCreateData[Bag_Word.WORD_MNG.SUB2][i].btn.interactable = true;
+                        mCreateData[Bag_Word.WORD_MNG.SUB2][i].pleate.SetActive(true);
+                    }
+                    else
+                    {
+                        // Sub1で選択したワードは押下できないように
+                        mCreateData[Bag_Word.WORD_MNG.SUB2][i].pleate.SetActive(true);
+                        mCreateData[Bag_Word.WORD_MNG.SUB2][i].btn.interactable = false;
+                        mCreateData[Bag_Word.WORD_MNG.SUB2][i].btn.image.color = Color.green;
                     }
                 }
                 break;
 
             case Bag_Word.WORD_MNG.SUB3:
-                // 必中を持っていたら
-                if (Bag_Word.wordState[targetWordNum_].getFlag == true)
+                for (int i = 0; i < mngMaxCnt[(int)Bag_Word.WORD_MNG.SUB3]; i++)
                 {
-                    // 必中を表示
-                    Bag_Word.wordState[targetWordNum_].btn.interactable = true;
+                    if (mCreateData[Bag_Word.WORD_MNG.SUB3][i].name == "必中")
+                    {
+                        // 必中を持っていたら
+                        if (mCreateData[Bag_Word.WORD_MNG.SUB3][i].getFlag == true)
+                        {
+                            mCreateData[Bag_Word.WORD_MNG.SUB3][i].btn.interactable = true;
+                            mCreateData[Bag_Word.WORD_MNG.SUB3][i].pleate.SetActive(true);
+                        }
+                    }
                 }
                 break;
 
@@ -491,103 +552,66 @@ public class MagicCreate : MonoBehaviour
         }
     }
 
-    private void SetInteractableCheck(int number, string num, bool flag, InitPopList.WORD word)
+    private void CommonButtonCheck(bool flag, string name, Bag_Word.WORD_MNG kinds, int num)
     {
-        // nameを==で判断する場合はflagがtrue
+        // trueなら＝＝　falseなら！＝
         if (flag == true)
         {
-            if (Bag_Word.wordState[number].kinds == word)
-            {
-                // 上昇のみ押下できる
-                if (Bag_Word.wordState[number].name == num)
-                {
-                    Bag_Word.wordState[number].btn.interactable = true;
-                }
-            }
+            mCreateData[kinds][num].btn.interactable = mCreateData[kinds][num].name == name ? true : false;
+            mCreateData[kinds][num].pleate.SetActive(mCreateData[kinds][num].btn.interactable);
+            // mCreateState[kinds][num].nameがnameならinteractableにtrueをいれる
         }
         else
         {
-            if (Bag_Word.wordState[number].kinds == word)
-            {
-                if (Bag_Word.wordState[number].name != num)
-                {
-                    Bag_Word.wordState[number].btn.interactable = true;
-                }
-            }
+            mCreateData[kinds][num].btn.interactable = mCreateData[kinds][num].name != name ? true : false;
+            mCreateData[kinds][num].pleate.SetActive(mCreateData[kinds][num].btn.interactable);
+            // mCreateState[kinds][num].nameがnameではないボタンのinteractableにtrueをいれる
         }
     }
 
     public void SetWord(string word)
     {
-        if ((int)Bag_Word.WORD_MNG.SUB3 == stringNum_)
-        {
-            // サブ3を表示中は右矢印を非アクティブにする
-            arrowBtn_[1].interactable = false;
-        }
-        else
-        {
-            arrowBtn_[1].interactable = true;
-        }
-
-        if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != "回復"
-         && selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != "補助")
-        {
-            if (Bag_Word.wordState[targetWordNum_].getFlag == false)
-            {
-                if ((int)Bag_Word.WORD_MNG.SUB2 <= stringNum_)
-                {
-                    arrowBtn_[1].interactable = false;// 右矢印を押したら必ずfalse
-                }
-            }
-        }
-        else if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] == "回復")
-        {
-            if ((int)Bag_Word.WORD_MNG.SUB2 <= stringNum_)
-            {
-                arrowBtn_[1].interactable = false;// 右矢印を押したら必ずfalse
-            }
-        }
-        else
-        {
-            // 何もしない
-        }
-
-
+        // ーーーーー●ワード選択処理
         // ワードのボタンを押下したら呼び出す
-        for (int i = 0; i < maxCnt_; i++)
+        for (int i = 0; i < mngMaxCnt[kindNum_]; i++)
         {
             // どの種類の時にどのワードが押下されたか
-            if (word == Bag_Word.wordState[i].name)
+            if (word == mCreateData[(Bag_Word.WORD_MNG)kindNum_][i].name)
             {
                 // 押下されたワードの番号を代入する
-                saveNumber_[stringNum_] = i;
+                saveNumber_[kindNum_] = i;
                 break;
+            }
+        }
+        //Debug.Log("選択したワード" + mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].name);
+
+        // Elementがどの属性なのかをチェック
+        if (kindNum_ == (int)Bag_Word.WORD_MNG.ELEMENT)
+        {
+            for (int i = 0; i < (int)Bag_Magic.ELEMENT_KIND.MAX; i++)
+            {
+                // Element選択中しか入らないからwordと比べる
+                if (Bag_Magic.elementString[i] == word)
+                {
+                    saveElementKind_ = i;
+                }
             }
         }
 
         // -1以外は同じワード種別内で複数のボタンが押されたとき
-        if (oldNumber_[stringNum_] != -1)
+        if (oldNumber_[kindNum_] != -1)
         {
             // 1つ前に押されたボタンは初期状態に戻す
-            Bag_Word.wordState[oldNumber_[stringNum_]].btn.image.color = Color.white;
-            Bag_Word.wordState[oldNumber_[stringNum_]].btn.interactable = true;
+            mCreateData[(Bag_Word.WORD_MNG)kindNum_][oldNumber_[kindNum_]].btn.image.color = Color.white;
+            mCreateData[(Bag_Word.WORD_MNG)kindNum_][oldNumber_[kindNum_]].btn.interactable = true;
         }
-
-        // Sub2を選択中
-        if (stringNum_ == (int)Bag_Word.WORD_MNG.SUB2)
-        {
-            // 1つ前のSubで選択していたものは押下状態のままにする
-            Bag_Word.wordState[saveNumber_[stringNum_ - 1]].btn.image.color = Color.green;
-            Bag_Word.wordState[saveNumber_[stringNum_ - 1]].btn.interactable = false;
-        }
-        //Debug.Log(Bag_Word.wordState_[saveNumber_[stringNum_]].btn.name);
 
         // 選択したワードの色を緑にして選択できないようにする
-        Bag_Word.wordState[saveNumber_[stringNum_]].btn.image.color = Color.green;
-        Bag_Word.wordState[saveNumber_[stringNum_]].btn.interactable = false;
+        mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].btn.image.color = Color.green;
+        mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].btn.interactable = false;
 
-        // トピックからどの種類の時に選ばれたワードなのかを見る
-        selectWord_[stringNum_] = Bag_Word.wordState[saveNumber_[stringNum_]].name;
+        //// トピックからどの種類の時に選ばれたワードなのかを見る
+        selectWord_[kindNum_] = mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].name;
         infoText_.text = selectWord_[(int)Bag_Word.WORD_MNG.HEAD] +
                   "\n" + selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] +
                   "\n" + selectWord_[(int)Bag_Word.WORD_MNG.TAIL] +
@@ -595,49 +619,70 @@ public class MagicCreate : MonoBehaviour
                   "\n" + selectWord_[(int)Bag_Word.WORD_MNG.SUB2] +
                   "\n" + selectWord_[(int)Bag_Word.WORD_MNG.SUB3];
 
+        // 改行なしで作られた名前を保存しておく
         allName_ = selectWord_[(int)Bag_Word.WORD_MNG.HEAD] +
                   selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] +
-                  selectWord_[(int)Bag_Word.WORD_MNG.TAIL] +
+                 selectWord_[(int)Bag_Word.WORD_MNG.TAIL] +
                   selectWord_[(int)Bag_Word.WORD_MNG.SUB1] +
                   selectWord_[(int)Bag_Word.WORD_MNG.SUB2] +
-                  selectWord_[(int)Bag_Word.WORD_MNG.SUB3];// 作られた名前を保存しておく
+                  selectWord_[(int)Bag_Word.WORD_MNG.SUB3];
+        // ーーーーー●ワード選択処理ここまで
 
-        if (stringNum_ == (int)Bag_Word.WORD_MNG.TAIL)
+        // ーーーーー〇ボタン系のinteractableチェック
+
+        // 突然の三項演算子がミネを襲う！！！！！！！！
+        // Sub3のワードを選択したら右矢印を非アクティブにする
+        arrowBtn_[1].interactable = (int)Bag_Word.WORD_MNG.SUB3 == kindNum_ ? false : true;
+        // kindNum_が(int)Bag_Word.WORD_MNG.SUB3ならarrowBtn_[1].interactableにfalseをいれる
+        // 違うならarrowBtn_[1].interactableにtrueをいれる
+
+        if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] == "回復")
         {
-            if (selectWord_[(int)Bag_Word.WORD_MNG.HEAD] != null
-                && selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != null
-                && selectWord_[(int)Bag_Word.WORD_MNG.TAIL] != null)
+            // Elementで「回復」ワードを選択していたら
+            if ((int)Bag_Word.WORD_MNG.SUB2 <= kindNum_)
+            {
+                // Sub3ワードを選択できないようにする
+                arrowBtn_[1].interactable = false;
+
+                // Elementで回復選択時はSub2を選択することで作成ができる
+                createFlag_ = selectWord_[(int)Bag_Word.WORD_MNG.SUB2] != null ? true : false;
+            }
+        }
+        else if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != "補助")
+        {
+            // 攻撃系のSubはどのタイミングで選んでも作成ができる
+            if ((int)Bag_Word.WORD_MNG.TAIL <= kindNum_)
+            {
+                createFlag_ = selectWord_[kindNum_] != null ? true : false;
+            }
+            // 攻撃系Element選択時に「必中」を持っていない時
+            // Sab2の時点で「必中」を選択時
+            if (Bag_Word.wordState[InitPopList.WORD.SUB3][targetWordNum_].getFlag == false
+             || selectWord_[(int)Bag_Word.WORD_MNG.SUB2] == "必中")
+            {
+                if ((int)Bag_Word.WORD_MNG.SUB2 <= kindNum_)
+                {
+                    arrowBtn_[1].interactable = false;// 右矢印を押したら必ずfalse
+                }
+            }
+        }
+        else
+        {
+            createFlag_ = selectWord_[(int)Bag_Word.WORD_MNG.SUB3] != null ? true : false;
+        }
+
+        if (kindNum_ == (int)Bag_Word.WORD_MNG.TAIL)
+        {
+            // Tail選択時＝Head、Element、Tailがnullではない
+            if (selectWord_[(int)Bag_Word.WORD_MNG.TAIL] != null)
             {
                 createFlag_ = true;
             }
         }
 
-        if (stringNum_ == (int)Bag_Word.WORD_MNG.SUB1)
-        {
-            if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] == "回復"
-             || selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] == "補助")
-            {
-                if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] != null)
-                {
-                    createFlag_ = false;
-                }
-            }
-        }
 
-        if (createFlag_ == true)
-        {
-            Debug.Log("作成開始ボタンを押せます");
-            createBtn_.interactable = true;
-        }
-        else
-        {
-            Debug.Log("作成開始ボタンを押せないです");
-            createBtn_.interactable = false;
-        }
-
-
-
-        oldNumber_[stringNum_] = saveNumber_[stringNum_];
+        createBtn_.interactable = createFlag_;
+        oldNumber_[kindNum_] = saveNumber_[kindNum_];
     }
 
     public void OnClickMagicCreate()
@@ -668,6 +713,8 @@ public class MagicCreate : MonoBehaviour
         // ゲームが始まるため押下できないようにする
         createBtn_.interactable = false;
         cancelBtn_.interactable = false;
+        arrowBtn_[0].interactable = false;
+        arrowBtn_[1].interactable = false;
     }
 
     public IEnumerator ResultMagicCreate()
@@ -680,7 +727,6 @@ public class MagicCreate : MonoBehaviour
             }
             else
             {
-
                 if (movePoint_.GetMiniGameJudge() == MovePoint.JUDGE.NORMAL)
                 {
                     judgeText_.text = "成功";
@@ -692,7 +738,7 @@ public class MagicCreate : MonoBehaviour
                 judgeBack_.gameObject.SetActive(true);
 
                 movePoint_.SetMiniGameJudge(MovePoint.JUDGE.NON);// 初期化しておく
-                bagMagic_.MagicCreateCheck(allName_, 100, 5, 5);// 出来上がった魔法を保存
+                bagMagic_.MagicCreateCheck(allName_, 100, 5, 5, saveElementKind_);// 出来上がった魔法を保存
 
                 yield return new WaitForSeconds(2.0f);
                 cancelBtn_.interactable = true;
@@ -726,21 +772,17 @@ public class MagicCreate : MonoBehaviour
         // Init()とワード合成後とワード合成終了時に呼ぶ
         miniGameMng.localPosition = new Vector3(0.0f, -180.0f, 0.0f);
 
-        createFlag_ = false;
-
-        arrowBtn_[0].interactable = false;
-        arrowBtn_[1].interactable = false;
         infoText_.text = "";
         allName_ = "";
-        stringNum_ = (int)Bag_Word.WORD_MNG.HEAD;
-        topicText_.text = topicString_[stringNum_];
+        kindNum_ = (int)Bag_Word.WORD_MNG.HEAD;
+        topicText_.text = topicString_[kindNum_];
 
         for (int i = 0; i < (int)Bag_Word.WORD_MNG.MAX; i++)
         {
             // 一度でも代入されたことがあるなら初期化する
             if (saveNumber_[i] != -1)
             {
-                Bag_Word.wordState[saveNumber_[i]].btn.image.color = Color.white;
+                mCreateData[(Bag_Word.WORD_MNG)i][saveNumber_[i]].btn.image.color = Color.white;
                 selectWord_[i] = null;
                 // 誰にも該当しない番号を入れる
                 saveNumber_[i] = -1;
@@ -748,22 +790,28 @@ public class MagicCreate : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < maxCnt_; i++)
+        for (int k = 0; k < (int)Bag_Word.WORD_MNG.MAX; k++)
         {
-            Bag_Word.wordState[i].pleate.gameObject.SetActive(false);//#
-            Bag_Word.wordState[i].btn.interactable = false;//#
-
-            if (Bag_Word.wordState[i].getFlag == true)
+            // すべて非表示にしておく
+            for (int i = 0; i < mngMaxCnt[k]; i++)
             {
-                // ワードの種類と一致しているか
-                if (InitPopList.WORD.HEAD == Bag_Word.wordState[i].kinds)
-                {
-                    Bag_Word.wordState[i].pleate.gameObject.SetActive(true);
-                    Bag_Word.wordState[i].btn.interactable = true;//#
-                    //Bag_Word.wordState_[i].btn.image.color = Color.clear;
-                }
+                //Debug.Log((Bag_Word.WORD_MNG)k + "       " + i + "      " + mCreateData[(Bag_Word.WORD_MNG)k][i].name);
+                mCreateData[(Bag_Word.WORD_MNG)k][i].btn.interactable = false;
+                mCreateData[(Bag_Word.WORD_MNG)k][i].pleate.gameObject.SetActive(false);
             }
         }
+        // ヘッドのワードは表示させておく
+        for (int i = 0; i < mngMaxCnt[(int)InitPopList.WORD.HEAD]; i++)
+        {
+            if (Bag_Word.wordState[InitPopList.WORD.HEAD][i].getFlag == true)
+            {
+                mCreateData[(int)Bag_Word.WORD_MNG.HEAD][i].btn.interactable = true;
+                mCreateData[(int)Bag_Word.WORD_MNG.HEAD][i].pleate.SetActive(true);
+            }
+        }
+        arrowBtn_[0].interactable = false;
+        arrowBtn_[1].interactable = false;
+        createFlag_ = false;
+        createBtn_.interactable = createFlag_;
     }
-
 }

@@ -4,7 +4,6 @@ using UnityEngine.EventSystems;
 public class Event_WordClick : MonoBehaviour
 {
     private MagicCreate wordCheck_;    // どのボタンをクリックしたか代入する変数
-
     private EventSystem eventSystem_;// ボタンクリックのためのイベント処理
     private GameObject clickbtn_;    // どのボタンをクリックしたか代入する変数
 
