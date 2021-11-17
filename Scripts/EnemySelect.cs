@@ -8,6 +8,7 @@ public class EnemySelect : MonoBehaviour
 {
     // Item1:座標情報のリスト,Item2:敵の生存切替用のリスト(Destroyされた敵の座標リストをfalseにする)
     private System.Tuple<List<Vector3>, List<bool>> posList_;
+    private List<GameObject> targetImageObjList_ = new List<GameObject>();   // 敵指定マークをリストに保存する
 
     private int selectNum_ = 0;
     private readonly float posOffset_Y = 1.5f;
@@ -16,17 +17,21 @@ public class EnemySelect : MonoBehaviour
     {
         NON,
         UP,
-        DOWN
+        DOWN,
+        MAX
     }
 
     private SelectKey selectKey_ = SelectKey.NON;
 
     void Update()
     {
-        if (posList_.Item1.Count <= 0)
+        if (posList_.Item1.Count <= 0 || selectKey_ == SelectKey.MAX)
         {
             return;
         }
+
+        // 常に回転させていたい
+        targetImageObjList_[selectNum_].transform.Rotate(0.0f, 0.0f, 120.0f * Time.deltaTime);
 
         if (Input.GetKeyDown(KeyCode.J))
         {
@@ -42,11 +47,6 @@ public class EnemySelect : MonoBehaviour
         }
 
         MoveSelectKey(selectKey_);
-
-        //Debug.Log("選択中の敵" + selectNum_);
-
-        // 座標移動
-        this.gameObject.transform.position = posList_.Item1[selectNum_];
     }
 
     // falseになっているposListがあったらアイコン設置位置を飛ばす処理
@@ -128,6 +128,14 @@ public class EnemySelect : MonoBehaviour
         {
             // 何も処理を行わない
         }
+
+        // TargetImageを全てfalseにする
+        for (int i = 0; i < this.transform.childCount; i++)
+        {
+            targetImageObjList_[i].SetActive(false);
+        }
+        // 選択中の敵のTargetImageをtrueにする
+        targetImageObjList_[selectNum_].SetActive(true);
     }
 
     // CharacterMng.csから戦闘時の敵の出現位置を受け取る
@@ -154,25 +162,47 @@ public class EnemySelect : MonoBehaviour
 
         // 矢印の初期位置
         selectNum_ = 0;
-        this.gameObject.transform.position = posList_.Item1[selectNum_];
+        //this.gameObject.transform.position = posList_.Item1[selectNum_];
 
         // 戦闘画面に遷移時、すぐにアイコンが表示されたら困るため非表示にする
-        this.gameObject.SetActive(false);
+        //this.gameObject.SetActive(false);
+
+        // TargetImageを全てfalseにする
+        // リストに登録する
+        for (int i = 0; i < this.transform.childCount; i++)
+        {
+            targetImageObjList_.Add(this.transform.GetChild(i).transform.Find("TargetImage").gameObject);
+            targetImageObjList_[i].SetActive(false);
+        }
     }
 
     // CharacterMng.cs側で表示/非表示を変更できるようにする
     public void SetActive(bool flag)
     {
-        this.gameObject.SetActive(flag);
+        if(!flag)
+        {
+            selectKey_ = SelectKey.MAX;
+            for (int i = 0; i < this.transform.childCount; i++)
+            {
+                targetImageObjList_[i].SetActive(flag);
+            }
+        }
+        else
+        {
+            selectKey_ = SelectKey.NON;
+            targetImageObjList_[selectNum_].SetActive(flag);
+        }
     }
 
     // CharacterMng.cs側に目標座標を渡す
     public Vector3 GetSelectEnemyPos()
     {
         // offset値を元に戻してから渡す
-        Vector3 tmppos = this.gameObject.transform.position;
-        tmppos.y -= posOffset_Y;
-        return tmppos;
+        //Vector3 tmppos = this.gameObject.transform.position;
+        //tmppos.y -= posOffset_Y;
+        //return tmppos;
+
+        return posList_.Item1[selectNum_];
     }
 
     // CharacterMng.cs側に選択された番号を渡す
@@ -219,7 +249,7 @@ public class EnemySelect : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.T))
         {
-            this.gameObject.SetActive(false);   // 非表示に戻す
+            SetActive(false);
             return false;
         }
         return true;

@@ -24,7 +24,7 @@ public class EnemyInstanceMng : MonoBehaviour
     private GameObject DataPopPrefab_;
     private EnemyList enemyData_ = null;        // フィールド毎の敵情報を保存する
 
-    public static List<(Enemy,HPBar)> enemyList_ = new List<(Enemy, HPBar)>();   // Enemy.csをキャラ毎にリスト化する
+    public static List<(Enemy,HPMPBar)> enemyList_ = new List<(Enemy, HPMPBar)>();   // Enemy.csをキャラ毎にリスト化する
 
     private ButtleMng buttleMng_;
     private ANIMATION anim_ = ANIMATION.NON;
@@ -88,7 +88,7 @@ public class EnemyInstanceMng : MonoBehaviour
         // 敵(数字がフィールドによって書き換えられるようにしとかないといけない)
         if (enemyData_ == null)
         {
-            enemyData_ = DataPopPrefab_.GetComponent<PopList>().GetData<EnemyList>(PopList.ListData.ENEMY, 1, name);
+            enemyData_ = DataPopPrefab_.GetComponent<PopList>().GetData<EnemyList>(PopList.ListData.ENEMY, 0, name);
         }
 
         buttleMng_ = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
@@ -284,7 +284,7 @@ public class EnemyInstanceMng : MonoBehaviour
 
             // 番号でどの敵をインスタンスするか決める
             int enemyNum = Random.Range(0, enemyTest.transform.childCount);
-            enemyNum = 3;   // イーグル固定
+            enemyNum = 1;   // 固定
 
             if (eventEnemy_.Item1 == null)
             {
@@ -295,8 +295,8 @@ public class EnemyInstanceMng : MonoBehaviour
                 // 敵の体の向きを変える
                 enemy.transform.Rotate(0, 180, 0);
 
-                // 敵がEagleのときは、HPバーの高さを上のほうに調整しないといけない
-                if(enemyTest.transform.GetChild(enemyNum).gameObject.name == "Enemy_Eagle")
+                // 敵がEagleかStoneMonsterときは、HPバーの高さを上のほうに調整しないといけない
+                if(enemyTest.transform.GetChild(enemyNum).gameObject.name == "Enemy_Eagle" || enemyTest.transform.GetChild(enemyNum).gameObject.name == "Enemy_StoneMonster")
                 {
                     enemyHPPosOffset_ = new Vector3(0.0f, 60.0f,0.0f);
                 }
@@ -320,18 +320,21 @@ public class EnemyInstanceMng : MonoBehaviour
             // Animatorがアタッチされているか確認(カボスはないからnullをいれる)
             if(enemy.GetComponent<Animator>() == null)
             {
-                enemyList_.Add((new Enemy(num.ToString(), 1, null, enemyData_.param[enemyNum]), hpBar.GetComponent<HPBar>()));
+                enemyList_.Add((new Enemy(num.ToString(), 1, null, enemyData_.param[enemyNum]), hpBar.GetComponent<HPMPBar>()));
             }
             else
             {
-                enemyList_.Add((new Enemy(num.ToString(), 1, enemy.GetComponent<Animator>(), enemyData_.param[enemyNum]), hpBar.GetComponent<HPBar>()));
+                enemyList_.Add((new Enemy(num.ToString(), 1, enemy.GetComponent<Animator>(), enemyData_.param[enemyNum]), hpBar.GetComponent<HPMPBar>()));
             }
 
             // 敵HPの設定
-            enemyList_[num - 1].Item2.SetHPBar(enemyList_[num - 1].Item1.HP(), enemyList_[num - 1].Item1.MaxHP());
+            enemyList_[num - 1].Item2.SetHPMPBar(enemyList_[num - 1].Item1.HP(), enemyList_[num - 1].Item1.MaxHP());
 
             // 敵オブジェクトを変数に入れる
             enemyMap_.Add(num, enemy);
+
+            // 敵HPの親を、EnemySelectObjにする
+            hpBar.transform.parent = GameObject.Find("ButtleUICanvas/EnemySelectObj").transform;
 
             num++;
         }

@@ -50,6 +50,16 @@ public class Chara : CharaBase,InterfaceButtle
         return set_.maxHP;
     }
 
+    public int MP()
+    {
+        return set_.MP;
+    }
+
+    public int MaxMP()
+    {
+        return set_.maxMP;
+    }
+
     public (Vector3,bool) RunMove(float time,Vector3 myPos, Vector3 targetPos)
     {
         if (!set_.animator.GetBool(key_isRun))

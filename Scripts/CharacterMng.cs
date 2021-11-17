@@ -36,7 +36,7 @@ public class CharacterMng : MonoBehaviour
     // Chara.csをキャラ毎にリスト化する
     private List<Chara> charasList_ = new List<Chara>();
     // 各キャラのHP情報
-    private Dictionary<CHARACTERNUM, HPBar> charHPMap_ = new Dictionary<CHARACTERNUM, HPBar>();
+    private Dictionary<CHARACTERNUM, (HPMPBar, HPMPBar)> charaHPMPMap_ = new Dictionary<CHARACTERNUM, (HPMPBar, HPMPBar)>();
 
     private TMPro.TextMeshProUGUI buttleAnounceText_;             // バトル中の案内
     private readonly string[] announceText_ = new string[2] { " 左シフトキー：\n 戦闘から逃げる", " Tキー：\n コマンドへ戻る" };
@@ -80,12 +80,17 @@ public class CharacterMng : MonoBehaviour
         enemyInstancePos_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().GetEnemyPos();
 
         buttleMng_ = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
-        //@ キャラ名+CharaDataのステータス表から、HP情報を取得する
-        charHPMap_[CHARACTERNUM.UNI] = buttleUICanvas.transform.Find("UniCharaData/HPSlider").GetComponent<HPBar>();
-        charHPMap_[CHARACTERNUM.JACK] = buttleUICanvas.transform.Find("JackCharaData/HPSlider").GetComponent<HPBar>();
-        //@ 初期HPを代入
-        charHPMap_[CHARACTERNUM.UNI].SetHPBar(charasList_[(int)CHARACTERNUM.UNI].HP(), charasList_[(int)CHARACTERNUM.UNI].MaxHP());
-        charHPMap_[CHARACTERNUM.JACK].SetHPBar(charasList_[(int)CHARACTERNUM.JACK].HP(), charasList_[(int)CHARACTERNUM.JACK].MaxHP());
+        // キャラ名+CharaDataのステータス表から、HP/MP情報を取得する
+        charaHPMPMap_[CHARACTERNUM.UNI] = 
+            (buttleUICanvas.transform.Find("UniCharaData/HPSlider").GetComponent<HPMPBar>(), buttleUICanvas.transform.Find("UniCharaData/MPSlider").GetComponent<HPMPBar>());
+        charaHPMPMap_[CHARACTERNUM.JACK] =
+            (buttleUICanvas.transform.Find("JackCharaData/HPSlider").GetComponent<HPMPBar>(), buttleUICanvas.transform.Find("JackCharaData/MPSlider").GetComponent<HPMPBar>());
+        // 初期HPを代入
+        charaHPMPMap_[CHARACTERNUM.UNI].Item1.SetHPMPBar(charasList_[(int)CHARACTERNUM.UNI].HP(), charasList_[(int)CHARACTERNUM.UNI].MaxHP());
+        charaHPMPMap_[CHARACTERNUM.JACK].Item1.SetHPMPBar(charasList_[(int)CHARACTERNUM.JACK].HP(), charasList_[(int)CHARACTERNUM.JACK].MaxHP());
+        // 初期MPを代入
+        charaHPMPMap_[CHARACTERNUM.UNI].Item2.SetHPMPBar(charasList_[(int)CHARACTERNUM.UNI].MP(), charasList_[(int)CHARACTERNUM.UNI].MaxMP());
+        charaHPMPMap_[CHARACTERNUM.JACK].Item2.SetHPMPBar(charasList_[(int)CHARACTERNUM.JACK].MP(), charasList_[(int)CHARACTERNUM.JACK].MaxMP());
     }
 
     // ButtleMng.csから敵の数を受け取る
@@ -158,7 +163,7 @@ public class CharacterMng : MonoBehaviour
         // 死亡していたら
         if (charasList_[(int)nowTurnChar_].GetDeathFlg())
         {
-            if (charHPMap_[nowTurnChar_].GetColFlg())
+            if (charaHPMPMap_[nowTurnChar_].Item1.GetColFlg())
             {
                 return;
             }
@@ -643,8 +648,7 @@ public class CharacterMng : MonoBehaviour
         }
 
         // キャラのHPを削る(スライドバー変更)
-        //StartCoroutine(charaHPBar.MoveSlideBar(charasList_[num].HP() - damage));
-        StartCoroutine(charHPMap_[(CHARACTERNUM)num].MoveSlideBar(charasList_[num].HP() - damage));
+        StartCoroutine(charaHPMPMap_[(CHARACTERNUM)num].Item1.MoveSlideBar(charasList_[num].HP() - damage));
 
         // 内部数値の変更を行う
         charasList_[num].sethp(charasList_[num].HP() - damage);

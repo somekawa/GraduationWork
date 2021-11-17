@@ -489,17 +489,198 @@ Luckが10以下の時は10でランダム振って判定し、
 キャラと敵、それぞれのHPdecrease関数で判定する。
 ------------------------------------------------
 
-<HPバーの高さを修正する>------------------------
+<戦闘中のキャラアイコンの顔部分を調整する>-------
+ButtleUICanvas/UniCharaData/CharaIconFrame
+の子として[MaskImage(Image)]を追加する。
+whiteFrameMask.pngをImageにアタッチして、
+コンポーネントにMaskをアタッチする。
 
-敵の数が1~4の時にどの敵でもちゃんとHPバーとか
-選択矢印が被らないように表示する方法を
-考える必要がある。
+MaskImageの子として[FaceImage(Image)]を追加する
+FrameBackPanelは不要になったから削除する。
 
+FaceImageには
+事前に用意しておいたUniFaceIconをアタッチする。
 
+大きさが全然うまくいかなかったのでサイズ調整！
 
+[MaskImage]
+Scale X:0.8 Y:0.8 Z:1
 
-Eagleの飛ぶ高さ的に、現在のHP表示位置が低い。
-Eagleの時だけ、Y軸を+60ぐらいしたほうがよさそう
+[UniFaceIcon]
+Width:128 Height:99
+
+同様にジャックの顔アイコンを調整していく。
+[JackFaceIcon]
+Width:112 Height:100
 
 ------------------------------------------------
 
+<MPバーも追加する>------------------------------
+
+HPSliderをコピペしてMPSliderという名称にする。
+ついでにHPSliderの位置も再調整する。
+
+[Uni(上側のバー)]
+HP PosY 170
+MP PosY 125
+
+[Jack(下側のバー)]
+HP PosY 120
+MP PosY 75
+
+どちらも□枠の丸角になってるところにぴったり
+くるようにそろえる
+
+[色の調整(MP)]
+通常色
+R:1 G:0.3 B:0.8
+
+減った部分の色
+R:0.5 G:0 B:0.4
+
+[色の調整(HP)]
+通常色
+R:0 G:0.8 B:0.8
+
+減った部分の色
+R:0 G:0.3 B:0.5
+
+このカラーリングは！ペルソナ！！
+
+------------------------------------------------
+
+<HPBar.csを変更する>----------------------------
+HP専用じゃなくて、MPの減少処理もできるようにする
+
+まずはScript名を変更する。
+
+HPBar.csから、[HPMPBar.cs]へ
+private intでつくっていたmaxHp_とcurrentHp_を
+HPとMPのどちらでも使えるように
+maxNum_とcurrentNum_に名称を変更する。
+
+また、SetHPBar関数も[SetHPMPBar関数]へと
+名を変更する。
+
+[CharacterMng.cs]
+現在はHPのSliderしか取得していないから
+MPも取得しないといけない。
+
+管理をcharHPMap_変数で行っているので、
+最初にcharHPMap_という名前をcharaHPMPMap_に変更
+
+DictionaryのHPMPBarの方をpairにする。
+Item1->HP
+Item2->MP
+とする。
+
+これによってでたエラーをItem1として対処する。
+
+[Chara.cs]
+MP関数とMaxMP関数を作成する。
+
+現在はMPを使う処理がないから適当にテストで
+削ってみる。okできた。
+削るときには、
+
+StartCoroutine(charaHPMPMap_[(CHARACTERNUM)num].Item2.MoveSlideBar(charasList_[num].MP() - 削る値));
+という風に書く！
+
+また、敵HP用のHPBarプレハブも設定が必要
+ここまで作成したHPSliderをPrefabフォルダのプレハブと交換する。
+※EnemyInstanceMngのEnemyHPBarがmissingになるか　らアタッチしなおす。
+→敵側の数字が見づらかったから黒にした
+
+------------------------------------------------
+
+<HP/MPバーの近くに、現在数値を表示する>----------
+現在数値はHPMPBar.csから取得できたほうが早いので
+各Sliderの子として
+[CurrentNum(TMP)]をアタッチする。
+
+(共通部分)
+黄色枠の大きさは3文字入る程度
+※1個つくったらそれをコピペしていく
+NewMplus1-Medium
+FontStyle 太文字(B)と斜め(I)にチェックをいれる
+FontSize  15
+
+(HPの数値)
+Pos X:30 Y:-3 Z:0
+
+(MPの数値)
+Pos X:30 Y:-3 Z:0
+
+つくってみたらそれぞれの子にするから全部共通だったわ。。。
+
+<現在数値を取得する処理>
+<HPMPBar.cs>
+private TMPro.TextMeshProUGUI currentNumText_; 
+を作成する。
+
+Start関数で[CurrentNum(TMP)]のFindをする。
+Start関数とMoveSlideBar関数で
+currentNumText_.text = currentNum_.ToString();
+を呼ぶようにする。
+
+数値が0以下になったら0で表示するようにしたい。
+currentNum_が0以下は全て0になるように処理を追加
+しておく。
+
+------------------------------------------------
+
+<敵選択のアイコンを変更する>---------------------
+現在は球体にしているのでターゲットマークみたいな
+丸いマークにしようと思っている
+
+<表示方法の変更>
+各HPの横に最初からButtleTarget.pngをつけておいて
+必要に応じてactiveを切り替えるようにしたい。
+
+[HPSliderプレハブ]
+[TargetImage(Image)]を子としてアタッチする。
+[TargetImage(Image)]
+ButtleTarget.pngのサイズは100*100
+Pos   X:70 Y:0 Z:0
+Width:100 Height:100
+Scale X:0.5 Y:0.5 Z:1
+
+[EnemyInstanceMng.cs]
+HPSliderを生成したときにEnemySelectObjの子にする
+
+[EnemySelect.cs]
+SetActiveを切り替えていた部分は
+TargetImageの表示状態を切り替える用にする。
+
+SelectKeyにMAXを用意して、
+MAXのときはUpdateをreturnで抜けるようにする
+※これがないと、コマンド選択で回転させるだけで
+　ターゲットマークが表示されてしまうから
+　→SetActive関数でMAXやNONに切り替える
+
+また、Update内で常に回転させるようにRotateの
+処理を追加する。
+
+Findが大量に発生したからこれを直していく。
+数が最初から決められないのでListをつかう。
+targetImageObjList_変数を作成しFindを使っていた部分を全てこの変数で処理するように変更する。
+最初の登録部分はSetPosList関数でおこなう。
+
+------------------------------------------------
+
+ここまでのUI内容をForestFieldにも適用する
+した。
+
+
+<バトル位置を変更する>--------------------------
+[ButtleCamera]
+Pos X:4 Y:2.6 Z:27.7
+
+[ButtleWarpPointPack]
+Pos X:0 Y:0 Z:28.2
+
+[EnemyInstancePointPack]
+Pos X:0 Y:0 Z:31.2
+
+更新するときはDesertFieldごと更新する
+------------------------------------------------
