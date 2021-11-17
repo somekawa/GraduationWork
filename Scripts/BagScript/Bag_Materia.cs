@@ -78,9 +78,8 @@ public class Bag_Materia : MonoBehaviour
         for (int i = 0; i < maxCnt_; i++)
         {
             MateriaGetCheck(i, materiaState[i].name, 5);
-           // Debug.Log(i + "”Ô–Ú‚Ì‘fÞ" + materiaBox_[i].name);
+            //Debug.Log(i + "”Ô–Ú‚Ì‘fÞ" + materiaState[i].name);
         }
-
     }
 
     public void MateriaGetCheck(int itemNum, string materiaName, int getCnt)

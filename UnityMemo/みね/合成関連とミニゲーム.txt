@@ -1,3 +1,12 @@
+2021/11/17更新
+
+●変更点
+・MagicCreate.csのパブリック変数を2つに
+uniHouseCanvas_にUniHouseCanvasをアタッチ
+miniGameParent_にMiniGameMngをアタッチ
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
 2021/11/11更新
 
 対象シーン：InHouseAndUniHouse

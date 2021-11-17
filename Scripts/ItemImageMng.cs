@@ -1,6 +1,6 @@
-using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class ItemImageMng : MonoBehaviour
 {
@@ -30,7 +30,6 @@ public class ItemImageMng : MonoBehaviour
 
         // 読み込みたいシート数、シート枚の大きさ、読み込みたい画像
         spriteMap[IMAGE.MATERIA] = ImageMng(6, 7, "/Materia/Materia_Field");
-        //spriteMap_[IMAGE.MATERIA] = ImageMng(5, 7, "/Materia/Materia_Field");
         onceFlag_ = true;
     }
 

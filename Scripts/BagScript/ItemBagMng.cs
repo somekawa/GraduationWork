@@ -1,11 +1,11 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ItemBagMng : MonoBehaviour
 {
     [SerializeField]
-    private Sprite[] CharaImage_;
+    private Sprite[] CharaImage;
+
     private RectTransform itemBagChild_;// itemBag_の子
 
     public enum TOPIC
@@ -30,6 +30,8 @@ public class ItemBagMng : MonoBehaviour
     private int charaStringNum_ = (int)SceneMng.CHARACTERNUM.UNI;
     private string[] charaTopicString_ = new string[(int)SceneMng.CHARACTERNUM.MAX] {
     "ユニ","ジャック"};
+    private RectTransform statusMagicCheck_;// ステータス画面で魔法を表示するための親
+    private Image magic0_;
 
     // ItemBox選択時
     private RectTransform[] mngs_ = new RectTransform[(int)TOPIC.MAX];
@@ -77,6 +79,17 @@ public class ItemBagMng : MonoBehaviour
         {
             charaNameTopicText_ = topicParent_.transform.Find("Topics/TopicName").GetComponent<Text>();
             charaNameTopicText_.text = charaTopicString_[(int)SceneMng.CHARACTERNUM.UNI];
+            statusMagicCheck_ = topicParent_.Find("MagicCheck").GetComponent<RectTransform>();
+            magic0_ = topicParent_.Find("MagicSet0").GetComponent<Image>();
+        }
+
+        for (int i = 0; i < Bag_Magic.number_; i++)
+        {
+            // 魔法をセットしていたらその画像をステータス画面に出す
+            if (Bag_Magic.data[i].setNumber == true)
+            {
+                magic0_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][Bag_Magic.elementNum_[i]];
+            }
         }
 
         if (charaImg_ == null)
@@ -86,10 +99,11 @@ public class ItemBagMng : MonoBehaviour
         }
 
         //サイズが変更して画像を切り替える
-        charaImgRect_.sizeDelta = new Vector2(CharaImage_[charaStringNum_].rect.width, CharaImage_[charaStringNum_].rect.height);
-        charaImg_.sprite = CharaImage_[charaStringNum_];
+        charaImgRect_.sizeDelta = new Vector2(CharaImage[charaStringNum_].rect.width, CharaImage[charaStringNum_].rect.height);
+        charaImg_.sprite = CharaImage[charaStringNum_];
 
         menuActive_.ViewStatus(charaStringNum_);
+        statusMagicCheck_.gameObject.SetActive(false); 
     }
 
     public void OnClickRightArrow()
@@ -135,7 +149,7 @@ public class ItemBagMng : MonoBehaviour
         {
             if (--stringNum_ < (int)TOPIC.ITEM)
             {
-                stringNum_ = (int)TOPIC.WORD;
+                stringNum_ = (int)TOPIC.MAGIC;
             }
             topicText_.text = topicString_[stringNum_];
             Debug.Log("左矢印をクリック" + stringNum_);
@@ -173,8 +187,8 @@ public class ItemBagMng : MonoBehaviour
         menuActive_.ViewStatus(charaStringNum_);
 
         //サイズが変更して画像を切り替える
-        charaImgRect_.sizeDelta = new Vector2(CharaImage_[charaStringNum_].rect.width, CharaImage_[charaStringNum_].rect.height);
-        charaImg_.sprite = CharaImage_[charaStringNum_];
+        charaImgRect_.sizeDelta = new Vector2(CharaImage[charaStringNum_].rect.width, CharaImage[charaStringNum_].rect.height);
+        charaImg_.sprite = CharaImage[charaStringNum_];
     }
 
     public void ActiveRectTransform()
@@ -203,8 +217,14 @@ public class ItemBagMng : MonoBehaviour
         }
         if (stringNum_ == (int)TOPIC.MATERIA)
         {
-            // 魔法合成からバッグのワードを開くと親の場所がずれてしまうため
             GameObject.Find("Managers").GetComponent<Bag_Materia>().Init();
         }
     }
+
+    public void OnClickSetMagicButton()
+    {
+        // ステータスを開いて魔法をセットするボタンを押した際
+        statusMagicCheck_.gameObject.SetActive(true);     // 持っている魔法一覧を表示
+    }
+
 }

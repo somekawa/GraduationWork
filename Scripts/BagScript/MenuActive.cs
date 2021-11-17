@@ -244,7 +244,8 @@ public class MenuActive : MonoBehaviour
                 Defence = int.Parse(csvDatas[i + 1][6]),
                 Speed = int.Parse(csvDatas[i + 1][7]),
                 Luck = int.Parse(csvDatas[i + 1][8]),
-                AnimMax = float.Parse(csvDatas[i + 1][9])
+                AnimMax = float.Parse(csvDatas[i + 1][9]),
+              //  Magic0 = int.Parse(csvDatas[i + 1][10])
             };
             Debug.Log(csvDatas[i + 1][0] + "            キャラデータをロード中。残り" + i);
             SceneMng.SetCharasSettings(i, set);

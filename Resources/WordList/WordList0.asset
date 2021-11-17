@@ -73,9 +73,9 @@ MonoBehaviour:
   - Word: "\u6575"
     ListNumber: 2
     KindsNumber: 5
-  - Word: "\u5FC5\u4E2D"
+  - Word: "\u547D\u4E2D/\u56DE\u907F"
     ListNumber: 2
-    KindsNumber: 8
+    KindsNumber: 6
   - Word: "\u98A8"
     ListNumber: 3
     KindsNumber: 3
@@ -92,6 +92,9 @@ MonoBehaviour:
     ListNumber: 3
     KindsNumber: 7
   - Word: "\u5438\u53CE"
+    ListNumber: 3
+    KindsNumber: 9
+  - Word: "\u5FC5\u4E2D"
     ListNumber: 3
     KindsNumber: 9
   - Word: "\u9F8D"

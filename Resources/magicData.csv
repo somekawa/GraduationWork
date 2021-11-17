@@ -1,3 +1,4 @@
-﻿MagicName,Power,AbilityKinds,Rate
-全体補助極大敵物理攻撃低下,100,100,100
-複数回水大暗闇即死必中,100,5,5
+﻿MagicName,Power,AbilityKinds,Rate,Element,SetNumber
+複数回水極大,100,5,5,2,True
+全体水極大麻痺即死必中,100,5,5,2,False
+全体補助大敵物理攻撃低下,100,5,5,3,True

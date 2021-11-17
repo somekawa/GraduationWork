@@ -1,21 +1,17 @@
 using System.Collections;
+using System;
+using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.IO;
-using System.Text;
-using System;
 
 public class Bag_Item : MonoBehaviour
 {
     [SerializeField]
-    private SaveCSV_HaveItem saveCsvSc;    // 素材を拾ったときに生成されるプレハブ
-
-    [SerializeField]
     private RectTransform itemParent;    // 素材を拾ったときに生成されるプレハブ
 
     // データ系
-    //private SaveCSV_Magic saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
+    private SaveCSV_HaveItem saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
     private const string saveDataFilePath = @"Assets/Resources/HaveItemList.csv";
     List<string[]> csvDatas = new List<string[]>(); // CSVの中身を入れるリスト;
                                           
@@ -44,6 +40,7 @@ public class Bag_Item : MonoBehaviour
         maxCnt_ = popItemList_.SetMaxItemCount();
 
         itemState = new ItemData[maxCnt_];
+        saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveCSV_HaveItem>();
         for (int i = 0; i < maxCnt_; i++)
         {
             itemState[i] = new ItemData
@@ -52,7 +49,7 @@ public class Bag_Item : MonoBehaviour
                 name = InitPopList.itemData[i].name,
                 haveCnt = 0,
             };
-            Debug.Log(itemState[i].name);
+            //Debug.Log(itemState[i].name);
             //itemBox_[i] = PopMateriaList.itemBox_[i];
             itemState[i].box.transform.SetParent(itemParent.transform);
             itemState[i].box.name = itemState[i].name;
@@ -65,23 +62,15 @@ public class Bag_Item : MonoBehaviour
             itemState[i].cntText.text = itemState[i].haveCnt.ToString();
             //itemCnt_[i] = 0;// すべてのアイテムの所持数を0にする
 
-            if (0 < itemState[i].haveCnt)
-            {
-                itemState[i].getFlag = false;
-                itemState[i].box.SetActive(false);// 非表示にする
-            }
-            else
-            {
-                itemState[i].getFlag = true;
-                itemState[i].box.SetActive(true);// 1つでも持っているものは表示
-            }
+            itemState[i].getFlag = 0 < itemState[i].haveCnt ? false : true;
+            itemState[i].box.SetActive(itemState[i].getFlag);
         }
 
         // デバッグ用 全部の素材を5個取得した状態で始まる
         for (int i = 0; i < maxCnt_; i++)
         {
             ItemGetCheck(i, itemState[i].name, 1);
-            Debug.Log(i + "番目の素材" + itemState[i].name);
+           // Debug.Log(i + "番目の素材" + itemState[i].name);
         }
 
     }
@@ -91,14 +80,14 @@ public class Bag_Item : MonoBehaviour
         itemState[itemNum].haveCnt += createCnt;
         if(0< itemState[itemNum].haveCnt)
         {
-            itemState[itemNum].box.SetActive(true);
             itemState[itemNum].getFlag = true;
+            itemState[itemNum].box.SetActive(true);
            // Debug.Log(itemName + "を取得しました");
         }
         else
         {
-            itemState[itemNum].box.SetActive(false);
             itemState[itemNum].getFlag = false;
+            itemState[itemNum].box.SetActive(false);
         }
         itemState[itemNum].cntText.text = itemState[itemNum].haveCnt.ToString();
 
@@ -141,14 +130,14 @@ public class Bag_Item : MonoBehaviour
     {
         Debug.Log("魔法が生成されました。セーブします");
 
-        saveCsvSc.SaveStart();
+        saveCsvSc_.SaveStart();
 
         // 魔法の個数分回す
         for (int i = 0; i < maxCnt_; i++)
         {
-            saveCsvSc.SaveItemData(data[i]);
+            saveCsvSc_.SaveItemData(data[i]);
         }
-        saveCsvSc.SaveEnd();
+        saveCsvSc_.SaveEnd();
     }
 
 }
