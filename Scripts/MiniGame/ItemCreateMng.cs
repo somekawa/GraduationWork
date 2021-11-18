@@ -19,8 +19,8 @@ public class ItemCreateMng : MonoBehaviour
 
     private Bag_Item bagItem_;// 所持しているアイテムを確認
 
-    private string saveBtnName_ = "";
-    private Button saveBtn_;
+    private string saveBtnName_ = "";   // どのアイテムを押したかを保存
+    private Button saveBtn_;            // どのボタンを押したかを保存
     private int saveItemNum_ = 0;
 
     public struct itemRecipe
@@ -53,7 +53,7 @@ public class ItemCreateMng : MonoBehaviour
 
     void Start()
     {
-        itemRecipeParent_ = transform.Find("ScrollView/Viewport/Content").GetComponent<RectTransform>();
+        itemRecipeParent_ = transform.Find("ScrollView/Viewport/ItemRecipeParent").GetComponent<RectTransform>();
         bagMateria_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>();
 
         popItemRecipeList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
@@ -83,53 +83,24 @@ public class ItemCreateMng : MonoBehaviour
         // ミニゲーム
         movePoint_ = miniGameMng.transform.GetComponent<MovePoint>();
         miniGameMng.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
-        // miniGameMng_= GameObject.Find("MiniGameMng").GetComponent<RectTransform>();
         judgeBack_ = miniGameMng.transform.Find("JudgeBack").GetComponent<Image>();
         judgeText_ = judgeBack_.transform.Find("Text").GetComponent<Text>();
-        judgeText_.text = "";
-        judgeBack_.gameObject.SetActive(false);
-        miniGameMng.gameObject.SetActive(false);
 
         cancelBtn_ = transform.Find("CancelBtn").GetComponent<Button>();
         createBtn_ = transform.Find("CreateBtn").GetComponent<Button>();
-        createBtn_.interactable = false;
 
         createName_ = transform.Find("InfoBack/CreateItemName").GetComponent<Text>();
         wantMateria_ = transform.Find("InfoBack/WantMateriaNames").GetComponent<Text>();
-        createName_.text = "";
-        wantMateria_.text = "";
-        StartCoroutine(AlchemyRecipeSelect());
+        ResetCommon();
     }
 
     public IEnumerator AlchemyRecipeSelect()
     {
         while (true)
         {
-            yield return null;
-
             if (movePoint_.GetMiniGameJudge() == MovePoint.JUDGE.NON)
             {
-                // レシピ選択処理
-                for (int i = 0; i < maxCnt_; i++)
-                {
-                    if (saveBtnName_ != itemRecipeState[i].btn.name)
-                    {
-                        // 選択してないボタンは押下できる状態にする
-                        itemRecipeState[i].btn.interactable = true;
-                    }
-                    else
-                    {
-                        // 選択したレシピの内容を表示
-                        SetActiveRecipe(i, saveBtnName_);
-                        saveBtn_ = itemRecipeState[i].btn;
-                        saveItemNum_ = i;// 番号を保存
-
-                        if (miniGameMng.gameObject.activeSelf == false)
-                        {
-                            createBtn_.interactable = true;
-                        }
-                    }
-                }
+                yield return null;
             }
             else
             {
@@ -143,19 +114,12 @@ public class ItemCreateMng : MonoBehaviour
                 }
                 judgeBack_.gameObject.SetActive(true);
                 bagItem_.ItemGetCheck(saveItemNum_, saveBtnName_, 1);
-                // 何らかの判定をされた場合
-                cancelBtn_.interactable = true;
-                createBtn_.interactable = false;
                 saveBtn_.interactable = true;
                 saveBtnName_ = "";
-                // 判定をリセット
-                judge_ = MovePoint.JUDGE.NON;
-                movePoint_.SetMiniGameJudge(judge_);
 
                 yield return new WaitForSeconds(2.0f);
-                judgeBack_.gameObject.SetActive(false);
-                miniGameMng.gameObject.SetActive(false);
-                judgeText_.text = "";
+                ResetCommon();
+                yield break;
             }
         }
     }
@@ -253,6 +217,7 @@ public class ItemCreateMng : MonoBehaviour
                             createBtn_.interactable = false;
                             miniGameMng.gameObject.SetActive(true);
                             StartCoroutine(movePoint_.CountDown());
+                            StartCoroutine(AlchemyRecipeSelect());
                             cancelBtn_.interactable = false;
                             Debug.Log(Bag_Materia.materiaState[i].name + "を持っていました。ゲームを始めます");
                         }
@@ -274,10 +239,41 @@ public class ItemCreateMng : MonoBehaviour
     public void SetButtonName(string name)
     {
         saveBtnName_ = name;
+        // レシピ選択処理
+        for (int i = 0; i < maxCnt_; i++)
+        {
+            if (saveBtnName_ != itemRecipeState[i].btn.name)
+            {
+                // 選択してないボタンは押下できる状態にする
+                itemRecipeState[i].btn.interactable = true;
+            }
+            else
+            {
+                // 選択したレシピの内容を表示
+                SetActiveRecipe(i, saveBtnName_);
+                saveBtn_ = itemRecipeState[i].btn;
+                saveItemNum_ = i;// 番号を保存
+
+                if (miniGameMng.gameObject.activeSelf == false)
+                {
+                    createBtn_.interactable = true;
+                }
+            }
+        }
     }
 
-    public void GetJudgeCheck(MovePoint.JUDGE num)
+    private void ResetCommon()
     {
-        judge_ = num;
+        // 何らかの判定をされた場合
+        cancelBtn_.interactable = true;
+        createBtn_.interactable = false;
+        // 判定をリセット
+        createName_.text = "";
+        wantMateria_.text = "";
+        miniGameMng.gameObject.SetActive(false);
+        judge_ = MovePoint.JUDGE.NON;
+        judgeText_.text = "";
+        movePoint_.SetMiniGameJudge(judge_);
+        judgeBack_.gameObject.SetActive(false);
     }
 }
