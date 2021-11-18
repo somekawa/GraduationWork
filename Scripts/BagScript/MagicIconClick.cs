@@ -6,9 +6,7 @@ using UnityEngine.UI;
 public class MagicIconClick : MonoBehaviour
 {
     private EventSystem eventSystem_;// ボタンクリックのためのイベント処理
-                                     // private Bag_Magic bagMagic_;
     private RectTransform rectItemBagMng_;
-    // private ItemBagMng itemBagMng_;
     private MenuActive menuActive_;
     private GameObject clickbtn_;    // どのボタンをクリックしたか代入する変数
     private Text info_; // クリックした魔法を説明する欄

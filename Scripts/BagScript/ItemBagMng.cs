@@ -51,6 +51,8 @@ public class ItemBagMng : MonoBehaviour
     private RectTransform[] mngs_ = new RectTransform[(int)TOPIC.MAX];
 
     private MenuActive menuActive_;     // 現在のページ状態がどこかを取得する(矢印に使用する)
+    // Chara.csをキャラ毎にリスト化する
+    private List<Chara> charasList_ = new List<Chara>();
 
     public void Init()
     {
@@ -99,6 +101,7 @@ public class ItemBagMng : MonoBehaviour
             magic0_ = topicParent_.Find("MagicSet0/Icon").GetComponent<Image>();
             magic1_ = topicParent_.Find("MagicSet1/Icon").GetComponent<Image>();
         }
+        charasList_ = SceneMng.charasList_;
 
         var data = SceneMng.GetCharasSettings(charaStringNum_);
         setMagicNum_[charaStringNum_, 0] = data.Magic0;
@@ -276,13 +279,15 @@ public class ItemBagMng : MonoBehaviour
         var data = SceneMng.GetCharasSettings(charaStringNum_);
         if (btnNumber_ == 0)
         {
-            data.Magic0 = num;
+          //  data.Magic0 = num;
+            charasList_[charaStringNum_].SetMagic0Num(num);
             setMagicNum_[charaStringNum_, 0] = num;
             Debug.Log(data.Magic0 + "を保存しました");
         }
         else
         {
-            data.Magic1 = num;
+            //data.Magic1 = num;
+            charasList_[charaStringNum_].SetMagic1Num(num);
             setMagicNum_[charaStringNum_, 1] = num;
             Debug.Log(data.Magic1 + "を保存しました");
         }
