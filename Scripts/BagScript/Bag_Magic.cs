@@ -33,7 +33,7 @@ public class Bag_Magic : MonoBehaviour
         public int rate;
         public int ability;
         public int element;
-        public bool setNumber;
+      //  public bool battleSet0;
     }
     public static MagicData[] data = new MagicData[50];
 
@@ -75,7 +75,7 @@ public class Bag_Magic : MonoBehaviour
                     data[i].ability = int.Parse(csvDatas[i + 1][2]);
                     data[i].rate = int.Parse(csvDatas[i + 1][3]);
                     data[i].element = int.Parse(csvDatas[i + 1][4]);
-                    data[i].setNumber = bool.Parse(csvDatas[i + 1][5]);
+                   // data[i].battleSet0 = bool.Parse(csvDatas[i + 1][5]);
 
                     elementNum_[i] = minElementNum_ + data[i].element;
                     Debug.Log(elementNum_[i] + "            c‚è" + data[i].power);
@@ -104,7 +104,7 @@ public class Bag_Magic : MonoBehaviour
         data[number_].rate = rateNum;
         data[number_].ability = abilityNum;
         data[number_].element = element;
-        data[number_].setNumber = false;// ì‚ç‚ê‚½‚¾‚¯‚Ì‚½‚ß
+     //   data[number_].battleSet0 = false;// ì‚ç‚ê‚½‚¾‚¯‚Ì‚½‚ß
         DataSave();
 
         elementNum_[number_] = minElementNum_ + data[number_].element;
@@ -159,7 +159,7 @@ public class Bag_Magic : MonoBehaviour
                 ability = int.Parse(csvDatas[i + 1][2]),
                 rate = int.Parse(csvDatas[i + 1][3]),
                 element = int.Parse(csvDatas[i + 1][4]),
-                setNumber = bool.Parse(csvDatas[i + 1][5]),
+               // battleSet0 = bool.Parse(csvDatas[i + 1][5]),
             };
         }
         Init();
@@ -182,8 +182,17 @@ public class Bag_Magic : MonoBehaviour
 
     public void SetMagicCheck(int num,bool flag)
     {
-        data[num].setNumber = flag;
-        DataSave();
+        //data[num].battleSet0 = flag;
+        //for (int i = 0; i < number_; i++)
+        //{
+        //    if(i==num)
+        //    {
+        //        continue;
+        //    }
+        //    data[i].battleSet0 = !flag;
+        //}
+        //DataSave();
+
     }
 
 }

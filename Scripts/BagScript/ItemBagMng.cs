@@ -1,8 +1,20 @@
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class ItemBagMng : MonoBehaviour
 {
+    // データ系
+    private SaveCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
+    private const string saveDataFilePath_ = @"Assets/Resources/data.csv";
+    List<string[]> csvDatas_ = new List<string[]>(); // CSVの中身を入れるリスト;
+
+    private EventSystem eventSystem_;// ボタンクリックのためのイベント処理
+    private GameObject clickbtn_;    // どのボタンをクリックしたか代入する変数
+    private int btnNumber_ = 0;
+
     [SerializeField]
     private Sprite[] CharaImage;
 
@@ -31,7 +43,9 @@ public class ItemBagMng : MonoBehaviour
     private string[] charaTopicString_ = new string[(int)SceneMng.CHARACTERNUM.MAX] {
     "ユニ","ジャック"};
     private RectTransform statusMagicCheck_;// ステータス画面で魔法を表示するための親
-    private Image magic0_;
+    private Image magic0_;// = new Image[(int)SceneMng.CHARACTERNUM.MAX];
+    private Image magic1_;// = new Image[(int)SceneMng.CHARACTERNUM.MAX];
+    private int[,] setMagicNum_ = new int[(int)SceneMng.CHARACTERNUM.MAX, 2];
 
     // ItemBox選択時
     private RectTransform[] mngs_ = new RectTransform[(int)TOPIC.MAX];
@@ -71,7 +85,9 @@ public class ItemBagMng : MonoBehaviour
     {
         if (menuActive_ == null)
         {
+            saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveCSV>();
             menuActive_ = GameObject.Find("SceneMng").GetComponent<MenuActive>();
+            eventSystem_ = GameObject.Find("EventSystem").GetComponent<EventSystem>();
         }
 
         RectTransform topicParent_ = GameObject.Find("StatusMng").GetComponent<RectTransform>();
@@ -80,16 +96,23 @@ public class ItemBagMng : MonoBehaviour
             charaNameTopicText_ = topicParent_.transform.Find("Topics/TopicName").GetComponent<Text>();
             charaNameTopicText_.text = charaTopicString_[(int)SceneMng.CHARACTERNUM.UNI];
             statusMagicCheck_ = topicParent_.Find("MagicCheck").GetComponent<RectTransform>();
-            magic0_ = topicParent_.Find("MagicSet0").GetComponent<Image>();
+            magic0_ = topicParent_.Find("MagicSet0/Icon").GetComponent<Image>();
+            magic1_ = topicParent_.Find("MagicSet1/Icon").GetComponent<Image>();
         }
 
-        for (int i = 0; i < Bag_Magic.number_; i++)
+        var data = SceneMng.GetCharasSettings(charaStringNum_);
+        setMagicNum_[charaStringNum_, 0] = data.Magic0;
+        setMagicNum_[charaStringNum_, 1] = data.Magic1;
+        // 魔法をセットしていたらその画像をステータス画面に出す
+        if (data.Magic0 != -1)
         {
-            // 魔法をセットしていたらその画像をステータス画面に出す
-            if (Bag_Magic.data[i].setNumber == true)
-            {
-                magic0_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][Bag_Magic.elementNum_[i]];
-            }
+            magic0_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][Bag_Magic.elementNum_[setMagicNum_[charaStringNum_, 0]]];
+            magic0_.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+        }
+        if (data.Magic1 != -1)
+        {
+            magic1_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][Bag_Magic.elementNum_[setMagicNum_[charaStringNum_, 1]]];
+            magic1_.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
         }
 
         if (charaImg_ == null)
@@ -103,7 +126,7 @@ public class ItemBagMng : MonoBehaviour
         charaImg_.sprite = CharaImage[charaStringNum_];
 
         menuActive_.ViewStatus(charaStringNum_);
-        statusMagicCheck_.gameObject.SetActive(false); 
+        statusMagicCheck_.gameObject.SetActive(false);
     }
 
     public void OnClickRightArrow()
@@ -189,11 +212,17 @@ public class ItemBagMng : MonoBehaviour
         //サイズが変更して画像を切り替える
         charaImgRect_.sizeDelta = new Vector2(CharaImage[charaStringNum_].rect.width, CharaImage[charaStringNum_].rect.height);
         charaImg_.sprite = CharaImage[charaStringNum_];
+
+        statusMagicCheck_.gameObject.SetActive(false);     // 持っている魔法一覧を表示
+        magic0_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][Bag_Magic.elementNum_[setMagicNum_[charaStringNum_, 0]]];
+        magic0_.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+        magic1_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][Bag_Magic.elementNum_[setMagicNum_[charaStringNum_, 1]]];
+        magic1_.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     public void ActiveRectTransform()
     {
-        Debug.Log(mngs_[stringNum_].gameObject.name + "を表示します               "+ stringNum_);
+        Debug.Log(mngs_[stringNum_].gameObject.name + "を表示します               " + stringNum_);
 
         for (int i = 0; i < (int)TOPIC.MAX; i++)
         {
@@ -201,7 +230,7 @@ public class ItemBagMng : MonoBehaviour
             {
                 // 選択のものを表示
                 mngs_[i].gameObject.SetActive(true);
-                Debug.Log(mngs_[i].gameObject.name+"を表示しています");
+                Debug.Log(mngs_[i].gameObject.name + "を表示しています");
             }
             else
             {
@@ -224,7 +253,51 @@ public class ItemBagMng : MonoBehaviour
     public void OnClickSetMagicButton()
     {
         // ステータスを開いて魔法をセットするボタンを押した際
+        clickbtn_ = eventSystem_.currentSelectedGameObject;
+        btnNumber_ = int.Parse(Regex.Replace(clickbtn_.name, @"[^0-9]", ""));
         statusMagicCheck_.gameObject.SetActive(true);     // 持っている魔法一覧を表示
+
+        //// 魔法をセットしていたらその画像をステータス画面に出す
+        //magic0_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][Bag_Magic.elementNum_[setMagicNum_[charaStringNum_, 0]]];
+        //magic0_.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+        //magic1_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][Bag_Magic.elementNum_[setMagicNum_[charaStringNum_, 1]]];
+        //magic1_.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
+    public void OnClickCloseMagicButton()
+    {
+        //data[num].battleSet0 = flag;
+        statusMagicCheck_.gameObject.SetActive(false);     // 持っている魔法一覧を表示
+    }
+
+    public void SetMagicCheck(int num)
+    {
+        // キャラのステータス値を表示させたい
+        var data = SceneMng.GetCharasSettings(charaStringNum_);
+        if (btnNumber_ == 0)
+        {
+            data.Magic0 = num;
+            setMagicNum_[charaStringNum_, 0] = num;
+            Debug.Log(data.Magic0 + "を保存しました");
+        }
+        else
+        {
+            data.Magic1 = num;
+            setMagicNum_[charaStringNum_, 1] = num;
+            Debug.Log(data.Magic1 + "を保存しました");
+        }
+
+        saveCsvSc_.SaveStart();
+        // キャラクター数分のfor文を回す
+        for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+        {
+            saveCsvSc_.SaveData(SceneMng.GetCharasSettings(i));
+        }
+        saveCsvSc_.SaveEnd();
+    }
+
+    public int GetClickButtonNum()
+    {
+        return btnNumber_;
+    }
 }

@@ -26,7 +26,8 @@ public abstract class CharaBase : object
         public int Speed;           // この値にポイントを振り分けると素早さが上がる
         public int Luck;            // この値にポイントを振り分けると幸運が上がる
         public float AnimMax;       // 攻撃モーションのフレームを時間に直した値が入っている(モーション切り替えで使用する)
-
+        public int Magic0;
+        public int Magic1;
         // 敵用の情報
         public int Exp;             // この敵を倒した際にキャラが得られる経験値
         public string Drop;         // この敵を倒した際にキャラが得られるドロップ素材

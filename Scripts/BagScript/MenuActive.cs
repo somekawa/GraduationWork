@@ -57,7 +57,6 @@ public class MenuActive : MonoBehaviour
     // ワープ中かどうか
     private WarpField warpField_;
 
-
     private HouseInteriorMng interiorMng_;
     void Awake()
     {
@@ -245,7 +244,8 @@ public class MenuActive : MonoBehaviour
                 Speed = int.Parse(csvDatas[i + 1][7]),
                 Luck = int.Parse(csvDatas[i + 1][8]),
                 AnimMax = float.Parse(csvDatas[i + 1][9]),
-              //  Magic0 = int.Parse(csvDatas[i + 1][10])
+                //Magic0 = int.Parse(csvDatas[i + 1][10]),
+                //Magic1 = int.Parse(csvDatas[i + 1][11])
             };
             Debug.Log(csvDatas[i + 1][0] + "            キャラデータをロード中。残り" + i);
             SceneMng.SetCharasSettings(i, set);
@@ -340,5 +340,11 @@ public class MenuActive : MonoBehaviour
     public CANVAS GetNowMenuCanvas()
     {
         return nowCanvas_;
+    }
+
+
+    public RectTransform GetItemBagMng()
+    {
+        return parentRectTrans_[(int)CANVAS.BAG];
     }
 }
