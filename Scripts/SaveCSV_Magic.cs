@@ -29,7 +29,7 @@ public class SaveCSV_Magic : MonoBehaviour
         }
 
         // ステータスの項目見出し
-        string[] s1 = { "MagicName", "Power", "AbilityKinds", "Rate", "Element" };//,"ButtoleSet0"};
+        string[] s1 = { "MagicName", "Power", "AbilityKinds", "Rate", "Element" };
         string s2 = string.Join(",", s1);
         sw_.WriteLine(s2);
     }
@@ -39,7 +39,7 @@ public class SaveCSV_Magic : MonoBehaviour
     {
         // 実際のステータス値
         string[] data = { set.name, set.power.ToString(),set.ability.ToString() , set.rate.ToString() ,
-                         set.element.ToString() };//, set.battleSet0.ToString()};
+                         set.element.ToString() };
         string write = string.Join(",", data);
         sw_.WriteLine(write);
     }

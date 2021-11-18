@@ -227,6 +227,8 @@ public class Chara : CharaBase,InterfaceButtle
         set_.Speed = set.Speed;
         set_.Luck = set.Luck;
         set_.AnimMax = set.AnimMax;
+        set_.Magic0 = set.Magic0;
+        set_.Magic1 = set.Magic1;
 
         SetTurnInit();
         // アニメーターはセットしてはいけない
@@ -251,6 +253,16 @@ public class Chara : CharaBase,InterfaceButtle
     public void SetBarrierNum(int num = 0)
     {
         barrierNum_ = num;
+    }
+
+    public void SetMagic0Num(int num = 0)
+    {
+        set_.Magic0 = num;
+    }
+
+    public void SetMagic1Num(int num = 0)
+    {
+        set_.Magic1 = num;
     }
 
     public bool GetDeathFlg()
