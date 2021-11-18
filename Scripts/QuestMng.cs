@@ -29,7 +29,6 @@ public class QuestMng : MonoBehaviour
     // クエストを受注したときに生成されるプレハブ
     private GameObject completePrefab;
 
-    private List<Quest> questList_;                  // クエストリスト
 	private List<Transform> questUIInstanceList_;    // クエスト用UIのインスタンスを入れる
     private Transform questContent_;                 // クエストを表示するUIのコンテンツ
     private Text questInfoText_;                     // クエスト情報の題名テキスト
@@ -89,7 +88,6 @@ public class QuestMng : MonoBehaviour
         questReportButton_ = questUI.transform.Find("ReportButton").gameObject;
         backButton_ = questUI.transform.Find("BackButton").gameObject;
 
-        questList_ = new List<Quest>();
 		questUIInstanceList_ = new List<Transform>();
 
 		//　クエスト表示用UIのコンテンツ
@@ -110,24 +108,20 @@ public class QuestMng : MonoBehaviour
             questButton_[i].SetQuestNum(i);
 
             questUIInstanceList_.Add(questUIInstance);
-			//　サンプルの説明文を設定しクエストインスタンスを大量生産
-			questList_.Add(new Quest("タイトル" + i, "テストの説明" + i));
 
-			//　セットするコンポーネントを取得
-			//var toggleCom = questUIInstanceList[i].Find("TitlePanel/Button").GetComponent<Button>();
-			var toggleTextCom = questUIInstanceList_[i].Find("TitlePanel/Button/Text").GetComponent<Text>();
-			//var informationTextCom = questUIInstanceList[i].Find("InformationPanel/Information").GetComponent<Text>();
-
-			//　クエストの情報を表示ページと表示数を使って計算し取得する
-			//var check = IsQuestFlag(i);
-			var title = GetQuest(i).GetTitle();
-			//var info = GetQuest(i).GetInformation();
-
-			//　取得した情報をUIに反映させる
-			//toggleCom.isOn = check;
-			toggleTextCom.text = title;
-			//informationTextCom.text = info;
-		}
+            // 5文字以上のタイトル情報のとき
+            if(popQuestInfo_.param[i].info.Length >= 5)
+            {
+                //　セットするコンポーネントを取得して情報を反映させる
+                questUIInstanceList_[i].Find("TitlePanel/Button/Text").GetComponent<TMPro.TextMeshProUGUI>().text =
+                    popQuestInfo_.param[i].info.Substring(0, 5) + "・・";
+            }
+            else
+            {
+                questUIInstanceList_[i].Find("TitlePanel/Button/Text").GetComponent<TMPro.TextMeshProUGUI>().text =
+                    popQuestInfo_.param[i].info;
+            }
+        }
 
         // 初回のみ登録する(初回 = 登録数が0)
         if(questClearCnt_.Count <= 0)
@@ -335,12 +329,6 @@ public class QuestMng : MonoBehaviour
         questUI.SetActive(!questUI.activeSelf);
         Debug.Log("戻るボタンが押されました");
     }
-
-    //　クエストを返す
-    public Quest GetQuest(int num)
-	{
-		return questList_[num];
-	}
 
 	//　トータルクエスト数を返す
 	public int GetTotalQuestNum()

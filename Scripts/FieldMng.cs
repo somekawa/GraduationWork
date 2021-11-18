@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -46,7 +45,7 @@ public class FieldMng : MonoBehaviour
     void Start()
     {
         // 現在のシーンをFIELDとする
-        SceneMng.SetNowScene(SceneMng.SCENE.FIELD0);
+        SceneMng.SetNowScene((SceneMng.SCENE)UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
 
         // イベントが発生するか確認する
         if (EventMng.GetChapterNum() == 8)
@@ -65,6 +64,8 @@ public class FieldMng : MonoBehaviour
         {
             Debug.Log("FieldMng.csで取得しているCameraMngがnullです");
         }
+
+        cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
 
         // WarpField.csの初期化関数を先に呼ぶ
         GameObject.Find("WarpOut").GetComponent<WarpField>().Init();

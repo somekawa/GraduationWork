@@ -167,6 +167,9 @@ public class EnemySelect : MonoBehaviour
         // 戦闘画面に遷移時、すぐにアイコンが表示されたら困るため非表示にする
         //this.gameObject.SetActive(false);
 
+        // 中身を初期化する
+        targetImageObjList_.Clear();
+
         // TargetImageを全てfalseにする
         // リストに登録する
         for (int i = 0; i < this.transform.childCount; i++)

@@ -85,10 +85,11 @@ public class EnemyInstanceMng : MonoBehaviour
 
         DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
 
-        // 敵(数字がフィールドによって書き換えられるようにしとかないといけない)
+        // 敵データ
+        // 数字がフィールドによって変更されるように、(現在シーン - FIELD0の番号)とする
         if (enemyData_ == null)
         {
-            enemyData_ = DataPopPrefab_.GetComponent<PopList>().GetData<EnemyList>(PopList.ListData.ENEMY, 0, name);
+            enemyData_ = DataPopPrefab_.GetComponent<PopList>().GetData<EnemyList>(PopList.ListData.ENEMY, (int)SceneMng.nowScene - (int)SceneMng.SCENE.FIELD0, name);
         }
 
         buttleMng_ = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
