@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using static CharaBase;
 using static SceneMng;
 
@@ -20,6 +21,8 @@ public class CharacterMng : MonoBehaviour
     //　通常攻撃弾のプレハブ
     [SerializeField]
     private GameObject uniAttackPrefab_;
+
+    public ItemBagMng itemBagMng_;
 
     CHARACTERNUM oldTurnChar_ = CHARACTERNUM.UNI;     // 前に行動順が回ってきていたキャラクター
     CHARACTERNUM nowTurnChar_ = CHARACTERNUM.MAX;     // 現在行動順が回ってきているキャラクター
@@ -45,6 +48,9 @@ public class CharacterMng : MonoBehaviour
     private EnemySelect buttleEnemySelect_;                       // バトル中の選択アイコン情報
     private ButtleMng buttleMng_;                                 // ButtleMng.csの取得
 
+    private GameObject setMagicObj_;                    // 魔法コマンド選択時に表示させるオブジェクト
+    private Image[] magicImage_ = new Image[4];         // 魔法画像の貼り付け先(最大4つ表示になる)
+
     private int enemyNum_ = 0;                                    // バトル時の敵の数
     private Dictionary<int, List<Vector3>> enemyInstancePos_;     // 敵のインスタンス位置の全情報
 
@@ -56,11 +62,6 @@ public class CharacterMng : MonoBehaviour
         // SceneMngからキャラの情報をもらう(charMap_とcharasList_)
         charMap_ = SceneMng.charMap_;
         charasList_ = SceneMng.charasList_;
-
-        // テスト用
-        //charasList_[0].sethp(charasList_[0].HP() - 10);
-        //Debug.Log("HHHPPP"+charasList_[0].HP());
-        //SceneMng.SceneLoad((int)SceneMng.SCENE.TOWN);
 
         nowTurnChar_ = CHARACTERNUM.UNI;
 
@@ -80,6 +81,15 @@ public class CharacterMng : MonoBehaviour
         enemyInstancePos_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().GetEnemyPos();
 
         buttleMng_ = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
+
+        setMagicObj_ = buttleUICanvas.transform.Find("SetMagicObj").gameObject;
+        // 魔法画像の表示先を設定する
+        for (int i = 0; i < magicImage_.Length; i++)
+        {
+            magicImage_[i] = setMagicObj_.transform.GetChild(i).GetComponent<Image>();
+        }
+        setMagicObj_.SetActive(false);  // 魔法コマンドを選択するまで非表示にする
+
         // キャラ名+CharaDataのステータス表から、HP/MP情報を取得する
         charaHPMPMap_[CHARACTERNUM.UNI] = 
             (buttleUICanvas.transform.Find("UniCharaData/HPSlider").GetComponent<HPMPBar>(), buttleUICanvas.transform.Find("UniCharaData/MPSlider").GetComponent<HPMPBar>());
@@ -191,35 +201,6 @@ public class CharacterMng : MonoBehaviour
                     EventMng.SetChapterNum(100, SCENE.CONVERSATION);
                 }
             }
-
-            //if (charaHPBar.GetColFlg())
-            //{
-            //    return;
-            //}
-            //else
-            //{
-            //    oldAnim_ = anim_;
-            //    Debug.Log("死亡中だから行動を飛ばす");
-            //    anim_ = ANIMATION.IDLE;
-            //    oldAnim_ = ANIMATION.NON;
-
-            //    // 全滅したか確認する処理
-            //    bool allDeathFlg = true;
-            //    for (int i = 0; i < (int)CHARACTERNUM.MAX; i++)
-            //    {
-            //        if (!charasList_[i].GetDeathFlg())
-            //        {
-            //            // 1人でも生存状態だと分かればbreakして抜ける
-            //            allDeathFlg = false;
-            //            break;
-            //        }
-            //    }
-            //    // 全滅時は町長の家へ飛ばす
-            //    if (allDeathFlg)
-            //    {
-            //        EventMng.SetChapterNum(100, SCENE.CONVERSATION);
-            //    }
-            //}
         }
 
         // テスト用(レベルアップ処理)
@@ -233,12 +214,6 @@ public class CharacterMng : MonoBehaviour
         // 戦闘から逃げる
         if (!selectFlg_ && Input.GetKeyDown(KeyCode.LeftShift))
         {
-            // 敵オブジェクトを削除する(タグ検索)
-            //foreach (GameObject obj in GameObject.FindGameObjectsWithTag("Enemy"))
-            //{
-            //    Destroy(obj);
-            //}
-
             buttleMng_.CallDeleteEnemy();
 
             FieldMng.nowMode = FieldMng.MODE.SEARCH;
@@ -254,57 +229,102 @@ public class CharacterMng : MonoBehaviour
             selectFlg_ = false;
             buttleCommandRotate_.SetRotaFlg(!selectFlg_);   // コマンド回転を有効化
             buttleAnounceText_.text = announceText_[0];
+
+            // 魔法コマンドが有効だった時
+            if(setMagicObj_.activeSelf)
+            {
+                Debug.Log("魔法コマンドの選択を解除します");
+                setMagicObj_.SetActive(false);
+                setMagicObj_.GetComponent<ImageRotate>().enabled = false;
+            }
         }
 
         // キャラ毎のモーションを呼ぶ
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            // 選択されたコマンドに対する処理
-            switch (buttleCommandRotate_.GetNowCommand())
+            if(!setMagicObj_.activeSelf)    // 魔法コマンド選択中じゃないとき
             {
-                case ImageRotate.COMMAND.ATTACK:
-                    if (!selectFlg_)
-                    {
-                        // 自分の行動の前の人が動作終わっているか調べる
-                        if (!charasList_[(int)oldTurnChar_].GetIsMove())
+                // 選択されたコマンドに対する処理
+                switch (buttleCommandRotate_.GetNowCommand())
+                {
+                    case ImageRotate.COMMAND.ATTACK:
+                        if (!selectFlg_)
                         {
-                            if (anim_ == ANIMATION.IDLE || anim_ == ANIMATION.NON)
+                            // 自分の行動の前の人が動作終わっているか調べる
+                            if (!charasList_[(int)oldTurnChar_].GetIsMove())
                             {
-                                anim_ = ANIMATION.BEFORE;
+                                if (anim_ == ANIMATION.IDLE || anim_ == ANIMATION.NON)
+                                {
+                                    anim_ = ANIMATION.BEFORE;
+                                }
+                            }
+                            else
+                            {
+                                Debug.Log("前のキャラがアニメーション中");
                             }
                         }
                         else
                         {
-                            Debug.Log("前のキャラがアニメーション中");
+                            if (anim_ == ANIMATION.BEFORE)
+                            {
+                                BeforeAttack((int)nowTurnChar_);    // 攻撃準備
+                            }
                         }
-                    }
-                    else
-                    {
-                        if (anim_ == ANIMATION.BEFORE)
+
+                        break;
+                    case ImageRotate.COMMAND.MAGIC:
+
+                        if (!selectFlg_)
                         {
-                            BeforeAttack((int)nowTurnChar_);    // 攻撃準備
+                            // 自分の行動の前の人が動作終わっているか調べる
+                            if (!charasList_[(int)oldTurnChar_].GetIsMove())
+                            {
+                                Debug.Log("魔法コマンドが有効コマンドです");
+                                selectFlg_ = true;
+
+                                setMagicObj_.SetActive(true);
+                                setMagicObj_.GetComponent<ImageRotate>().enabled = true;
+                                buttleCommandRotate_.SetRotaFlg(true);
+
+                                //@ 行動中のキャラに設定された魔法を出す
+                                //@ まずは画像表示(とりあえず全部同じ画像へ)
+                                magicImage_[0].sprite = itemBagMng_.GetImageTest((int)nowTurnChar_);
+                                magicImage_[1].sprite = itemBagMng_.GetImageTest((int)nowTurnChar_);
+                                magicImage_[2].sprite = itemBagMng_.GetImageTest((int)nowTurnChar_);
+                                magicImage_[3].sprite = itemBagMng_.GetImageTest((int)nowTurnChar_);
+                            }
+                            else
+                            {
+                                Debug.Log("前のキャラがアニメーション中");
+                            }
                         }
-                    }
 
-                    break;
-                case ImageRotate.COMMAND.MAGIC:
-                    Debug.Log("魔法コマンドが有効コマンドです");
-                    break;
-                case ImageRotate.COMMAND.ITEM:
-                    Debug.Log("アイテムコマンドが有効コマンドです");
-                    break;
-                case ImageRotate.COMMAND.BARRIER:
-                    // 次の自分のターンまで防御力を1.5倍にする
-                    charasList_[(int)nowTurnChar_].SetBarrierNum(charasList_[(int)nowTurnChar_].Defence() / 2);
-                    // 次のキャラor敵に行動が回るようにanim_とoldAnim_を設定する
-                    anim_ = ANIMATION.IDLE;
-                    oldAnim_ = ANIMATION.NON;
+                        break;
+                    case ImageRotate.COMMAND.ITEM:
+                        Debug.Log("アイテムコマンドが有効コマンドです");
+                        break;
+                    case ImageRotate.COMMAND.BARRIER:
+                        // 次の自分のターンまで防御力を1.5倍にする
+                        charasList_[(int)nowTurnChar_].SetBarrierNum(charasList_[(int)nowTurnChar_].Defence() / 2);
+                        // 次のキャラor敵に行動が回るようにanim_とoldAnim_を設定する
+                        anim_ = ANIMATION.IDLE;
+                        oldAnim_ = ANIMATION.NON;
 
-                    Debug.Log("防御コマンドが有効コマンドです");
-                    break;
-                default:
-                    Debug.Log("無効なコマンドです");
-                    break;
+                        Debug.Log("防御コマンドが有効コマンドです");
+                        break;
+                    default:
+                        Debug.Log("無効なコマンドです");
+                        break;
+                }
+            }
+            else
+            {
+                // 魔法コマンド選択中のとき
+                Debug.Log("現在は魔法コマンドが有効コマンドです");
+
+                var tmp = (int)setMagicObj_.GetComponent<ImageRotate>().GetNowCommand() - 1;
+                Debug.Log(tmp + "番の魔法を使用しようとしています");
+                //var aa = charasList_[(int)nowTurnChar_].GetMagicNum(tmp);
             }
         }
 
@@ -636,11 +656,11 @@ public class CharacterMng : MonoBehaviour
             else
             {
                 Debug.Log(randLuck + ">" + tmpLuck + "以下なので、回避失敗");
+                damage = buttleMng_.GetDamageNum() - charasList_[num].Defence();
             }
         }
 
         // 通常ダメージ
-        damage = buttleMng_.GetDamageNum() - charasList_[num].Defence();
         if (damage <= 0)
         {
             Debug.Log("敵の攻撃力よりキャラの防御力が上回ったのでダメージが0になりました");

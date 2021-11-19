@@ -43,8 +43,8 @@ public class SaveCSV : MonoBehaviour
         string[] data = { set.name, set.Level.ToString(),set.HP.ToString(),set.MP.ToString(),
                           set.Attack.ToString(),set.MagicAttack.ToString(),set.Defence.ToString(),
                           set.Speed.ToString(),set.Luck.ToString(),set.AnimMax.ToString(),
-                          set.Magic0.ToString(),set.Magic1.ToString(),
-                          set.Magic2.ToString(),set.Magic3.ToString()};
+                          set.Magic[0].ToString(),set.Magic[1].ToString(),
+                          set.Magic[2].ToString(),set.Magic[3].ToString()};
         string write = string.Join(",", data);
         sw.WriteLine(write);
     }

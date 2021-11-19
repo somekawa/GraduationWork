@@ -73,8 +73,9 @@ public class Enemy_importer : AssetPostprocessor
                     cell = row.GetCell(12); p.MoveTime = (float)(cell == null ? 0 : cell.NumericCellValue);
                     cell = row.GetCell(13); p.MoveDistance = (float)(cell == null ? 0 : cell.NumericCellValue);
                     cell = row.GetCell(14); p.WeaponTagObjName = (cell == null ? "" : cell.StringCellValue);
+                    cell = row.GetCell(15); p.Weak = (int)(cell == null ? 0 : cell.NumericCellValue);
 
-                        data.param.Add(p);
+                    data.param.Add(p);
                     }
                     
                     // save scriptable object

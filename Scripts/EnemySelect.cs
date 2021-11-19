@@ -21,7 +21,7 @@ public class EnemySelect : MonoBehaviour
         MAX
     }
 
-    private SelectKey selectKey_ = SelectKey.NON;
+    private SelectKey selectKey_ = SelectKey.MAX;
 
     void Update()
     {

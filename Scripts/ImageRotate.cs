@@ -142,6 +142,7 @@ public class ImageRotate : MonoBehaviour
     public void SetRotaFlg(bool flag)
     {
         rotaFlg_ = flag;
-        this.gameObject.SetActive(flag);
+        // Commandオブジェクトの表示/非表示切替
+        transform.parent.gameObject.SetActive(flag);
     }
 }

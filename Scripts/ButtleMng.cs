@@ -12,7 +12,7 @@ public class ButtleMng : MonoBehaviour
 
     private bool setCallOnce_ = false;      // 戦闘モードに切り替わった最初のタイミングだけ切り替わる
 
-    private Transform buttleCommandUI_;         // 金の大枠を含めた情報を取得
+    //private Transform buttleCommandUI_;         // 金の大枠を含めた情報を取得
 
     private CharacterMng characterMng_;         // キャラクター管理クラスの情報
     private EnemyInstanceMng enemyInstanceMng_; // 敵インスタンス管理クラスの情報
@@ -28,7 +28,7 @@ public class ButtleMng : MonoBehaviour
         characterMng_ = GameObject.Find("CharacterMng").GetComponent<CharacterMng>();
         enemyInstanceMng_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>();
 
-        buttleCommandUI_ = buttleUICanvas.transform.Find("Command");
+        //buttleCommandUI_ = buttleUICanvas.transform.Find("Command");
         buttleUICanvas.gameObject.SetActive(false);
     }
 
@@ -89,7 +89,7 @@ public class ButtleMng : MonoBehaviour
             // キャラクターの行動
             characterMng_.Buttle();
             // コマンド状態の表示/非表示切替
-            buttleCommandUI_.gameObject.SetActive(!characterMng_.GetSelectFlg());
+            //buttleCommandUI_.gameObject.SetActive(!characterMng_.GetSelectFlg());
 
             // キャラクターの攻撃対象が最後の敵だった時
             if (characterMng_.GetLastEnemyToAttackFlg())

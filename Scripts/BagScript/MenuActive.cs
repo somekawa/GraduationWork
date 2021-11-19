@@ -232,6 +232,9 @@ public class MenuActive : MonoBehaviour
         // キャラクター数分のfor文を回す
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
         {
+            // 一時変数に入れてからじゃないとsetに入れられない
+            int[] tmpArray = { int.Parse(csvDatas[i + 1][10]), int.Parse(csvDatas[i + 1][11]), int.Parse(csvDatas[i + 1][12]), int.Parse(csvDatas[i + 1][13]) };
+
             CharaBase.CharacterSetting set = new CharaBase.CharacterSetting
             {
                 name = csvDatas[i + 1][0],
@@ -244,10 +247,7 @@ public class MenuActive : MonoBehaviour
                 Speed = int.Parse(csvDatas[i + 1][7]),
                 Luck = int.Parse(csvDatas[i + 1][8]),
                 AnimMax = float.Parse(csvDatas[i + 1][9]),
-                Magic0 = int.Parse(csvDatas[i + 1][10]),
-                Magic1 = int.Parse(csvDatas[i + 1][11]),
-                Magic2 = int.Parse(csvDatas[i + 1][12]),
-                Magic3 = int.Parse(csvDatas[i + 1][13])
+                Magic = tmpArray,
             };
             Debug.Log(csvDatas[i + 1][0] + "            キャラデータをロード中。残り" + i);
             SceneMng.SetCharasSettings(i, set);

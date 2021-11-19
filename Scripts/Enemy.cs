@@ -195,6 +195,11 @@ public class Enemy : CharaBase, InterfaceButtle
         }
     }
 
+    public int Weak()
+    {
+        return set_.Weak;
+    }
+
     public int Speed()
     {
         return set_.Speed;
@@ -229,7 +234,6 @@ public class Enemy : CharaBase, InterfaceButtle
     {
         deathFlg_ = flag;
     }
-
 
     public override void DamageAnim()
     {

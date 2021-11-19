@@ -26,10 +26,7 @@ public abstract class CharaBase : object
         public int Speed;           // この値にポイントを振り分けると素早さが上がる
         public int Luck;            // この値にポイントを振り分けると幸運が上がる
         public float AnimMax;       // 攻撃モーションのフレームを時間に直した値が入っている(モーション切り替えで使用する)
-        public int Magic0;
-        public int Magic1;
-        public int Magic2;
-        public int Magic3;
+        public int[] Magic;
 
         // 敵用の情報
         public int Exp;             // この敵を倒した際にキャラが得られる経験値
@@ -37,6 +34,7 @@ public abstract class CharaBase : object
         public float MoveTime;      // 移動時にdeltaTimeを割る値
         public float MoveDistance;  // キャラとの距離許容範囲
         public string WeaponTagObjName;  // CheckAttackHit.csがアタッチされているオブジェクトの名前
+        public int Weak;
     }
 
     public enum ANIMATION
@@ -77,6 +75,9 @@ public abstract class CharaBase : object
 
             setting_.maxHP = setting_.HP;
             setting_.maxMP = setting_.MP;
+
+            // 最大4つまでつけられるのでここで初期化しておく
+            setting_.Magic = new int[4];
         }
         else
         {
@@ -97,6 +98,7 @@ public abstract class CharaBase : object
             setting_.MoveTime = param.MoveTime;
             setting_.MoveDistance = param.MoveDistance;
             setting_.WeaponTagObjName = param.WeaponTagObjName;
+            setting_.Weak = param.Weak;
 
             setting_.animator = animator;
             setting_.isMove = false;

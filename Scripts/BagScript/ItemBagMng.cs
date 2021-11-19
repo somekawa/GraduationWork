@@ -99,13 +99,11 @@ public class ItemBagMng : MonoBehaviour
 
             charasList_ = SceneMng.charasList_;
             var data = SceneMng.GetCharasSettings(charaStringNum_);
-            setMagicNum_[charaStringNum_, 0] = data.Magic0;
-            setMagicNum_[charaStringNum_, 1] = data.Magic1;
-            setMagicNum_[charaStringNum_, 2] = data.Magic2;
-            setMagicNum_[charaStringNum_, 3] = data.Magic3;
 
             for (int i = 0; i < 4; i++)
             {
+                setMagicNum_[charaStringNum_, i] = data.Magic[i];
+
                 equipMagic_[i] = topicParent_.Find("MagicSetMng/MagicSet" + i + "/Icon").GetComponent<Image>();
                 Debug.Log(setMagicNum_[charaStringNum_, i]);
                 if (setMagicNum_[charaStringNum_, i] != setNullNum_)
@@ -274,20 +272,10 @@ public class ItemBagMng : MonoBehaviour
     {
         // キャラのステータス値を表示させたい
         var data = SceneMng.GetCharasSettings(charaStringNum_);
-        if (btnNumber_ == 0)
-        {
-            //  data.Magic0 = num;
-            charasList_[charaStringNum_].SetMagic0Num(num);
-            setMagicNum_[charaStringNum_, 0] = num;
-            Debug.Log(data.Magic0 + "を保存しました");
-        }
-        else
-        {
-            //data.Magic1 = num;
-            charasList_[charaStringNum_].SetMagic1Num(num);
-            setMagicNum_[charaStringNum_, 1] = num;
-            Debug.Log(data.Magic1 + "を保存しました");
-        }
+
+        charasList_[charaStringNum_].SetMagicNum(btnNumber_, num);
+        setMagicNum_[charaStringNum_, btnNumber_] = num;
+        Debug.Log(data.Magic[btnNumber_] + "を保存しました");
 
         saveCsvSc_.SaveStart();
         // キャラクター数分のfor文を回す
@@ -301,5 +289,10 @@ public class ItemBagMng : MonoBehaviour
     public int GetClickButtonNum()
     {
         return btnNumber_;
+    }
+
+    public Sprite GetImageTest(int num)
+    {
+        return equipMagic_[num].sprite;
     }
 }

@@ -285,7 +285,7 @@ public class EnemyInstanceMng : MonoBehaviour
 
             // 番号でどの敵をインスタンスするか決める
             int enemyNum = Random.Range(0, enemyTest.transform.childCount);
-            enemyNum = 1;   // 固定
+            enemyNum = 2;   // 固定
 
             if (eventEnemy_.Item1 == null)
             {
@@ -462,6 +462,7 @@ public class EnemyInstanceMng : MonoBehaviour
                 {
                     // 命中
                     Debug.Log(rand + "<=" + hitProbabilityOffset + "なので、命中");
+                    damage = buttleMng_.GetDamageNum() - enemyList_[num].Item1.Defence();
                 }
                 else
                 {
@@ -473,11 +474,16 @@ public class EnemyInstanceMng : MonoBehaviour
             else
             {
                 Debug.Log("命中率" + hitProbabilityOffset + "が100以上ならので、自動命中");
+                damage = buttleMng_.GetDamageNum() - enemyList_[num].Item1.Defence();
             }
         }
 
+        // 自分の弱点属性を確認する
+        var weakElement = enemyList_[num].Item1.Weak();
+        //@ ここで攻撃側の属性と一致してたらダメージ量を倍にするようにしたい
+
+
         // ダメージ値の算出
-        damage = buttleMng_.GetDamageNum() - enemyList_[num].Item1.Defence();
         if(damage <= 0)
         {
             Debug.Log("キャラの攻撃力より敵の防御力が上回ったのでダメージが0になりました");
