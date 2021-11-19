@@ -40,7 +40,7 @@ public class MagicCreate : MonoBehaviour
     private string allName_ = "";
     private int[] saveNumber_ = new int[(int)Bag_Word.WORD_MNG.MAX];// 選択したワードの番号を保存
     private int[] oldNumber_ = new int[(int)Bag_Word.WORD_MNG.MAX];
-    private int saveElementKind_ = 0;
+    private int[] saveWordNum_ = new int[(int)Bag_Word.WORD_MNG.MAX];
 
     // 矢印ボタン
     private Button[] arrowBtn_ = new Button[2];
@@ -585,16 +585,11 @@ public class MagicCreate : MonoBehaviour
         }
         //Debug.Log("選択したワード" + mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].name);
 
-        // Elementがどの属性なのかをチェック
-        if (kindNum_ == (int)Bag_Word.WORD_MNG.ELEMENT)
+        for (int i = 0; i < mngMaxCnt[i]; i++)
         {
-            for (int i = 0; i < (int)Bag_Magic.ELEMENT_KIND.MAX; i++)
+            if (word == mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].name)
             {
-                // Element選択中しか入らないからwordと比べる
-                if (Bag_Magic.elementString[i] == word)
-                {
-                    saveElementKind_ = i;
-                }
+                saveWordNum_[kindNum_] = i;
             }
         }
 
@@ -738,7 +733,14 @@ public class MagicCreate : MonoBehaviour
                 judgeBack_.gameObject.SetActive(true);
 
                 movePoint_.SetMiniGameJudge(MovePoint.JUDGE.NON);// 初期化しておく
-                bagMagic_.MagicCreateCheck(allName_, 100, 5, 5, saveElementKind_);// 出来上がった魔法を保存
+                                                                 // 出来上がった魔法を保存
+                bagMagic_.MagicCreateCheck(allName_, 100, 5,
+                saveWordNum_[(int)Bag_Word.WORD_MNG.HEAD],
+                            saveWordNum_[(int)Bag_Word.WORD_MNG.ELEMENT],
+                            saveWordNum_[(int)Bag_Word.WORD_MNG.TAIL],
+                            saveWordNum_[(int)Bag_Word.WORD_MNG.SUB1],
+                            saveWordNum_[(int)Bag_Word.WORD_MNG.SUB2],
+                            saveWordNum_[(int)Bag_Word.WORD_MNG.SUB3]);
 
                 yield return new WaitForSeconds(2.0f);
                 cancelBtn_.interactable = true;

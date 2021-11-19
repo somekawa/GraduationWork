@@ -30,8 +30,10 @@ public class PopListInTown : MonoBehaviour
     //private int singleMateriaCnt_ = 0;         // シートに記載されてる個数
 
     [SerializeField]
-    private GameObject materiaPlate;         // 素材を拾ったときに生成されるプレハブ
+    private GameObject itemStorePleate;         // 素材を拾ったときに生成されるプレハブ
     public static GameObject[] materiaPleate;  // 生成したプレハブを保存
+    public static Text[] activeText_;         // 表示する素材の名前
+    public static Text[] activePrice_;        // 表示する値段
 
     //--------------
 
@@ -61,7 +63,7 @@ public class PopListInTown : MonoBehaviour
 
     private GameObject DataPopPrefab_;
 
-    void Start()
+    void Awake()
     {
         DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
         popLists_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
@@ -92,14 +94,16 @@ public class PopListInTown : MonoBehaviour
         // 魔道具店関連
         maxMateriaCnt_ = popLists_.SetMaxMateriaCount();
         materiaPleate = new GameObject[maxMateriaCnt_];
+        activePrice_ = new Text[maxMateriaCnt_];
+        activeText_ = new Text[maxMateriaCnt_];
 
         for (int i = 0; i < maxMateriaCnt_; i++)
         {
-            materiaPleate[i] = Instantiate(materiaPlate,
+            materiaPleate[i] = Instantiate(itemStorePleate,
                 new Vector2(0, 0), Quaternion.identity, this.transform);
             materiaPleate[i].name = InitPopList.materiaData[i].name;
         }
-
+        Debug.Log("タウンでのデータを読み込み終わりました");
     }
 
     public int SetMaxBookCount()

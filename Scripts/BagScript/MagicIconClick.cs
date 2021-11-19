@@ -6,9 +6,9 @@ using UnityEngine.UI;
 public class MagicIconClick : MonoBehaviour
 {
     private EventSystem eventSystem_;// ボタンクリックのためのイベント処理
+    private GameObject clickbtn_;    // どのボタンをクリックしたか代入する変数
     private RectTransform rectItemBagMng_;
     private MenuActive menuActive_;
-    private GameObject clickbtn_;    // どのボタンをクリックしたか代入する変数
     private Text info_; // クリックした魔法を説明する欄
     private Image magicIcon_;
 
@@ -38,7 +38,7 @@ public class MagicIconClick : MonoBehaviour
         }
         // どの魔法ボタンに画像をセットするか
         int getNum = rectItemBagMng_.GetComponent<ItemBagMng>().GetClickButtonNum();
-        magicIcon_ = GameObject.Find("StatusMng/MagicSet" + getNum+"/Icon").GetComponent<Image>();
+        magicIcon_ = GameObject.Find("StatusMng/MagicSetMng/MagicSet" + getNum+"/Icon").GetComponent<Image>();
 
         // このCSがついているボタンの名前
         clickbtn_ = eventSystem_.currentSelectedGameObject;

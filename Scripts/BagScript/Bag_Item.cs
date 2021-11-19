@@ -128,7 +128,7 @@ public class Bag_Item : MonoBehaviour
 
     private void DataSave()
     {
-        Debug.Log("魔法が生成されました。セーブします");
+      //  Debug.Log("魔法が生成されました。セーブします");
 
         saveCsvSc_.SaveStart();
 

@@ -28,6 +28,9 @@ public abstract class CharaBase : object
         public float AnimMax;       // 攻撃モーションのフレームを時間に直した値が入っている(モーション切り替えで使用する)
         public int Magic0;
         public int Magic1;
+        public int Magic2;
+        public int Magic3;
+
         // 敵用の情報
         public int Exp;             // この敵を倒した際にキャラが得られる経験値
         public string Drop;         // この敵を倒した際にキャラが得られるドロップ素材

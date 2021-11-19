@@ -11,6 +11,17 @@ public class Bag_Magic : MonoBehaviour
     private const string saveDataFilePath_ = @"Assets/Resources/magicData.csv";
     List<string[]> csvDatas = new List<string[]>(); // CSVの中身を入れるリスト;
 
+    public enum HEAD_KIND
+    {
+        NON = -1,
+        SINGLE, // 0 単体
+        MULTIPLE,// 1 複数回
+        OVERALL,// 2 全体
+        MAX
+    }
+    public static string[] headString = new string[(int)HEAD_KIND.MAX] {
+    "単体","複数回","全体"};
+
     public enum ELEMENT_KIND
     {
         NON=-1,
@@ -26,13 +37,78 @@ public class Bag_Magic : MonoBehaviour
     public static string[] elementString = new string[(int)ELEMENT_KIND.MAX] {
     "炎","回復","水","補助","土","風","龍"};
 
+    public enum TAIL_KIND
+    {
+        NON = -1,
+        SMALL, // 0 小
+        MEDIUM,// 1 中
+        LARGE,// 2 大
+        MAXMUM,// 3 極大
+        MAX
+    }
+    public static string[] tailString = new string[(int)TAIL_KIND.MAX] {
+    "小","中","大","極大"};
+    public enum SUB1_KIND
+    {
+        NON = -1,
+        FELLOW,//味方
+        ENEMY,//敵
+        POISON,//毒
+        DARK,//暗闇
+        PARALYSIS,// 麻痺
+        DEATH,//即死
+        SUCTION,//吸収
+        TARGET,//必中
+        MAX
+    }
+    public static string[] sub1String_ = new string[(int)SUB1_KIND.MAX] {
+    "味方","敵","毒","暗闇","麻痺","即死","吸収","必中"};
+
+    public enum SUB2_KIND
+    {
+        NON = -1,
+        HP,//HP
+        MAGIC_ATTACK,// 魔法攻撃
+        PHYSICS_ATTACK,//物理攻撃
+        DEFENCE,//防御力
+        SPEED,//命中/回避
+        POISON,//毒
+        DARK,//暗闇
+        PARALYSIS,// 麻痺
+        DEATH,//即死
+        SUCTION,//吸収
+        TARGET,//必中
+        MAX
+    }
+    public static string[] sub2String_ = new string[(int)SUB2_KIND.MAX] {
+    "HP","魔法攻撃","物理攻撃","防御力","命中/回避","毒","暗闇","麻痺","即死","吸収","必中"};
+
+    public enum SUB3_KIND
+    {
+        NON = -1,
+        UP,//上昇、
+        DOWN,//低下、
+        REFLECTION,//反射
+        SUCTION,//吸収
+        TARGET,//必中
+        MAX
+    }
+    public static string[] sub3String_ = new string[(int)SUB3_KIND.MAX] {
+    "上昇","低下","反射","吸収","必中"};
+
+
+
     public struct MagicData
     {
         public string name;
         public int power;
         public int rate;
-        public int ability;
+        public int head;
         public int element;
+        public int tail;
+        public int sub1;
+        public int sub2;
+        public int sub3;
     }
     public static MagicData[] data = new MagicData[50];
 
@@ -71,10 +147,14 @@ public class Bag_Magic : MonoBehaviour
                 {
                     data[i].name = csvDatas[i + 1][0];
                     data[i].power = int.Parse(csvDatas[i + 1][1]);
-                    data[i].ability = int.Parse(csvDatas[i + 1][2]);
-                    data[i].rate = int.Parse(csvDatas[i + 1][3]);
+                    data[i].rate = int.Parse(csvDatas[i + 1][2]);
+                    data[i].head = int.Parse(csvDatas[i + 1][3]);
                     data[i].element = int.Parse(csvDatas[i + 1][4]);
-                   // data[i].battleSet0 = bool.Parse(csvDatas[i + 1][5]);
+                    data[i].tail = int.Parse(csvDatas[i + 1][5]);
+                    data[i].sub1 = int.Parse(csvDatas[i + 1][6]);
+                    data[i].sub2 = int.Parse(csvDatas[i + 1][7]);
+                    data[i].sub3 = int.Parse(csvDatas[i + 1][8]);
+                    // data[i].battleSet0 = bool.Parse(csvDatas[i + 1][5]);
 
                     elementNum_[i] = minElementNum_ + data[i].element;
                     Debug.Log(elementNum_[i] + "            残り" + data[i].power);
@@ -96,13 +176,18 @@ public class Bag_Magic : MonoBehaviour
         }
     }
 
-    public void MagicCreateCheck(string magic, int pow, int rateNum, int abilityNum,int element)
+    public void MagicCreateCheck(string magicName, int pow, int rateNum, 
+                                  int head, int element, int tail, int sub1, int sub2,int sub3)
     {
-        data[number_].name = magic;
+        data[number_].name = magicName;
         data[number_].power = pow;
         data[number_].rate = rateNum;
-        data[number_].ability = abilityNum;
+        data[number_].head = head;
         data[number_].element = element;
+        data[number_].tail = tail;
+        data[number_].sub1 = sub1;
+        data[number_].sub2 = sub2;
+        data[number_].sub3 = sub3;
         DataSave();
 
         elementNum_[number_] = minElementNum_ + data[number_].element;
@@ -154,9 +239,13 @@ public class Bag_Magic : MonoBehaviour
             {
                 name = csvDatas[i + 1][0],
                 power = int.Parse(csvDatas[i + 1][1]),
-                ability = int.Parse(csvDatas[i + 1][2]),
-                rate = int.Parse(csvDatas[i + 1][3]),
+                rate = int.Parse(csvDatas[i + 1][2]),
+                head = int.Parse(csvDatas[i + 1][3]),
                 element = int.Parse(csvDatas[i + 1][4]),
+                tail = int.Parse(csvDatas[i + 1][5]),
+                sub1 = int.Parse(csvDatas[i + 1][6]),
+                sub2 = int.Parse(csvDatas[i + 1][7]),
+                sub3 = int.Parse(csvDatas[i + 1][8]),
             };
         }
         Init();
@@ -164,7 +253,7 @@ public class Bag_Magic : MonoBehaviour
 
     private void DataSave()
     {
-        //  Debug.Log("魔法が生成されました。セーブします");
+        Debug.Log("魔法が生成されました。セーブします");
 
         saveCsvSc_.SaveStart();
 
