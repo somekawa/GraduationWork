@@ -233,7 +233,7 @@ public class MenuActive : MonoBehaviour
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
         {
             // 一時変数に入れてからじゃないとsetに入れられない
-            int[] tmpArray = { int.Parse(csvDatas[i + 1][10]), int.Parse(csvDatas[i + 1][11]), int.Parse(csvDatas[i + 1][12]), int.Parse(csvDatas[i + 1][13]) };
+            Bag_Magic.MagicData[] tmpArray = { Bag_Magic.data[int.Parse(csvDatas[i + 1][10])], Bag_Magic.data[int.Parse(csvDatas[i + 1][11])], Bag_Magic.data[int.Parse(csvDatas[i + 1][12])], Bag_Magic.data[int.Parse(csvDatas[i + 1][10])]  };
 
             CharaBase.CharacterSetting set = new CharaBase.CharacterSetting
             {

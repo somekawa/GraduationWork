@@ -254,12 +254,21 @@ public class Chara : CharaBase,InterfaceButtle
         barrierNum_ = num;
     }
 
+    //public void SetMagicNum(int arrayNum, int num = 0)
+    //{
+    //    set_.Magic[arrayNum] = num;
+    //}
+
+    //public int GetMagicNum(int arrayNum)
+    //{
+    //    return set_.Magic[arrayNum];
+    //}
     public void SetMagicNum(int arrayNum, int num = 0)
     {
-        set_.Magic[arrayNum] = num;
+        set_.Magic[arrayNum] =Bag_Magic.data[num];
     }
 
-    public int GetMagicNum(int arrayNum)
+    public Bag_Magic.MagicData GetMagicNum(int arrayNum)
     {
         return set_.Magic[arrayNum];
     }

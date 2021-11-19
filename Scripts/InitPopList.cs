@@ -34,7 +34,6 @@ public class InitPopList : MonoBehaviour
         FIELD2,
         FIELD3,
         FIELD4,
-        MATERIAS,
         MAX
     }
     private int fieldNumber_ = (int)FIELD_NUM.FOREST;  // 現在いるフィールドの番号

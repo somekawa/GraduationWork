@@ -11,7 +11,7 @@ public class ItemImageMng : MonoBehaviour
         ALCHEMY_MATERIA,
         ITEM,
         BOOK,
-        RECIPE,
+        MAGIC,
         RESTAURANT,
         MAX
     }
@@ -27,9 +27,10 @@ public class ItemImageMng : MonoBehaviour
         }
 
         spriteMap[IMAGE.ITEM] = ImageMng(1, 7, "/Item/Items01");
+        spriteMap[IMAGE.MAGIC] = ImageMng(1, 7, "/MagicImage");
 
         // 読み込みたいシート数、シート枚の大きさ、読み込みたい画像
-        spriteMap[IMAGE.MATERIA] = ImageMng(6, 7, "/Materia/Materia_Field");
+        spriteMap[IMAGE.MATERIA] = ImageMng(5, 7, "/Materia/Materia_Field");
         onceFlag_ = true;
     }
 

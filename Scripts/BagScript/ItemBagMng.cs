@@ -102,14 +102,16 @@ public class ItemBagMng : MonoBehaviour
 
             for (int i = 0; i < 4; i++)
             {
-                setMagicNum_[charaStringNum_, i] = data.Magic[i];
+                // setMagicNum_[charaStringNum_, i] = data.Magic[i];
+                setMagicNum_[charaStringNum_, i] = data.Magic[i].element;
+                 //   (int)charasList_[charaStringNum_].GetMagicNum(btnNumber_);
 
                 equipMagic_[i] = topicParent_.Find("MagicSetMng/MagicSet" + i + "/Icon").GetComponent<Image>();
                 Debug.Log(setMagicNum_[charaStringNum_, i]);
                 if (setMagicNum_[charaStringNum_, i] != setNullNum_)
                 {
                     // 魔法をセットしていたらその画像をステータス画面に出す
-                    equipMagic_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][Bag_Magic.elementNum_[setMagicNum_[charaStringNum_, i]]];
+                    equipMagic_[i].sprite =Bag_Magic.magicSpite[i];
                     equipMagic_[i].color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
                 }
             }
@@ -218,7 +220,7 @@ public class ItemBagMng : MonoBehaviour
         {
             if (setMagicNum_[charaStringNum_, i] != setNullNum_)
             {
-                equipMagic_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][Bag_Magic.elementNum_[setMagicNum_[charaStringNum_, i]]];
+                equipMagic_[i].sprite = Bag_Magic.magicSpite[i];
                 equipMagic_[i].color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
             }
         }
@@ -271,11 +273,8 @@ public class ItemBagMng : MonoBehaviour
     public void SetMagicCheck(int num)
     {
         // キャラのステータス値を表示させたい
-        var data = SceneMng.GetCharasSettings(charaStringNum_);
-
         charasList_[charaStringNum_].SetMagicNum(btnNumber_, num);
         setMagicNum_[charaStringNum_, btnNumber_] = num;
-        Debug.Log(data.Magic[btnNumber_] + "を保存しました");
 
         saveCsvSc_.SaveStart();
         // キャラクター数分のfor文を回す

@@ -44,7 +44,7 @@ public class MagicIconClick : MonoBehaviour
         clickbtn_ = eventSystem_.currentSelectedGameObject;
         // ƒ{ƒ^ƒ“–¼‚©‚ç”š‚Ì‚İ‚ğæ‚èo‚·
         int number = int.Parse(Regex.Replace(clickbtn_.name, @"[^0-9]", ""));
-        magicIcon_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][Bag_Magic.elementNum_[number]];
+        magicIcon_.sprite = Bag_Magic.magicSpite[number];
         magicIcon_.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
         //itemBagMng_.SetMagicCheck(number,true);
         rectItemBagMng_.GetComponent<ItemBagMng>().SetMagicCheck(number);

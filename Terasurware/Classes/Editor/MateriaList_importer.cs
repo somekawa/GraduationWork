@@ -10,7 +10,7 @@ using NPOI.SS.UserModel;
 public class MateriaList_importer : AssetPostprocessor
 {
     private static readonly string filePath = "Assets/ExcelData/MateriaList.xls";
-    private static readonly string[] sheetNames = { "M_Field0","M_Field1","M_Field2","M_Field3","M_Field4","M_Field5", };
+    private static readonly string[] sheetNames = { "M_Field0","M_Field1","M_Field2","M_Field3","M_Field4", };
     
     static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
     {

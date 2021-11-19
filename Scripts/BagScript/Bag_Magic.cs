@@ -31,11 +31,10 @@ public class Bag_Magic : MonoBehaviour
         ASSIST,  // 3 補助
         EARTH, // 4 土
         WIND, // 5 風
-        DRAGON, // 6 龍
         MAX
     }
     public static string[] elementString = new string[(int)ELEMENT_KIND.MAX] {
-    "炎","回復","水","補助","土","風","龍"};
+    "炎","回復","水","補助","土","風"};
 
     public enum TAIL_KIND
     {
@@ -109,8 +108,11 @@ public class Bag_Magic : MonoBehaviour
         public int sub1;
         public int sub2;
         public int sub3;
+      //  public Sprite sprite;
+       // public int imageNum;
     }
     public static MagicData[] data = new MagicData[50];
+    public static Sprite[] magicSpite = new Sprite[50];
 
     // バッグ表示用
     [SerializeField]
@@ -132,8 +134,8 @@ public class Bag_Magic : MonoBehaviour
 
     // 共通
     public static int number_ = 0;
-    private int minElementNum_ = 34;
-    public static int[] elementNum_ = new int[50];
+    //private int minElementNum_ = 34;
+  //  public static int[] elementNum_ = new int[50];
 
     public void Init()
     {
@@ -154,23 +156,25 @@ public class Bag_Magic : MonoBehaviour
                     data[i].sub1 = int.Parse(csvDatas[i + 1][6]);
                     data[i].sub2 = int.Parse(csvDatas[i + 1][7]);
                     data[i].sub3 = int.Parse(csvDatas[i + 1][8]);
+
+                    magicSpite[i]= ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[i].element];
+                    Debug.Log(data[i].element + "            残り" + data[i].power);
                     // data[i].battleSet0 = bool.Parse(csvDatas[i + 1][5]);
 
-                    elementNum_[i] = minElementNum_ + data[i].element;
-                    Debug.Log(elementNum_[i] + "            残り" + data[i].power);
+                    // elementNum_[i] = minElementNum_ + data[i].element;
                     // バッグ用
                     magicObject[i] = Instantiate(bagMagicUI, new Vector2(0, 0),
                                                 Quaternion.identity, bagMagicParent.transform);
                     magicObject[i].name = "Magic_" + i;
                     magicImage_[i] = magicObject[i].transform.Find("MagicIcon").GetComponent<Image>();
-                    magicImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][elementNum_[i]];
+                    magicImage_[i].sprite = magicSpite[i];
                    
                     // ステータス用の座標に変更
                     statusMagicObject[i] = Instantiate(statusMagicUI, new Vector2(0, 0),
                                                     Quaternion.identity, statusMagicParent.transform);
                     statusMagicObject[i].name = "Magic_" + i;
                     statusMagicImage_[i] = statusMagicObject[i].transform.Find("MagicIcon").GetComponent<Image>();
-                    statusMagicImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][elementNum_[i]];
+                    statusMagicImage_[i].sprite = magicSpite[i];
                 }
             }
         }
@@ -188,16 +192,15 @@ public class Bag_Magic : MonoBehaviour
         data[number_].sub1 = sub1;
         data[number_].sub2 = sub2;
         data[number_].sub3 = sub3;
+        //data[number_].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][element];
         DataSave();
-
-        elementNum_[number_] = minElementNum_ + data[number_].element;
         
         // バッグ用
         magicObject[number_] = Instantiate(bagMagicUI,new Vector2(0, 0),
                                             Quaternion.identity, bagMagicParent.transform);
         magicObject[number_].name = "Magic_" + number_;
         magicImage_[number_] = magicObject[number_].transform.Find("MagicIcon").GetComponent<Image>();
-        magicImage_[number_].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][elementNum_[number_]];
+        magicImage_[number_].sprite = magicSpite[data[number_].element];
         //Debug.Log(data[number_].name + "  " + data[number_].power + "  " + data[number_].rate + "  " + data[number_].ability);
         
         // ステータス用の座標に変更
@@ -205,7 +208,7 @@ public class Bag_Magic : MonoBehaviour
                                         Quaternion.identity, statusMagicParent.transform);
         statusMagicObject[number_].name = "Magic_" + number_;
         statusMagicImage_[number_] = statusMagicObject[number_].transform.Find("MagicIcon").GetComponent<Image>();
-        statusMagicImage_[number_].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][elementNum_[number_]];
+        statusMagicImage_[number_].sprite = magicSpite[data[number_].element];
        
         number_++;
     }
@@ -229,11 +232,11 @@ public class Bag_Magic : MonoBehaviour
             // カンマ区切りでリストへ登録していく(2次元配列状態になる[行番号][カンマ区切り])
             csvDatas.Add(texts[i].Split(','));
         }
-       // Debug.Log("データ数" + csvDatas.Count);
-        number_ = csvDatas.Count - 1;
+        Debug.Log("データ数" + csvDatas.Count);
+        number_ = csvDatas.Count- 1;
 
         // 魔法の個数分回す
-        for (int i = 1; i < number_; i++)
+        for (int i = 0; i < number_; i++)
         {
             MagicData set = new MagicData
             {
@@ -246,6 +249,8 @@ public class Bag_Magic : MonoBehaviour
                 sub1 = int.Parse(csvDatas[i + 1][6]),
                 sub2 = int.Parse(csvDatas[i + 1][7]),
                 sub3 = int.Parse(csvDatas[i + 1][8]),
+               // sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][int.Parse(csvDatas[i + 1][9])],
+           // imageNum = int.Parse(csvDatas[i + 1][9]),
             };
         }
         Init();
