@@ -252,6 +252,7 @@ public class MenuActive : MonoBehaviour
             Debug.Log(csvDatas[i + 1][0] + "            キャラデータをロード中。残り" + i);
             SceneMng.SetCharasSettings(i, set);
         }
+        parentRectTrans_[(int)CANVAS.BAG].GetComponent<ItemBagMng>().MagicInit();
     }
 
     public bool GetActiveFlag()
