@@ -150,7 +150,7 @@ public class Enemy : CharaBase, InterfaceButtle
     {
         Debug.Log("•ŠíØ‘ÖI");
     }
-    public override int Defence()
+    public override int Defence(bool flag)
     {
         return set_.Defence;
     }

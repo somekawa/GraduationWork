@@ -119,7 +119,7 @@ public abstract class CharaBase : object
     // 抽象関数(中身は継承先で実装する必要がある）
     public abstract void LevelUp();
     public abstract void Weapon();
-    public abstract int Defence();
+    public abstract int Defence(bool flag);
     public abstract void Magic();
     public abstract void Item();
     public abstract bool ChangeNextChara(); // 次のキャラの操作に切り替える為の準備処理

@@ -267,6 +267,8 @@ public class CharacterMng : MonoBehaviour
                         {
                             if (anim_ == ANIMATION.BEFORE)
                             {
+                                // 防御用の値を0に戻す
+                                charasList_[(int)nowTurnChar_].SetBarrierNum();
                                 BeforeAttack((int)nowTurnChar_);    // 攻撃準備
                             }
                         }
@@ -279,6 +281,9 @@ public class CharacterMng : MonoBehaviour
                             // 自分の行動の前の人が動作終わっているか調べる
                             if (!charasList_[(int)oldTurnChar_].GetIsMove())
                             {
+                                // 防御用の値を0に戻す
+                                charasList_[(int)nowTurnChar_].SetBarrierNum();
+
                                 Debug.Log("魔法コマンドが有効コマンドです");
                                 selectFlg_ = true;
 
@@ -286,12 +291,20 @@ public class CharacterMng : MonoBehaviour
                                 setMagicObj_.GetComponent<ImageRotate>().enabled = true;
                                 buttleCommandRotate_.SetRotaFlg(true);
 
-                                //@ 行動中のキャラに設定された魔法を出す
-                                //@ まずは画像表示(とりあえず全部同じ画像へ)
-                                magicImage_[0].sprite = itemBagMng_.GetImageTest((int)nowTurnChar_);
-                                magicImage_[1].sprite = itemBagMng_.GetImageTest((int)nowTurnChar_);
-                                magicImage_[2].sprite = itemBagMng_.GetImageTest((int)nowTurnChar_);
-                                magicImage_[3].sprite = itemBagMng_.GetImageTest((int)nowTurnChar_);
+                                //@ 行動中のキャラに設定された魔法画像を描画する
+                                for (int i = 0; i < 4; i++)
+                                {
+                                    if (charasList_[(int)nowTurnChar_].GetImageTest(i) == null)
+                                    {
+                                        // nullのときは魔法を設定していないから透過する
+                                        magicImage_[i].color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+                                    }
+                                    else
+                                    {
+                                        magicImage_[i].color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+                                        magicImage_[i].sprite = charasList_[(int)nowTurnChar_].GetImageTest(i);
+                                    }
+                                }
                             }
                             else
                             {
@@ -301,11 +314,13 @@ public class CharacterMng : MonoBehaviour
 
                         break;
                     case ImageRotate.COMMAND.ITEM:
+                        // 防御用の値を0に戻す
+                        charasList_[(int)nowTurnChar_].SetBarrierNum();
                         Debug.Log("アイテムコマンドが有効コマンドです");
                         break;
                     case ImageRotate.COMMAND.BARRIER:
                         // 次の自分のターンまで防御力を1.5倍にする
-                        charasList_[(int)nowTurnChar_].SetBarrierNum(charasList_[(int)nowTurnChar_].Defence() / 2);
+                        charasList_[(int)nowTurnChar_].SetBarrierNum(charasList_[(int)nowTurnChar_].Defence(false) / 2);                       
                         // 次のキャラor敵に行動が回るようにanim_とoldAnim_を設定する
                         anim_ = ANIMATION.IDLE;
                         oldAnim_ = ANIMATION.NON;
@@ -313,6 +328,8 @@ public class CharacterMng : MonoBehaviour
                         Debug.Log("防御コマンドが有効コマンドです");
                         break;
                     default:
+                        // 防御用の値を0に戻す
+                        charasList_[(int)nowTurnChar_].SetBarrierNum();
                         Debug.Log("無効なコマンドです");
                         break;
                 }
@@ -320,11 +337,26 @@ public class CharacterMng : MonoBehaviour
             else
             {
                 // 魔法コマンド選択中のとき
+                buttleAnounceText_.text = announceText_[1];
                 Debug.Log("現在は魔法コマンドが有効コマンドです");
 
                 var tmp = (int)setMagicObj_.GetComponent<ImageRotate>().GetNowCommand() - 1;
                 Debug.Log(tmp + "番の魔法を使用しようとしています");
-                //var aa = charasList_[(int)nowTurnChar_].GetMagicNum(tmp);
+
+                // 範囲外かの確認をする
+                if (charasList_[(int)nowTurnChar_].CheckMagicNum(tmp))
+                {
+                    var aa = charasList_[(int)nowTurnChar_].GetMagicNum(tmp);
+
+                    //@ aa変数から単体か全体かの情報を取って、単体なら敵指定を表示する
+                    buttleEnemySelect_.SetActive(true);
+                    buttleCommandRotate_.SetRotaFlg(false);
+                    setMagicObj_.SetActive(false);
+                }
+                else
+                {
+                    Debug.Log("範囲外の魔法番号です。選択しなおしてください");
+                }
             }
         }
 
@@ -377,12 +409,6 @@ public class CharacterMng : MonoBehaviour
                     anim_ = ANIMATION.IDLE;
                 }
 
-                // 次の行動キャラのHPバーを表示する
-                //charaHPBar.SetHPBar(charasList_[(int)nowTurnChar_].HP(), charasList_[(int)nowTurnChar_].MaxHP());
-
-                // 防御用の値を0に戻す
-                charasList_[(int)nowTurnChar_].SetBarrierNum();
-
                 selectFlg_ = false;
 
                 // 矢印位置のリセットを行う(falseなら、敵を全て倒したということなのでフラグを切り替える)
@@ -416,10 +442,6 @@ public class CharacterMng : MonoBehaviour
             case ANIMATION.AFTER:
                 AfterAttack((int)nowTurnChar_);
                 break;
-            //case ANIMATION.DEATH:
-                //Debug.Log("死亡中だから行動を飛ばす");
-                //anim_ = ANIMATION.IDLE;
-                //break;
             default:
                 break;
         }
@@ -597,7 +619,7 @@ public class CharacterMng : MonoBehaviour
             // クリティカル発生(必中+ダメージ2倍)10はクリティカルの基礎値
             Debug.Log(criticalRand + "<=" + (10 + buttleMng_.GetLuckNum()) + "なので、敵の攻撃がクリティカル！");
             // クリティカルダメージ
-            damage = (buttleMng_.GetDamageNum() * 2) - charasList_[num].Defence();
+            damage = (buttleMng_.GetDamageNum() * 2) - charasList_[num].Defence(true);
         }
         else
         {
@@ -656,7 +678,7 @@ public class CharacterMng : MonoBehaviour
             else
             {
                 Debug.Log(randLuck + ">" + tmpLuck + "以下なので、回避失敗");
-                damage = buttleMng_.GetDamageNum() - charasList_[num].Defence();
+                damage = buttleMng_.GetDamageNum() - charasList_[num].Defence(true);
             }
         }
 

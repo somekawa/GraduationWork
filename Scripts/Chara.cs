@@ -133,10 +133,10 @@ public class Chara : CharaBase,InterfaceButtle
         Debug.Log("武器切替！");
     }
 
-    public override int Defence()
+    public override int Defence(bool flag)
     {
         // 被ダメージアニメーションを開始
-        set_.animator.SetBool(key_isDamage, true);
+        set_.animator.SetBool(key_isDamage, flag);
         return set_.Defence + barrierNum_;
     }
 
@@ -269,9 +269,30 @@ public class Chara : CharaBase,InterfaceButtle
       //  Debug.Log(set_.Magic[arrayNum].name);
     }
 
-    public int GetMagicNum(int arrayNum)
+    public Bag_Magic.MagicData GetMagicNum(int arrayNum)
     {
-        return set_.Magic[arrayNum];
+        return Bag_Magic.data[set_.Magic[arrayNum]];
+    }
+
+    public Sprite GetImageTest(int num)
+    {
+        // 魔法装備無し
+        if(set_.Magic[num] == 0)
+        {
+            return null;
+        }
+
+        return ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][Bag_Magic.data[set_.Magic[num]].element];
+    }
+
+    public bool CheckMagicNum(int num)
+    {
+        if(num < 0 || num >= 4)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public bool GetDeathFlg()
