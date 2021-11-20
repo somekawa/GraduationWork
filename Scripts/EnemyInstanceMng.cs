@@ -440,7 +440,7 @@ public class EnemyInstanceMng : MonoBehaviour
             // クリティカル発生(必中+ダメージ2倍)10はクリティカルの基礎値
             Debug.Log(criticalRand + "<=" + (10 + buttleMng_.GetLuckNum()) + "なので、キャラの攻撃がクリティカル！");
             // クリティカルダメージ
-            damage = (buttleMng_.GetDamageNum() * 2) - enemyList_[num].Item1.Defence();
+            damage = (buttleMng_.GetDamageNum() * 2) - enemyList_[num].Item1.Defence(true);
         }
         else
         {
@@ -462,7 +462,7 @@ public class EnemyInstanceMng : MonoBehaviour
                 {
                     // 命中
                     Debug.Log(rand + "<=" + hitProbabilityOffset + "なので、命中");
-                    damage = buttleMng_.GetDamageNum() - enemyList_[num].Item1.Defence();
+                    damage = buttleMng_.GetDamageNum() - enemyList_[num].Item1.Defence(true);
                 }
                 else
                 {
@@ -474,7 +474,7 @@ public class EnemyInstanceMng : MonoBehaviour
             else
             {
                 Debug.Log("命中率" + hitProbabilityOffset + "が100以上ならので、自動命中");
-                damage = buttleMng_.GetDamageNum() - enemyList_[num].Item1.Defence();
+                damage = buttleMng_.GetDamageNum() - enemyList_[num].Item1.Defence(true);
             }
         }
 
