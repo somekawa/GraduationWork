@@ -51,16 +51,10 @@ public class Bag_Word : MonoBehaviour
         for (int i = 0; i < (int)InitPopList.WORD.INFO; i++)
         {
             maxCnt_[i] = InitPopList.maxWordCnt[i];
+            // 事前に生成していた情報を取得
+            wordState[(InitPopList.WORD)i] = InitWordState((InitPopList.WORD)i, maxCnt_[i]);
             //  Debug.Log(i + "       " + maxCnt_[i]);
         }
-
-        for (int k = 0; k < (int)InitPopList.WORD.INFO; k++)
-        {
-            // Debug.Log((InitPopList.WORD)k + " " + maxCnt_[k]);
-            // 事前に生成していた情報を取得
-            wordState[(InitPopList.WORD)k] = InitWordState((InitPopList.WORD)k, maxCnt_[k]);
-        }
-        //Debug.Log(wordState[InitPopList.WORD.ELEMENT_ATTACK][4].name);
 
         // 一番初めに出てくるワードの表示位置が違ったら、表示位置をバッグにする
         if (wordState[InitPopList.WORD.HEAD][0].pleate.transform.parent != wordParent.transform)

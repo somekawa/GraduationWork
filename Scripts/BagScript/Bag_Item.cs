@@ -99,7 +99,7 @@ public class Bag_Item : MonoBehaviour
 
     public void DataLoad()
     {
-        Debug.Log("ロードします");
+       // Debug.Log("ロードします");
 
         csvDatas.Clear();
 
@@ -111,7 +111,7 @@ public class Bag_Item : MonoBehaviour
             // カンマ区切りでリストへ登録していく(2次元配列状態になる[行番号][カンマ区切り])
             csvDatas.Add(texts[i].Split(','));
         }
-        Debug.Log("データ数" + csvDatas.Count);
+       // Debug.Log("データ数" + csvDatas.Count);
 
 
         // アイテム個数分回す

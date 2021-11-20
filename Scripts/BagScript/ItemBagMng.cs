@@ -15,6 +15,8 @@ public class ItemBagMng : MonoBehaviour
 
     [SerializeField]
     private Sprite[] CharaImage;
+    [SerializeField]
+    private RectTransform statusMngObj;
 
     private RectTransform itemBagChild_;// itemBag_の子
 
@@ -43,7 +45,8 @@ public class ItemBagMng : MonoBehaviour
     private RectTransform statusMagicCheck_;// ステータス画面で魔法を表示するための親
     private Image[] equipMagic_ = new Image[4];
     private int[,] setMagicNum_ = new int[(int)SceneMng.CHARACTERNUM.MAX, 4];
-    private int setNullNum_ = 100;// 魔法が装備されてないときの番号
+   private Bag_Magic.MagicData[] test = new Bag_Magic.MagicData[(int)SceneMng.CHARACTERNUM.MAX];
+    private int setNullNum_ = 0;// 魔法が装備されてないときの番号
 
     // ItemBox選択時
     private RectTransform[] mngs_ = new RectTransform[(int)TOPIC.MAX];
@@ -90,19 +93,19 @@ public class ItemBagMng : MonoBehaviour
             eventSystem_ = GameObject.Find("EventSystem").GetComponent<EventSystem>();
         }
 
-        RectTransform topicParent_ = GameObject.Find("StatusMng").GetComponent<RectTransform>();
+      //  RectTransform topicParent_ = GameObject.Find("StatusMng").GetComponent<RectTransform>();
         if (charaNameTopicText_ == null)
         {
-            charaNameTopicText_ = topicParent_.transform.Find("Topics/TopicName").GetComponent<Text>();
+            charaNameTopicText_ = statusMngObj.transform.Find("Topics/TopicName").GetComponent<Text>();
             charaNameTopicText_.text = charaTopicString_[(int)SceneMng.CHARACTERNUM.UNI];
-            statusMagicCheck_ = topicParent_.Find("MagicCheck").GetComponent<RectTransform>();
+            statusMagicCheck_ = statusMngObj.Find("MagicCheck").GetComponent<RectTransform>();
 
         }
 
         if (charaImg_ == null)
         {
-            charaImgRect_ = topicParent_.transform.Find("CharaImage").GetComponent<RectTransform>();
-            charaImg_ = topicParent_.transform.Find("CharaImage").GetComponent<Image>();
+            charaImgRect_ = statusMngObj.transform.Find("CharaImage").GetComponent<RectTransform>();
+            charaImg_ = statusMngObj.transform.Find("CharaImage").GetComponent<Image>();
             MagicInit();
         }
 
@@ -111,32 +114,46 @@ public class ItemBagMng : MonoBehaviour
         charaImg_.sprite = CharaImage[charaStringNum_];
 
         menuActive_.ViewStatus(charaStringNum_);
+        statusMagicCheck_.gameObject.SetActive(false);
     }
 
     public void MagicInit()
     {
         charasList_ = SceneMng.charasList_;
-        var data = SceneMng.GetCharasSettings(charaStringNum_);
 
         for (int c = 0; c < (int)SceneMng.CHARACTERNUM.MAX; c++)
         {
+            var data = SceneMng.GetCharasSettings(c);
             for (int i = 0; i < 4; i++)
             {
-                // setMagicNum_[charaStringNum_, i] = data.Magic[i];
-                setMagicNum_[c, i] = data.Magic[i].element;
-                //   (int)charasList_[charaStringNum_].GetMagicNum(btnNumber_);
+                setMagicNum_[c, i] = Bag_Magic.data[data.Magic[i]].element;
+                Debug.Log((SceneMng.CHARACTERNUM)c+"の"+i+"番目:"+ data.Magic[i]+ "番の魔法/名前："+ 
+                    Bag_Magic.data[data.Magic[i]].name +
+                    "/エレメント番号"+ Bag_Magic.data[data.Magic[i]].element);
 
-                equipMagic_[i] = GameObject.Find("StatusMng/MagicSetMng/MagicSet" + i + "/Icon").GetComponent<Image>();
-                Debug.Log(setMagicNum_[c, i]);
-                if (setMagicNum_[c, i] != setNullNum_)
+                if (statusMngObj.gameObject.activeSelf == true)
                 {
-                    // 魔法をセットしていたらその画像をステータス画面に出す
-                    equipMagic_[i].sprite = Bag_Magic.magicSpite[i];
-                    equipMagic_[i].color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+                    // StatusMngがアクティブ状態なら魔法セット先を探す
+                    equipMagic_[i] = GameObject.Find("StatusMng/MagicSetMng/MagicSet" + i + "/Icon").GetComponent<Image>();
+                    Debug.Log(equipMagic_[i].name);
+                    if (data.Magic[i] != setNullNum_)
+                    {
+                        // 魔法をセットしていたらその画像をステータス画面に出す
+                        equipMagic_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][setMagicNum_[c, i]];
+                        //Bag_Magic.magicSpite[i];
+                        equipMagic_[i].color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+                    }
+                    else
+                    {
+                        equipMagic_[i].sprite = null;
+                        equipMagic_[i].color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+                       // Debug.Log(i + "番目に魔法はないです");
+                    }
                 }
+
+                // Debug.Log(setMagicNum_[c, i]);
             }
         }
-        statusMagicCheck_.gameObject.SetActive(false);
     }
 
 
@@ -149,7 +166,7 @@ public class ItemBagMng : MonoBehaviour
                 stringNum_ = (int)TOPIC.ITEM;
             }
             topicText_.text = topicString_[stringNum_];
-            Debug.Log("右矢印をクリック" + stringNum_);
+          //  Debug.Log("右矢印をクリック" + stringNum_);
         }
         else if (menuActive_.GetNowMenuCanvas() == MenuActive.CANVAS.STATUS)
         {
@@ -164,7 +181,7 @@ public class ItemBagMng : MonoBehaviour
                 charaStringNum_ = (int)SceneMng.CHARACTERNUM.UNI;
             }
             ArrowCommon();
-            Debug.Log("右矢印をクリック" + charaStringNum_);
+        //    Debug.Log("右矢印をクリック" + charaStringNum_);
         }
         else
         {
@@ -186,7 +203,7 @@ public class ItemBagMng : MonoBehaviour
                 stringNum_ = (int)TOPIC.MAGIC;
             }
             topicText_.text = topicString_[stringNum_];
-            Debug.Log("左矢印をクリック" + stringNum_);
+          //  Debug.Log("左矢印をクリック" + stringNum_);
         }
         else if (menuActive_.GetNowMenuCanvas() == MenuActive.CANVAS.STATUS)
         {
@@ -201,7 +218,7 @@ public class ItemBagMng : MonoBehaviour
                 charaStringNum_ = (int)SceneMng.CHARACTERNUM.JACK;
             }
             ArrowCommon();
-            Debug.Log("左矢印をクリック" + charaStringNum_);
+           // Debug.Log("左矢印をクリック" + charaStringNum_);
         }
         else
         {
@@ -232,12 +249,18 @@ public class ItemBagMng : MonoBehaviour
                 equipMagic_[i].sprite = Bag_Magic.magicSpite[i];
                 equipMagic_[i].color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
             }
+            else
+            {
+                equipMagic_[i].sprite = null;
+                equipMagic_[i].color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+
+            }
         }
     }
 
     public void ActiveRectTransform()
     {
-        Debug.Log(mngs_[stringNum_].gameObject.name + "を表示します               " + stringNum_);
+       // Debug.Log(mngs_[stringNum_].gameObject.name + "を表示します               " + stringNum_);
 
         for (int i = 0; i < (int)TOPIC.MAX; i++)
         {
@@ -245,7 +268,7 @@ public class ItemBagMng : MonoBehaviour
             {
                 // 選択のものを表示
                 mngs_[i].gameObject.SetActive(true);
-                Debug.Log(mngs_[i].gameObject.name + "を表示しています");
+               // Debug.Log(mngs_[i].gameObject.name + "を表示しています");
             }
             else
             {
@@ -281,8 +304,10 @@ public class ItemBagMng : MonoBehaviour
 
     public void SetMagicCheck(int num)
     {
-        // キャラのステータス値を表示させたい
-        charasList_[charaStringNum_].SetMagicNum(btnNumber_, num);
+        // 魔法をセットしたらセーブする
+        Debug.Log("クリックしたボタンの番号：" + num);
+      //  test[btnNumber_] = Bag_Magic.data[num];
+        charasList_[charaStringNum_].SetMagicNum(btnNumber_,num);
         setMagicNum_[charaStringNum_, btnNumber_] = num;
 
         saveCsvSc_.SaveStart();

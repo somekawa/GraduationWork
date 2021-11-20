@@ -263,12 +263,13 @@ public class Chara : CharaBase,InterfaceButtle
     //{
     //    return set_.Magic[arrayNum];
     //}
-    public void SetMagicNum(int arrayNum, int num = 0)
+    public void SetMagicNum(int arrayNum,int num = 0)
     {
-        set_.Magic[arrayNum] =Bag_Magic.data[num];
+        set_.Magic[arrayNum] = num;
+      //  Debug.Log(set_.Magic[arrayNum].name);
     }
 
-    public Bag_Magic.MagicData GetMagicNum(int arrayNum)
+    public int GetMagicNum(int arrayNum)
     {
         return set_.Magic[arrayNum];
     }

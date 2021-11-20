@@ -212,7 +212,8 @@ public class MenuActive : MonoBehaviour
         saveCsvSc_.SaveEnd();
     }
 
-    private void DataLoad()
+   // private void DataLoad()
+    public void DataLoad()
     {
         Debug.Log("ロードキー押下");
 
@@ -232,8 +233,15 @@ public class MenuActive : MonoBehaviour
         // キャラクター数分のfor文を回す
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
         {
-            // 一時変数に入れてからじゃないとsetに入れられない
-            Bag_Magic.MagicData[] tmpArray = { Bag_Magic.data[int.Parse(csvDatas[i + 1][10])], Bag_Magic.data[int.Parse(csvDatas[i + 1][11])], Bag_Magic.data[int.Parse(csvDatas[i + 1][12])], Bag_Magic.data[int.Parse(csvDatas[i + 1][10])]  };
+            //// 一時変数に入れてからじゃないとsetに入れられない
+            int[] tmpArray = { int.Parse(csvDatas[i + 1][10]),
+                                int.Parse(csvDatas[i + 1][11]), 
+                                int.Parse(csvDatas[i + 1][12]), 
+                                int.Parse(csvDatas[i + 1][13]) };
+            Debug.Log(Bag_Magic.data[tmpArray[0]].element);
+            Debug.Log(Bag_Magic.data[tmpArray[1]].element);
+            Debug.Log(Bag_Magic.data[tmpArray[2]].element);
+            Debug.Log(Bag_Magic.data[tmpArray[3]].element);
 
             CharaBase.CharacterSetting set = new CharaBase.CharacterSetting
             {

@@ -37,9 +37,10 @@ public class UniHouseMng : MonoBehaviour
 
         // バッグ関連
         GameObject.Find("Managers").GetComponent<Bag_Word>().Init();
-        GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
         GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
         GameObject.Find("Managers").GetComponent<Bag_Materia>().Init();
+        GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
+        GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad();
 
         // メインカメラを最初にアクティブにする
         var cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
@@ -76,8 +77,8 @@ public class UniHouseMng : MonoBehaviour
         {
             magicCreateMng.gameObject.SetActive(true);
             uniHouseCanvas.gameObject.SetActive(false);
-            GameObject.Find("MagicCreateMng").GetComponent<MagicCreate>().Init();
+          GameObject.Find("MagicCreateMng").GetComponent<MagicCreate>().Init();
         }
-        Debug.Log("ワード合成ボタンが押下されました");
+        Debug.Log("魔法作成ボタンが押下されました");
     }
 }
