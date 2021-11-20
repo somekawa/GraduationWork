@@ -58,6 +58,8 @@ public class MenuActive : MonoBehaviour
     private WarpField warpField_;
 
     private HouseInteriorMng interiorMng_;
+    private Bag_Magic bagMagic_;
+
     void Awake()
     {
         saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveCSV>();
@@ -71,6 +73,8 @@ public class MenuActive : MonoBehaviour
         parentRectTrans_[(int)CANVAS.BAG] = parentCanvas_.transform.Find("ItemBagMng").GetComponent<RectTransform>();
         parentRectTrans_[(int)CANVAS.STATUS] = parentCanvas_.transform.Find("StatusMng").GetComponent<RectTransform>();
         parentRectTrans_[(int)CANVAS.OTHER] = parentCanvas_.transform.Find("OtherUI").GetComponent<RectTransform>();
+
+        bagMagic_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Magic>();
 
         // バッグ（左下）の画像
         bagImage_ = parentRectTrans_[(int)CANVAS.MENU].Find("BagImage").GetComponent<Image>();
@@ -229,6 +233,8 @@ public class MenuActive : MonoBehaviour
         }
 
         Debug.Log("データ数" + csvDatas.Count);
+
+        bagMagic_.DataLoad();
 
         // キャラクター数分のfor文を回す
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
