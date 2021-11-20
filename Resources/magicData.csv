@@ -1,2 +1,4 @@
-﻿MagicName,Power,Rate,Head,Element,Tail,Sub1,Sub2,Sub3
-全体水大毒必中,100,5,2,3,2,2,10,0
+﻿Number,Name,Power,Rate,Head,Element,Tail,Sub1,Sub2,Sub3
+0,Error,-1,-1,-1,-1,-1,-1,-1,-1
+1,複数回水大,100,5,1,3,2,0,0,0
+2,単体補助極大,100,5,0,1,3,0,0,0
