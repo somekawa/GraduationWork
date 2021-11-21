@@ -10,6 +10,8 @@ public class EnemySelect : MonoBehaviour
     private System.Tuple<List<Vector3>, List<bool>> posList_;
     private List<GameObject> targetImageObjList_ = new List<GameObject>();   // 敵指定マークをリストに保存する
 
+    private bool allSelectFlg_; // true:複数or全体攻撃,false:単体攻撃
+    private bool randFlg_;      // true:複数,false:全体攻撃
     private int selectNum_ = 0;
     private readonly float posOffset_Y = 1.5f;
 
@@ -30,23 +32,36 @@ public class EnemySelect : MonoBehaviour
             return;
         }
 
-        // 常に回転させていたい
-        targetImageObjList_[selectNum_].transform.Rotate(0.0f, 0.0f, 120.0f * Time.deltaTime);
-
-        if (Input.GetKeyDown(KeyCode.J))
+        if(allSelectFlg_)
         {
-            selectKey_ = SelectKey.UP;
-        }
-        else if (Input.GetKeyDown(KeyCode.H))
-        {
-            selectKey_ = SelectKey.DOWN;
+            // 攻撃対象が複数or全体
+            // 常に回転させていたい
+            for(int i = 0; i < targetImageObjList_.Count; i++)
+            {
+                targetImageObjList_[i].transform.Rotate(0.0f, 0.0f, 120.0f * Time.deltaTime);
+            }
         }
         else
         {
-            selectKey_ = SelectKey.NON;
-        }
+            // 攻撃対象が単体
+            // 常に回転させていたい
+            targetImageObjList_[selectNum_].transform.Rotate(0.0f, 0.0f, 120.0f * Time.deltaTime);
 
-        MoveSelectKey(selectKey_);
+            if (Input.GetKeyDown(KeyCode.J))
+            {
+                selectKey_ = SelectKey.UP;
+            }
+            else if (Input.GetKeyDown(KeyCode.H))
+            {
+                selectKey_ = SelectKey.DOWN;
+            }
+            else
+            {
+                selectKey_ = SelectKey.NON;
+            }
+
+            MoveSelectKey(selectKey_);
+        }
     }
 
     // falseになっているposListがあったらアイコン設置位置を飛ばす処理
@@ -182,7 +197,8 @@ public class EnemySelect : MonoBehaviour
     // CharacterMng.cs側で表示/非表示を変更できるようにする
     public void SetActive(bool flag)
     {
-        if(!flag)
+        allSelectFlg_ = false;
+        if (!flag)
         {
             selectKey_ = SelectKey.MAX;
             for (int i = 0; i < this.transform.childCount; i++)
@@ -197,23 +213,79 @@ public class EnemySelect : MonoBehaviour
         }
     }
 
+    // 全ての敵選択マークを表示/非表示を切り替えられるようにする
+    public void SetAllActive(bool flag,bool randFlg)
+    {
+        selectKey_ = SelectKey.NON;
+        allSelectFlg_ = true;
+        randFlg_ = randFlg;
+        for (int i = 0; i < this.transform.childCount; i++)
+        {
+            targetImageObjList_[i].SetActive(flag);
+        }
+    }
+
     // CharacterMng.cs側に目標座標を渡す
-    public Vector3 GetSelectEnemyPos()
+    public Vector3 GetSelectEnemyPos(int num)
     {
         // offset値を元に戻してから渡す
         //Vector3 tmppos = this.gameObject.transform.position;
         //tmppos.y -= posOffset_Y;
         //return tmppos;
 
-        return posList_.Item1[selectNum_];
+        return posList_.Item1[num];
     }
 
     // CharacterMng.cs側に選択された番号を渡す
-    public int GetSelectNum()
+    //public int GetSelectNum()
+    //{
+    //    return selectNum_;
+    //}
+
+    public int[] GetSelectNum()
     {
-        // returnされるselectNum_はMagicMove.csでDestroyされるので、該当するlistをfalseにする
-        //posList_.Item2[selectNum_] = false;
-        return selectNum_;
+        // 初期数値を-1にしておく
+        int[] tmpArray = { -1, -1, -1, -1 };
+
+        if(!allSelectFlg_)
+        {
+            // selectNum_と3つの-1
+            tmpArray[0] = selectNum_;
+        }
+        else
+        {
+            // 先に生きてる敵だけまとめたほうが早いかも
+            List<int> tmpList = new List<int>();
+            for (int i = 0; i < posList_.Item1.Count; i++)
+            {
+                if (posList_.Item2[i])   // フラグがtrueの敵だけAddする
+                {
+                    tmpList.Add(i);
+                }
+            }
+
+            // 複数か全体で処理を分ける
+            if (randFlg_)
+            {
+                // 複数(4回攻撃だから同じ数字が入ってもok)
+                // 生きてる敵の中から攻撃対象をランダムで決定する
+                for (int i = 0; i < tmpArray.Length; i++)
+                {
+                    tmpArray[i] = Random.Range(0, tmpList.Count);
+                }
+            }
+            else
+            {
+                // 全体
+                // 生きてる敵の数値を入れる
+                for (int i = 0; i < tmpList.Count; i++)
+                {
+                    tmpArray[i] = tmpList[i];
+                }
+            }
+        }
+
+        return tmpArray;
     }
 
     // CharacterMng.cs側からGetSelectNum関数の後に呼び出してもらい、矢印位置を再設定する

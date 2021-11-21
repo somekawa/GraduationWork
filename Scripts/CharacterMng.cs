@@ -57,6 +57,8 @@ public class CharacterMng : MonoBehaviour
     private Vector3 charaPos_;                         // キャラクター座標
     private Vector3 enePos_;                           // 目標の敵座標
 
+    private CharaUseMagic useMagic_;
+
     void Start()
     {
         // SceneMngからキャラの情報をもらう(charMap_とcharasList_)
@@ -101,6 +103,8 @@ public class CharacterMng : MonoBehaviour
         // 初期MPを代入
         charaHPMPMap_[CHARACTERNUM.UNI].Item2.SetHPMPBar(charasList_[(int)CHARACTERNUM.UNI].MP(), charasList_[(int)CHARACTERNUM.UNI].MaxMP());
         charaHPMPMap_[CHARACTERNUM.JACK].Item2.SetHPMPBar(charasList_[(int)CHARACTERNUM.JACK].MP(), charasList_[(int)CHARACTERNUM.JACK].MaxMP());
+
+        useMagic_ = new CharaUseMagic();
     }
 
     // ButtleMng.csから敵の数を受け取る
@@ -242,7 +246,31 @@ public class CharacterMng : MonoBehaviour
         // キャラ毎のモーションを呼ぶ
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if(!setMagicObj_.activeSelf)    // 魔法コマンド選択中じゃないとき
+            if(setMagicObj_.activeSelf)    // 魔法コマンド選択中のとき
+            {
+                // 魔法コマンド選択中のとき
+                buttleAnounceText_.text = announceText_[1];
+                Debug.Log("現在は魔法コマンドが有効コマンドです");
+
+                var tmp = (int)setMagicObj_.GetComponent<ImageRotate>().GetNowCommand() - 1;
+                Debug.Log(tmp + "番の魔法を使用しようとしています");
+
+                // 範囲外かの確認をする
+                if (charasList_[(int)nowTurnChar_].CheckMagicNum(tmp))
+                {
+                    // CharaUseMagic.csに情報を渡す
+                    useMagic_.CheckUseMagic(charasList_[(int)nowTurnChar_].GetMagicNum(tmp));
+
+                    //buttleEnemySelect_.SetActive(true);
+                    //buttleCommandRotate_.SetRotaFlg(false);
+                    //setMagicObj_.SetActive(false);
+                }
+                else
+                {
+                    Debug.Log("範囲外の魔法番号です。選択しなおしてください");
+                }
+            }
+            else
             {
                 // 選択されたコマンドに対する処理
                 switch (buttleCommandRotate_.GetNowCommand())
@@ -269,7 +297,7 @@ public class CharacterMng : MonoBehaviour
                             {
                                 // 防御用の値を0に戻す
                                 charasList_[(int)nowTurnChar_].SetBarrierNum();
-                                BeforeAttack((int)nowTurnChar_);    // 攻撃準備
+                                BeforeAttack();    // 攻撃準備
                             }
                         }
 
@@ -281,6 +309,8 @@ public class CharacterMng : MonoBehaviour
                             // 自分の行動の前の人が動作終わっているか調べる
                             if (!charasList_[(int)oldTurnChar_].GetIsMove())
                             {
+                                anim_ = ANIMATION.NON;
+
                                 // 防御用の値を0に戻す
                                 charasList_[(int)nowTurnChar_].SetBarrierNum();
 
@@ -311,6 +341,10 @@ public class CharacterMng : MonoBehaviour
                                 Debug.Log("前のキャラがアニメーション中");
                             }
                         }
+                        else
+                        {
+                            MagicAttack();
+                        }
 
                         break;
                     case ImageRotate.COMMAND.ITEM:
@@ -320,7 +354,7 @@ public class CharacterMng : MonoBehaviour
                         break;
                     case ImageRotate.COMMAND.BARRIER:
                         // 次の自分のターンまで防御力を1.5倍にする
-                        charasList_[(int)nowTurnChar_].SetBarrierNum(charasList_[(int)nowTurnChar_].Defence(false) / 2);                       
+                        charasList_[(int)nowTurnChar_].SetBarrierNum(charasList_[(int)nowTurnChar_].Defence(false) / 2);
                         // 次のキャラor敵に行動が回るようにanim_とoldAnim_を設定する
                         anim_ = ANIMATION.IDLE;
                         oldAnim_ = ANIMATION.NON;
@@ -332,30 +366,6 @@ public class CharacterMng : MonoBehaviour
                         charasList_[(int)nowTurnChar_].SetBarrierNum();
                         Debug.Log("無効なコマンドです");
                         break;
-                }
-            }
-            else
-            {
-                // 魔法コマンド選択中のとき
-                buttleAnounceText_.text = announceText_[1];
-                Debug.Log("現在は魔法コマンドが有効コマンドです");
-
-                var tmp = (int)setMagicObj_.GetComponent<ImageRotate>().GetNowCommand() - 1;
-                Debug.Log(tmp + "番の魔法を使用しようとしています");
-
-                // 範囲外かの確認をする
-                if (charasList_[(int)nowTurnChar_].CheckMagicNum(tmp))
-                {
-                    var aa = charasList_[(int)nowTurnChar_].GetMagicNum(tmp);
-
-                    //@ aa変数から単体か全体かの情報を取って、単体なら敵指定を表示する
-                    buttleEnemySelect_.SetActive(true);
-                    buttleCommandRotate_.SetRotaFlg(false);
-                    setMagicObj_.SetActive(false);
-                }
-                else
-                {
-                    Debug.Log("範囲外の魔法番号です。選択しなおしてください");
                 }
             }
         }
@@ -411,8 +421,8 @@ public class CharacterMng : MonoBehaviour
 
                 selectFlg_ = false;
 
-                // 矢印位置のリセットを行う(falseなら、敵を全て倒したということなのでフラグを切り替える)
-                lastEnemytoAttackFlg_ = !buttleEnemySelect_.ResetSelectPoint();
+                //// 矢印位置のリセットを行う(falseなら、敵を全て倒したということなのでフラグを切り替える)
+                //lastEnemytoAttackFlg_ = !buttleEnemySelect_.ResetSelectPoint();
 
                 break;
             case ANIMATION.BEFORE:
@@ -448,12 +458,12 @@ public class CharacterMng : MonoBehaviour
     }
 
     // 攻撃準備処理
-    void BeforeAttack(int charNum)
+    void BeforeAttack()
     {
         // キャラの位置を取得する
-        charaPos_ = charasList_[charNum].GetButtlePos();
+        charaPos_ = charasList_[(int)nowTurnChar_].GetButtlePos();
         // 敵の位置を取得する
-        enePos_ = buttleEnemySelect_.GetSelectEnemyPos();
+        enePos_ = buttleEnemySelect_.GetSelectEnemyPos(buttleEnemySelect_.GetSelectNum()[0]);
         enePos_.y = 0.0f;        // ここで0.0fにしないと斜め上方向に飛んでしまう
 
         // 行動中のキャラが、攻撃対象の方向に体を向ける
@@ -461,7 +471,7 @@ public class CharacterMng : MonoBehaviour
         charMap_[nowTurnChar_].transform.localRotation = Quaternion.LookRotation(enePos_ - charaPos_);
 
 
-        if (charNum == (int)CHARACTERNUM.JACK)
+        if ((int)nowTurnChar_ == (int)CHARACTERNUM.JACK)
         {
             // 敵に向かって走る処理
             StartCoroutine(MoveToEnemyPos());
@@ -584,15 +594,55 @@ public class CharacterMng : MonoBehaviour
                 }
 
                 // 選択した敵の番号を渡す
-                weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(buttleEnemySelect_.GetSelectNum() + 1);
+                weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(buttleEnemySelect_.GetSelectNum()[0] + 1);
             }
         }
 
     }
 
+    void MagicAttack()
+    {
+        // キャラの位置を取得する
+        charaPos_ = charasList_[(int)nowTurnChar_].GetButtlePos();
+
+        // 速度と幸運を渡す
+        buttleMng_.SetSpeedNum(charasList_[(int)nowTurnChar_].Speed());
+        buttleMng_.SetLuckNum(charasList_[(int)nowTurnChar_].Luck());
+
+        // MP減少処理
+        int MPdecrease = useMagic_.MPdecrease();
+        StartCoroutine(charaHPMPMap_[nowTurnChar_].Item2.MoveSlideBar
+        (charasList_[(int)nowTurnChar_].MP() - MPdecrease));
+        // 内部数値の変更を行う
+        charasList_[(int)nowTurnChar_].SetMP(charasList_[(int)nowTurnChar_].MP() - MPdecrease);
+
+        // 魔法での攻撃対象を決定したときに入る
+        // 選択した敵の番号を渡す
+        var tmp = buttleEnemySelect_.GetSelectNum();
+        for(int i = 0; i < tmp.Length; i++)
+        {
+            // tmp内容が-1以外なら攻撃対象がいるので処理を行う
+            if(tmp[i] >= 0)
+            {
+                // 敵の位置を取得する
+                enePos_ = buttleEnemySelect_.GetSelectEnemyPos(tmp[i]);
+                enePos_.y = 0.0f;        // ここで0.0fにしないと斜め上方向に飛んでしまう
+
+                useMagic_.MagicEffect(charaPos_,enePos_, tmp[i]);
+            }
+        }
+
+        buttleCommandRotate_.SetRotaFlg(true);
+        buttleEnemySelect_.SetActive(false);
+
+        anim_ = ANIMATION.IDLE;
+    }
+
     // ButtleMng.csで参照
     public bool GetLastEnemyToAttackFlg()
     {
+        // 矢印位置のリセットを行う(falseなら、敵を全て倒したということなのでフラグを切り替える)
+        lastEnemytoAttackFlg_ = !buttleEnemySelect_.ResetSelectPoint();
         return lastEnemytoAttackFlg_;
     }
 
@@ -693,12 +743,12 @@ public class CharacterMng : MonoBehaviour
         StartCoroutine(charaHPMPMap_[(CHARACTERNUM)num].Item1.MoveSlideBar(charasList_[num].HP() - damage));
 
         // 内部数値の変更を行う
-        charasList_[num].sethp(charasList_[num].HP() - damage);
+        charasList_[num].SetHP(charasList_[num].HP() - damage);
 
         if (charasList_[num].HP() <= 0)
         {
             Debug.Log("キャラが死亡");
-            charasList_[num].sethp(0);
+            charasList_[num].SetHP(0);
             //anim_ = ANIMATION.DEATH;
             // Chara.csに死亡情報を入れる
             charasList_[num].SetDeathFlg(true);

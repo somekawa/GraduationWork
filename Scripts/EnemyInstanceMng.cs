@@ -514,7 +514,8 @@ public class EnemyInstanceMng : MonoBehaviour
                 }
             }
 
-            Destroy(GameObject.Find(enemyList_[num].Item2.name));   // HPバーの削除
+            GameObject.Find(enemyList_[num].Item2.name).SetActive(false);   // HPバーの非表示
+            //Destroy(GameObject.Find(enemyList_[num].Item2.name));   // HPバーの削除(削除したらエラーになるから、あとから削除する)
         }
     }
 
@@ -551,10 +552,11 @@ public class EnemyInstanceMng : MonoBehaviour
 
     public void DeleteEnemy()
     {
-        // 敵の削除処理
+        // 敵とそのHPバーの削除処理
         for(int i = 0; i < enemyMap_.Count; i++)
         {
             Destroy(enemyMap_[i + 1]);
+            Destroy(GameObject.Find(enemyList_[i].Item2.name));
         }
     }
 

@@ -107,10 +107,14 @@ public class Chara : CharaBase,InterfaceButtle
     }
 
 
-    // テスト用
-    public void sethp(int hp)
+    public void SetHP(int hp)
     {
         set_.HP = hp;
+    }
+
+    public void SetMP(int mp)
+    {
+        set_.MP = mp;
     }
 
     // CharaBaseクラスの抽象メソッドを実装する
@@ -282,7 +286,7 @@ public class Chara : CharaBase,InterfaceButtle
             return null;
         }
 
-        return ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][Bag_Magic.data[set_.Magic[num]].element];
+        return ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][Bag_Magic.data[set_.Magic[num]].element];
     }
 
     public bool CheckMagicNum(int num)

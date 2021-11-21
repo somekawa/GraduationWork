@@ -41,7 +41,7 @@ public class CheckAttackHit : MonoBehaviour
                 GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().HPdecrease(targetNum_ - 1);
 
                 // –‚–@‚Ì’e‚Ì‚¾‚¯–‚–@‚Ì’e‚ğíœ‚·‚é
-                if(this.gameObject.name == "UniAttack(Clone)")
+                if(this.gameObject.name == "UniAttack(Clone)" || this.gameObject.name == "2-0(Clone)")
                 {
                     Destroy(this.gameObject);
                 }
@@ -62,7 +62,7 @@ public class CheckAttackHit : MonoBehaviour
                 return;
             }
 
-            if (this.gameObject.name == "UniAttack(Clone)")
+            if (this.gameObject.name == "UniAttack(Clone)" || this.gameObject.name == "2-0(Clone)")
             {
                 return;
             }

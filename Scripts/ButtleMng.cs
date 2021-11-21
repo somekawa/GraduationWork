@@ -22,6 +22,9 @@ public class ButtleMng : MonoBehaviour
     private int damageNum_ = 0;             // ダメージの値
     private int speedNum_ = 0;              // 命中判定用の値
     private int luckNum_ = 0;               // 幸運値の値
+    private int element_ = 0;               // エレメント情報
+
+    private bool lastEnemyFlg_;
 
     void Start()
     {
@@ -47,6 +50,7 @@ public class ButtleMng : MonoBehaviour
         // 戦闘開始時に設定される項目
         if(!setCallOnce_)
         {
+            lastEnemyFlg_ = false;
             setCallOnce_ = true;
             buttleUICanvas.gameObject.SetActive(true);
             fieldUICanvas.gameObject.SetActive(false);
@@ -92,7 +96,7 @@ public class ButtleMng : MonoBehaviour
             //buttleCommandUI_.gameObject.SetActive(!characterMng_.GetSelectFlg());
 
             // キャラクターの攻撃対象が最後の敵だった時
-            if (characterMng_.GetLastEnemyToAttackFlg())
+            if (lastEnemyFlg_)
             {
                 if(enemyInstanceMng_.AllAnimationFin())
                 {
@@ -100,14 +104,6 @@ public class ButtleMng : MonoBehaviour
 
                     FieldMng.nowMode = FieldMng.MODE.SEARCH;
                     characterMng_.SetCharaFieldPos();
-
-                    //// Enemyタグの数を見て該当する物がない(= 0)なら、MODEを探索に切り替える
-                    //if (GameObject.FindGameObjectsWithTag("Enemy").Length == 0)
-                    //{
-                    //    FieldMng.nowMode = FieldMng.MODE.SEARCH;
-                    //    characterMng_.SetCharaFieldPos();
-                    //}
-
                 }
             }
         }
@@ -127,6 +123,9 @@ public class ButtleMng : MonoBehaviour
         {
             moveTurnCnt_ = 0;
         }
+
+        // 行動が切り替わる毎に、敵の状態を確認する
+        lastEnemyFlg_ = characterMng_.GetLastEnemyToAttackFlg();
     }
 
     public void SetDamageNum(int num)
@@ -163,6 +162,18 @@ public class ButtleMng : MonoBehaviour
     {
         Debug.Log("***GetLuckNum" + luckNum_);
         return luckNum_;
+    }
+
+    public void SetElement(int num)
+    {
+        Debug.Log("*SetElement" + num);
+        element_ = num;
+    }
+
+    public int GetElement()
+    {
+        Debug.Log("***GetElement" + element_);
+        return element_;
     }
 
     // ユニたちが逃げる処理の時に使用する
