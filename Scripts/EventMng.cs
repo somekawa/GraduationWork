@@ -9,6 +9,9 @@ public static class EventMng
     // 読み返し機能を作成するときには引数部分に該当するチャプター番号を入れるようにする
     public static void SetChapterNum(int num ,SceneMng.SCENE scene)
     {
+        // 現在のシーンをCONVERSATIONとする
+        SceneMng.SetNowScene(SceneMng.SCENE.CONVERSATION);
+
         if (num == 100)
         {
             // 全滅時の特殊会話時には、全滅前のチャプター番号を保存しておく
