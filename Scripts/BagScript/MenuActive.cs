@@ -122,29 +122,21 @@ public class MenuActive : MonoBehaviour
 
     void Update()
     {
-        if ((int)SceneMng.nowScene == (int)SceneMng.SCENE.CONVERSATION)
-        {
-            return;
-        }
-
-        if (warpField_.GetWarpNowFlag() == true)
+        if ((int)SceneMng.nowScene == (int)SceneMng.SCENE.CONVERSATION ||
+            warpField_.GetWarpNowFlag() == true ||
+            FieldMng.nowMode == FieldMng.MODE.BUTTLE)
         {
             return;
         }
 
         if (parentMenuBtn_.gameObject.activeSelf == false)
         {
-            if(parentRectTrans_[(int)CANVAS.MENU].gameObject.activeSelf==false)
-            {
-                return;
-            }
-
             if (Input.GetKeyUp(KeyCode.Tab))
             {
                 Debug.Log("メニュー画面を表示します");
                 FieldMng.nowMode = FieldMng.MODE.MENU;  // ユニが歩行できないようにモードを切り替える  activeFlag_ = true;
                 bagImage_.color = new Color(0.5f, 1.0f, 0.5f, 1.0f);
-               // parentRectTrans_[(int)CANVAS.MENU].gameObject.SetActive(true);
+                // parentRectTrans_[(int)CANVAS.MENU].gameObject.SetActive(true);
                 StartCoroutine(MoveMenuButtons(1));
             }
         }
