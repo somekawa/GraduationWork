@@ -155,7 +155,7 @@ public class SceneMng : MonoBehaviour
             }
 
             // sceneでnowSceneを上書き前に、今まで動いていたシーンがフィールドであれば時間経過させる
-            if(nowScene != SCENE.TOWN && nowScene != SCENE.UNIHOUSE && nowScene != SCENE.NON)    
+            if(nowScene != SCENE.TOWN && nowScene != SCENE.UNIHOUSE && nowScene != SCENE.CONVERSATION && nowScene != SCENE.NON)    
             {
                 // タウンでもユニハウスでもNONでもない = どこかのフィールド
                 SetTimeGear(timeGrar_ + 1);

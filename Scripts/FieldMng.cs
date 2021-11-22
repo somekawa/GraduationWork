@@ -16,6 +16,9 @@ public class FieldMng : MonoBehaviour
     [SerializeField]
     private GameObject fieldUICanvasPopUp_; // FieldUICanvasの中にあるPopUpという空のオブジェクトを外部アタッチする
 
+    //[SerializeField]
+    //private GameObject menu_;               // DontDestroyCanvasの中のMenuオブジェクトを外部アタッチする
+
     // 画面状態一覧
     public enum MODE
     {
@@ -34,7 +37,6 @@ public class FieldMng : MonoBehaviour
 
     private UnitychanController player_;           // プレイヤー情報格納用
     private CameraMng cameraMng_;
-    private Image bagImage_;                       // 左下のバッグの画像
 
     private TMPro.TextMeshProUGUI titleInfo_;      // 宝箱か壁かで表示内容を変更する
     private TMPro.TextMeshProUGUI getChestsInfo_;  // 宝箱から獲得したアイテム内容の表示先
@@ -52,6 +54,11 @@ public class FieldMng : MonoBehaviour
         {
             EventMng.SetChapterNum(8, SceneMng.SCENE.CONVERSATION);
         }
+        else if(EventMng.GetChapterNum() == 13)
+        {
+            EventMng.SetChapterNum(13, SceneMng.SCENE.CONVERSATION);
+        }
+
         //unitychanの情報を取得
         player_ = GameObject.Find("Uni").GetComponent<UnitychanController>();
         if (player_ == null)
@@ -70,10 +77,6 @@ public class FieldMng : MonoBehaviour
         // WarpField.csの初期化関数を先に呼ぶ
         GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
 
-        // バッグの画像がDontDestroyOnLoadされるオブジェクトのこのためその親から探す
-        //var gameObject = DontDestroyMng.Instance;
-        bagImage_ = GameObject.Find("DontDestroyCanvas/Menu/BagImage").GetComponent<Image>();
-
         // イベント戦発生用の宝箱/壁情報を取得する
         CheckWallAndChestActive("ButtleWall");
         CheckWallAndChestActive("Chests");
@@ -86,6 +89,9 @@ public class FieldMng : MonoBehaviour
         titleInfo_ = fieldUICanvasPopUp_.transform.Find("TitleInfo").GetComponent<TMPro.TextMeshProUGUI>();
         // 宝箱の文字描画先
         getChestsInfo_ = fieldUICanvasPopUp_.transform.Find("GetChestsInfo").GetComponent<TMPro.TextMeshProUGUI>();
+
+        // MenuActive.csのAwakeより後に入ってくるのを利用して、ここでMenuを表示状態にする
+        //menu_.SetActive(true);
     }
 
     // クエストの受注状況に合わせて、壁や宝箱のアクティブ状態を判別する
@@ -190,12 +196,12 @@ public class FieldMng : MonoBehaviour
 
             case MODE.SEARCH:
                 cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
-                bagImage_.gameObject.SetActive(true);
+                //menu_.SetActive(true);
                 break;
 
             case MODE.BUTTLE:
-                cameraMng_.SetChangeCamera(true);   // サブカメラアクティブ
-                bagImage_.gameObject.SetActive(false);// バッグ画像を非アクティブに
+                cameraMng_.SetChangeCamera(true);    // サブカメラアクティブ
+                //menu_.SetActive(false);
                 break;
 
             case MODE.MENU:

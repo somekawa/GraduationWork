@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc22a6017df729f4e8b987aab614d748, type: 3}
+  m_Name: Chapter13
+  m_EditorClassIdentifier: 
+  param:
+  - name1: Image
+    name2: Back
+    face: Mob
+    message: Desert
+    eventNum: 0
+  - name1: "\u30E6\u30CB"
+    name2: Uni
+    face: sad@sd_hmd
+    message: "\u3042\u3063\u3064\u3044\u30FB\u30FB\u30FB\u6EB6\u3051\u308B\u3045"
+    eventNum: 0
+  - name1: "\u30B8\u30E3\u30C3\u30AF"
+    name2: Yuji
+    face: Mob
+    message: "\u3055\u3063\u3055\u3068\u539F\u56E0\u3092\u7A81\u304D\u6B62\u3081\u3066\u8857\u3078\u623B\u308D\u3046\u305C"
+    eventNum: 0
+  - name1: "\u30E6\u30CB"
+    name2: Uni
+    face: sad@sd_hmd
+    message: "\u8CDB\u6210\u3060\u3088\u30FC\u3002"
+    eventNum: 0
+  - name1: "\u30B8\u30E3\u30C3\u30AF"
+    name2: Yuji
+    face: Mob
+    message: "\u4ED6\u30AE\u30EB\u30C9\u306E\u9023\u4E2D\u304B\u3089\u306E\u60C5\u5831\u3060\u304C\u3001\\n\u4F53\u304C\u6C34\u3067\u5F62\u6210\u3055\u308C\u305F\u30E2\u30F3\u30B9\u30BF\u30FC\u3092\n\u30AA\u30A2\u30B7\u30B9\u304B\u3089\u53F3\u306B\u9032\u3093\u3060\u5834\u6240\u3067\u898B\u304B\u3051\u305F\u3089\u3057\u3044\u3002"
+    eventNum: 0
+  - name1: "\u30E6\u30CB"
+    name2: Uni
+    face: default@sd_hmd
+    message: "\u3068\u3044\u3046\u3053\u3068\u306F\u3001\u30AA\u30A2\u30B7\u30B9\u306E\u6C34\u3092\u4F7F\u3063\u3066\u4F53\u3092\u4F5C\u308A\u51FA\u3057\u305F\u306E\u304B\u306A\uFF1F"
+    eventNum: 0
+  - name1: "\u30B8\u30E3\u30C3\u30AF"
+    name2: Yuji
+    face: Mob
+    message: "\u305D\u306E\u53EF\u80FD\u6027\u304C\u9AD8\u3044\u3060\u308D\u3046\u306A\u3002\u305D\u3053\u306B\u30A8\u30EC\u30E1\u30F3\u30C8\u30EF\u30FC\u30C9\u306E\u529B\u304C\u4F5C\u7528\u3057\u3066\u3044\u308B\u306F\u305A\u3060\u3002"
+    eventNum: 0
+  - name1: "\u30E6\u30CB"
+    name2: Uni
+    face: smile2@sd_hmd
+    message: "\u306A\u3089\u305D\u306E\u30E2\u30F3\u30B9\u30BF\u30FC\u3092\u5012\u3057\u3066\u3001\u30EF\u30FC\u30C9\u3092\u56DE\u53CE\u3057\u3066\u8857\u306B\u5E30\u308D\u3046\uFF01"
+    eventNum: 0
+  - name1: Scene
+    name2: FIELD1
+    face: Mob
+    message: "<Chapter13  \u30F4\u30A7\u30B9\u30C6\u7802\u6F20\u306E\u8ABF\u67FB\u958B\u59CB
+      \u5B8C>"
+    eventNum: 14
