@@ -26,11 +26,13 @@ public class HouseInteriorMng : MonoBehaviour
 
     private Dictionary<string, Func<bool>> func_ = new Dictionary<string, Func<bool>>();    // キー:英語建物名,値:イベント発生確認用のoverride関数
 
+
+    private RectTransform menuRect_;
     void Start()
     {
         cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
-
-        if(playerController_ == null)
+        menuRect_ = GameObject.Find("DontDestroyCanvas/Menu").GetComponent<RectTransform>();
+        if (playerController_ == null)
         {
             playerController_ = GameObject.Find("Uni").GetComponent<UnitychanController>();
         }
@@ -98,7 +100,6 @@ public class HouseInteriorMng : MonoBehaviour
     private IEnumerator SelectInHouse(bool flag,string name)
     {
         SetWarpCanvasAndCharaController(false);
-
         // イベント状態の確認
         string  tmpstr = "";
         tmpstr = EventMng.CheckEventHouse(name);
@@ -126,6 +127,7 @@ public class HouseInteriorMng : MonoBehaviour
             {
                 iconImage_.transform.localPosition = new Vector3(-140.0f, -70.0f, 0.0f);
                 inHouseFlg_ = true;
+                menuRect_.gameObject.SetActive(false);// バッグを非表示にする
                 Debug.Log("選択肢「はい」");
             }
             else
@@ -264,5 +266,8 @@ public class HouseInteriorMng : MonoBehaviour
 
         // 現在の建物名を初期化
         nowInHouseName = "";
+
+        // バッグを表示
+        menuRect_.gameObject.SetActive(true);
     }
 }

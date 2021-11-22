@@ -82,6 +82,7 @@ public class MenuActive : MonoBehaviour
         // ステータス表示
         statusInfo_ = parentRectTrans_[(int)CANVAS.STATUS].Find("StatusInfo").GetComponent<TMPro.TextMeshProUGUI>();
 
+
         // メニューで表示するボタンたち
         parentMenuBtn_ = parentRectTrans_[(int)CANVAS.MENU].Find("MenuImage").GetComponent<RectTransform>();
         parentMenuBtn_.gameObject.SetActive(false);
@@ -133,6 +134,11 @@ public class MenuActive : MonoBehaviour
 
         if (parentMenuBtn_.gameObject.activeSelf == false)
         {
+            if(parentRectTrans_[(int)CANVAS.MENU].gameObject.activeSelf==false)
+            {
+                return;
+            }
+
             if (Input.GetKeyUp(KeyCode.Tab))
             {
                 Debug.Log("メニュー画面を表示します");
@@ -244,10 +250,6 @@ public class MenuActive : MonoBehaviour
                                 int.Parse(csvDatas[i + 1][11]), 
                                 int.Parse(csvDatas[i + 1][12]), 
                                 int.Parse(csvDatas[i + 1][13]) };
-            Debug.Log(Bag_Magic.data[tmpArray[0]].element);
-            Debug.Log(Bag_Magic.data[tmpArray[1]].element);
-            Debug.Log(Bag_Magic.data[tmpArray[2]].element);
-            Debug.Log(Bag_Magic.data[tmpArray[3]].element);
 
             CharaBase.CharacterSetting set = new CharaBase.CharacterSetting
             {
