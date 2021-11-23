@@ -129,7 +129,7 @@ public class CharaUseMagic : MonoBehaviour
             }
 
             time += Time.deltaTime;
-            Debug.Log("時間計測" + time);
+            //Debug.Log("時間計測" + time);
 
             for (int t = 0; t < list_.Count; t++)
             {
@@ -145,7 +145,10 @@ public class CharaUseMagic : MonoBehaviour
                     var adjustPos = new Vector3(list_[t].Item2.charaPos.x, list_[t].Item2.charaPos.y + 0.5f, list_[t].Item2.charaPos.z);
                     // 魔法プレハブをインスタンス化(現在は指定した魔法のみ)
                     GameObject obj = Resources.Load("MagicPrefabs/" + magicPrefabNum_) as GameObject;
-                    var uniAttackInstance = Instantiate(obj, adjustPos, Quaternion.identity);
+
+                    //var uniAttackInstance = Instantiate(obj, adjustPos, Quaternion.identity); // 回転座標が全て0になるver.
+                    var uniAttackInstance = Instantiate(obj, adjustPos, obj.transform.rotation);
+                    
                     MagicMove magicMove = uniAttackInstance.GetComponent<MagicMove>();
                     // 通常攻撃弾の飛んでいく方向を指定
                     magicMove.SetDirection(dir);
