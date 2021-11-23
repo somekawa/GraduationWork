@@ -267,9 +267,13 @@ public class EnemySelect : MonoBehaviour
             // •¡”‚©‘S‘Ì‚Åˆ—‚ğ•ª‚¯‚é
             if (randFlg_)
             {
+                // UŒ‚‰ñ”‚ğƒ‰ƒ“ƒ_ƒ€‚É‚·‚é(2`4‰ñ‚Æ‚·‚é)
+                int randAttackNum = Random.Range(2, 5); // 2ˆÈã5–¢–‚Ì’l‚ª‚Å‚é
+                Debug.Log("•¡”‰ñ–‚–@UŒ‚‚ÌUŒ‚‰ñ”‚Í" + randAttackNum + "‰ñ‚ÉŒˆ’è‚µ‚Ü‚µ‚½");
+
                 // •¡”(4‰ñUŒ‚‚¾‚©‚ç“¯‚¶”š‚ª“ü‚Á‚Ä‚àok)
                 // ¶‚«‚Ä‚é“G‚Ì’†‚©‚çUŒ‚‘ÎÛ‚ğƒ‰ƒ“ƒ_ƒ€‚ÅŒˆ’è‚·‚é
-                for (int i = 0; i < tmpArray.Length; i++)
+                for (int i = 0; i < randAttackNum; i++)
                 {
                     tmpArray[i] = Random.Range(0, tmpList.Count);
                 }
