@@ -14,9 +14,17 @@ public class CheckAttackHit : MonoBehaviour
         "KabosuAttack(Clone)","SpiderAttack(Clone)"
     };
 
+    // キャラの魔法エフェクトの削除
+    private string charaMagicStr_ = "";
+
     public void SetTargetNum(int num)
     {
         targetNum_ = num;
+    }
+
+    public void SetCharaMagicStr(string str)
+    {
+        charaMagicStr_ = str;
     }
 
     void OnTriggerEnter(Collider col)
@@ -41,7 +49,7 @@ public class CheckAttackHit : MonoBehaviour
                 GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().HPdecrease(targetNum_ - 1);
 
                 // 魔法の弾の時だけ魔法の弾を削除する
-                if(this.gameObject.name == "UniAttack(Clone)" || this.gameObject.name == "2-0(Clone)")
+                if(this.gameObject.name == "UniAttack(Clone)" || this.gameObject.name == charaMagicStr_)
                 {
                     Destroy(this.gameObject);
                 }
@@ -62,7 +70,7 @@ public class CheckAttackHit : MonoBehaviour
                 return;
             }
 
-            if (this.gameObject.name == "UniAttack(Clone)" || this.gameObject.name == "2-0(Clone)")
+            if (this.gameObject.name == "UniAttack(Clone)" || this.gameObject.name == charaMagicStr_)
             {
                 return;
             }

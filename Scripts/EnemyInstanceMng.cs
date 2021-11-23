@@ -146,7 +146,7 @@ public class EnemyInstanceMng : MonoBehaviour
         //{
         //    attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
         //} while (SceneMng.charasList_[attackTarget_].HP() <= 0);
-        attackTarget_ = (int)SceneMng.CHARACTERNUM.UNI;
+        attackTarget_ = (int)SceneMng.CHARACTERNUM.JACK;
 
         // ダメージと速度を渡す
         buttleMng_.SetDamageNum(enemyList_[num].Item1.Damage());
@@ -407,6 +407,9 @@ public class EnemyInstanceMng : MonoBehaviour
             flag = true;
         }
 
+        // y軸を0.0fにしておかないと空中へ向かって戻ることになる
+        var tmpEnemyPos_ = new Vector3(enemyPosSetMap_[mapNum_][num].x, 0.0f, enemyPosSetMap_[mapNum_][num].z);
+
         float time = 0.0f;
         while (!flag)
         {
@@ -414,7 +417,7 @@ public class EnemyInstanceMng : MonoBehaviour
 
             time += Time.deltaTime / (enemyList_[num].Item1.MoveTime() / 2.0f);  // deltaTimeだけだと移動が速すぎるため、任意の値で割る
 
-            var tmp = enemyList_[num].Item1.BackMove(time, enemyMap_[num + 1].transform.localPosition, enemyPosSetMap_[mapNum_][num]);
+            var tmp = enemyList_[num].Item1.BackMove(time, enemyMap_[num + 1].transform.localPosition, tmpEnemyPos_);
             flag = tmp.Item2;   // while文を抜けるかフラグを代入する
             enemyMap_[num + 1].transform.localPosition = tmp.Item1;     // 座標を代入する
         }
@@ -431,6 +434,12 @@ public class EnemyInstanceMng : MonoBehaviour
 
     public void HPdecrease(int num)
     {
+        // すでにHPが0を下回っていたら処理を抜ける(魔法攻撃連続ヒット用のガード処理)
+        if (enemyList_[num].Item1.HP() <= 0)
+        {
+            return;
+        }
+
         var damage = 0;
 
         // クリティカルの計算をする(基礎値と幸運値で上限を狭める)
@@ -486,8 +495,8 @@ public class EnemyInstanceMng : MonoBehaviour
         // ダメージ値の算出
         if(damage <= 0)
         {
-            Debug.Log("キャラの攻撃力より敵の防御力が上回ったのでダメージが0になりました");
-            damage = 0;
+            Debug.Log("キャラの攻撃力より敵の防御力が上回ったのでダメージが1になりました");
+            damage = 1;
         }
 
         StartCoroutine(enemyList_[num].Item2.MoveSlideBar(enemyList_[num].Item1.HP() - damage));

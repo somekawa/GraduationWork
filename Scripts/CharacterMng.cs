@@ -162,6 +162,8 @@ public class CharacterMng : MonoBehaviour
             // 行動順に関連する値を初期化する
             charasList_[(int)character.Key].SetTurnInit();
         }
+
+        useMagic_.Init();
     }
 
     public (int, string) CharaTurnSpeed(int num)
@@ -260,10 +262,8 @@ public class CharacterMng : MonoBehaviour
                 {
                     // CharaUseMagic.csに情報を渡す
                     useMagic_.CheckUseMagic(charasList_[(int)nowTurnChar_].GetMagicNum(tmp));
-
-                    //buttleEnemySelect_.SetActive(true);
-                    //buttleCommandRotate_.SetRotaFlg(false);
-                    //setMagicObj_.SetActive(false);
+                    setMagicObj_.SetActive(false);
+                    buttleCommandRotate_.SetRotaFlg(false);
                 }
                 else
                 {
@@ -618,7 +618,8 @@ public class CharacterMng : MonoBehaviour
 
         // 魔法での攻撃対象を決定したときに入る
         // 選択した敵の番号を渡す
-        var tmp = buttleEnemySelect_.GetSelectNum();
+        //var tmp = buttleEnemySelect_.GetSelectNum();
+        int[] tmp = { 0, 0, 0, 0 }; // デバッグ用(好きな数値で攻撃対象を決められる)
         for(int i = 0; i < tmp.Length; i++)
         {
             // tmp内容が-1以外なら攻撃対象がいるので処理を行う
@@ -627,13 +628,25 @@ public class CharacterMng : MonoBehaviour
                 // 敵の位置を取得する
                 enePos_ = buttleEnemySelect_.GetSelectEnemyPos(tmp[i]);
                 enePos_.y = 0.0f;        // ここで0.0fにしないと斜め上方向に飛んでしまう
-
-                useMagic_.MagicEffect(charaPos_,enePos_, tmp[i]);
+                // 情報を設定する
+                useMagic_.InstanceMagicInfo(charaPos_, enePos_, tmp[i], i);
             }
         }
 
+        StartCoroutine(useMagic_.InstanceMagicCoroutine());
+
         buttleCommandRotate_.SetRotaFlg(true);
         buttleEnemySelect_.SetActive(false);
+
+        // IDLEに切り替わると敵の死亡処理の判定を行うので、間を開けるようにコルーチンで調節する
+        StartCoroutine(ChangeIDLETiming());
+    }
+
+    private IEnumerator ChangeIDLETiming()
+    {
+        Debug.Log("スタート");
+        yield return new WaitForSeconds(5.0f);
+        Debug.Log("スタートから5秒後");
 
         anim_ = ANIMATION.IDLE;
     }
@@ -735,8 +748,8 @@ public class CharacterMng : MonoBehaviour
         // 通常ダメージ
         if (damage <= 0)
         {
-            Debug.Log("敵の攻撃力よりキャラの防御力が上回ったのでダメージが0になりました");
-            damage = 0;
+            Debug.Log("敵の攻撃力よりキャラの防御力が上回ったのでダメージが1になりました");
+            damage = 1;
         }
 
         // キャラのHPを削る(スライドバー変更)
