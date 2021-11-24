@@ -11,8 +11,8 @@ public class MagicMove : MonoBehaviour
     private Rigidbody rigid;
     // パーティクルシステム
     private ParticleSystem particle;
-    // 目標の敵か判別する番号
-    //private int targetNum_;
+
+    private bool moveStopFlg_ = false;
 
     void Start()
     {
@@ -39,30 +39,21 @@ public class MagicMove : MonoBehaviour
         this.direction = direction;
     }
 
-    //public void SetTargetNum(int num)
-    //{
-    //    targetNum_ = num;
-    //}
+    // 敵と衝突したときに移動速度を0にする
+    public void MoveStop()
+    {
+        moveStopFlg_ = true;
+    }
 
     //　力を加えて飛ばす
     void FixedUpdate()
     {
+        if(moveStopFlg_)
+        {
+            rigid.velocity = Vector3.zero;
+            rigid.angularVelocity = Vector3.zero;
+            return;
+        }
         rigid.AddForce(direction * power);
     }
-
-    //void OnTriggerEnter(Collider col)
-    //{
-    //    // 敵に当たった場合(col.tag == "Enemy"と書くより、処理が速い)
-    //    if (col.CompareTag("Enemy"))
-    //    {
-    //        // 目標の敵に当たった場合
-    //        if(targetNum_ == int.Parse(col.name))
-    //        {
-    //            Debug.Log("Hit");
-    //            Destroy(col.gameObject);
-    //            Destroy(this.gameObject);
-    //            col = null; // Destroy後にnull代入処理
-    //        }
-    //    }
-    //}
 }

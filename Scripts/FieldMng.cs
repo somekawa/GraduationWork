@@ -59,6 +59,18 @@ public class FieldMng : MonoBehaviour
             EventMng.SetChapterNum(13, SceneMng.SCENE.CONVERSATION);
         }
 
+        // DesertFieldかつ「オアシスを甦らせて」のクエストを達成後なら
+        // クエスト達成後の会話で進行度は15となる
+        if((SceneMng.nowScene == SceneMng.SCENE.FIELD1) && EventMng.GetChapterNum() >= 15)
+        {
+            // Oasisオブジェクトを含めた全てのFieldMapオブジェクトをtrueにする
+            var tmp = GameObject.Find("FieldMap").transform;
+            for (int i = 0; i < tmp.childCount; i++)
+            {
+                tmp.GetChild(i).gameObject.SetActive(true);
+            }
+        }
+
         //unitychanの情報を取得
         player_ = GameObject.Find("Uni").GetComponent<UnitychanController>();
         if (player_ == null)

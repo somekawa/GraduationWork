@@ -618,8 +618,8 @@ public class CharacterMng : MonoBehaviour
 
         // 魔法での攻撃対象を決定したときに入る
         // 選択した敵の番号を渡す
-        //var tmp = buttleEnemySelect_.GetSelectNum();
-        int[] tmp = { 0, 0, 0, 0 }; // デバッグ用(好きな数値で攻撃対象を決められる)
+        var tmp = buttleEnemySelect_.GetSelectNum();
+        //int[] tmp = { 0, 0, 0, 0 }; // デバッグ用(好きな数値で攻撃対象を決められる)
         for(int i = 0; i < tmp.Length; i++)
         {
             // tmp内容が-1以外なら攻撃対象がいるので処理を行う
@@ -645,8 +645,8 @@ public class CharacterMng : MonoBehaviour
     private IEnumerator ChangeIDLETiming()
     {
         Debug.Log("スタート");
-        yield return new WaitForSeconds(5.0f);
-        Debug.Log("スタートから5秒後");
+        yield return new WaitForSeconds(3.0f);
+        Debug.Log("スタートから3秒後");
 
         anim_ = ANIMATION.IDLE;
     }

@@ -1454,4 +1454,188 @@ obj.transform.rotationをidentityのところにいれるようにして、プ�
 
 ここまでで、水の小は完成。
 
+土でいいのが見つからなかったから先に風をやろう↓
+https://ktk-kumamoto.hatenablog.com/entry/2018/01/18/222653
+
+インポートしたら[eff_wind_sample]フォルダが増えるからsplashフォルダと合わせて[Effect]フォルダにいれる。
+
+<風小魔法>
+データは
+1,単体風小,15,7,0,5,0,0,0,0
+大きさ調整は必要そうだからやって、
+魔法の設定をしていく。
+[5-0]
+Weaponタグをつける
+BoxColliderを付ける(IsTriggerにチェック)
+Rigidbodyを付ける(UseGravityチェックはずす)
+CheckAttackHit.csを付ける
+MagicMove.csはPowerの引数を10にしておく。
+
+単体風小の確認完了。
+
+1,複数風小,15,10,1,5,0,0,0,0
+複数風小の確認完了。
+
+1,全体風小,15,15,2,5,0,0,0,0
+全体風小の確認完了。
+
+これで風小魔法は終了。
+
+<土小魔法>
+https://ktk-kumamoto.hatenablog.com/entry/2018/02/01/214331
+上記のやつが氷なのでこれを岩っぽくアレンジしたい
+
+インポートするとeff_icewall_sampleフォルダが作成されるので、Effectフォルダに移動させた後、
+名前を[eff_rock]とする。
+
+色変更をお願いしてからsolid.pngを使うように修正
+あとは他のparticle色も土色っぽく変更した。
+
+プレハブをunpackにしておいて名前を[4-0]とする。
+Weaponタグをつける
+BoxColliderを付ける(IsTriggerにチェック)
+Rigidbodyを付ける(UseGravityチェックはずす)
+CheckAttackHit.csを付ける
+MagicMove.csはPowerの引数を10にしておく。
+
+データは
+1,単体土小,15,5,0,4,0,0,0,0
+
+この土魔法の場合、アニメーションの再生が完了して
+から削除するようにしたほうがよさそう。
+
+[CheckAttackHit.cs]
+このScriptがアタッチされているオブジェクトの
+先頭の文字が[4](=エレメントが土)のときは、
+Destroyをアニメーション終了まで待機する。としたい
+
+ハイフンで文字を区切ったときに[4]が先頭数字なら、
+Destroyは呼ばないようにする。
+→アニメーション終了時間になれば、MagicMove.csの
+　Update関数で消してくれるから。
+
+その代わり、敵にぶつかったときにそれ以上移動しないようにMagicMove.csのPowerを0にしたい。
+
+[MagicMove.cs]
+MoveStop関数を用意して、
+CheckAttackHit.csの土魔法だったときに呼び出すようにする。
+
+関数が呼ばれたらmoveStopFlg_をtrueにして、
+FixedUpdate関数でflgがtrueなら
+
+rigid.velocity = Vector3.zero;
+rigid.angularVelocity = Vector3.zero;
+を呼び出すようにした。
+→ユニちゃんの慣性止めるやつと同じ
+
+これで岩を止められる！
+
+単体土小確認完了。
+
+1,複数土小,15,10,1,4,0,0,0,0
+複数土小確認完了。
+
+1,全体土小,15,15,2,4,0,0,0,0
+全体土小確認完了。
+
 ------------------------------------------------
+
+※EffectFreeの中身が全部ピンクになってるから
+　入れなおしたほうがいいかも
+　→そもそも使わない可能性ある？かも
+
+<ボスを倒したら達成報告ができるようにしたい>-----
+
+討伐対象につけるScriptを新規で作成する
+→KnockDownEnemy.cs
+
+KnockDownEnemy.csをWaterMonsterのところにつける
+(Weaponタグがついているところ)
+
+このScriptをアタッチしている対象が非表示になったらクエスト達成状態かを確認する処理をいれたい。
+→OnDisable関数というのでできそう。
+
+※今後、ボス系の討伐クエストクリア処理には
+　このScriptを使う。
+
+<ボスの名前を変更する>
+カボスを[Field0Boss_4]にして、
+水猫ちゃんを[Field1Boss_4]にする
+→特に意味はないけどわかりやすくするため。
+
+<ギルドで依頼を受けるところからデバッグをする>
+HouseInteriorMng.csでエラーがでる。
+menuRect_がnullになる。
+→原因は、会話シーンからギルドに戻ってきて
+　DontDestroyCanvasのMenuが非表示状態になるから
+　取得できなくなってる
+
+[HouseInteriorMng.cs]
+ExitButton関数の中で、バッグの表示処理を
+
+var tmp =
+GameObject.Find("DontDestroyCanvas").
+GetComponent<RectTransform>();
+
+for(int i = 0; i < tmp.childCount; i++)
+{
+  if(tmp.GetChild(i).gameObject.name == "Menu")
+  {
+     tmp.GetChil(i).gameObject.SetActive(true);
+     break;
+  }
+}
+としてする必要がある。
+
+DontDestroyCanvas自体は非表示になっていないから取得ができ、その子供を検索して非表示状態のMenuをFindし、表示に切り替えるようにする。
+めんどくさい書き方だけどしょうがない。
+
+<シーン遷移する前のシーン情報を使ってMenuのオブジェクトを表示/非表示切替用としていたのを修正>
+MenuActive.csで行っていたMenuオブジェクトの非表示処理をSceneMng.csで行うようにした。
+これによりnowSceneが切り替わった後で表示設定ができるようになったためエラーを修正できた。
+
+------------------------------------------------
+
+<達成報告後に会話をはさんで、それ以降はオアシス
+ を表示状態にする>------------------------------
+
+達成報告後にChapter14で会話を入れてそこで
+進行度を15にする。
+
+FieldMng.csで進行度が15以上で
+現在のマップがFiled1(=DesertField)なら、
+FindでOasisオブジェクトを探して表示状態に変更する
+
+[FieldMng.cs]
+if((SceneMng.nowScene == SceneMng.SCENE.FIELD1) && EventMng.GetChapterNum() >= 15)
+{
+  全てのFieldMapオブジェクトをtrueにする
+  var tmp =
+  GameObject.Find("FieldMap").transform;
+  for (int i = 0; i < tmp.childCount; i++)
+  {
+     tmp.GetChild(i).gameObject.SetActive(true);
+  }
+}
+
+<達成報告後会話を作成する>
+Chpter.xlsにChapter14を追加する。
+[Chapter_importer]
+"14"を追加。reimportする。
+
+[Guild.cs]
+GuildQuestEvent関数で
+報告タイミングのswitch文にcase 14
+questNum == 4ならChapter14の会話を発生させる
+ように処理を追加する。
+
+これで会話を発生させられるようになった。
+
+------------------------------------------------
+
+<ポーションクエストと魔法作成クエストのクリア状態
+ も作成しないと>
+
+<討伐系クエストもどういう風に討伐した判定にするか考えないと>
+
+<敵の弱点属性だったときにダメを2倍にする処理も追加しないと>

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -49,9 +50,22 @@ public class CheckAttackHit : MonoBehaviour
                 GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().HPdecrease(targetNum_ - 1);
 
                 // 魔法の弾の時だけ魔法の弾を削除する
-                if(this.gameObject.name == "UniAttack(Clone)" || this.gameObject.name == charaMagicStr_)
+                if(this.gameObject.name == "UniAttack(Clone)")
                 {
                     Destroy(this.gameObject);
+                }
+                else if(this.gameObject.name == charaMagicStr_)
+                {
+                    if (int.Parse(charaMagicStr_.Split('-')[0]) == 4)    // 土魔法なら
+                    {
+                        // アニメーション終了まで削除待つ
+                        this.gameObject.GetComponent<MagicMove>().MoveStop();
+                    }
+                    else
+                    {
+                        // 土魔法以外はすぐに削除する(現状は、)
+                        Destroy(this.gameObject);
+                    }
                 }
                 else
                 {
@@ -101,6 +115,5 @@ public class CheckAttackHit : MonoBehaviour
                 targetNum_ = -1;
             }
         }
-
     }
 }

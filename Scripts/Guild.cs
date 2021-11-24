@@ -75,6 +75,13 @@ public class Guild : HouseBase
                         EventMng.SetChapterNum(11, SceneMng.SCENE.CONVERSATION);
                     }
                     break;
+                case 14:// 現在の進行度が14で、クエスト4番を達成したら
+                    if (questNum == 4)
+                    {
+                        SceneMng.SetTimeGear(SceneMng.TIMEGEAR.NOON);      // 時間経過
+                        EventMng.SetChapterNum(14, SceneMng.SCENE.CONVERSATION);
+                    }
+                    break;
                 default:
                     break;
             }
