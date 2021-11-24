@@ -89,9 +89,6 @@ public class FieldMng : MonoBehaviour
         titleInfo_ = fieldUICanvasPopUp_.transform.Find("TitleInfo").GetComponent<TMPro.TextMeshProUGUI>();
         // 宝箱の文字描画先
         getChestsInfo_ = fieldUICanvasPopUp_.transform.Find("GetChestsInfo").GetComponent<TMPro.TextMeshProUGUI>();
-
-        // MenuActive.csのAwakeより後に入ってくるのを利用して、ここでMenuを表示状態にする
-        //menu_.SetActive(true);
     }
 
     // クエストの受注状況に合わせて、壁や宝箱のアクティブ状態を判別する

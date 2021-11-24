@@ -268,6 +268,7 @@ public class HouseInteriorMng : MonoBehaviour
         nowInHouseName = "";
 
         // バッグを表示
-        menuRect_.gameObject.SetActive(true);
+        //menuRect_.gameObject.SetActive(true); // この書き方だとエラーがでるケースがある(会話シーンから戻ってきたとき等)
+        SceneMng.MenuSetActiveFalse();
     }
 }

@@ -161,8 +161,42 @@ public class SceneMng : MonoBehaviour
                 SetTimeGear(timeGrar_ + 1);
             }
 
-
             nowScene = scene;
+
+            // DontDestroyCanvas内のオブジェクトの非表示管理
+            if (nowScene == SCENE.TOWN)
+            {
+                // ギルドにいる場合はバッグを非表示に
+                var interiorMng = GameObject.Find("HouseInterior").GetComponent<HouseInteriorMng>();
+                if (interiorMng.GetInHouseName() == "Guild")
+                {
+                    // 会話シーンならMENUのみ非表示に
+                    MenuSetActiveFalse();
+                }
+            }
+            else if (nowScene == SCENE.CONVERSATION)
+            {
+                // 会話シーンならMENUのみ非表示に
+                MenuSetActiveFalse();
+            }
+            else
+            {
+                return;
+            }
+        }
+    }
+
+    public static void MenuSetActiveFalse()
+    {
+        // 会話シーンならMENUのみ非表示に
+        var tmp = GameObject.Find("DontDestroyCanvas").GetComponent<RectTransform>();
+        for (int i = 0; i < tmp.childCount; i++)
+        {
+            if (tmp.GetChild(i).gameObject.name == "Menu")
+            {
+                tmp.GetChild(i).gameObject.SetActive(false);
+                break;
+            }
         }
     }
 
