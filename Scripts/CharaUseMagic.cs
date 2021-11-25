@@ -142,12 +142,24 @@ public class CharaUseMagic : MonoBehaviour
                     // 弾の方向の計算
                     var dir = (list_[t].Item2.enePos - list_[t].Item2.charaPos).normalized;
                     // エフェクトの発生位置高さ調整
-                    var adjustPos = new Vector3(list_[t].Item2.charaPos.x, list_[t].Item2.charaPos.y + 0.5f, list_[t].Item2.charaPos.z);
+                    Vector3 adjustPos;
+                    
+                    // 威力が大の攻撃魔法なら、敵の頭上にエフェクトをインスタンスさせる
+                    if(int.Parse(magicPrefabNum_.Split('-')[1]) == 2)
+                    {
+                        adjustPos = new Vector3(list_[t].Item2.enePos.x, list_[t].Item2.enePos.y, list_[t].Item2.enePos.z);
+                    }
+                    else
+                    {
+                        adjustPos = new Vector3(list_[t].Item2.charaPos.x, list_[t].Item2.charaPos.y + 0.5f, list_[t].Item2.charaPos.z);
+                    }
+
                     // 魔法プレハブをインスタンス化(現在は指定した魔法のみ)
                     GameObject obj = Resources.Load("MagicPrefabs/" + magicPrefabNum_) as GameObject;
 
                     //var uniAttackInstance = Instantiate(obj, adjustPos, Quaternion.identity); // 回転座標が全て0になるver.
-                    var uniAttackInstance = Instantiate(obj, adjustPos, obj.transform.rotation);
+                    // プレハブの高さも含めた位置に生成する
+                    var uniAttackInstance = Instantiate(obj, adjustPos + obj.transform.position, obj.transform.rotation);
                     
                     MagicMove magicMove = uniAttackInstance.GetComponent<MagicMove>();
                     // 通常攻撃弾の飛んでいく方向を指定
