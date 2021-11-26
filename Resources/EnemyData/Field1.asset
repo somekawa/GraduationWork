@@ -28,6 +28,7 @@ MonoBehaviour:
     MoveTime: -1
     MoveDistance: -1
     WeaponTagObjName: SpiderAttack(Clone)
+    Weak: 2
   - Name: StoneMonster
     Level: 3
     HP: 15
@@ -35,7 +36,7 @@ MonoBehaviour:
     Attack: 8
     MagicAttack: 1
     Defence: 3
-    Speed: 1
+    Speed: 2
     Luck: 1
     AnimMax: 1
     Exp: 35
@@ -43,21 +44,23 @@ MonoBehaviour:
     MoveTime: 150
     MoveDistance: 1.5
     WeaponTagObjName: StoneMonster
+    Weak: 3
   - Name: BombMonster
     Level: 3
     HP: 10
     MP: 5
-    Attack: 15
+    Attack: 7
     MagicAttack: 1
     Defence: 3
     Speed: 1
-    Luck: 1
+    Luck: 100
     AnimMax: 1
     Exp: 20
     Drop: "\u30DC\u30E0\u306E\u6B20\u7247"
     MoveTime: 150
     MoveDistance: 1.5
     WeaponTagObjName: BombMonster
+    Weak: 3
   - Name: Eagle
     Level: 4
     HP: 20
@@ -66,10 +69,27 @@ MonoBehaviour:
     MagicAttack: 1
     Defence: 2
     Speed: 5
-    Luck: 3
+    Luck: 4
     AnimMax: 1
     Exp: 40
     Drop: "\u7DBA\u9E97\u306A\u7FBD\u6839"
     MoveTime: 150
     MoveDistance: 1.5
     WeaponTagObjName: Eagle
+    Weak: 2
+  - Name: WaterMonster
+    Level: 6
+    HP: 60
+    MP: 5
+    Attack: 10
+    MagicAttack: 1
+    Defence: 4
+    Speed: 8
+    Luck: 4
+    AnimMax: 1
+    Exp: 200
+    Drop: "\u30EF\u30FC\u30C9\u300C\u6C34(\u30A8\u30EC\u30E1\u30F3\u30C8)\u300D"
+    MoveTime: 150
+    MoveDistance: 1.5
+    WeaponTagObjName: WaterMonster
+    Weak: 2

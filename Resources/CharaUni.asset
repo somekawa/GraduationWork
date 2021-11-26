@@ -17,7 +17,7 @@ MonoBehaviour:
     Level: 1
     HP: 15
     MP: 16
-    Attack: 10
+    Attack: 5
     MagicAttack: 6
     Defence: 3
     Speed: 3

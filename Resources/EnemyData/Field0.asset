@@ -28,6 +28,7 @@ MonoBehaviour:
     MoveTime: -1
     MoveDistance: -1
     WeaponTagObjName: KabosuAttack(Clone)
+    Weak: 2
   - Name: Slime
     Level: 2
     HP: 12
@@ -43,6 +44,7 @@ MonoBehaviour:
     MoveTime: 150
     MoveDistance: 2
     WeaponTagObjName: Slime
+    Weak: 2
   - Name: RabbitSlime
     Level: 3
     HP: 15
@@ -58,6 +60,7 @@ MonoBehaviour:
     MoveTime: 150
     MoveDistance: 1.5
     WeaponTagObjName: Monster_1
+    Weak: 2
   - Name: Bee
     Level: 3
     HP: 8
@@ -73,6 +76,7 @@ MonoBehaviour:
     MoveTime: 150
     MoveDistance: 1.3
     WeaponTagObjName: Bee
+    Weak: 2
   - Name: YellowKabosu
     Level: 3
     HP: 20
@@ -88,3 +92,4 @@ MonoBehaviour:
     MoveTime: -1
     MoveDistance: -1
     WeaponTagObjName: KabosuAttack(Clone)
+    Weak: 2

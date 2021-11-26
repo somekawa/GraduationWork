@@ -57,7 +57,11 @@ public class CheckAttackHit : MonoBehaviour
                 else if(this.gameObject.name == charaMagicStr_)
                 {
                     var tmpStr = charaMagicStr_.Split('-');
-                    if (tmpStr[1] == "2(Clone)" || tmpStr[0] == "4" || (tmpStr[0] == "5" && tmpStr[1] == "1(Clone)"))    // 大威力か土魔法か風魔法の中なら
+                    // 大威力か極大威力か土魔法か風魔法の中なら
+                    if (tmpStr[1] == "2(Clone)" ||
+                        tmpStr[1] == "3(Clone)" ||
+                        tmpStr[0] == "4" ||
+                       (tmpStr[0] == "5" && tmpStr[1] == "1(Clone)"))    
                     {
                         // アニメーション終了まで削除待つ
                         this.gameObject.GetComponent<MagicMove>().MoveStop();

@@ -2,14 +2,14 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
-  m_ObjectHideFlags: 8
+  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2821f08f126191418ae31f3b9cd7cd5, type: 3}
+  m_Script: {fileID: 11500000, guid: dc440ea223c3871469540e088a5a1d10, type: 3}
   m_Name: M_Field3
   m_EditorClassIdentifier: 
   param:

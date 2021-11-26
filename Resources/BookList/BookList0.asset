@@ -2,44 +2,14 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
-  m_ObjectHideFlags: 8
+  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 041483e12177250488be5e2e5c2043a8, type: 3}
+  m_Script: {fileID: 11500000, guid: e6997970aeaf6f24b858ce1ad6c07c66, type: 3}
   m_Name: BookList0
   m_EditorClassIdentifier: 
-  param:
-  - BookName: "\u8D64\u30CE\u672C1"
-    Word: HP
-    AddNum: non
-    Price: 1000
-    Info: "\u30B5\u30D6\u30EF\u30FC\u30C9\u3010HP\u3011"
-  - BookName: "\u9752\u30CE\u672C1"
-    Word: non
-    AddNum: Add1_0
-    Price: 1000
-    Info: HP+10
-  - BookName: "\u7DD1\u30CE\u672C1"
-    Word: non
-    AddNum: Add1_1
-    Price: 1000
-    Info: MP+10
-  - BookName: "\u9ED2\u30CE\u672C1"
-    Word: non
-    AddNum: Add1_2
-    Price: 1000
-    Info: "\u653B\u6483\u529B+10"
-  - BookName: "\u767D\u30CE\u672C1"
-    Word: non
-    AddNum: Add1_8
-    Price: 1000
-    Info: "\u7D4C\u9A13\u5024+100"
-  - BookName: non
-    Word: non
-    AddNum: non
-    Price: 0
-    Info: non
+  param: []

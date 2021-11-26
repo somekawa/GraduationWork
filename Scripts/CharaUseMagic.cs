@@ -144,8 +144,8 @@ public class CharaUseMagic : MonoBehaviour
                     // エフェクトの発生位置高さ調整
                     Vector3 adjustPos;
                     
-                    // 威力が大の攻撃魔法なら、敵の頭上にエフェクトをインスタンスさせる
-                    if(int.Parse(magicPrefabNum_.Split('-')[1]) == 2)
+                    // 威力が大以上の攻撃魔法なら(極大含む)、敵の頭上にエフェクトをインスタンスさせる
+                    if(int.Parse(magicPrefabNum_.Split('-')[1]) >= 2)
                     {
                         adjustPos = new Vector3(list_[t].Item2.enePos.x, list_[t].Item2.enePos.y, list_[t].Item2.enePos.z);
                     }
