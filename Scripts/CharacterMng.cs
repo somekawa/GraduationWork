@@ -45,6 +45,7 @@ public class CharacterMng : MonoBehaviour
     private readonly string[] announceText_ = new string[2] { " 左シフトキー：\n 戦闘から逃げる", " Tキー：\n コマンドへ戻る" };
 
     private ImageRotate buttleCommandRotate_;                     // バトル中のコマンドUIを取得して、保存しておく変数
+    private GameObject[] buttleCommandImage_ = new GameObject[4]; // バトルコマンドの画像4種類
     private EnemySelect buttleEnemySelect_;                       // バトル中の選択アイコン情報
     private ButtleMng buttleMng_;                                 // ButtleMng.csの取得
 
@@ -77,7 +78,14 @@ public class CharacterMng : MonoBehaviour
 
         buttleAnounceText_ = buttleUICanvas.transform.Find("AnnounceText").GetComponent<TMPro.TextMeshProUGUI>();
 
-        buttleCommandRotate_ = buttleUICanvas.transform.Find("Command").transform.Find("Image").GetComponent<ImageRotate>();
+        var commandImage = buttleUICanvas.transform.Find("Command/Image");
+        buttleCommandRotate_ = commandImage.GetComponent<ImageRotate>();
+        for(int i = 0; i < commandImage.childCount; i++)
+        {
+            // コマンド画像4種類を取得
+            buttleCommandImage_[i] = commandImage.GetChild(i).gameObject;
+        }
+
         buttleEnemySelect_ = buttleUICanvas.transform.Find("EnemySelectObj").GetComponent<EnemySelect>();
 
         enemyInstancePos_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().GetEnemyPos();
@@ -242,6 +250,11 @@ public class CharacterMng : MonoBehaviour
                 Debug.Log("魔法コマンドの選択を解除します");
                 setMagicObj_.SetActive(false);
                 setMagicObj_.GetComponent<ImageRotate>().enabled = false;
+                // コマンド画像を表示にする
+                for (int i = 0; i < buttleCommandImage_.Length; i++)
+                {
+                    buttleCommandImage_[i].SetActive(true);
+                }
             }
         }
 
@@ -313,6 +326,12 @@ public class CharacterMng : MonoBehaviour
 
                                 // 防御用の値を0に戻す
                                 charasList_[(int)nowTurnChar_].SetBarrierNum();
+
+                                // コマンド画像を非表示にする
+                                for(int i = 0; i < buttleCommandImage_.Length; i++)
+                                {
+                                    buttleCommandImage_[i].SetActive(false);
+                                }
 
                                 Debug.Log("魔法コマンドが有効コマンドです");
                                 selectFlg_ = true;
