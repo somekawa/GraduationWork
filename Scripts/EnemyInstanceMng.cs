@@ -487,13 +487,16 @@ public class EnemyInstanceMng : MonoBehaviour
             }
         }
 
-        // 自分の弱点属性を確認する
-        var weakElement = enemyList_[num].Item1.Weak();
-        //@ ここで攻撃側の属性と一致してたらダメージ量を倍にするようにしたい
+        // 攻撃側の属性と自分の弱点属性が一致してたらダメージ量を2倍にする
+        if (enemyList_[num].Item1.Weak() == buttleMng_.GetElement())
+        {
+            damage *= 2;
+            Debug.Log("敵の弱点属性！ ダメージ量2倍で" + damage);
+        }
 
 
         // ダメージ値の算出
-        if(damage <= 0)
+        if (damage <= 0)
         {
             Debug.Log("キャラの攻撃力より敵の防御力が上回ったのでダメージが1になりました");
             damage = 1;

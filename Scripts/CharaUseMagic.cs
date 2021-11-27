@@ -17,7 +17,6 @@ public class CharaUseMagic : MonoBehaviour
     // 魔法生成用リスト(bool->魔法生成したらtrueにする)
     private List<(bool,MagicAttackInfo)> list_ = new List<(bool,MagicAttackInfo)>();
 
-    private int mp_;
     private string magicPrefabNum_;    // 10の桁->効果範囲(ヘッド),1の桁->エレメント
     private int headNum_;              // ヘッド番号
 
@@ -30,7 +29,7 @@ public class CharaUseMagic : MonoBehaviour
         enemySelect_ = GameObject.Find("ButtleUICanvas/EnemySelectObj").GetComponent<EnemySelect>();
     }
 
-    public void CheckUseMagic(Bag_Magic.MagicData magicData)
+    public void CheckUseMagic(Bag_Magic.MagicData magicData, int charaMagicPower)
     {
         // リストの初期化
         list_.Clear();
@@ -67,19 +66,18 @@ public class CharaUseMagic : MonoBehaviour
             }
 
             // 攻撃威力をButtleMng.csに渡す
-            buttleMng_.SetDamageNum(magicData.power);
+            buttleMng_.SetDamageNum(magicData.power + charaMagicPower);
             // 攻撃属性をButtleMng.csに渡す
             buttleMng_.SetElement(magicData.element);
         }
 
-        mp_ = magicData.rate;
         magicPrefabNum_ = magicData.element.ToString() + "-" + magicData.tail.ToString();
         headNum_ = magicData.head;
     }
 
-    public int MPdecrease()
+    public int MPdecrease(Bag_Magic.MagicData magicData)
     {
-        return mp_; // 消費MP情報
+        return magicData.rate; // 消費MP情報
     }
 
     public void InstanceMagicInfo(Vector3 charaPos,Vector3 enePos,int targetNum,int instanceNum)

@@ -154,9 +154,9 @@ public class Enemy : CharaBase, InterfaceButtle
     {
         return set_.Defence;
     }
-    public override void Magic()
+    public override int MagicPower()
     {
-        Debug.Log("–‚–@I");
+        return set_.MagicAttack;
     }
     public override void Item()
     {

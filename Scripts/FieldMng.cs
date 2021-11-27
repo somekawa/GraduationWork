@@ -16,9 +16,6 @@ public class FieldMng : MonoBehaviour
     [SerializeField]
     private GameObject fieldUICanvasPopUp_; // FieldUICanvasの中にあるPopUpという空のオブジェクトを外部アタッチする
 
-    //[SerializeField]
-    //private GameObject menu_;               // DontDestroyCanvasの中のMenuオブジェクトを外部アタッチする
-
     // 画面状態一覧
     public enum MODE
     {
@@ -205,12 +202,12 @@ public class FieldMng : MonoBehaviour
 
             case MODE.SEARCH:
                 cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
-                //menu_.SetActive(true);
+                SceneMng.MenuSetActive(true);
                 break;
 
             case MODE.BUTTLE:
                 cameraMng_.SetChangeCamera(true);    // サブカメラアクティブ
-                //menu_.SetActive(false);
+                SceneMng.MenuSetActive(false);
                 break;
 
             case MODE.MENU:

@@ -59,6 +59,7 @@ public class CharacterMng : MonoBehaviour
     private Vector3 enePos_;                           // 目標の敵座標
 
     private CharaUseMagic useMagic_;
+    private int mpDecrease_ = 0;                       // 魔法発動時に減少させるMPの量
 
     void Start()
     {
@@ -268,15 +269,26 @@ public class CharacterMng : MonoBehaviour
                 Debug.Log("現在は魔法コマンドが有効コマンドです");
 
                 var tmp = (int)setMagicObj_.GetComponent<ImageRotate>().GetNowCommand() - 1;
+                mpDecrease_ = useMagic_.MPdecrease(charasList_[(int)nowTurnChar_].GetMagicNum(tmp));
+
                 Debug.Log(tmp + "番の魔法を使用しようとしています");
 
-                // 範囲外かの確認をする
-                if (charasList_[(int)nowTurnChar_].CheckMagicNum(tmp))
+                // 回転中は魔法情報を取得しないようにする。かつ、範囲外かの確認をする
+                if (charasList_[(int)nowTurnChar_].CheckMagicNum(tmp) && charasList_[(int)nowTurnChar_].GetMagicNum(tmp).number > 0)
                 {
-                    // CharaUseMagic.csに情報を渡す
-                    useMagic_.CheckUseMagic(charasList_[(int)nowTurnChar_].GetMagicNum(tmp));
-                    setMagicObj_.SetActive(false);
-                    buttleCommandRotate_.SetRotaFlg(false);
+                    // 現在のMP量と、発動に必要なMP量を比較する
+                    if(charasList_[(int)nowTurnChar_].MP() < mpDecrease_)
+                    {
+                        Debug.Log("魔法を発動するためのMPが不足しています");
+                        mpDecrease_ = 0;
+                    }
+                    else
+                    {
+                        // CharaUseMagic.csに情報を渡す
+                        useMagic_.CheckUseMagic(charasList_[(int)nowTurnChar_].GetMagicNum(tmp), charasList_[(int)nowTurnChar_].MagicPower());
+                        setMagicObj_.SetActive(false);
+                        buttleCommandRotate_.SetRotaFlg(false);
+                    }
                 }
                 else
                 {
@@ -311,6 +323,8 @@ public class CharacterMng : MonoBehaviour
                                 // 防御用の値を0に戻す
                                 charasList_[(int)nowTurnChar_].SetBarrierNum();
                                 BeforeAttack();    // 攻撃準備
+                                // 攻撃属性を-1にする(弱点とかが無い状態にする)
+                                buttleMng_.SetElement(-1);
                             }
                         }
 
@@ -343,7 +357,7 @@ public class CharacterMng : MonoBehaviour
                                 //@ 行動中のキャラに設定された魔法画像を描画する
                                 for (int i = 0; i < 4; i++)
                                 {
-                                    if (charasList_[(int)nowTurnChar_].GetImageTest(i) == null)
+                                    if (charasList_[(int)nowTurnChar_].GetMagicImage(i) == null)
                                     {
                                         // nullのときは魔法を設定していないから透過する
                                         magicImage_[i].color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
@@ -351,7 +365,7 @@ public class CharacterMng : MonoBehaviour
                                     else
                                     {
                                         magicImage_[i].color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-                                        magicImage_[i].sprite = charasList_[(int)nowTurnChar_].GetImageTest(i);
+                                        magicImage_[i].sprite = charasList_[(int)nowTurnChar_].GetMagicImage(i);
                                     }
                                 }
                             }
@@ -439,6 +453,12 @@ public class CharacterMng : MonoBehaviour
                 }
 
                 selectFlg_ = false;
+
+                // コマンド画像を表示にする
+                for (int i = 0; i < buttleCommandImage_.Length; i++)
+                {
+                    buttleCommandImage_[i].SetActive(true);
+                }
 
                 //// 矢印位置のリセットを行う(falseなら、敵を全て倒したということなのでフラグを切り替える)
                 //lastEnemytoAttackFlg_ = !buttleEnemySelect_.ResetSelectPoint();
@@ -629,11 +649,10 @@ public class CharacterMng : MonoBehaviour
         buttleMng_.SetLuckNum(charasList_[(int)nowTurnChar_].Luck());
 
         // MP減少処理
-        int MPdecrease = useMagic_.MPdecrease();
         StartCoroutine(charaHPMPMap_[nowTurnChar_].Item2.MoveSlideBar
-        (charasList_[(int)nowTurnChar_].MP() - MPdecrease));
+        (charasList_[(int)nowTurnChar_].MP() - mpDecrease_));
         // 内部数値の変更を行う
-        charasList_[(int)nowTurnChar_].SetMP(charasList_[(int)nowTurnChar_].MP() - MPdecrease);
+        charasList_[(int)nowTurnChar_].SetMP(charasList_[(int)nowTurnChar_].MP() - mpDecrease_);
 
         // 魔法での攻撃対象を決定したときに入る
         // 選択した敵の番号を渡す
@@ -656,6 +675,7 @@ public class CharacterMng : MonoBehaviour
 
         buttleCommandRotate_.SetRotaFlg(true);
         buttleEnemySelect_.SetActive(false);
+        mpDecrease_ = 0;
 
         // IDLEに切り替わると敵の死亡処理の判定を行うので、間を開けるようにコルーチンで調節する
         StartCoroutine(ChangeIDLETiming());

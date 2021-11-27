@@ -120,7 +120,7 @@ public abstract class CharaBase : object
     public abstract void LevelUp();
     public abstract void Weapon();
     public abstract int Defence(bool flag);
-    public abstract void Magic();
+    public abstract int MagicPower();
     public abstract void Item();
     public abstract bool ChangeNextChara(); // Ÿ‚ÌƒLƒƒƒ‰‚Ì‘€ì‚ÉØ‚è‘Ö‚¦‚éˆ×‚Ì€”õˆ—
     public abstract void DamageAnim();      // UŒ‚‚ğó‚¯‚½‚Æ‚«‚Ìƒ‚[ƒVƒ‡ƒ“ˆ—

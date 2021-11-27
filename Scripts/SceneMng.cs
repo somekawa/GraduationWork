@@ -171,13 +171,13 @@ public class SceneMng : MonoBehaviour
                 if (interiorMng.GetInHouseName() == "Guild")
                 {
                     // 会話シーンならMENUのみ非表示に
-                    MenuSetActiveFalse();
+                    MenuSetActive(false);
                 }
             }
             else if (nowScene == SCENE.CONVERSATION)
             {
                 // 会話シーンならMENUのみ非表示に
-                MenuSetActiveFalse();
+                MenuSetActive(false);
             }
             else
             {
@@ -186,15 +186,15 @@ public class SceneMng : MonoBehaviour
         }
     }
 
-    public static void MenuSetActiveFalse()
+    // この書き方のほうが確実にMenuを取得して表示/非表示を変更できる
+    public static void MenuSetActive(bool flag)
     {
-        // 会話シーンならMENUのみ非表示に
         var tmp = GameObject.Find("DontDestroyCanvas").GetComponent<RectTransform>();
         for (int i = 0; i < tmp.childCount; i++)
         {
             if (tmp.GetChild(i).gameObject.name == "Menu")
             {
-                tmp.GetChild(i).gameObject.SetActive(false);
+                tmp.GetChild(i).gameObject.SetActive(flag);
                 break;
             }
         }

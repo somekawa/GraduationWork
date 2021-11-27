@@ -144,9 +144,9 @@ public class Chara : CharaBase,InterfaceButtle
         return set_.Defence + barrierNum_;
     }
 
-    public override void Magic()
+    public override int MagicPower()
     {
-        Debug.Log("–‚–@I");
+        return set_.MagicAttack;
     }
     public override void Item()
     {
@@ -258,19 +258,9 @@ public class Chara : CharaBase,InterfaceButtle
         barrierNum_ = num;
     }
 
-    //public void SetMagicNum(int arrayNum, int num = 0)
-    //{
-    //    set_.Magic[arrayNum] = num;
-    //}
-
-    //public int GetMagicNum(int arrayNum)
-    //{
-    //    return set_.Magic[arrayNum];
-    //}
     public void SetMagicNum(int arrayNum,int num = 0)
     {
         set_.Magic[arrayNum] = num;
-      //  Debug.Log(set_.Magic[arrayNum].name);
     }
 
     public Bag_Magic.MagicData GetMagicNum(int arrayNum)
@@ -278,7 +268,7 @@ public class Chara : CharaBase,InterfaceButtle
         return Bag_Magic.data[set_.Magic[arrayNum]];
     }
 
-    public Sprite GetImageTest(int num)
+    public Sprite GetMagicImage(int num)
     {
         // –‚–@‘•”õ–³‚µ
         if(set_.Magic[num] == 0)
