@@ -16,5 +16,7 @@ public class QuestInfo : ScriptableObject
         public int eventNum;
         public string type;
         public string reward;
+        public int questType;
+        public string delivery;
     }
 }

@@ -1446,6 +1446,271 @@ SetNowScene関数で、sceneでnowSceneを上書き前に、今まで動いて�
 
 ------------------------------------------------
 
+<ギルドのボタンを変更する>----------------------
+デフォルトのボタンから[InHouseButton.png]に変更
+※UniHouseSceneも同様に画像変更する。
+
+ついでに文字フォントもTextからTMPに変更していく
+FontSize:15
+Alignment:両方とも中央にする
+(QuestCanvasを一時保存ファイルで更新)
+
+さらについでに建物名の表示位置も調整していく
+右上を原点にして
+Pos X:455 Y:270 Z:0
+全ての建物に関して
+(InHouseCanvasとUniHouseを一時保存ファイルで更新)
+
+クエストボタンも変更する
+(QuestPrefabをプレハブフォルダで更新)
+TMPのTextにするからQuestMng.csでFindの部分を処理変更が必要
+[QuestPrefabのButton]
+Pos   X:30 Y:0 Z:0
+Scale X:1.5 Y:1.5 Z:1
+
+<クエストのタイトル名を変更する>
+今は「クエスト+番号」になってるから
+ここを各クエストのタイトル名に変更する
+
+toggleTextCom.text =
+　　　　　 popQuestInfo_.param[i].info;
+とする。
+
+ただ、このままでは文字数を超えたときに段になってしまうから、最初の5文字だけ表示して
+あとは「・・」にしたい。
+
+// 5文字以上のタイトル情報のとき
+if(popQuestInfo_.param[i].info.Length >= 5)
+{
+   // コンポーネントを取得して情報を反映させる
+   questUIInstanceList_[i].Find  ("TitlePanel/Button/Text").
+  GetComponent<TMPro.TextMeshProUGUI>().text =
+  popQuestInfo_.param[i].info.Substring(0, 5) 
+  + "・・";
+}
+else
+{
+   questUIInstanceList_[i].Find   ("TitlePanel/Button/Text").
+   GetComponent<TMPro.TextMeshProUGUI>().text =
+   popQuestInfo_.param[i].info;
+}
+
+<受注/報告ボタンも変更する>
+ボタンの色は他と違うほうがいいから
+赤っぽいのをPictureフォルダに追加して
+「SomeButton.png」と命名する。
+
+一時保存ファイルに
+OrderButtonとReportButtonをいれる。
+
+さいごに、
+もともと使用していなかったQuest.csを削除する
+
+------------------------------------------------
+
+<ポーションクエストと
+ 魔法作成クエストのクリア判定を作成>---------------
+納品クエストのときには、どのアイテムを納品するか選択できるようにしないといけない。
+→「成功」のアイテムなのか、「大成功」のアイテムな　 のか
+※そもそも、今、成功と大成功の同種類アイテムは
+　別々で鞄に入っているのかわからない。
+
+
+進行度を11にしてギルドに入る。
+とりあえず順番にゆっくり考えるべし。。。
+
+<ポーション納品クエスト>
+まずは成功/大成功を区別せずに考える。
+プレイヤーに任意でアイテムを選択してもらえるように
+画面上に鞄みたいな枠をだして、納品可能アイテムを
+表示するようにする。
+
+アイテム画像をクリックして、個数を指定して、確定ボタンを押したら個数を確認してクエスト達成状態に移行するようにする
+
+そもそも別ウィンドウを出すかどうかとかの判断をするために、クエストタイプみたいなenumがあった方がいい
+
+納品 delivery(0)
+討伐 Subjugation(1)
+その他(ほとんどのメインクエスト) other(2)
+これらをQuestInfo.xlsに
+新項目(questType)として追加する
+→現在あるクエストのうち、ポーションを届けてだけ0に
+　して、他は全部2とする
+
+また、何を納品するかもExcelから読み込めるようにしとかないといけない。
+名前を使えるはずだから項目でdeliveryを追加し、
+HPポーション(小)と入力しておく。
+
+[QuestInfo.cs]
+public int questType;
+public string delivery;
+を追加する。
+
+[QuestInfo_importer.cs]
+cell = row.GetCell(7); p.questType = (int)(cell == null ? 0 : cell.NumericCellValue);
+と、
+cell = row.GetCell(8); p.delivery = (cell == null ? "" : cell.StringCellValue);
+を追加する。
+
+[QuestMng.cs]
+enumでQUESTTYPEを作成する。
+
+ClickOrderButton関数の中で受注できたときに、
+そのクエストのタイプを見て、0(=納品)かどうかみる。
+
+0以外だったら今まで通り受注するようにelse側に書いて
+0だったら、納品画面みたいなのを用意してそれを表示。
+
+QuestUIに[DeliveryPanel(Panel)]を追加する。
+[DeliveryPanel]
+アンカーポイント：中心
+Width:750,Height:500
+
+ImageのColor(R:1 G:0.97 B:0.47 A:1)
+非表示にしておく。
+
+private GameObject deliveryBack_;を作成して、
+Start関数で、deliveryBack_ = transform.Find("QuestUI/DeliveryPanel").gameObject;
+とする。
+
+納品クエスト受注時にSetActiveをtrueにする。
+ここに、自分の持っているアイテムで納品に該当するアイテムを所持している場合は画面上にアイコン表示するように設定する。
+
+自分が所持しているアイテムはBag_Item.csから見れる。
+itemState変数
+画像はPrefabフォルダにあるItemBoxが使えそう。
+動的に生成しようかと思ったけど、よく考えて。
+納品してほしいアイテムは1種類であることを考えたら、
+その1種類の成功or大成功の2つのボックスで足りる。
+→DeliveryPanelの子として2つItemBoxを付けたらok
+
+[ItemBox]
+Pos X:-285 Y:150 Z:0
+
+[ItemBox(1)]
+Pos X:-100 Y:150 Z:0
+
+この2つのアイテムボックスに手持ちの情報をいれないと
+いけない。
+
+private GameObject[] deliveryItemBox_ =
+new GameObject[2];
+を用意して、
+Start関数で
+deliveryItemBox_[0] = deliveryBack_.transform.Find("ItemBox").gameObject;
+
+deliveryItemBox_[1] = deliveryBack_.transform.Find("ItemBox (1)").gameObject;
+
+とする。
+
+納品クエストだったときの処理に、
+所持アイテム数でfor文を回して、納品アイテムと名前が一致しているものを見つけたら
+deliveryItemBox_[0].transform.Find("ItemIcon").GetComponent<Image>().sprite = Bag_Item.itemState[i].image.sprite;
+
+deliveryItemBox_[0].transform.Find("ItemNum").GetComponent<Text>().text = Bag_Item.itemState[i].cntText.text;
+
+という処理をするようにしておく。
+
+※ItemNumは未所持だった時を考えて最初のテキストを
+  0にしておく(プレハブのままだったら99になってる)
+
+スライドバーみたいなのを作って、
+納品個数を決められるようにしたい。
+
+ItemBoxの子として[Slider(Slider)]を追加する。
+[Slider]
+Pos X:0 Y:-100 Z:0
+Scale X:1 Y:1.5 Z:1
+FillのColorを青っぽくする
+
+SliderのValueを取得して、Sliderの下に現在納品しようとしている数を表示するようにしたい。
+
+ItemBoxの子として[DeliveryNum(Text)]を追加する。
+[DeliveryNum]
+Pos X:0 Y:-125 Z:0
+FontSize:48
+Alignment:左の設定を中央にする
+Overflowにしとく。
+
+納品を決定、もしくは、やめるのボタンを押すまで
+コルーチンが回るようにしておいて
+その中でValueの取得とか最大値の変更とかしたい。
+※Bag_Item.csの所持数を5にしてテストする
+
+コルーチンを作成する。
+コルーチンの中で、現在のSliderのvalueを
+DeliveryNumに反映させる処理をまずは書く。
+※floatになっているので、WholeNumbersにチェックしてintに直すこと！
+スライダーのmax値を現在所持しているアイテム数にする
+→ただし、納品数 < 所持アイテム数ならば
+　納品数がmax値の優先になるようにしたい。
+
+納品をクエスト情報から取り出す必要がある。
+string str = Regex.Replace(popQuestInfo_.param[questNum_].detail, @"[^0-9]", "");
+として、infoから納品数字を取り出す
+
+あとは、アイテム画像の右下の所持数を
+スライダーが増える分だけマイナスしていく。
+
+次に、納品確定ボタンをつくる。
+DeliveryPanelの子に[Button(Button)]を作成する。
+
+[Button]
+Pos X:0 Y:-200 Z:0
+Scale X:2 Y:2 Z:1
+画像はSomeButton
+
+[Buttonの子のText(TMP)]
+FontSize:15
+
+確定ボタンは、成功と大成功のスライドバーのvalueが
+納品数と同じときにしか押せないようにする。
+→α値を0.5にしておいて押せない感は出しとこ
+　ぴったりのときには押せる感出しとこ
+
+やめるボタンの処理をつくる。
+DeliveryPanelを非表示にすればokだとおもう。
+
+大成功のバーとか数字もつくる。
+
+<確定ボタンの処理をつくる>
+[QuestMng.cs]
+ClickKakuteiButton関数を作成する。
+ButtonのOnClickにQuestMngにアタッチして
+ClickKakuteiButtonを呼び出すようにする。
+
+button.interactableを
+納品数がぴったりのときにtrue
+合わないときにfalse
+としてボタンを押下できないようにする
+
+確定ボタンを押したら
+納品するアイテム分手持ちから減らして
+コルーチンを止める。
+→ただStopするのではなくて完全に初期化させる
+そしてパネルを非表示にしてクエストをクリア状態にする。
+
+※戻るボタン押したときにスライダーのvalueが0に
+　初期化されるようにしておく。
+
+やめるボタンの作成
+納品をやめるときに押すボタン。
+パネルを非表示にするだけでok
+
+<Backボタンもついでにデザイン修正する>
+茶色い丸枠の中に▽矢印をいれて、戻れそうな雰囲気をだす。設置位置も画面左下にする
+
+<魔法作成クエストのクリア判定>
+また後でがんばろ
+
+-------------------------------------------------
+
+回復ポーション(小)
+回復ポーション(小)大成功
+※大成功のアイテムにはキラキラマークとかつけて
+　わかりやすくしたい
+
+
 *重要*
 タグの判別にはgameObject.tag == “string tag”もあるが、CompareTag()の方が早い
 

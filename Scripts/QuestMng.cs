@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Collections;
+using System.Text.RegularExpressions;
 
 // クエスト管理スクリプト
 
@@ -15,6 +16,14 @@ public class QuestMng : MonoBehaviour
         NON,            // 入室時画面
         LOOK_QUEST,     // クエストを見るの画面
         REPORT_QUEST    // クエスト報告画面
+    }
+
+    // クエストのタイプ
+    enum QUESTTYPE
+    {
+        DELIVERY,       // 納品
+        SUBJUGATION,    // 討伐
+        OTHER,          // その他(だいたいのメインクエスト系)
     }
 
     [SerializeField]
@@ -43,6 +52,9 @@ public class QuestMng : MonoBehaviour
     private GameObject popUpReward_;                 // クリア報酬のポップアップ
     private TMPro.TextMeshProUGUI rewardText_;       // クリア報酬のテキスト
 
+    private GameObject deliveryBack_;                // 納品クエストの背景パネル
+    private GameObject[] deliveryItemBox_ = new GameObject[2];  // 納品予定のアイテムを表示するアイテムボックス     
+
     private QuestButton[] questButton_;
 
     private int totalQuestNum_;                      // 全クエストの数
@@ -52,6 +64,8 @@ public class QuestMng : MonoBehaviour
     private Guild guild_ = null;                     // ギルドスクリプトのインスタンス
 
     private NOWPAGE nowPage_ = NOWPAGE.NON;          // 現在の画面状態
+
+    IEnumerator[] rest = new IEnumerator[2];         // 納品処理のコルーチンを保存する
 
     // Excelからのデータ読み込み
     private GameObject DataPopPrefab_;
@@ -97,6 +111,10 @@ public class QuestMng : MonoBehaviour
 
         popUpReward_ = transform.Find("QuestUI/PopUp").gameObject;
         rewardText_ = transform.Find("QuestUI/PopUp/GetReward").GetComponent<TMPro.TextMeshProUGUI>();
+
+        deliveryBack_ = transform.Find("QuestUI/DeliveryPanel").gameObject;
+        deliveryItemBox_[0] = deliveryBack_.transform.Find("ItemBox").gameObject;
+        deliveryItemBox_[1] = deliveryBack_.transform.Find("ItemBox (1)").gameObject;
 
         for (var i = 0; i < tmpQuestNum; i++)
 		{
@@ -195,24 +213,167 @@ public class QuestMng : MonoBehaviour
         else
         {
             // まだ3つ以下だから受けられる
-            // プレハブのインスタンス
-            var prefab = Instantiate(completePrefab);
-            // クエスト番号の設定
-            prefab.GetComponent<CompleteQuest>().SetMyNum(questNum_);
+            // 納品クエストかを確認する
+            if (popQuestInfo_.param[questNum_].questType == 0)
+            {
+                deliveryBack_.SetActive(true);
 
-            // クエストクリアを確認するスクリプトのリストに登録する
-            QuestClearCheck.SetOrderQuestsList(prefab);
+                // 所持アイテム数をfor文で回す
+                // deliveryItemBox_[0]に成功のアイテムを、deliveryItemBox_[1]に大成功のアイテムの個数を入れる
+                for (int i = 0; i < Bag_Item.itemState.Length; i++)
+                {
+                    // 所持アイテムと、納品クエストで名前が一致している物を検索する
+                    if(Bag_Item.itemState[i].name == popQuestInfo_.param[questNum_].delivery)
+                    {
+                        // 画像を出して、所持個数を入れる(左側)
+                        deliveryItemBox_[0].transform.Find("ItemIcon").GetComponent<Image>().sprite = Bag_Item.itemState[i].image.sprite;
+                        deliveryItemBox_[1].transform.Find("ItemIcon").GetComponent<Image>().sprite = Bag_Item.itemState[i].image.sprite;
+                        deliveryItemBox_[0].transform.Find("ItemNum").GetComponent<Text>().text = Bag_Item.itemState[i].cntText.text;
+                    }
+                    else if (Bag_Item.itemState[i].name + "Ex" == popQuestInfo_.param[questNum_].delivery + "Ex")
+                    {
+                        // 画像を出して、所持個数を入れる(右側)
+                        //deliveryItemBox_[1].transform.Find("ItemIcon").GetComponent<Image>().sprite = Bag_Item.itemState[i].image.sprite;
+                        deliveryItemBox_[1].transform.Find("ItemNum").GetComponent<Text>().text = Bag_Item.itemState[i].cntText.text;
+                    }
+                    else
+                    {
+                        // 何も処理を行わない
+                    }
+                }
 
-            // クエストの受注でイベントが進行するか判断する
-            guild_.GuildQuestEvent(questNum_,false, questClearCnt_);
-
-            Debug.Log("クエストを受注しました");
-
-            // 受注ボタンを非表示にする
-            questOrderButton_.SetActive(false);
-            // 受注したものを左側のリストから非表示にする
-            questButton_[questNum_].gameObject.SetActive(false);
+                // コルーチンを初期化
+                rest[0] = DeliveryCoroutine(0);
+                rest[1] = DeliveryCoroutine(1);
+                StartCoroutine(rest[0]); // コルーチンを呼び出す(成功)
+                StartCoroutine(rest[1]); // コルーチンを呼び出す(大成功)
+            }
+            else
+            {
+                // まだ3つ以下だから受けられる
+                OrderQuestCommon();
+            }
         }
+    }
+
+    // 納品数のいろいろするコルーチン
+    private IEnumerator DeliveryCoroutine(int num)
+    {
+        var slider = deliveryItemBox_[num].transform.Find("Slider").GetComponent<Slider>();
+        // スライダーの位置を初期化する
+        slider.value = 0.0f;
+
+        var deliveryNum = deliveryItemBox_[num].transform.Find("DeliveryNum").GetComponent<Text>();
+        var itemNumText = deliveryItemBox_[num].transform.Find("ItemNum").GetComponent<Text>();
+        var charaHaveItemCnt = int.Parse(itemNumText.text);
+        var buttonImage = deliveryBack_.transform.Find("Button").GetComponent<Image>();
+        var button = deliveryBack_.transform.Find("Button").GetComponent<Button>();
+
+        // クエスト情報から数字だけ抜き取る(= 納品数)
+        string str = Regex.Replace(popQuestInfo_.param[questNum_].detail, @"[^0-9]", "");
+
+        // 納品数 < 所持数ならば、納品数をスライダーの上限とする
+        if(int.Parse(str) < int.Parse(itemNumText.text))
+        {
+            // スライダーのmax値を納品数にする
+            slider.maxValue = float.Parse(str);
+        }
+        else
+        {
+            // スライダーのmax値を現在所持しているアイテム数にする
+            slider.maxValue = float.Parse(itemNumText.text);
+        }
+
+        bool flag = false;
+        while (!flag)
+        {
+            yield return null;
+
+            // 納品予定の数をスライダーのスライド量で変更する
+            deliveryNum.text = slider.value.ToString();
+
+            // 画像右下の数字をスライダーが増えた分だけマイナスする
+            itemNumText.text = (charaHaveItemCnt - int.Parse(deliveryNum.text)).ToString();
+
+            if(int.Parse(slider.maxValue.ToString()) == int.Parse(slider.value.ToString()))
+            {
+                // 納品数がぴったりのとき
+                button.interactable = true;
+                buttonImage.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+            }
+            else
+            {
+                // 納品数が合わないとき
+                button.interactable = false;
+                buttonImage.color = new Color(1.0f, 1.0f, 1.0f, 0.5f);
+            }
+        }
+    }
+
+    // 納品の確定
+    public void ClickDeliveryButton()
+    {
+        Debug.Log("納品確定ボタン");
+
+        for (int i = 0; i < Bag_Item.itemState.Length; i++)
+        {
+            // 所持アイテムと、納品クエストで名前が一致している物を検索する
+            if (Bag_Item.itemState[i].name == popQuestInfo_.param[questNum_].delivery)
+            {
+                // 納品するものを手持ちから減らす
+                Bag_Item.itemState[0].haveCnt -= (int)deliveryItemBox_[0].transform.Find("Slider").GetComponent<Slider>().value;
+            }
+            else if (Bag_Item.itemState[i].name + "Ex" == popQuestInfo_.param[questNum_].delivery + "Ex")
+            {
+                // 納品するものを手持ちから減らす
+                Bag_Item.itemState[0].haveCnt -= (int)deliveryItemBox_[1].transform.Find("Slider").GetComponent<Slider>().value;
+            }
+            else
+            {
+                // 何も処理を行わない
+            }
+        }
+
+        StopCoroutine(rest[0]); //一時停止
+        StopCoroutine(rest[1]); //一時停止
+        rest[0] = null;  //リセット
+        rest[1] = null; //リセット
+
+        OrderQuestCommon();
+
+        // パネルを非表示にする
+        deliveryBack_.SetActive(false);
+
+        // クリア状態にする
+        QuestClearCheck.QuestClear(questNum_);
+    }
+
+    // 受注処理の共通部分
+    private void OrderQuestCommon()
+    {
+        // プレハブのインスタンス
+        var prefab = Instantiate(completePrefab);
+        // クエスト番号の設定
+        prefab.GetComponent<CompleteQuest>().SetMyNum(questNum_);
+
+        // クエストクリアを確認するスクリプトのリストに登録する
+        QuestClearCheck.SetOrderQuestsList(prefab);
+
+        // クエストの受注でイベントが進行するか判断する
+        guild_.GuildQuestEvent(questNum_, false, questClearCnt_);
+
+        Debug.Log("クエストを受注しました");
+
+        // 受注ボタンを非表示にする
+        questOrderButton_.SetActive(false);
+        // 受注したものを左側のリストから非表示にする
+        questButton_[questNum_].gameObject.SetActive(false);
+    }
+
+    public void ClickCanselDeliveryButton()
+    {
+        // パネルを非表示にする
+        deliveryBack_.SetActive(false);
     }
 
     // クリアクエストの報告画面を出す
@@ -327,6 +488,8 @@ public class QuestMng : MonoBehaviour
         nowPage_ = NOWPAGE.NON;
         questCanvas_.gameObject.SetActive(true);
         questUI.SetActive(!questUI.activeSelf);
+        // パネルを非表示にする
+        deliveryBack_.SetActive(false);
         Debug.Log("戻るボタンが押されました");
     }
 
