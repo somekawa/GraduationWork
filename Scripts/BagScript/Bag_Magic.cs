@@ -215,6 +215,28 @@ public class Bag_Magic : MonoBehaviour
         statusMagicImage_[number_].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][element];
 
         number_++;
+
+        // 現在受注中のクエストを見る
+        var orderList = QuestClearCheck.GetOrderQuestsList();
+
+        for(int k = 0; k < orderList.Count; k++)
+        {
+            // 炎単体小のクエストクリア確認
+            // 受注したのが炎マテリアの合成クエスト(番号が3)のとき
+            if (int.Parse(orderList[k].Item1.name) == 3)
+            {
+                // Magic_番号の番号を見て、1なら「炎単体小」の魔法なのですでに魔法を取得しているからクリア状態にする
+                for (int i = 1; i < magicObject.Length; i++)
+                {
+                    if (int.Parse(magicObject[i].name.Split('_')[1]) == 1)
+                    {
+                        // クリア状態にする
+                        QuestClearCheck.QuestClear(3);
+                        break;  // これ以上for文を回す必要がないから抜ける
+                    }
+                }
+            }
+        }
     }
 
     public int MagicNumber()

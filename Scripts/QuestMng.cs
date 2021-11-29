@@ -252,6 +252,27 @@ public class QuestMng : MonoBehaviour
             {
                 // まだ3つ以下だから受けられる
                 OrderQuestCommon();
+
+                // 受注したのが炎マテリアの合成クエスト(番号が3)のとき
+                if(popQuestInfo_.param[questNum_].num == 3)
+                {
+                    // Magic_番号の番号を見て、1なら「炎単体小」の魔法なのですでに魔法を取得しているからクリア状態にする
+                    for(int i = 1; i < Bag_Magic.magicObject.Length; i++)
+                    {
+                        // 空白だったら抜ける
+                        if(Bag_Magic.magicObject[i] == null)
+                        {
+                            break;
+                        }
+
+                        if (int.Parse(Bag_Magic.magicObject[i].name.Split('_')[1]) == 1)
+                        {
+                            // クリア状態にする
+                            QuestClearCheck.QuestClear(questNum_);
+                            break;  // これ以上for文を回す必要がないから抜ける
+                        }
+                    }
+                }
             }
         }
     }

@@ -78,7 +78,8 @@ public class HouseInteriorMng : MonoBehaviour
 
         // 建物オブジェクトの表示/非表示切り替え
         ChangeObjectActive(this.gameObject.transform.childCount, this.transform,name);
-        menuRect_.gameObject.SetActive(false);// バッグを非表示にする
+        //menuRect_.gameObject.SetActive(false);// バッグを非表示にする
+        SceneMng.MenuSetActive(false);
 
         return true;
     }

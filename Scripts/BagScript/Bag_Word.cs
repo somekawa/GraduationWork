@@ -35,12 +35,15 @@ public class Bag_Word : MonoBehaviour
         public Button btn;
         public InitPopList.WORD kinds;
         public string name;
+        public string english;
+        public int power;
         public bool getFlag;
         public int maxCnt;
     }
     public static Dictionary<InitPopList.WORD, word[]> wordState = new Dictionary<InitPopList.WORD, word[]>();
     // 他Scriptで指定するワードは番号を取得しておく
     public static int targetWordNum;// 必中用の番号
+    public static bool getFlagCheck = false;
 
     //   void Start()
     public void Init()
@@ -48,14 +51,16 @@ public class Bag_Word : MonoBehaviour
         eventSystem_ = GameObject.Find("EventSystem").GetComponent<EventSystem>();
         popWordList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
 
-        for (int i = 0; i < (int)InitPopList.WORD.INFO; i++)
+        if (getFlagCheck == false)
         {
-            maxCnt_[i] = InitPopList.maxWordCnt[i];
-            // 事前に生成していた情報を取得
-            wordState[(InitPopList.WORD)i] = InitWordState((InitPopList.WORD)i, maxCnt_[i]);
-            //  Debug.Log(i + "       " + maxCnt_[i]);
+            for (int i = 0; i < (int)InitPopList.WORD.INFO; i++)
+            {
+                maxCnt_[i] = InitPopList.maxWordKindsCnt[i];
+                // 事前に生成していた情報を取得
+                wordState[(InitPopList.WORD)i] = InitWordState((InitPopList.WORD)i, maxCnt_[i]);
+            }
+            getFlagCheck = true;
         }
-
         // 一番初めに出てくるワードの表示位置が違ったら、表示位置をバッグにする
         if (wordState[InitPopList.WORD.HEAD][0].pleate.transform.parent != wordParent.transform)
         {
@@ -85,10 +90,11 @@ public class Bag_Word : MonoBehaviour
         for (int i = 0; i < maxCnt; i++)
         {
             // ワード名を取得
-            word[i].name = InitPopList.wordData[kind][i].name;
+            word[i].name = InitPopList.name[(int)kind, i];
+            word[i].english = InitPopList.englishName[(int)kind, i];
 
             // オブジェクト情報を取得
-            word[i].pleate = InitPopList.wordData[kind][i].pleate;
+            word[i].pleate = InitPopList.pleate[(int)kind, i];
             word[i].pleate.name = word[i].name;
 
             // オブジェクトの子のtextを取得
@@ -100,7 +106,8 @@ public class Bag_Word : MonoBehaviour
 
             // 指定のワードを取得しているか
             word[i].getFlag = false;
-            word[i].kinds = InitPopList.wordData[kind][i].kinds;
+            word[i].kinds = InitPopList.kinds[(int)kind, i];
+            word[i].power = InitPopList.power[(int)kind, i];
             word[i].maxCnt = maxCnt;
             // Debug.Log(kind + "      "+ i);
         }
@@ -135,6 +142,11 @@ public class Bag_Word : MonoBehaviour
                 kindsBtn_.interactable = true;
             }
         }
+    }
+
+    public void SetGetFlagCheck(bool flag)
+    {
+        getFlagCheck = flag;
     }
 
     private void ActiveCheck(WORD_MNG kinds)

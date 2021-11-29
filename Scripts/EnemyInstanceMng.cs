@@ -39,7 +39,7 @@ public class EnemyInstanceMng : MonoBehaviour
 
     private BoxCollider changeEnableBoxCollider_;
 
-    void Start()
+    public void Init()
     {
         // HPバー表示位置の設定
         // 1体
@@ -146,7 +146,7 @@ public class EnemyInstanceMng : MonoBehaviour
         //{
         //    attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
         //} while (SceneMng.charasList_[attackTarget_].HP() <= 0);
-        attackTarget_ = (int)SceneMng.CHARACTERNUM.JACK;
+        attackTarget_ = (int)SceneMng.CHARACTERNUM.UNI;
 
         // ダメージと速度を渡す
         buttleMng_.SetDamageNum(enemyList_[num].Item1.Damage());
@@ -285,7 +285,7 @@ public class EnemyInstanceMng : MonoBehaviour
 
             // 番号でどの敵をインスタンスするか決める
             int enemyNum = Random.Range(0, enemyTest.transform.childCount);
-            enemyNum = 2;   // 固定
+            enemyNum = 0;   // (Field3)とげぞー固定
 
             if (eventEnemy_.Item1 == null)
             {

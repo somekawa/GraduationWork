@@ -46,6 +46,8 @@ public class FieldMng : MonoBehaviour
         // 現在のシーンをFIELDとする
         SceneMng.SetNowScene((SceneMng.SCENE)UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
 
+        GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().Init();
+
         // イベントが発生するか確認する
         if (EventMng.GetChapterNum() == 8)
         {

@@ -38,7 +38,8 @@ public class MagicCreate : MonoBehaviour
     private Button cancelBtn_;
     private Bag_Magic bagMagic_;
     private string allName_ = "";
-    private int[] saveNumber_ = new int[(int)Bag_Word.WORD_MNG.MAX];// 選択したワードの番号を保存
+    private int[] saveNumber_ = new int[(int)Bag_Word.WORD_MNG.MAX]
+{ -1,-1,-1,-1,-1,-1};// 選択したワードの番号を保存
     private int[] oldNumber_ = new int[(int)Bag_Word.WORD_MNG.MAX];
     private int[] saveWordNum_ = new int[(int)Bag_Word.WORD_MNG.MAX];
 
@@ -59,6 +60,7 @@ public class MagicCreate : MonoBehaviour
     }
     public static Dictionary<Bag_Word.WORD_MNG, MagicCreateData[]> mCreateData = new Dictionary<Bag_Word.WORD_MNG, MagicCreateData[]>();
     private int[] mngMaxCnt = new int[(int)Bag_Word.WORD_MNG.MAX];
+    private Bag_Word bagWord_;
 
     private MagicCreateData[] InitCheck(Bag_Word.WORD_MNG kind)
     {
@@ -173,7 +175,7 @@ public class MagicCreate : MonoBehaviour
         // ワードの最大個数を取得
         for (int i = 0; i < (int)InitPopList.WORD.INFO; i++)
         {
-            selectKindMaxCnt_[i] = InitPopList.maxWordCnt[i];
+            selectKindMaxCnt_[i] = InitPopList.maxWordKindsCnt[i];
         }
 
         for (int i = 0; i < (int)Bag_Word.WORD_MNG.MAX; i++)
@@ -226,6 +228,9 @@ public class MagicCreate : MonoBehaviour
         }
         ResetCommon();
 
+        // ワードの種類と一致している番号だけ表示
+        SelectWordKindCheck((Bag_Word.WORD_MNG)kindNum_);
+
         // ワードたちを魔法合成用の親の子に移動させる
         if (Bag_Word.wordState[InitPopList.WORD.HEAD][0].pleate.transform.parent != magicCreateParent.transform)
         {
@@ -238,33 +243,39 @@ public class MagicCreate : MonoBehaviour
             }
            // Debug.Log("親の位置をずらしました。");
         }
+
+        bagWord_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Word>();
     }
 
     public void OnClickRightArrow()
     {
         // 値を加算
         kindNum_++;
-        if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] == "回復")
+
+        if (kindNum_ == (int)Bag_Word.WORD_MNG.SUB2)
         {
-            if ((int)Bag_Word.WORD_MNG.SUB2 <= kindNum_)
-            {
-                kindNum_ = (int)Bag_Word.WORD_MNG.SUB2;
-            }
-        }
-        else if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != "補助")
-        {
-            // 攻撃系Elementを選択時に必中をもっていなかったらSub2でストップ
-            if (Bag_Word.wordState[InitPopList.WORD.SUB3][targetWordNum_].getFlag == false)
+            if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] == "回復")
             {
                 if ((int)Bag_Word.WORD_MNG.SUB2 <= kindNum_)
                 {
                     kindNum_ = (int)Bag_Word.WORD_MNG.SUB2;
                 }
             }
-        }
-        else
-        {
-            // 何もしない
+            else if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != "補助")
+            {
+                // 攻撃系Elementを選択時に必中をもっていなかったらSub2でストップ
+                if (Bag_Word.wordState[InitPopList.WORD.SUB3][targetWordNum_].getFlag == false)
+                {
+                    if ((int)Bag_Word.WORD_MNG.SUB2 <= kindNum_)
+                    {
+                        kindNum_ = (int)Bag_Word.WORD_MNG.SUB2;
+                    }
+                }
+            }
+            else
+            {
+                // 何もしない
+            }
         }
         // Debug.Log(selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT]);
         ActiveKindsCheck((Bag_Word.WORD_MNG)kindNum_, false);
@@ -321,6 +332,7 @@ public class MagicCreate : MonoBehaviour
             arrowBtn_[0].interactable = true;
             arrowBtn_[1].interactable = false;// 右矢印を押したら必ずfalse
         }
+
         // ワードの種類と一致している番号だけ表示
         SelectWordKindCheck((Bag_Word.WORD_MNG)kindNum_);
 
@@ -767,6 +779,8 @@ public class MagicCreate : MonoBehaviour
         ResetCommon();
         this.gameObject.SetActive(false);
         uniHouseCanvas.gameObject.SetActive(true);
+        bagWord_.SetGetFlagCheck(false);
+        GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Word>().Init();
     }
 
     private void ResetCommon()
