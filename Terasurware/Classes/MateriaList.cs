@@ -13,6 +13,6 @@ public class MateriaList : ScriptableObject
 		public string MateriaName;
 		public int Price_Buy;
 		public int Price_Sell;
-		public string Explanation;
+		public string Info;
 	}
 }

@@ -11,7 +11,9 @@ public class WordList : ScriptableObject
 	{
 		
 		public string Word;
+		public string EnglishWord;
 		public int ListNumber;
 		public int KindsNumber;
+		public int Power;
 	}
 }
