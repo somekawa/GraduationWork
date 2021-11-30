@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44bcd4d38745f0e41b217f6e9a969f89, type: 3}
+  m_Name: Field2
+  m_EditorClassIdentifier: 
+  param:
+  - Name: TurtleShell
+    Level: 6
+    HP: 30
+    MP: 10
+    Attack: 7
+    MagicAttack: 2
+    Defence: 8
+    Speed: 1
+    Luck: 1
+    AnimMax: 1
+    Exp: 50
+    Drop: "\u7532\u7F85"
+    MoveTime: 150
+    MoveDistance: 1.5
+    WeaponTagObjName: TurtleShell
+    Weak: 3
+  - Name: Golem
+    Level: 5
+    HP: 25
+    MP: 0
+    Attack: 13
+    MagicAttack: 0
+    Defence: 8
+    Speed: 4
+    Luck: 1
+    AnimMax: 1
+    Exp: 30
+    Drop: "\u30B4\u30FC\u30EC\u30E0\u306E\u571F"
+    MoveTime: 150
+    MoveDistance: 2.5
+    WeaponTagObjName: Golem
+    Weak: 3
+  - Name: Chicken
+    Level: 5
+    HP: 35
+    MP: 5
+    Attack: 5
+    MagicAttack: 1
+    Defence: 2
+    Speed: 5
+    Luck: 90
+    AnimMax: 1
+    Exp: 55
+    Drop: "\u5375"
+    MoveTime: 150
+    MoveDistance: 1.5
+    WeaponTagObjName: Chicken
+    Weak: 2
+  - Name: PartyMonsterY
+    Level: 8
+    HP: 50
+    MP: 5
+    Attack: 15
+    MagicAttack: 1
+    Defence: 4
+    Speed: 2
+    Luck: 5
+    AnimMax: 1
+    Exp: 60
+    Drop: "\u771F\u3063\u8D64\u306A\u30B0\u30ED\u30FC\u30D6"
+    MoveTime: 150
+    MoveDistance: 2
+    WeaponTagObjName: PartyMonsterY
+    Weak: 3
+  - Name: PartyMonsterB
+    Level: 8
+    HP: 50
+    MP: 5
+    Attack: 15
+    MagicAttack: 1
+    Defence: 4
+    Speed: 2
+    Luck: 5
+    AnimMax: 1
+    Exp: 60
+    Drop: "\u30D1\u30FC\u30C6\u30A3\u5E3D\u5B50"
+    MoveTime: 150
+    MoveDistance: 2
+    WeaponTagObjName: PartyMonsterB
+    Weak: 2

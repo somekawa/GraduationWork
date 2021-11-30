@@ -100,24 +100,24 @@ public class MenuActive : MonoBehaviour
             parentRectTrans_[i].gameObject.SetActive(false);
         }
 
-        if ((int)SceneMng.nowScene == (int)SceneMng.SCENE.TOWN)
-        {
-            // ギルドにいる場合はバッグを非表示に
-            interiorMng_ = GameObject.Find("HouseInterior").GetComponent<HouseInteriorMng>();
-            if (interiorMng_.GetInHouseName() == "Guild")
-            {
-                parentCanvas_.gameObject.SetActive(false);
-            }
-        }
-        else if((int)SceneMng.nowScene == (int)SceneMng.SCENE.CONVERSATION)
-        {
-            // 会話シーンならバッグを非表示に
-            parentCanvas_.gameObject.SetActive(false);
-        }
-        else
-        {
-            return;
-        }
+        //if ((int)SceneMng.nowScene == (int)SceneMng.SCENE.TOWN)
+        //{
+        //    // ギルドにいる場合はバッグを非表示に
+        //    interiorMng_ = GameObject.Find("HouseInterior").GetComponent<HouseInteriorMng>();
+        //    if (interiorMng_.GetInHouseName() == "Guild")
+        //    {
+        //        parentCanvas_.gameObject.SetActive(false);
+        //    }
+        //}
+        //else if((int)SceneMng.nowScene == (int)SceneMng.SCENE.CONVERSATION)
+        //{
+        //    // 会話シーンならバッグを非表示に
+        //    parentCanvas_.gameObject.SetActive(false);
+        //}
+        //else
+        //{
+        //    return;
+        //}
     }
 
     void Update()

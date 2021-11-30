@@ -285,7 +285,7 @@ public class EnemyInstanceMng : MonoBehaviour
 
             // 番号でどの敵をインスタンスするか決める
             int enemyNum = Random.Range(0, enemyTest.transform.childCount);
-            enemyNum = 0;   // (Field3)とげぞー固定
+            enemyNum = 4;   // (Field3)青色パーティ君固定
 
             if (eventEnemy_.Item1 == null)
             {
@@ -296,8 +296,10 @@ public class EnemyInstanceMng : MonoBehaviour
                 // 敵の体の向きを変える
                 enemy.transform.Rotate(0, 180, 0);
 
-                // 敵がEagleかStoneMonsterときは、HPバーの高さを上のほうに調整しないといけない
-                if(enemyTest.transform.GetChild(enemyNum).gameObject.name == "Enemy_Eagle" || enemyTest.transform.GetChild(enemyNum).gameObject.name == "Enemy_StoneMonster")
+                // 敵がEagleかStoneMonsterかゴーレムときは、HPバーの高さを上のほうに調整しないといけない
+                if(enemyTest.transform.GetChild(enemyNum).gameObject.name == "Enemy_Eagle" ||
+                   enemyTest.transform.GetChild(enemyNum).gameObject.name == "Enemy_StoneMonster" ||
+                   enemyTest.transform.GetChild(enemyNum).gameObject.name == "Enemy_Golem")
                 {
                     enemyHPPosOffset_ = new Vector3(0.0f, 60.0f,0.0f);
                 }
