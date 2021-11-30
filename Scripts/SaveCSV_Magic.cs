@@ -10,26 +10,26 @@ public class SaveCSV_Magic : MonoBehaviour
     // 書き込み始めに呼ぶ
     public void SaveStart()
     {
-        TextAsset saveFile = Resources.Load("data") as TextAsset;
+        TextAsset saveFile = Resources.Load("magicData") as TextAsset;
 
         if (saveFile == null)
         {
             // Resourcesフォルダ内のSavaDataフォルダへ新規で作成する
             sw_ = new StreamWriter(magicSaveDataFilePath_, true, Encoding.UTF8);
-         //   Debug.Log("新規ファイルへ書き込み");
+            Debug.Log("新規ファイルへ書き込み");
         }
         else
         {
             // 古いデータを削除
             File.Delete(magicSaveDataFilePath_);
             sw_ = new StreamWriter(magicSaveDataFilePath_, true, Encoding.UTF8);
-         //   Debug.Log("古いデータを削除してファイル書き込み");
+            Debug.Log("古いデータを削除してファイル書き込み");
             // すでに存在する場合は、上書き保存する(第二引数をfalseにすることで、上書きに切り替えられる)
             //sw = new StreamWriter(saveDataFilePath_, false, Encoding.GetEncoding("Shift_JIS"));
         }
 
         // ステータスの項目見出し
-        string[] s1 = { "Number","Name", "Power", "Rate",
+        string[] s1 = { "Number","Name","EnglishMain","SubMain", "Power", "Rate",
                         "Head", "Element", "Tail", "Sub1", "Sub2", "Sub3" };//,"ImageNum"};
         string s2 = string.Join(",", s1);
         sw_.WriteLine(s2);
@@ -39,9 +39,11 @@ public class SaveCSV_Magic : MonoBehaviour
     public void SaveMagicData(Bag_Magic.MagicData set)
     {
         // 実際のステータス値
-        string[] data = { set.number.ToString(),set.name, set.power.ToString(), set.rate.ToString() ,
+        string[] data = { set.number.ToString(),set.name,set.main, set.sub, 
+                         set.power.ToString(), set.rate.ToString() ,
                          set.head.ToString(),set.element.ToString(),set.tail.ToString(),
                          set.sub1.ToString(),set.sub2.ToString(),set.sub3.ToString()};
+        
        // set.sprite.ToString() 
         string write = string.Join(",", data);
         sw_.WriteLine(write);

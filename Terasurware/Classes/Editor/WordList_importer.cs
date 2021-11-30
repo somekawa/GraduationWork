@@ -59,8 +59,10 @@ public class WordList_importer : AssetPostprocessor
                         var p = new WordList.Param();
 			
 					cell = row.GetCell(0); p.Word = (cell == null ? "" : cell.StringCellValue);
-					cell = row.GetCell(1); p.ListNumber = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(2); p.KindsNumber = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(1); p.EnglishWord = (cell == null ? "" : cell.StringCellValue);
+					cell = row.GetCell(2); p.ListNumber = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(3); p.KindsNumber = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(4); p.Power = (int)(cell == null ? 0 : cell.NumericCellValue);
 
                         data.param.Add(p);
                     }

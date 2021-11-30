@@ -2,84 +2,96 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e7b7a47419a3c3748a8ff954917978f3, type: 3}
+  m_Script: {fileID: 11500000, guid: 0fa3d8a6cced0214a92f05a2d7b7c1bd, type: 3}
   m_Name: ItemList
   m_EditorClassIdentifier: 
   param:
   - ItemName: "HP\u30DD\u30FC\u30B7\u30E7\u30F3(\u5C0F)"
+    Information: "HP\u3092\u5C11\u3057\u56DE\u5FA9"
     ChapterNum: 0
     Price_Sell: 300
     WantMateria1: "\u9162\u306E\u6A58"
     WantMateria2: "\u6E05\u3089\u304B\u306A\u6C34"
     WantMateria3: non
   - ItemName: "\u6BD2\u6D88\u3057"
+    Information: "\u6BD2\u72B6\u614B\u3092\u6D88\u3059"
     ChapterNum: 0
     Price_Sell: 400
     WantMateria1: "\u9162\u306E\u6A58"
     WantMateria2: "\u82B1\u306E\u871C"
     WantMateria3: non
   - ItemName: "\u653B\u6483\u30A2\u30A4\u30C6\u30E0"
+    Information: "\u653B\u6483\u30A2\u30A4\u30C6\u30E01\u3067\u3059"
     ChapterNum: 0
     Price_Sell: 500
     WantMateria1: "\u5996\u7CBE\u306E\u7FBD"
     WantMateria2: "B\u30CB\u30FC\u30C9\u30EB"
     WantMateria3: non
   - ItemName: "HP\u30DD\u30FC\u30B7\u30E7\u30F3(\u4E2D)"
+    Information: "HP\u3092\u305D\u3053\u305D\u3053\u56DE\u5FA9"
     ChapterNum: 1
     Price_Sell: 600
     WantMateria1: "\u9162\u306E\u6A58"
     WantMateria2: "\u6E05\u3089\u304B\u306A\u6C34"
     WantMateria3: "\u30B9\u30E9\u30A4\u30E0\u306E\u6838"
   - ItemName: "\u9EBB\u75FA\u6D88\u3057"
+    Information: "\u9EBB\u75FA\u72B6\u614B\u3092\u6D88\u3059"
     ChapterNum: 1
     Price_Sell: 700
     WantMateria1: "\u304D\u306E\u3053"
     WantMateria2: "\u82B1\u306E\u871C"
     WantMateria3: "\u6E05\u3089\u304B\u306A\u6C34"
-  - ItemName: "\u653B\u6483\u30A2\u30A4\u30C6\u30E02"
+  - ItemName: "\u653B\u6483\u30A2\u30A4\u30C6\u30E0"
+    Information: "\u653B\u6483\u30A2\u30A4\u30C6\u30E02\u3067\u3059"
     ChapterNum: 1
     Price_Sell: 800
     WantMateria1: "\u5996\u7CBE\u306E\u7FBD"
     WantMateria2: "B\u30CB\u30FC\u30C9\u30EB"
     WantMateria3: non
   - ItemName: "HP\u30DD\u30FC\u30B7\u30E7\u30F3(\u5927)"
+    Information: "HP\u3092\u7D50\u69CB\u56DE\u5FA9"
     ChapterNum: 2
     Price_Sell: 900
     WantMateria1: "\u9162\u306E\u6A58"
     WantMateria2: "\u6E05\u3089\u304B\u306A\u6C34"
     WantMateria3: "\u30B9\u30E9\u30A4\u30E0\u306E\u6838"
   - ItemName: "\u6697\u95C7\u6D88\u3057"
+    Information: "\u6697\u95C7\u72B6\u614B\u3092\u6D88\u3059"
     ChapterNum: 2
     Price_Sell: 850
     WantMateria1: "\u30AF\u30EA\u30B9\u30BF\u30EB"
     WantMateria2: "\u6697\u95C7\u30EA\u30F3\u30B4"
     WantMateria3: "\u6E05\u3089\u304B\u306A\u6C34"
-  - ItemName: "\u653B\u6483\u30A2\u30A4\u30C6\u30E03"
+  - ItemName: "\u653B\u6483\u30A2\u30A4\u30C6\u30E0"
+    Information: "\u653B\u6483\u30A2\u30A4\u30C6\u30E03\u3067\u3059"
     ChapterNum: 2
     Price_Sell: 750
     WantMateria1: "\u8449\u306E\u5E3D\u5B50"
     WantMateria2: "\u3055\u3089\u3055\u3089\u306E\u571F"
     WantMateria3: non
   - ItemName: "HP\u30DD\u30FC\u30B7\u30E7\u30F3(\u6975)"
+    Information: "HP\u3092\u3059\u3054\u304F\u56DE\u5FA9"
     ChapterNum: 3
     Price_Sell: 950
     WantMateria1: "\u6C34\u9280"
     WantMateria2: "\u9B54\u9664\u3051\u306E\u9234"
     WantMateria3: "\u4E08\u592B\u306A\u8526"
   - ItemName: "\u80FD\u529B\u30A2\u30C3\u30D7\u85AC"
+    Information: "\u3059\u3054\u304F\u30CF\u30A4\u306B\u306A\u308A\u307E\u3059"
     ChapterNum: 3
     Price_Sell: 650
     WantMateria1: "\u6EB6\u3051\u306A\u3044\u516D\u82B1"
     WantMateria2: "\u308F\u305F\u96F2"
     WantMateria3: "\u70AC\u9727"
-  - ItemName: "\u653B\u6483\u30A2\u30A4\u30C6\u30E04"
+  - ItemName: "\u653B\u6483\u30A2\u30A4\u30C6\u30E0"
+    Information: "\u653B\u6483\u30A2\u30A4\u30C6\u30E04\u3067\u3059"
     ChapterNum: 3
     Price_Sell: 550
     WantMateria1: "\u67AF\u308C\u305F\u679D"

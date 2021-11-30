@@ -105,14 +105,17 @@ public class ItemCreateMng : MonoBehaviour
             {
                 if (movePoint_.GetMiniGameJudge() == MovePoint.JUDGE.NORMAL)
                 {
+                    judge_ = MovePoint.JUDGE.NORMAL;
                     judgeText_.text = "ê¨å˜";
                 }
                 else
                 {
+                    judge_ = MovePoint.JUDGE.GOOD;
                     judgeText_.text = "ëÂê¨å˜";
                 }
                 judgeBack_.gameObject.SetActive(true);
-                bagItem_.ItemGetCheck(saveItemNum_, saveBtnName_, 1);
+
+                bagItem_.ItemGetCheck(saveItemNum_, saveBtnName_, 1,judge_);
                 saveBtn_.interactable = true;
                 saveBtnName_ = "";
 

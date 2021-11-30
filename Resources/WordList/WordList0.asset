@@ -2,101 +2,159 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 08a63bdbc6b0a814d9dee0cf0605712e, type: 3}
+  m_Script: {fileID: 11500000, guid: f5a569a8a8aad0343b4eefa5063d7f7a, type: 3}
   m_Name: WordList0
   m_EditorClassIdentifier: 
   param:
   - Word: "\u5358\u4F53"
+    EnglishWord: non
     ListNumber: 0
     KindsNumber: 0
+    Power: 0
   - Word: "\u708E"
+    EnglishWord: "\u30D5\u30A1\u30A4"
     ListNumber: 0
     KindsNumber: 3
+    Power: 10
   - Word: "\u5C0F"
+    EnglishWord: non
     ListNumber: 0
     KindsNumber: 4
+    Power: 50
   - Word: HP
+    EnglishWord: HP
     ListNumber: 0
     KindsNumber: 6
+    Power: 0
   - Word: "\u5473\u65B9"
+    EnglishWord: "\u30D5\u30EC\u30DF"
     ListNumber: 0
     KindsNumber: 5
+    Power: 0
   - Word: "\u8907\u6570\u56DE"
+    EnglishWord: "\u30EB\u30C1"
     ListNumber: 1
     KindsNumber: 0
+    Power: 0
   - Word: "\u56DE\u5FA9"
+    EnglishWord: "\u30AD\u30E5\u30EA"
     ListNumber: 1
     KindsNumber: 1
+    Power: 10
   - Word: "\u6C34"
+    EnglishWord: "\u30B7\u30A3"
     ListNumber: 1
     KindsNumber: 3
+    Power: 10
   - Word: "\u6BD2"
+    EnglishWord: "\u30DD\u30BA"
     ListNumber: 1
     KindsNumber: 7
+    Power: 10
   - Word: "\u6697\u95C7"
+    EnglishWord: "\u30CD\u30B9"
     ListNumber: 1
     KindsNumber: 7
+    Power: 10
   - Word: "\u4E0A\u6607"
+    EnglishWord: "\u30CF\u30A4"
     ListNumber: 1
     KindsNumber: 8
+    Power: 0
   - Word: "\u5168\u4F53"
+    EnglishWord: "\u30AA\u30F4\u30A1"
     ListNumber: 2
     KindsNumber: 0
+    Power: 0
   - Word: "\u88DC\u52A9"
+    EnglishWord: "\u30A2\u30BB\u30EA"
     ListNumber: 2
     KindsNumber: 2
+    Power: 0
   - Word: "\u571F"
+    EnglishWord: "\u30BD\u30A4"
     ListNumber: 2
     KindsNumber: 3
+    Power: 10
   - Word: "\u4E2D"
+    EnglishWord: "\u30AE\u30AC"
     ListNumber: 2
     KindsNumber: 4
+    Power: 100
   - Word: "\u7269\u7406\u653B\u6483"
+    EnglishWord: "\u30D5\u30A3\u30EA"
     ListNumber: 2
     KindsNumber: 6
+    Power: 0
   - Word: "\u9B54\u6CD5\u653B\u6483"
+    EnglishWord: "\u30DE\u30B8\u30EA"
     ListNumber: 2
     KindsNumber: 6
+    Power: 0
   - Word: "\u9632\u5FA1\u529B"
+    EnglishWord: "\u30D5\u30A7\u30F3"
     ListNumber: 2
     KindsNumber: 6
+    Power: 0
   - Word: "\u4F4E\u4E0B"
+    EnglishWord: "\u30ED\u30A6"
     ListNumber: 2
     KindsNumber: 8
+    Power: 0
   - Word: "\u6575"
+    EnglishWord: "\u30CD\u30A4\u30DF"
     ListNumber: 2
     KindsNumber: 5
+    Power: 0
   - Word: "\u547D\u4E2D/\u56DE\u907F"
+    EnglishWord: "\u30B9\u30D4\u30EA"
     ListNumber: 2
     KindsNumber: 6
+    Power: 0
   - Word: "\u98A8"
+    EnglishWord: "\u30A6\u30A3"
     ListNumber: 3
     KindsNumber: 3
+    Power: 10
   - Word: "\u5927"
+    EnglishWord: "\u30C6\u30E9"
     ListNumber: 3
     KindsNumber: 4
+    Power: 150
   - Word: "\u9EBB\u75FA"
+    EnglishWord: "\u30D1\u30E9\u30BA"
     ListNumber: 3
     KindsNumber: 7
+    Power: 10
   - Word: "\u53CD\u5C04"
+    EnglishWord: "\u30EA\u30D5"
     ListNumber: 3
     KindsNumber: 8
+    Power: 0
   - Word: "\u5373\u6B7B"
+    EnglishWord: "\u30C7\u30B9"
     ListNumber: 3
     KindsNumber: 7
+    Power: 0
   - Word: "\u5438\u53CE"
+    EnglishWord: "\u30EC\u30C9"
     ListNumber: 3
     KindsNumber: 9
+    Power: 0
   - Word: "\u5FC5\u4E2D"
+    EnglishWord: "\u30D2\u30C6\u30A3"
     ListNumber: 3
     KindsNumber: 9
+    Power: 0
   - Word: "\u6975\u5927"
+    EnglishWord: "\u30DA\u30BF"
     ListNumber: 4
     KindsNumber: 4
+    Power: 250

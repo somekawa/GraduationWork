@@ -10,7 +10,7 @@ public class SaveCSV_HaveItem : MonoBehaviour
     // ‘‚«‚İn‚ß‚ÉŒÄ‚Ô
     public void SaveStart()
     {
-        TextAsset saveFile = Resources.Load("data") as TextAsset;
+        TextAsset saveFile = Resources.Load("HaveItemList") as TextAsset;
 
         if (saveFile == null)
         {

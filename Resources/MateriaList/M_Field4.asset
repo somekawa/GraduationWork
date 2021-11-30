@@ -2,42 +2,42 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc440ea223c3871469540e088a5a1d10, type: 3}
+  m_Script: {fileID: 11500000, guid: d2821f08f126191418ae31f3b9cd7cd5, type: 3}
   m_Name: M_Field4
   m_EditorClassIdentifier: 
   param:
   - MateriaName: "\u9F8D\u306E\u3046\u308D\u3053"
     Price_Buy: 500
     Price_Sell: 250
-    Explanation: "\u3046\u308D\u3053\u306E\u8AAC\u660E"
+    Info: "\u3046\u308D\u3053\u306E\u8AAC\u660E"
   - MateriaName: "\u6728\u70AD"
     Price_Buy: 400
     Price_Sell: 200
-    Explanation: "\u6728\u70AD\u306E\u8AAC\u660E"
+    Info: "\u6728\u70AD\u306E\u8AAC\u660E"
   - MateriaName: "\u708E\u306E\u676F"
     Price_Buy: 300
     Price_Sell: 150
-    Explanation: "\u708E\u306E\u8AAC\u660E"
+    Info: "\u708E\u306E\u8AAC\u660E"
   - MateriaName: "\u70AC\u9727"
     Price_Buy: 200
     Price_Sell: 100
-    Explanation: "\u9727\u306E\u8AAC\u660E"
+    Info: "\u9727\u306E\u8AAC\u660E"
   - MateriaName: "\u878D\u3051\u306A\u3044\u516D\u82B1"
     Price_Buy: 100
     Price_Sell: 50
-    Explanation: "\u82B1\u306E\u8AAC\u660E"
+    Info: "\u82B1\u306E\u8AAC\u660E"
   - MateriaName: "\u65B0\u3057\u3044\u7D20\u6750"
     Price_Buy: 100
     Price_Sell: 50
-    Explanation: "\u65B0\u3057\u3044\u7D20\u6750\u306E\u8AAC\u660E"
+    Info: "\u65B0\u3057\u3044\u7D20\u6750\u306E\u8AAC\u660E"
   - MateriaName: "\u65B0\u3057\u3044\u7D20\u6750"
     Price_Buy: 100
     Price_Sell: 50
-    Explanation: "\u65B0\u3057\u3044\u7D20\u6750\u306E\u8AAC\u660E"
+    Info: "\u65B0\u3057\u3044\u7D20\u6750\u306E\u8AAC\u660E"

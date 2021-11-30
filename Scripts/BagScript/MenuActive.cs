@@ -100,24 +100,24 @@ public class MenuActive : MonoBehaviour
             parentRectTrans_[i].gameObject.SetActive(false);
         }
 
-        //if ((int)SceneMng.nowScene == (int)SceneMng.SCENE.TOWN)
-        //{
-        //    // ギルドにいる場合はバッグを非表示に
-        //    interiorMng_ = GameObject.Find("HouseInterior").GetComponent<HouseInteriorMng>();
-        //    if (interiorMng_.GetInHouseName() == "Guild")
-        //    {
-        //        parentCanvas_.gameObject.SetActive(false);
-        //    }
-        //}
-        //else if((int)SceneMng.nowScene == (int)SceneMng.SCENE.CONVERSATION)
-        //{
-        //    // 会話シーンならMENUのみ非表示に
-        //    parentRectTrans_[(int)CANVAS.MENU].gameObject.SetActive(false);
-        //}
-        //else
-        //{
-        //    return;
-        //}
+        if ((int)SceneMng.nowScene == (int)SceneMng.SCENE.TOWN)
+        {
+            // ギルドにいる場合はバッグを非表示に
+            interiorMng_ = GameObject.Find("HouseInterior").GetComponent<HouseInteriorMng>();
+            if (interiorMng_.GetInHouseName() == "Guild")
+            {
+                parentCanvas_.gameObject.SetActive(false);
+            }
+        }
+        else if((int)SceneMng.nowScene == (int)SceneMng.SCENE.CONVERSATION)
+        {
+            // 会話シーンならバッグを非表示に
+            parentCanvas_.gameObject.SetActive(false);
+        }
+        else
+        {
+            return;
+        }
     }
 
     void Update()
@@ -134,9 +134,9 @@ public class MenuActive : MonoBehaviour
             if (Input.GetKeyUp(KeyCode.Tab))
             {
                 Debug.Log("メニュー画面を表示します");
-                parentRectTrans_[(int)CANVAS.MENU].gameObject.SetActive(true);
                 FieldMng.nowMode = FieldMng.MODE.MENU;  // ユニが歩行できないようにモードを切り替える  activeFlag_ = true;
                 bagImage_.color = new Color(0.5f, 1.0f, 0.5f, 1.0f);
+                // parentRectTrans_[(int)CANVAS.MENU].gameObject.SetActive(true);
                 StartCoroutine(MoveMenuButtons(1));
             }
         }
@@ -260,7 +260,10 @@ public class MenuActive : MonoBehaviour
             Debug.Log(csvDatas[i + 1][0] + "            キャラデータをロード中。残り" + i);
             SceneMng.SetCharasSettings(i, set);
         }
-        parentRectTrans_[(int)CANVAS.BAG].GetComponent<ItemBagMng>().MagicInit();
+        if (2 < bagMagic_.MagicNumber())
+        {
+            parentRectTrans_[(int)CANVAS.BAG].GetComponent<ItemBagMng>().MagicInit();
+        }
     }
 
     public bool GetActiveFlag()

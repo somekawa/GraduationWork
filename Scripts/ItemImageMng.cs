@@ -26,7 +26,7 @@ public class ItemImageMng : MonoBehaviour
             return;
         }
 
-        spriteMap[IMAGE.ITEM] = ImageMng(1, 7, "/Item/Items01");
+        spriteMap[IMAGE.ITEM] = ImageMng(2, 6, "/Item/Items");
         spriteMap[IMAGE.MAGIC] = ImageMng(1, 7, "/MagicImage");
 
         // 読み込みたいシート数、シート枚の大きさ、読み込みたい画像

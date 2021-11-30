@@ -128,7 +128,7 @@ public class InitPopList : MonoBehaviour
                 itemData[i].box = Instantiate(itemUIBox,
                         new Vector2(0, 0), Quaternion.identity, this.transform);
                 itemData[i].name = itemList_.param[i].ItemName;
-                //itemData[i].info = itemList_.param[i].Information;
+                itemData[i].info = itemList_.param[i].Information;
                 itemData[i].box.name = itemData[i].name;
                 itemData[i].sellPrice = itemList_.param[i].Price_Sell;
                 itemData[i].materia1 = itemList_.param[i].WantMateria1;
@@ -155,7 +155,7 @@ public class InitPopList : MonoBehaviour
                     materiaData[number].box.name = materiaData[number].name;
                     materiaData[number].buyPrice = materiaList_.param[i].Price_Buy;
                     materiaData[number].sellPrice = materiaList_.param[i].Price_Sell;
-                    //materiaData[number].info = materiaList_.param[i].Info;
+                    materiaData[number].info = materiaList_.param[i].Info;
                 }
             }
 
@@ -181,30 +181,29 @@ public class InitPopList : MonoBehaviour
                 //Debug.Log((InitPopList.WORD)k + "   InitPopList " + maxWordCnt[k]);
             //    wordData[(WORD)k] = test((WORD)k, maxWordCnt[k]);
             }
-
-            int count = 0;
-            for (int k = 0; k<(int)WORD.INFO; k++)
+            int count=0;
+            for (int k = 0; k < (int)WORD.INFO; k++)
             {
-            for (int i = 0; i<maxWordCnt_; i++)
-            {
-            if (k == wordList_.param[i].KindsNumber)
-            {
-            name[k, count] = wordList_.param[i].Word;
-            pleate[k, count] = Instantiate(wordUIPleate,
-            new Vector2(0, 0), Quaternion.identity, this.transform);
-            pleate[k, count].name = name[k, count];
-            //englishName[k, count] = wordList_.param[i].EnglishWord;
-            //Debug.Log(num+ " " + data[num].name);
-            activeNum[k, count] = wordList_.param[i].ListNumber;
-            kinds[k, count] = (WORD) wordList_.param[i].KindsNumber;
-               // power[k, count] = wordList_.param[i].Power;
-            Debug.Log((WORD) k+" "+ count + " "+name[k, count]);
-            count++;
+                for (int i = 0; i < maxWordCnt_; i++)
+                {
+                    if (k == wordList_.param[i].KindsNumber)
+                    {
+                        name[k, count] = wordList_.param[i].Word;
+                        pleate[k, count] = Instantiate(wordUIPleate,
+                               new Vector2(0, 0), Quaternion.identity, this.transform);
+                   
+                        pleate[k, count].name = name[k, count];
+                        englishName[k, count] = wordList_.param[i].EnglishWord;
+                        //Debug.Log(num+ "            " + data[num].name);
+                        activeNum[k, count] = wordList_.param[i].ListNumber;
+                        kinds[k, count] = (WORD)wordList_.param[i].KindsNumber;
+                        power[k, count] = wordList_.param[i].Power;
+                       //Debug.Log((WORD)k+" "+ count + "   "+name[k, count]);
+                        count++;
+                    }
+                }
+                count = 0;
             }
-            }
-            count = 0;
-            }
-
             onceFlag_ = true;
         }
     }

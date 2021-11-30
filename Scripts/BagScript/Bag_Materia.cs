@@ -16,6 +16,7 @@ public class Bag_Materia : MonoBehaviour
         public Text cntText;    // 持っている素材の個数を表示
         public int haveCnt;     // 指定素材の持ってる個数
         public string name;     // 素材の名前
+        public string info;
         public bool getFlag;    // 1つ以上持っているか
     }
     public static materia[] materiaState;
@@ -27,6 +28,10 @@ public class Bag_Materia : MonoBehaviour
     private int maxCnt_ = 0;            // すべての素材数
 
     private int maxHaveCnt_ = 99;// 指定素材の所持数上限
+
+    private int clickMateriaNum_ = -1;
+    private Text info_; // クリックしたアイテムを説明する欄
+    private Button throwAwayBtn_;
 
     public void Init()
     {
@@ -41,13 +46,14 @@ public class Bag_Materia : MonoBehaviour
                 materiaState[i] = new materia
                 {
                     box = InitPopList.materiaData[i].box,
-                    getFlag=false,
+                    name = InitPopList.materiaData[i].name,
+                    info = InitPopList.materiaData[i].info,
+                    getFlag = false,
                     haveCnt = 0,
                 };
-                materiaState[i].name = InitPopList.materiaData[i].name;
-
                 materiaState[i].box.transform.SetParent(materiaParent.transform);
-                materiaState[i].box.name = materiaState[i].name;
+                // 名前に番号をつけて素材クリック時に情報を取得しやすくする
+                materiaState[i].box.name = materiaState[i].name + i;
 
                 // 生成したプレハブの子になっているImageを見つける
                 materiaState[i].image= materiaState[i].box.transform.Find("MateriaIcon").GetComponent<Image>();
@@ -82,37 +88,74 @@ public class Bag_Materia : MonoBehaviour
         }
     }
 
-    public void MateriaGetCheck(int itemNum, string materiaName, int getCnt)
+    public void MateriaGetCheck(int materiaNum, string materiaName, int getCnt)
     {
-        materiaState[itemNum].getFlag = true;
+        materiaState[materiaNum].getFlag = true;
 
         // Debug.Log("     アイテム番号：" + itemNum + "     アイテム名：" + materiaName);
-        if (maxHaveCnt_ <= materiaState[itemNum].haveCnt)
+        if (maxHaveCnt_ <= materiaState[materiaNum].haveCnt)
         {
             // 最大所持数は99個
-            materiaState[itemNum].haveCnt = maxHaveCnt_;
+            materiaState[materiaNum].haveCnt = maxHaveCnt_;
         }
         else
         {
             // 呼ばれた素材番号の素材の所持数を加算
-            materiaState[itemNum].haveCnt += getCnt;
+            materiaState[materiaNum].haveCnt += getCnt;
         }
 
-        if (materiaState[itemNum].haveCnt < 1)
+        if (materiaState[materiaNum].haveCnt < 1)
         {
             // 所持数が1以下なら非表示に
-            materiaState[itemNum].box.SetActive(false);
+            materiaState[materiaNum].box.SetActive(false);
         }
         else
         {
             // 1つでも持っていたら表示する
-            materiaState[itemNum].box.SetActive(true);
+            materiaState[materiaNum].box.SetActive(true);
         }
-        materiaState[itemNum].cntText.text = materiaState[itemNum].haveCnt.ToString();
+        materiaState[materiaNum].cntText.text = materiaState[materiaNum].haveCnt.ToString();
     }
 
     public int GetMaxHaveMateriaCnt()
     {
         return materiaParent.transform.childCount;
     }
+
+    public void SetMateriaNumber(int num)
+    {
+        // 捨てるボタンを表示
+        if (throwAwayBtn_ == null)
+        {
+            throwAwayBtn_ = GameObject.Find("ItemBagMng/InfoBack/MateriaDelete").GetComponent<Button>();
+            info_ = GameObject.Find("ItemBagMng/InfoBack/InfoText").GetComponent<Text>();
+        }
+        throwAwayBtn_.gameObject.SetActive(true);
+
+        // 選択されたアイテムの番号を保存
+        clickMateriaNum_ = num;
+    }
+
+    public void OnClickThrowAwayButton()
+    {
+        if (materiaParent.gameObject.activeSelf == false)
+        {
+            //materiaState[clickMateriaNum_].box.SetActive(false);
+            return;
+        }
+
+        // 捨てるボタンを押された場合
+        materiaState[clickMateriaNum_].haveCnt--;// 所持数を1減らす
+                                                 // 表示中の所持数を更新
+        materiaState[clickMateriaNum_].cntText.text = materiaState[clickMateriaNum_].haveCnt.ToString();
+        if (materiaState[clickMateriaNum_].haveCnt < 1)
+        {
+            // 所持数が0になったら非表示にする
+            materiaState[clickMateriaNum_].box.SetActive(false);
+            throwAwayBtn_.gameObject.SetActive(false);
+            info_.text = "";
+        }
+    }
+
+
 }

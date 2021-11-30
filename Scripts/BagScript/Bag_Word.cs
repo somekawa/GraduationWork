@@ -42,8 +42,8 @@ public class Bag_Word : MonoBehaviour
     }
     public static Dictionary<InitPopList.WORD, word[]> wordState = new Dictionary<InitPopList.WORD, word[]>();
     // 他Scriptで指定するワードは番号を取得しておく
-    public static int targetWordNum;// 必中用の番号
-    public static bool getFlagCheck = false;
+    public static int targetWordNum;            // 必中用の番号
+    public static bool getFlagCheck = false;    // 中身を魔法作成の時に渡したら使われる
 
     //   void Start()
     public void Init()
