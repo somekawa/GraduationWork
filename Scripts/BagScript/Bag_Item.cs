@@ -144,17 +144,6 @@ public class Bag_Item : MonoBehaviour
             csvDatas.Add(texts[i].Split(','));
         }
        // Debug.Log("データ数" + csvDatas.Count);
-
-
-        // アイテム個数分回す
-        for (int i = 1; i <= maxCnt_; i++)
-        {
-            ItemData set = new ItemData
-            {
-                name = csvDatas[i + 1][0],// name自体はこのScriptをアタッチ指定オブジェクト名が入ってる
-                haveCnt = int.Parse(csvDatas[i + 1][1]),
-            };
-        }
         Init();
     }
 

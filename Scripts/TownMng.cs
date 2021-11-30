@@ -32,7 +32,6 @@ public class TownMng : MonoBehaviour
             nightLights.SetActive(false);
         }
 
-
         // Œš•¨‚ÆÀ•W‚ğˆê’v‚³‚¹‚é
         for (int i = 0; i < buildNameEng_.Length; i++)
         {
@@ -51,6 +50,7 @@ public class TownMng : MonoBehaviour
         GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
         GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
         GameObject.Find("Managers").GetComponent<Bag_Materia>().Init();
+        GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad();
 
         var cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
 

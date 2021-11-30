@@ -56,6 +56,7 @@ public class Bag_Word : MonoBehaviour
             for (int i = 0; i < (int)InitPopList.WORD.INFO; i++)
             {
                 maxCnt_[i] = InitPopList.maxWordKindsCnt[i];
+               // Debug.Log((InitPopList.WORD)i+"     "+maxCnt_[i]);
                 // Ž–‘O‚É¶¬‚µ‚Ä‚¢‚½î•ñ‚ðŽæ“¾
                 wordState[(InitPopList.WORD)i] = InitWordState((InitPopList.WORD)i, maxCnt_[i]);
             }

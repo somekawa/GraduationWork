@@ -100,24 +100,24 @@ public class MenuActive : MonoBehaviour
             parentRectTrans_[i].gameObject.SetActive(false);
         }
 
-        //if ((int)SceneMng.nowScene == (int)SceneMng.SCENE.TOWN)
-        //{
-        //    // ギルドにいる場合はバッグを非表示に
-        //    interiorMng_ = GameObject.Find("HouseInterior").GetComponent<HouseInteriorMng>();
-        //    if (interiorMng_.GetInHouseName() == "Guild")
-        //    {
-        //        parentCanvas_.gameObject.SetActive(false);
-        //    }
-        //}
-        //else if((int)SceneMng.nowScene == (int)SceneMng.SCENE.CONVERSATION)
-        //{
-        //    // 会話シーンならバッグを非表示に
-        //    parentCanvas_.gameObject.SetActive(false);
-        //}
-        //else
-        //{
-        //    return;
-        //}
+        if ((int)SceneMng.nowScene == (int)SceneMng.SCENE.TOWN)
+        {
+            // ギルドにいる場合はバッグを非表示に
+            interiorMng_ = GameObject.Find("HouseInterior").GetComponent<HouseInteriorMng>();
+            if (interiorMng_.GetInHouseName() == "Guild")
+            {
+                parentCanvas_.gameObject.SetActive(false);
+            }
+        }
+        else if((int)SceneMng.nowScene == (int)SceneMng.SCENE.CONVERSATION)
+        {
+            // 会話シーンならバッグを非表示に
+            parentCanvas_.gameObject.SetActive(false);
+        }
+        else
+        {
+            return;
+        }
     }
 
     void Update()
@@ -214,7 +214,7 @@ public class MenuActive : MonoBehaviour
         saveCsvSc_.SaveEnd();
     }
 
-   // private void DataLoad()
+    // private void DataLoad()
     public void DataLoad()
     {
         Debug.Log("ロードキー押下");
@@ -239,8 +239,8 @@ public class MenuActive : MonoBehaviour
         {
             //// 一時変数に入れてからじゃないとsetに入れられない
             int[] tmpArray = { int.Parse(csvDatas[i + 1][10]),
-                                int.Parse(csvDatas[i + 1][11]), 
-                                int.Parse(csvDatas[i + 1][12]), 
+                                int.Parse(csvDatas[i + 1][11]),
+                                int.Parse(csvDatas[i + 1][12]),
                                 int.Parse(csvDatas[i + 1][13]) };
 
             CharaBase.CharacterSetting set = new CharaBase.CharacterSetting
@@ -260,10 +260,7 @@ public class MenuActive : MonoBehaviour
             Debug.Log(csvDatas[i + 1][0] + "            キャラデータをロード中。残り" + i);
             SceneMng.SetCharasSettings(i, set);
         }
-        if (2 < bagMagic_.MagicNumber())
-        {
-            parentRectTrans_[(int)CANVAS.BAG].GetComponent<ItemBagMng>().MagicInit();
-        }
+        parentRectTrans_[(int)CANVAS.BAG].GetComponent<ItemBagMng>().MagicInit();
     }
 
     public bool GetActiveFlag()
