@@ -146,7 +146,7 @@ public class SceneMng : MonoBehaviour
                     break;
 
                 case SCENE.FIELD2:
-                    charaRunSpeed = 8.0f;
+                    charaRunSpeed = 10.0f;
                     Debug.Log("ˆÚ“®‘¬“x•ÏX" + charaRunSpeed);
                     break;
 

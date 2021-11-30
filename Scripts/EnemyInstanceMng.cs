@@ -311,6 +311,15 @@ public class EnemyInstanceMng : MonoBehaviour
                 enemy = Instantiate(eventEnemy_.Item1, pos, Quaternion.identity) as GameObject;
                 // イベント用の敵の番号部分をenemyNumとして適用する(エクセル番号も合わせる必要がある)
                 enemyNum = int.Parse(eventEnemy_.Item1.name.Split('_')[1]);
+
+                // 敵の体の向きを変える
+                enemy.transform.Rotate(0, 180, 0);
+
+                // 敵がボスゴーレムときは、HPバーの高さを上のほうに調整しないといけない
+                if (eventEnemy_.Item1.name == "BossGolem_5")
+                {
+                    enemyHPPosOffset_ = new Vector3(0.0f, 60.0f, 0.0f);
+                }
             }
 
             enemy.name = num.ToString();

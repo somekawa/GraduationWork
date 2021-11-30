@@ -125,6 +125,18 @@ public class FieldMng : MonoBehaviour
             }
         }
 
+        // 宝箱/壁の番号が[100-0]のやつはいつ来てもアクティブになるようにする
+        for (int i = 0; i < objChild.Length; i++)
+        {
+            string[] split = objChild[i].name.Split('-');
+            if ((int.Parse(split[1]) == 0 && int.Parse(split[0]) == 100) ||
+                (int.Parse(split[1]) == 0 && int.Parse(split[0]) == 200))
+            {
+                objChild[i].SetActive(true);
+            }
+        }
+
+
         // 宝箱/壁の個数でfor文を回す
         for (int i = 0; i < objChild.Length; i++)
         {
@@ -168,7 +180,7 @@ public class FieldMng : MonoBehaviour
             // 探索中の時間加算処理
             if (player_.GetMoveFlag() && time_ < toButtleTime_)
             {
-                time_ += Time.deltaTime;
+                //time_ += Time.deltaTime;
             }
             else if (time_ >= toButtleTime_)
             {

@@ -28,7 +28,7 @@ MonoBehaviour:
     MoveTime: 150
     MoveDistance: 1.5
     WeaponTagObjName: TurtleShell
-    Weak: 3
+    Weak: 4
   - Name: Golem
     Level: 5
     HP: 25
@@ -36,7 +36,7 @@ MonoBehaviour:
     Attack: 13
     MagicAttack: 0
     Defence: 8
-    Speed: 4
+    Speed: 1
     Luck: 1
     AnimMax: 1
     Exp: 30
@@ -92,4 +92,36 @@ MonoBehaviour:
     MoveTime: 150
     MoveDistance: 2
     WeaponTagObjName: PartyMonsterB
+    Weak: 4
+  - Name: BossGolem
+    Level: 10
+    HP: 100
+    MP: 0
+    Attack: 18
+    MagicAttack: 0
+    Defence: 10
+    Speed: 1
+    Luck: 1
+    AnimMax: 1
+    Exp: 200
+    Drop: "\u30EF\u30FC\u30C9\u300C\u571F(\u30A8\u30EC\u30E1\u30F3\u30C8)\u300D"
+    MoveTime: 150
+    MoveDistance: 2.5
+    WeaponTagObjName: BossGolem
+    Weak: 3
+  - Name: BossParty
+    Level: 9
+    HP: 80
+    MP: 5
+    Attack: 17
+    MagicAttack: 1
+    Defence: 5
+    Speed: 1
+    Luck: 7
+    AnimMax: 1
+    Exp: 120
+    Drop: "\u3068\u3052\u3068\u3052\u30B0\u30ED\u30FC\u30D6"
+    MoveTime: 150
+    MoveDistance: 2
+    WeaponTagObjName: BossParty
     Weak: 2
