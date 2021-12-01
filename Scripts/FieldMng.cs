@@ -46,27 +46,55 @@ public class FieldMng : MonoBehaviour
         // 現在のシーンをFIELDとする
         SceneMng.SetNowScene((SceneMng.SCENE)UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
 
+        GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad();
+
         GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().Init();
 
         // イベントが発生するか確認する
         if (EventMng.GetChapterNum() == 8)
         {
             EventMng.SetChapterNum(8, SceneMng.SCENE.CONVERSATION);
+            nowMode = MODE.NON;
         }
         else if(EventMng.GetChapterNum() == 13)
         {
             EventMng.SetChapterNum(13, SceneMng.SCENE.CONVERSATION);
+            nowMode = MODE.NON;
+        }
+        else if (EventMng.GetChapterNum() == 16)
+        {
+            EventMng.SetChapterNum(16, SceneMng.SCENE.CONVERSATION);
+            nowMode = MODE.NON;
+        }
+        else
+        {
+            nowMode = MODE.SEARCH;
         }
 
         // DesertFieldかつ「オアシスを甦らせて」のクエストを達成後なら
         // クエスト達成後の会話で進行度は15となる
-        if((SceneMng.nowScene == SceneMng.SCENE.FIELD1) && EventMng.GetChapterNum() >= 15)
+        if ((SceneMng.nowScene == SceneMng.SCENE.FIELD1) && EventMng.GetChapterNum() >= 15)
         {
             // Oasisオブジェクトを含めた全てのFieldMapオブジェクトをtrueにする
             var tmp = GameObject.Find("FieldMap").transform;
             for (int i = 0; i < tmp.childCount; i++)
             {
                 tmp.GetChild(i).gameObject.SetActive(true);
+            }
+        }
+
+        // Field3かつ「ゴーレム大量発生」のクエスト中(未達成)なら
+        var quest = QuestClearCheck.GetOrderQuestsList();
+        for(int i = 0; i < quest.Count; i++)
+        {
+            if(int.Parse(quest[i].Item1.name) == 5 && !quest[i].Item2)
+            {
+                if ((SceneMng.nowScene == SceneMng.SCENE.FIELD2))
+                {
+                    // エンカウントの速度を2倍にする(数字的には1/2にする)
+                    toButtleTime_ /= 2.0f;
+                    break;  // 処理を抜ける
+                }
             }
         }
 
@@ -125,18 +153,6 @@ public class FieldMng : MonoBehaviour
             }
         }
 
-        // 宝箱/壁の番号が[100-0]のやつはいつ来てもアクティブになるようにする
-        for (int i = 0; i < objChild.Length; i++)
-        {
-            string[] split = objChild[i].name.Split('-');
-            if ((int.Parse(split[1]) == 0 && int.Parse(split[0]) == 100) ||
-                (int.Parse(split[1]) == 0 && int.Parse(split[0]) == 200))
-            {
-                objChild[i].SetActive(true);
-            }
-        }
-
-
         // 宝箱/壁の個数でfor文を回す
         for (int i = 0; i < objChild.Length; i++)
         {
@@ -166,6 +182,17 @@ public class FieldMng : MonoBehaviour
                     // 名前不一致時の処理
                     objChild[i].SetActive(false);
                 }
+            }
+        }
+
+        // 宝箱/壁の番号が[100-0]のやつはいつ来てもアクティブになるようにする
+        for (int i = 0; i < objChild.Length; i++)
+        {
+            string[] split = objChild[i].name.Split('-');
+            if ((int.Parse(split[1]) == 0 && int.Parse(split[0]) == 100) ||
+                (int.Parse(split[1]) == 0 && int.Parse(split[0]) == 200))
+            {
+                objChild[i].SetActive(true);
             }
         }
     }

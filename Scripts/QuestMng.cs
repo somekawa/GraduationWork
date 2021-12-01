@@ -65,6 +65,7 @@ public class QuestMng : MonoBehaviour
 
     private NOWPAGE nowPage_ = NOWPAGE.NON;          // 現在の画面状態
 
+    private int[] nowDeliveryNum_ = new int[2];      // 現在の納品予定数
     IEnumerator[] rest = new IEnumerator[2];         // 納品処理のコルーチンを保存する
 
     // Excelからのデータ読み込み
@@ -218,35 +219,37 @@ public class QuestMng : MonoBehaviour
             {
                 deliveryBack_.SetActive(true);
 
-                // 所持アイテム数をfor文で回す
-                // deliveryItemBox_[0]に成功のアイテムを、deliveryItemBox_[1]に大成功のアイテムの個数を入れる
-                for (int i = 0; i < Bag_Item.itemState.Length; i++)
+                // カンマ区切りにする(前の数字が成功,後ろの数字が大成功時のアイテムの番号)
+                var split = popQuestInfo_.param[questNum_].delivery.Split(',');
+                int[] numSplit = new int[split.Length];
+                for(int i = 0; i < split.Length; i++)
                 {
-                    // 所持アイテムと、納品クエストで名前が一致している物を検索する
-                    if(Bag_Item.itemState[i].name == popQuestInfo_.param[questNum_].delivery)
-                    {
-                        // 画像を出して、所持個数を入れる(左側)
-                        deliveryItemBox_[0].transform.Find("ItemIcon").GetComponent<Image>().sprite = Bag_Item.itemState[i].image.sprite;
-                        deliveryItemBox_[1].transform.Find("ItemIcon").GetComponent<Image>().sprite = Bag_Item.itemState[i].image.sprite;
-                        deliveryItemBox_[0].transform.Find("ItemNum").GetComponent<Text>().text = Bag_Item.itemState[i].cntText.text;
-                    }
-                    else if (Bag_Item.itemState[i].name + "Ex" == popQuestInfo_.param[questNum_].delivery + "Ex")
-                    {
-                        // 画像を出して、所持個数を入れる(右側)
-                        //deliveryItemBox_[1].transform.Find("ItemIcon").GetComponent<Image>().sprite = Bag_Item.itemState[i].image.sprite;
-                        deliveryItemBox_[1].transform.Find("ItemNum").GetComponent<Text>().text = Bag_Item.itemState[i].cntText.text;
-                    }
-                    else
-                    {
-                        // 何も処理を行わない
-                    }
+                    numSplit[i] = int.Parse(split[i]);
+
+                    // 画像を出す
+                    deliveryItemBox_[i].transform.Find("ItemIcon").GetComponent<Image>().sprite = Bag_Item.itemState[numSplit[i]].image.sprite;
+
+                    // 所持数を出す
+                    deliveryItemBox_[i].transform.Find("ItemNum").GetComponent<Text>().text = Bag_Item.itemState[numSplit[i]].cntText.text;
+
+                    // コルーチンを初期化
+                    rest[i] = DeliveryCoroutine(i);
+                    StartCoroutine(rest[i]); // コルーチンを呼び出す
                 }
 
-                // コルーチンを初期化
-                rest[0] = DeliveryCoroutine(0);
-                rest[1] = DeliveryCoroutine(1);
-                StartCoroutine(rest[0]); // コルーチンを呼び出す(成功)
-                StartCoroutine(rest[1]); // コルーチンを呼び出す(大成功)
+                //// 画像を出す
+                //deliveryItemBox_[0].transform.Find("ItemIcon").GetComponent<Image>().sprite = Bag_Item.itemState[numSplit[0]].image.sprite;
+                //deliveryItemBox_[1].transform.Find("ItemIcon").GetComponent<Image>().sprite = Bag_Item.itemState[numSplit[1]].image.sprite;
+
+                //// 所持数を出す
+                //deliveryItemBox_[0].transform.Find("ItemNum").GetComponent<Text>().text = Bag_Item.itemState[numSplit[0]].cntText.text;
+                //deliveryItemBox_[1].transform.Find("ItemNum").GetComponent<Text>().text = Bag_Item.itemState[numSplit[1]].cntText.text;
+
+                //// コルーチンを初期化
+                //rest[0] = DeliveryCoroutine(0);
+                //rest[1] = DeliveryCoroutine(1);
+                //StartCoroutine(rest[0]); // コルーチンを呼び出す(成功)
+                //StartCoroutine(rest[1]); // コルーチンを呼び出す(大成功)
             }
             else
             {
@@ -316,7 +319,18 @@ public class QuestMng : MonoBehaviour
             // 画像右下の数字をスライダーが増えた分だけマイナスする
             itemNumText.text = (charaHaveItemCnt - int.Parse(deliveryNum.text)).ToString();
 
-            if(int.Parse(slider.maxValue.ToString()) == int.Parse(slider.value.ToString()))
+            // 納品予定数を保存する
+            nowDeliveryNum_[num] = int.Parse(deliveryNum.text);
+            Debug.Log("現在の納品予定数は、、" + nowDeliveryNum_[num]);
+
+            // 成功と大成功の納品予定数を合わせる
+            int tmpNum = 0; 
+            for (int i = 0; i < 2; i++)
+            {
+                tmpNum += nowDeliveryNum_[i];
+            }
+            // 合計の納品予定数とmaxで比較する
+            if (int.Parse(slider.maxValue.ToString()) == tmpNum)
             {
                 // 納品数がぴったりのとき
                 button.interactable = true;
@@ -324,7 +338,7 @@ public class QuestMng : MonoBehaviour
             }
             else
             {
-                // 納品数が合わないとき
+                // 納品数が合わないとき(多すぎてもこっちに入る)
                 button.interactable = false;
                 buttonImage.color = new Color(1.0f, 1.0f, 1.0f, 0.5f);
             }
@@ -332,6 +346,7 @@ public class QuestMng : MonoBehaviour
     }
 
     // 納品の確定
+    //@ 修正が必要
     public void ClickDeliveryButton()
     {
         Debug.Log("納品確定ボタン");

@@ -46,6 +46,12 @@ public class Guild : HouseBase
                         EventMng.SetChapterNum(12, SceneMng.SCENE.CONVERSATION);
                     }
                     break;
+                case 15:// 現在の進行度が15で、クエスト5番を受注したら
+                    if (questNum == 5)
+                    {
+                        EventMng.SetChapterNum(15, SceneMng.SCENE.CONVERSATION);
+                    }
+                    break;
                 default:
                     break;
             }
