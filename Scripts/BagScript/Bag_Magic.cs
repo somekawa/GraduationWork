@@ -3,13 +3,12 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Linq;
 
 public class Bag_Magic : MonoBehaviour
 {
     // データ系
     private SaveCSV_Magic saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
-    private const string saveDataFilePath_ = @"Assets/Resources/magicData2.csv";
+    private const string saveDataFilePath_ = @"Assets/Resources/magicData.csv";
     List<string[]> csvDatas = new List<string[]>(); // CSVの中身を入れるリスト;
     string[] texts;
 
@@ -150,9 +149,9 @@ public class Bag_Magic : MonoBehaviour
     private List<Chara> charasList_ = new List<Chara>();
     public void Init()
     {
-        if (magicObject[0] == null)
+        if (magicObject[1] == null)
         {
-            saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveCSV_Magic>();
+            saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_Magic>();
             charasList_ = SceneMng.charasList_;
             // データの個数が最低値より大きかったらデータを呼ばない
             if (number_ < minNumber_)
@@ -187,14 +186,14 @@ public class Bag_Magic : MonoBehaviour
                 // バッグ用
                 magicObject[i] = Instantiate(bagMagicUI, new Vector2(0, 0),
                                             Quaternion.identity, bagMagicParent.transform);
-                magicObject[i].name = "Magic_" + data[i].number;
+                magicObject[i].name = "Magic" + data[i].number;
                 magicImage_[i] = magicObject[i].transform.Find("MagicIcon").GetComponent<Image>();
                 magicImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[i].element];
 
                 // ステータス用の座標に変更
                 statusMagicObject[i] = Instantiate(statusMagicUI, new Vector2(0, 0),
                                                 Quaternion.identity, statusMagicParent.transform);
-                statusMagicObject[i].name = "Magic_" + data[i].number;
+                statusMagicObject[i].name = "Magic" + data[i].number;
                 statusMagicImage_[i] = statusMagicObject[i].transform.Find("MagicIcon").GetComponent<Image>();
                 statusMagicBtn_[i] = statusMagicObject[i].GetComponent<Button>();
                 // Debug.Log(statusMagicBtn_[i].name);
@@ -336,8 +335,6 @@ public class Bag_Magic : MonoBehaviour
             number_ -= 1;
             clickMagicNum_ = -1;
         }
-
-
 
         saveCsvSc_.SaveEnd();
     }

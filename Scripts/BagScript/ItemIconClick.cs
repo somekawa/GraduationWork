@@ -11,7 +11,8 @@ public class ItemIconClick : MonoBehaviour
 
     private Bag_Item bagItem_;
     private Bag_Materia bagMateria_;
-
+    private InitPopList popItemList_;
+    private int maxCnt_ = 0;
     public void OnClickBagItemIcon()
     {
         if (eventSystem_ == null)
@@ -19,13 +20,20 @@ public class ItemIconClick : MonoBehaviour
             eventSystem_ = GameObject.Find("EventSystem").GetComponent<EventSystem>();
             info_ = GameObject.Find("InfoBack/InfoText").GetComponent<Text>();
             info_.text = "";
+            popItemList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
             bagItem_ = GameObject.Find("Managers").GetComponent<Bag_Item>();
         }
         clickbtn_ = eventSystem_.currentSelectedGameObject;
+        maxCnt_ = popItemList_.SetMaxItemCount();
         // ボタン名から数字のみを取り出す
-        int number = int.Parse(Regex.Replace(clickbtn_.name, @"[^0-9]", ""));
-        info_.text = Bag_Item.itemState[number].name + "\n" + Bag_Item.itemState[number].info;
-        bagItem_.SetItemNumber(number);// どのボタンを押したか保存する
+        int nameNum = int.Parse(Regex.Replace(clickbtn_.name, @"[^0-9]", ""));
+        int infoNum = nameNum;
+        if(maxCnt_<= infoNum)
+        {
+            infoNum -= maxCnt_;
+        }
+        info_.text = Bag_Item.itemState[nameNum].name + "\n" + Bag_Item.itemState[infoNum].info;
+        bagItem_.SetItemNumber(nameNum);// どのボタンを押したか保存する
     }
 
     public void OnClickBagMateriaIcon()

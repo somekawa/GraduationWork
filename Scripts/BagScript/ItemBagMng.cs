@@ -148,9 +148,9 @@ public class ItemBagMng : MonoBehaviour
                 bagMagic_.SetStatusMagicCheck(dataCheck_[c, i], true);
 
                 setImageNum_[c, i] = Bag_Magic.data[data.Magic[i]].element;
-                Debug.Log((SceneMng.CHARACTERNUM)c + "の" + i + "番目:" + data.Magic[i] + "番の魔法/名前：" +
-                    Bag_Magic.data[data.Magic[i]].name +
-                    "/エレメント番号" + Bag_Magic.data[data.Magic[i]].element);
+                //Debug.Log((SceneMng.CHARACTERNUM)c + "の" + i + "番目:" + data.Magic[i] + "番の魔法/名前：" +
+                //    Bag_Magic.data[data.Magic[i]].name +
+                //    "/エレメント番号" + Bag_Magic.data[data.Magic[i]].element);
 
                 if (statusMngObj.gameObject.activeSelf == true)
                 {
@@ -300,8 +300,9 @@ public class ItemBagMng : MonoBehaviour
 
     public void ActiveRectTransform()
     {
-       // Debug.Log(mngs_[stringNum_].gameObject.name + "を表示します               " + stringNum_);
-
+        // Debug.Log(mngs_[stringNum_].gameObject.name + "を表示します               " + stringNum_);
+        info_.text = "";// 説明欄の表示をリセット
+      
         for (int i = 0; i < (int)TOPIC.MAX; i++)
         {
             if (stringNum_ == i)
@@ -317,8 +318,7 @@ public class ItemBagMng : MonoBehaviour
             }
         }
 
-
-
+        // ワードに捨てるボタンはないためfor文で回さず直で書く
         if (stringNum_ == (int)TOPIC.WORD)
         {
             // 魔法合成からバッグのワードを開くと親の場所がずれてしまうため

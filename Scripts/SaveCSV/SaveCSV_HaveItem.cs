@@ -29,7 +29,7 @@ public class SaveCSV_HaveItem : MonoBehaviour
         }
 
         // ステータスの項目見出し
-        string[] s1 = { "ItemName", "Cnt"};
+        string[] s1 = {"Number", "ItemName", "Cnt"};
         string s2 = string.Join(",", s1);
         sw_.WriteLine(s2);
     }
@@ -38,7 +38,7 @@ public class SaveCSV_HaveItem : MonoBehaviour
     public void SaveItemData(Bag_Item.ItemData set)
     {
         // 実際のステータス値
-        string[] data = { set.name, set.haveCnt.ToString() };
+        string[] data = {set.number.ToString(), set.name, set.haveCnt.ToString() };
         string write = string.Join(",", data);
         sw_.WriteLine(write);
     }

@@ -96,7 +96,7 @@ public class Bag_Word : MonoBehaviour
 
             // オブジェクト情報を取得
             word[i].pleate = InitPopList.pleate[(int)kind, i];
-            word[i].pleate.name = word[i].name;
+            word[i].pleate.name = word[i].name+i;
 
             // オブジェクトの子のtextを取得
             word[i].nameText = word[i].pleate.transform.Find("Word").GetComponent<Text>();

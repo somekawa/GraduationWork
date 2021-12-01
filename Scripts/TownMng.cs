@@ -49,7 +49,7 @@ public class TownMng : MonoBehaviour
         GameObject.Find("Managers").GetComponent<Bag_Word>().Init();
         GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
         GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
-        GameObject.Find("Managers").GetComponent<Bag_Materia>().Init();
+        GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
         GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad();
 
         var cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
