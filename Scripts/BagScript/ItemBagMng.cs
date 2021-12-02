@@ -332,6 +332,7 @@ public class ItemBagMng : MonoBehaviour
         }
         else if (stringNum_ == (int)TOPIC.ITEM)
         {
+            GameObject.Find("Managers").GetComponent<Bag_Item>().Init();
             throwAwayBtn_[1].gameObject.SetActive(false);
             throwAwayBtn_[2].gameObject.SetActive(false);
         }

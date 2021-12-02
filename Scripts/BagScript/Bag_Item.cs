@@ -46,113 +46,99 @@ public class Bag_Item : MonoBehaviour
     private int clickItemNum_ = -1;
     private Text info_; // クリックしたアイテムを説明する欄
     private Button throwAwayBtn_;
+    private bool checkFlag_ = false;
 
     public void Init()
     // void Start()
     {
-        popItemList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
-       
-        maxCnt_ = popItemList_.SetMaxItemCount();
-        Debug.Log("csvアイテム数" + exItemNum_+"         xlsアイテム数"+maxCnt_);
-        //exItemNum_ =maxCnt_;
-        itemState = new ItemData[exItemNum_];
-        data = new ItemData[exItemNum_];
-        saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_HaveItem>();
-        for (int i = 0; i < exItemNum_; i++)
+        if (checkFlag_ == false)
         {
-            if (maxCnt_-1<i)
+            popItemList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
+
+            maxCnt_ = popItemList_.SetMaxItemCount();
+            Debug.Log("csvアイテム数" + exItemNum_ + "         xlsアイテム数" + maxCnt_);
+            //exItemNum_ =maxCnt_;
+            itemState = new ItemData[exItemNum_];
+            data = new ItemData[exItemNum_];
+            saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_HaveItem>();
+            for (int i = 0; i < exItemNum_; i++)
             {
-                // 大成功アイテムの生成
-                itemState[i].box = Instantiate(itemUIBox,
-                         new Vector2(0, 0), Quaternion.identity, transform);
-                //Debug.Log(i+":大成功アイテムの生成");
-            }
-            else
-            {
-                itemState[i] = new ItemData
+                if (maxCnt_ - 1 < i)
                 {
-                    box = InitPopList.itemData[i].box,
-                    info = InitPopList.itemData[i].info,
-                };
+                    // 大成功アイテムの生成
+                    itemState[i].box = Instantiate(itemUIBox,
+                             new Vector2(0, 0), Quaternion.identity, transform);
+                    //Debug.Log(i+":大成功アイテムの生成");
+                }
+                else
+                {
+                    itemState[i] = new ItemData
+                    {
+                        box = InitPopList.itemData[i].box,
+                        info = InitPopList.itemData[i].info,
+                    };
+                }
+
+                itemState[i].number = int.Parse(csvDatas_[i + 1][0]);
+                itemState[i].name = csvDatas_[i + 1][1];
+                itemState[i].haveCnt = int.Parse(csvDatas_[i + 1][2]);
+                // 親の位置を変更
+                itemState[i].box.transform.SetParent(itemParent.transform);
+
+                // 探しやすいように番号をつけておく
+                itemState[i].box.name = itemState[i].name + i;
+
+                // 生成したプレハブの子になっているImageを見つける
+                itemState[i].image = itemState[i].box.transform.Find("ItemIcon").GetComponent<Image>();
+                int num = maxCnt_ - 1 < i ? i - maxCnt_ : i;
+                itemState[i].image.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.ITEM][num];
+
+                // Exアイテムの目印を表示するかしないか
+                itemState[i].EX = itemState[i].box.transform.Find("SymbolImage").GetComponent<Image>();
+                bool flag = maxCnt_ - 1 < i ? true : false;
+                itemState[i].EX.gameObject.SetActive(flag);
+
+                // 生成したプレハブの子になっているTextを見つける
+                itemState[i].cntText = itemState[i].box.transform.Find("NumBack/Num").GetComponent<Text>();
+                itemState[i].cntText.text = itemState[i].haveCnt.ToString();
+                //itemCnt_[i] = 0;// すべてのアイテムの所持数を0にする
+
+                itemState[i].getFlag = 0 < itemState[i].haveCnt ? true : false;
+                itemState[i].box.SetActive(itemState[i].getFlag);
             }
-
-            itemState[i].number = int.Parse(csvDatas_[i + 1][0]);
-            itemState[i].name = csvDatas_[i + 1][1];
-            itemState[i].haveCnt = int.Parse(csvDatas_[i + 1][2]);
-             // 親の位置を変更
-            itemState[i].box.transform.SetParent(itemParent.transform);
-          
-            // 探しやすいように番号をつけておく
-            itemState[i].box.name = itemState[i].name + i;
-
-            // 生成したプレハブの子になっているImageを見つける
-            itemState[i].image = itemState[i].box.transform.Find("ItemIcon").GetComponent<Image>();
-            int num= maxCnt_ - 1 < i ? i-maxCnt_ : i;
-            itemState[i].image.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.ITEM][num];
-
-            // Exアイテムの目印を表示するかしないか
-            itemState[i].EX = itemState[i].box.transform.Find("SymbolImage").GetComponent<Image>();
-            bool flag = maxCnt_-1 < i ? true : false;
-            itemState[i].EX.gameObject.SetActive(flag);
-
-            // 生成したプレハブの子になっているTextを見つける
-            itemState[i].cntText = itemState[i].box.transform.Find("NumBack/Num").GetComponent<Text>();
-            itemState[i].cntText.text = itemState[i].haveCnt.ToString();
-            //itemCnt_[i] = 0;// すべてのアイテムの所持数を0にする
-
-            itemState[i].getFlag = 0 < itemState[i].haveCnt ?   true: false;
-            itemState[i].box.SetActive(itemState[i].getFlag);
+        }
+        else
+        {
+            // 店かアイテム使用でアイテム個数が変更されたとき
+            for (int i = 0; i < exItemNum_; i++)
+            {
+                itemState[i].cntText.text = itemState[i].haveCnt.ToString();
+                itemState[i].getFlag = 0 < itemState[i].haveCnt ? true : false;
+                itemState[i].box.SetActive(itemState[i].getFlag);
+            }
         }
 
 
+            //// デバッグ用 全部の素材を5個取得した状態で始まる
+            //for (int i = 0; i < exItemNum_; i++)
+            //{
+            //    ItemGetCheck(i, itemState[i].name, 10, MovePoint.JUDGE.NORMAL);
+            //   // Debug.Log(i + "番目の素材" + itemState[i].name);
+            //}
+            //ItemGetCheck(0, itemState[0].name, 10, MovePoint.JUDGE.GOOD);
 
-        //// デバッグ用 全部の素材を5個取得した状態で始まる
-        //for (int i = 0; i < exItemNum_; i++)
-        //{
-        //    ItemGetCheck(i, itemState[i].name, 10, MovePoint.JUDGE.NORMAL);
-        //   // Debug.Log(i + "番目の素材" + itemState[i].name);
-        //}
-        //ItemGetCheck(0, itemState[0].name, 10, MovePoint.JUDGE.GOOD);
+        }
 
-    }
-
-    public void ItemGetCheck(int itemNum,string itemName,int createCnt, MovePoint.JUDGE judge)
+    public void ItemGetCheck(int itemNum,int createCnt)
     {
-        //if(judge==MovePoint.JUDGE.GOOD)
-        //{
-        //    Debug.Log("生成したアイテム番号"+exItemNum_);
-        //    itemNum = exItemNum_;
-        //  //  itemName = itemName + "Ex";
-        //    //itemState[exItemNum_].box = Instantiate(itemUIBox,
-        //    //            new Vector2(0, 0), Quaternion.identity, transform);
-        //    //// 親の位置を変更
-        //    //itemState[exItemNum_].box.transform.SetParent(itemParent.transform);
-
-        //    //// 探しやすいように番号をつけておく
-        //    //itemState[exItemNum_].box.name = itemName + exItemNum_;
-
-        //    //// 生成したプレハブの子になっているImageを見つける
-        //    //itemState[exItemNum_].image = itemState[exItemNum_].box.transform.Find("ItemIcon").GetComponent<Image>();
-        //    //itemState[exItemNum_].image.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.ITEM][exItemNum_ - maxCnt_];
-        //    //itemState[exItemNum_].EX = itemState[exItemNum_].box.transform.Find("SymbolImage").GetComponent<Image>();
-        //    //itemState[exItemNum_].EX.gameObject.SetActive(true);
-
-        //    //// 生成したプレハブの子になっているTextを見つける
-        //    //itemState[exItemNum_].cntText = itemState[exItemNum_].box.transform.Find("NumBack/Num").GetComponent<Text>();
-        //    //itemState[exItemNum_].cntText.text = itemState[exItemNum_].haveCnt.ToString();
-        //    //exItemNum_++;
-        //}
-
         itemState[itemNum].haveCnt += createCnt;
-
-        itemState[itemNum].getFlag = 0 < itemState[itemNum].haveCnt ? true : false;
-        itemState[itemNum].box.SetActive(itemState[itemNum].getFlag);
-        itemState[itemNum].cntText.text = itemState[itemNum].haveCnt.ToString();
-
-        //data[itemNum].name = itemName;
-        //data[itemNum].number = itemNum;
         data[itemNum].haveCnt = itemState[itemNum].haveCnt;
         DataSave();
+    }
+
+    public void SetItemCntText(int itemNum)
+    {
+        itemState[itemNum].cntText.text = itemState[itemNum].haveCnt.ToString();
     }
 
     public void DataLoad()
