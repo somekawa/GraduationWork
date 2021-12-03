@@ -5,7 +5,7 @@ public class PopList : MonoBehaviour
     public enum ListData
     {
         CHAPTER,        // ストーリー
-        CHARACTER,      // キャラクター初期情報(あとで、すべてCSV形式からの読み込み書き出しに変えるかも)
+        CHARACTER,      // キャラクター初期情報
         ENEMY,          // 敵情報
         QUESTINFO,      // クエスト情報
         CHEST,          // 宝箱情報
@@ -13,6 +13,7 @@ public class PopList : MonoBehaviour
         ITEM,
         WORD,
         BOOK_STORE,
+        RESTAURANT,     // レストラン情報
         MAX
     }
 
@@ -70,8 +71,9 @@ public class PopList : MonoBehaviour
             case ListData.BOOK_STORE:
                 tmpStr = "BookList/BookList" + num;
                 return (T)(object)GetList<BookList>(tmpStr);
-
-
+            case ListData.RESTAURANT:
+                tmpStr = "Cook" + num;
+                return (T)(object)GetList<Cook0>(tmpStr);
             default:
                 return default(T);
         }

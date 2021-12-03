@@ -51,18 +51,21 @@ public class FieldMng : MonoBehaviour
         GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().Init();
 
         // イベントが発生するか確認する
-        if (EventMng.GetChapterNum() == 8)
+        if (EventMng.GetChapterNum() == 8 && SceneMng.nowScene == SceneMng.SCENE.FIELD0)
         {
+            // 進行度8 かつ 豊作の森
             EventMng.SetChapterNum(8, SceneMng.SCENE.CONVERSATION);
             nowMode = MODE.NON;
         }
-        else if(EventMng.GetChapterNum() == 13)
+        else if(EventMng.GetChapterNum() == 13 && SceneMng.nowScene == SceneMng.SCENE.FIELD1)
         {
+            // 進行度13 かつ ヴェステ砂漠
             EventMng.SetChapterNum(13, SceneMng.SCENE.CONVERSATION);
             nowMode = MODE.NON;
         }
-        else if (EventMng.GetChapterNum() == 16)
+        else if (EventMng.GetChapterNum() == 16 && SceneMng.nowScene == SceneMng.SCENE.FIELD2)
         {
+            // 進行度16 かつ Field3
             EventMng.SetChapterNum(16, SceneMng.SCENE.CONVERSATION);
             nowMode = MODE.NON;
         }
@@ -111,6 +114,7 @@ public class FieldMng : MonoBehaviour
             Debug.Log("FieldMng.csで取得しているCameraMngがnullです");
         }
 
+        cameraMng_.MainCameraPosInit();
         cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
 
         // WarpField.csの初期化関数を先に呼ぶ
@@ -128,6 +132,15 @@ public class FieldMng : MonoBehaviour
         titleInfo_ = fieldUICanvasPopUp_.transform.Find("TitleInfo").GetComponent<TMPro.TextMeshProUGUI>();
         // 宝箱の文字描画先
         getChestsInfo_ = fieldUICanvasPopUp_.transform.Find("GetChestsInfo").GetComponent<TMPro.TextMeshProUGUI>();
+
+        // ステータスアップを消すか判定する
+        if(!SceneMng.GetFinStatusUpTime())
+        {
+            for(int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+            {
+                SceneMng.charasList_[i].DeleteStatusUpByCook();
+            }
+        }
     }
 
     // クエストの受注状況に合わせて、壁や宝箱のアクティブ状態を判別する

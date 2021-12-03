@@ -66,7 +66,7 @@ public class QuestMng : MonoBehaviour
     private NOWPAGE nowPage_ = NOWPAGE.NON;          // 現在の画面状態
 
     private int[] nowDeliveryNum_ = new int[2];      // 現在の納品予定数
-    IEnumerator[] rest = new IEnumerator[2];         // 納品処理のコルーチンを保存する
+    private IEnumerator[] rest_ = new IEnumerator[2];         // 納品処理のコルーチンを保存する
 
     // Excelからのデータ読み込み
     private GameObject DataPopPrefab_;
@@ -233,23 +233,9 @@ public class QuestMng : MonoBehaviour
                     deliveryItemBox_[i].transform.Find("ItemNum").GetComponent<Text>().text = Bag_Item.itemState[numSplit[i]].cntText.text;
 
                     // コルーチンを初期化
-                    rest[i] = DeliveryCoroutine(i);
-                    StartCoroutine(rest[i]); // コルーチンを呼び出す
+                    rest_[i] = DeliveryCoroutine(i);
+                    StartCoroutine(rest_[i]); // コルーチンを呼び出す
                 }
-
-                //// 画像を出す
-                //deliveryItemBox_[0].transform.Find("ItemIcon").GetComponent<Image>().sprite = Bag_Item.itemState[numSplit[0]].image.sprite;
-                //deliveryItemBox_[1].transform.Find("ItemIcon").GetComponent<Image>().sprite = Bag_Item.itemState[numSplit[1]].image.sprite;
-
-                //// 所持数を出す
-                //deliveryItemBox_[0].transform.Find("ItemNum").GetComponent<Text>().text = Bag_Item.itemState[numSplit[0]].cntText.text;
-                //deliveryItemBox_[1].transform.Find("ItemNum").GetComponent<Text>().text = Bag_Item.itemState[numSplit[1]].cntText.text;
-
-                //// コルーチンを初期化
-                //rest[0] = DeliveryCoroutine(0);
-                //rest[1] = DeliveryCoroutine(1);
-                //StartCoroutine(rest[0]); // コルーチンを呼び出す(成功)
-                //StartCoroutine(rest[1]); // コルーチンを呼び出す(大成功)
             }
             else
             {
@@ -346,34 +332,23 @@ public class QuestMng : MonoBehaviour
     }
 
     // 納品の確定
-    //@ 修正が必要
     public void ClickDeliveryButton()
     {
         Debug.Log("納品確定ボタン");
 
-        for (int i = 0; i < Bag_Item.itemState.Length; i++)
-        {
-            // 所持アイテムと、納品クエストで名前が一致している物を検索する
-            if (Bag_Item.itemState[i].name == popQuestInfo_.param[questNum_].delivery)
-            {
-                // 納品するものを手持ちから減らす
-                Bag_Item.itemState[0].haveCnt -= (int)deliveryItemBox_[0].transform.Find("Slider").GetComponent<Slider>().value;
-            }
-            else if (Bag_Item.itemState[i].name + "Ex" == popQuestInfo_.param[questNum_].delivery + "Ex")
-            {
-                // 納品するものを手持ちから減らす
-                Bag_Item.itemState[0].haveCnt -= (int)deliveryItemBox_[1].transform.Find("Slider").GetComponent<Slider>().value;
-            }
-            else
-            {
-                // 何も処理を行わない
-            }
-        }
+        // カンマ区切りにする(前の数字が成功,後ろの数字が大成功時のアイテムの番号)
+        var split = popQuestInfo_.param[questNum_].delivery.Split(',');
+        int[] numSplit = new int[split.Length];
 
-        StopCoroutine(rest[0]); //一時停止
-        StopCoroutine(rest[1]); //一時停止
-        rest[0] = null;  //リセット
-        rest[1] = null; //リセット
+        for (int i = 0; i < split.Length; i++)
+        {
+            numSplit[i] = int.Parse(split[i]);
+            Bag_Item.itemState[numSplit[i]].haveCnt -= (int)deliveryItemBox_[i].transform.Find("Slider").GetComponent<Slider>().value;
+            StopCoroutine(rest_[i]); //一時停止
+            rest_[i] = null;         //リセット
+            nowDeliveryNum_[i] = 0; // 納品予定数の初期化
+
+        }
 
         OrderQuestCommon();
 
@@ -382,6 +357,20 @@ public class QuestMng : MonoBehaviour
 
         // クリア状態にする
         QuestClearCheck.QuestClear(questNum_);
+    }
+
+    public void ClickCancelDeliveryButton()
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            StopCoroutine(rest_[i]); //一時停止
+            rest_[i] = null; //リセット
+            nowDeliveryNum_[i] = 0; // 納品予定数の初期化
+        }
+
+
+        // パネルを非表示にする
+        deliveryBack_.SetActive(false);
     }
 
     // 受注処理の共通部分
@@ -404,12 +393,6 @@ public class QuestMng : MonoBehaviour
         questOrderButton_.SetActive(false);
         // 受注したものを左側のリストから非表示にする
         questButton_[questNum_].gameObject.SetActive(false);
-    }
-
-    public void ClickCanselDeliveryButton()
-    {
-        // パネルを非表示にする
-        deliveryBack_.SetActive(false);
     }
 
     // クリアクエストの報告画面を出す

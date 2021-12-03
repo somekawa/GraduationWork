@@ -38,8 +38,7 @@ public class UniHouseMng : MonoBehaviour
         // バッグ関連
         GameObject.Find("Managers").GetComponent<Bag_Word>().Init();
         GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
-        GameObject.Find("Managers").GetComponent<Bag_Materia>().Init();
-        GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
+        GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
         GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad();
 
         // メインカメラを最初にアクティブにする
@@ -49,6 +48,15 @@ public class UniHouseMng : MonoBehaviour
         // 合成時のミニゲーム用Mng
         alchemyMng.gameObject.SetActive(false);
         magicCreateMng.gameObject.SetActive(false);
+
+        // ステータスアップを消すか判定する
+        if (!SceneMng.GetFinStatusUpTime())
+        {
+            for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+            {
+                SceneMng.charasList_[i].DeleteStatusUpByCook();
+            }
+        }
     }
 
     public void ClickSleepButton()

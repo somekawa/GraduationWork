@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class TownMng : MonoBehaviour
 {
-    [SerializeField]
-    private Canvas inHouseCanvas;
+    //[SerializeField]
+    //private Canvas inHouseCanvas;
 
     [SerializeField]
     private GameObject nightLights; // 街頭
@@ -22,8 +22,11 @@ public class TownMng : MonoBehaviour
         // 現在のシーンをTOWNとする
         SceneMng.SetNowScene(SceneMng.SCENE.TOWN);
 
+        // メインカメラの初期化関数を呼ぶために、CameraMng.csを経由している
+        GameObject.Find("CameraController").GetComponent<CameraMng>().MainCameraPosInit();
+
         // 今が夜ならばライト点灯、それ以外ならライト消灯
-        if(SceneMng.GetTimeGear() == SceneMng.TIMEGEAR.NIGHT)
+        if (SceneMng.GetTimeGear() == SceneMng.TIMEGEAR.NIGHT)
         {
             nightLights.SetActive(true);
         }
@@ -72,8 +75,8 @@ public class TownMng : MonoBehaviour
             cameraMng_.SetChangeCamera(true);
 
             // 室内キャンバスの表示(非表示の状態から取得が必要になる為、SerializeFieldを使って外部アタッチしている)
-            inHouseCanvas.gameObject.SetActive(true);
-            temp.ChangeObjectActive(inHouseCanvas.gameObject.transform.childCount, inHouseCanvas.transform, str);
+            //inHouseCanvas.gameObject.SetActive(true);
+            //temp.ChangeObjectActive(inHouseCanvas.gameObject.transform.childCount, inHouseCanvas.transform, str);
 
             temp.SetWarpCanvasAndCharaController(false);
 
@@ -86,6 +89,15 @@ public class TownMng : MonoBehaviour
         {
             // メインカメラをアクティブにする
             cameraMng_.SetChangeCamera(false);
+        }
+
+        // ステータスアップを消すか判定する
+        if (!SceneMng.GetFinStatusUpTime())
+        {
+            for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+            {
+                SceneMng.charasList_[i].DeleteStatusUpByCook();
+            }
         }
     }
 }

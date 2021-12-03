@@ -1722,11 +1722,510 @@ numが3のとき、Bag_Magic.csにあるmagicObject変数でfor文を回してMa
 
 -------------------------------------------------
 
-回復ポーション(小)
-回復ポーション(小)大成功
-※大成功のアイテムにはキラキラマークとかつけて
-　わかりやすくしたい
+<Field3へ行くためのメインクエストを発生させる>----
 
+Chapter.xlsにChapter15の会話を追加する。
+[Chapter_importer.cs]
+"15"を追加する。
+
+[Guild.cs]
+受注時に会話を発生させるようにする。
+
+// 現在の進行度が15で、クエスト5番を受注したら
+case 15:
+if (questNum == 5)
+{
+　　　EventMng.SetChapterNum(15, 　　　SceneMng.SCENE.CONVERSATION);
+}
+break;
+
+を入れる。
+
+現在の進行度を15にして確認する。
+
+-------------------------------------------------
+
+<納品クエストの個数表示を一部変更する>-------------
+[QuestMng.cs]
+いままでは名前で判定していたけどnumがitemのほうの項目に加わったのでnumで判定するようにする。
+
+通常の回復ポーション(小)は0番で、大成功は12番
+
+QuestInfo.xlsのdeliveryに[0,12]といれる。
+カンマ区切りにして、前の数値と後ろの数値で判断する
+
+これでfor文で回してたところがなくなって
+直でアイテムを検索できるようになる
+処理回数削減！
+
+また、大成功のアイテムとの合計で納品数とする計算が
+できていなかったので、修正する。
+
+private変数で配列のintを用意して、
+いまの各、納品予定数を保存するようにしておく。
+
+コルーチンのwhile文の中で
+for文を回して合計の納品予定数を確認するようにする。
+
+ClickDeliveryButton関数の修正も必要
+→メニューのアイテムの所持数が減っていない
+ClickDeliveryButton関数のhaveCntは減っているから
+問題はメニューの方だと思う。
+※さきちゃんに明日聞く。もしかしたらText側も変更が
+　いるのかもしれない
+
+<メニュー画面のアイテムが減らない問題について>
+さきちゃんに修正をお願いして完了した。
+
+<納品キャンセルボタンの一部変更>
+関数名がcansel->cancelに修正したので
+CancelボタンのOnClickがmissingになる部分を直す
+
+-------------------------------------------------
+
+<大成功アイテムを納品した時の処理を作る>-----------
+大成功の個数に応じて報酬をupさせる。
+納品個数と大成功数で全体の何％が大成功のアイテムなのかを調べてその％で報酬up度を決める。
+
+
+
+
+-------------------------------------------------
+
+<レストラン処理を作成する>------------------------
+
+[レストランで必要な選択肢]
+・料理を注文する
+・外に出る
+
+[料理を注文する]
+前に作ったレイアウト通りに並べていく
+左側にはクエストみたいに料理名をインスタンスする。
+→料理数はゲームの進行度によって増えていく。
+
+<ヒエラルキーにオブジェクトを追加する>
+・RestaurantCanvas->料理を注文する/外に出るのボタン
+・RestaurantMng->RestanrantMng.csをアタッチする所
+・RestaurantMenuUI->メニューとかの詳細を出すところ
+
+<RestaurantCanvas>
+UIMove.csをアタッチしておく。
+・ExitButtonのオブジェクトをアタッチ
+※InHouseCanvasのRestaurantに入れている
+　ExitButtonを削除する
+・OrderButtonを作成する。
+
+<RestaurantMng.csを用意する>
+新規で[RestaurantMng.cs]を作成する。
+
+[RestaurantMng.cs]
+    [SerializeField]
+    // レストランのメニューを表示するUI
+    private GameObject restaurantMenuUI;
+
+    [SerializeField]
+    //　一つ一つの料理情報を表示するプレハブ
+    private Transform cookPrefab;
+を用意しておく。
+→restaurantMenuUIはRestaurantMenuUIをアタッチする
+→cookPrefabはまだ。
+
+OnClickOrderButton関数を作成して、
+OrderButtonにアタッチする。
+
+OrderButton関数の中で
+restaurantMenuUIを表示状態になるようにする。
+それと交代で、RestaurantCanvasを非表示にする。
+
+<クエストみたいに左側のボタン類を用意する>
+QuestButton.csをギルドでもレストランでも
+使えるようにしたい。
+
+[QuestButton.cs]
+TestRButton関数を用意しておいて、
+Debug.Log(questNum_ + "の番号を渡します");
+GameObject.Find("HouseInterior/Restaurant/RestaurantMng").GetComponent<RestaurantMng>().SetSelectOrder(questNum_);
+を書く。
+
+[RestaurantMng.cs]
+SetSelectOrder関数を用意しておく。
+
+RestaurantMngのCookPrefabの場所に
+PrefabフォルダにあるQuestPrefabを複製してつくった
+CookPrefabをアタッチする
+
+[CookPrefab]
+プレハブの中にあるButtonのOnClick部分に
+TestRButton関数をアタッチする
+
+インスタンスの仕組みを作る
+[RestaurantMng.cs]
+private Transform content_;の変数を作成する。
+Start関数で
+content_ = restaurantMenuUI.transform.Find("Background/Scroll View/Viewport/Content");
+と
+var uIInstance = Instantiate(cookPrefab, content_);
+を呼び出すようにする。
+
+RestaurantMenuUIの方にギルドで使っていたBackground
+を子としてアタッチする。
+
+※ここまでで、「ああああ…」と書かれた
+　ボタンをインスタンスするところまではできた
+
+<Excelを作成する>
+新規で[CookList.xls]を作成する
+
+必要になる情報としては、
+num,name,info,statusUp,
+needFood,needMoney,eventNum
+となる。
+(注意点)
+statusUp・・・キャラのステータスと照合できるように
+　　　　　　　する必要がある
+needFood・・・素材の番号と数字を合わせる必要あり
+
+インポート処理をしてResourcesフォルダに入っているのを確かめておく。
+
+<表示処理をする>
+該当するボタンを押下したら名前と説明を出すようにする。
+Resourcesファイルから検索する部分を書き、
+PopList.csにも処理を追加する。
+
+Excelから読み込んだ文字を表示させるようにした。
+サイズ調整とかが必要
+
+次に、該当するボタンを押下したらステータスアップ効果を出すようにする。
+
+・上がるステータスの内容は、StatusUpInfoText
+・いくつアップするかの数字は、StatusUpInfoNumText
+内容と数字に分けるには、ExcelのStatusUp項目の
+データを分解する必要がある。
+
+そして、必要な素材(食材になるもの系(?))を
+表示するのをつくる。
+→素材が必要のないものをあるからそのときには
+　なしと表示する
+・必要な素材はNeedFoodText
+→数字から素材名をとるようにする
+・個数系はNeedFoodNumText
+
+needFoodText_.text = Bag_Materia.materiaState[popCookInfo_.param[num].needFood].name;
+として素材名を取り出す。
+キノコのときは3
+
+最後に必要なお金の表示をする
+MoneyText
+→Alignmentを中央に設定しておく
+
+最後に進行度を見てfor文でボタンを生成するようにしておく。
+→QuestMng.csのStart関数を参考にしてつくる。
+
+素材必要数をExcelに項目作るの忘れてた。
+追加しておく。
+
+これで右の説明部分は画像以外できた。
+あとはOrderボタンを押された時の処理だけ
+
+<Order押下時>
+・素材をつかうやつ
+→素材数が足りているか確認して、
+　足りないなら押せなくする
+→足りるときはお金処理とステータスアップと素材減ら　す
+→所持金が足りるかも確認！
+
+・素材をつかわないやつ
+→お金処理
+→ステータスアップ
+→所持金が足りるかも確認！
+
+[RestaurantMng.cs]
+OnClickMenuOrderButton関数を作成する
+→RestaurantMenuUIの中にあるOrderButtonにアタッチ
+
+OnClickMenuOrderButton関数の中の処理を作成する。
+お金の減少は、お金の管理をどこでしているかによる
+→正式にSceneMng.csで管理することに決定
+(使うときはGet/Setを通してね)
+
+キャラのステータスアップは難易度高そう。。
+・キャラクターの情報をSceneMng経由で取得
+・一時アップ変数を用意しとくべきかも
+・SetCharaSetting関数を参考に考えてみる
+
+[Chara.cs]
+SetStatusUpByCook関数をつくる。
+※これの引数が悩む・・・
+配列で受け取るようにする(順番命！！)
+一時アップの数字を保存しておく変数も用意する。
+→時間経過で下げるときにつかう。
+
+[RestaurantMng.cs]
+private (string, int)[] statusUp_ =
+ new (string, int)[5];
+という変数を用意して、あらかじめAttack,MagicAttack
+とかのstringを入れておく。
+
+メニューボタンを押した時に名前が一致したステータスのところにアップ値を入れるようにしておき。
+
+実際に注文ボタンを押したらそのアップ値が配列になってChara.csの方に渡せるようにしておく。
+
+素材を減らす処理について
+Bag_Materia.materiaState[tmppop.needFood].haveCnt -= tmppop.needNum;
+で解決できたとおもう。
+
+-------------------------------------------------
+
+<ワープ時にカメラが追従しなくなった>--------------
+
+おそらくCameraSample.csのStart関数をInit関数に
+変更したせいだと思う。
+
+Init関数をTownMng.csで呼び出せるように、
+CameraMng.csをFindするようにしよう。
+
+[TownMng.cs]
+Start関数のSetNowScene関数のあとに、
+
+GameObject.Find("CameraController").GetComponent<CameraMng>().MainCameraPosInit();
+
+を呼び出すようにする。
+-------------------------------------------------
+
+<建物から出たあとにワープすると、カメラがついてこないバグが発生>-------------------------------------
+
+[CameraMng.cs]
+SetChangeCamera関数に
+mainCameraがactiveになるときはInit関数を呼び出すようにする。
+
+何回か移動するとエラーでてるから、
+コルーチンの初期化処理をInit関数内でやったほうが
+良さそう。
+
+[CameraSanple.cs]
+QuestMng.csのコルーチン初期化うんぬんを見ながら処理をかく。
+
+-------------------------------------------------
+
+<レストランのメニュー画面中に戻るボタンをつける>---
+
+RestaurantMenuUIの子として[BackButton]を追加する。
+このボタンはギルドのやつと同じ
+
+[BackButton]
+アンカーポイントを左下にして
+Pos   X:50 Y:50 Z:0
+Scale X:2  Y:2  Z:1
+色はそのままにする。
+
+あとは内部処理をScriptに書いてアタッチさせる。
+
+[RestaurantMng.cs]
+OnClickBackButton関数を作成する。
+中でSetActiveの切替とステータス値の初期化を行う。
+これをBackButtonのOnClickにアタッチする。
+
+-------------------------------------------------
+
+<店に入ったときからお金を右上に表示しておく>-------
+
+配置は店名の下らへん。
+お金のマークを作っておきたい。
+
+<お金のマークについて>
+https://www.ac-illust.com/main/detail.php?id=830600&word=%E9%87%91%E3%83%A1%E3%83%80%E3%83%AB_02&searchId=1593258780
+上記のサイトからコインの画像は落としてきた。
+あとは中のマークだけ。
+中のマークと枠はさきちゃんが書いてくれる。
+
+画像の名前を[HaveMoneyFrame.png]とする。
+※サイズを245*48に変更してもらう
+
+必要な店では各HouseInfoの子としてもらって、
+(レストランの例)
+Pos X:0 Y:-60 Z:0
+等としてもらう
+
+<所持金表示が必要なお店では、出せるようにする>
+[UIMove.cs]
+"HouseInfo"を検索したついでに、
+さらにその子として"HaveMoneyText"というオブジェクトがついていたら、その子のTextに所持金を代入する。
+
+[HaveMoneyText(TMP)]
+Pos X:14.3 Y:-58 Z:0
+FontSize:36
+Alignment:右寄せ中段
+
+
+-------------------------------------------------
+
+<メニュー注文後は、前の画面に戻るようにする>-------
+
+[RestaurantMng.cs]
+OnClickMenuOrderButton関数の一番下に、
+SetActive処理を入れる。
+→OnClickBackButton関数と処理が丸被りなので
+private関数でBackMenu関数をつくり、そこにまとめて
+その関数を呼び出すようにする。
+
+-------------------------------------------------
+
+<一定時間新しい料理を食べられないようにしたい>-----
+
+料理の効果が切れるのを、食べたときから
+「2つ先の時刻」とする。
+
+(例)
+朝食べる->夕方切れる
+夕方切れる->朝切れる
+フィールド1つ分の効果時間しかない
+※フィールドをハシゴしたら、2つ目以降のフィールドで
+　はステータスアップなし
+
+[SceneMng.cs]
+TIMEGEAR finStatusUpTime_変数をstaticで作成する。
+Get/Set関数で呼び出せるようにする
+
+Set関数の中で2つ先の時刻を設定する
+※2つ先の時刻が夜を超えた数字なら[-4]すればいい
+
+[RestaurantMng.cs]
+OnClickMenuOrderButton関数の一番下でSetFinStatusUpTime関数を呼び出すようにする。
+
+
+※切れたあとに食べに来ないで食べれない時刻と同じに
+　来ることを考えないとダメ
+　効果が切れたときにフラグをfalseにするとかを
+　したほうがいい
+
+時刻はboolの入れ替えの為に使うようにして、
+実際食べれるか食べれないかはboolで判断するようにする
+
+[SceneMng.cs]
+SetTimeGear関数で
+// 料理の効果が切れる時間ならフラグをfalseにする
+if(timeGrar_ == finStatusUpTime_.Item1)
+{
+    finStatusUpTime_.Item2 = false;
+}
+というのを書く。
+
+[RestautrantMng.cs]
+OrderButtonを押したときに
+最初の行に
+
+// フラグがtrueなら食べれないようにする
+if(SceneMng.GetFinStatusUpTime())
+{
+   Debug.Log("お腹がいっぱいで食べられないヨ！！");
+   return;
+}
+というのを書く。
+
+-------------------------------------------------
+
+<料理効果がきれたときにステータスアップ分を消す>---
+
+[Chara.cs]
+DeleteStatusUpByCook関数を作成する。
+中でstatusUp変数から各ステータス値をマイナスする。
+最後に値を0に初期化しておく
+
+[TownMng.cs][FieldMng.cs][UniHouseMng.cs]
+Start関数の中でSceneMng.csの
+GetFinStatusUpTime関数を呼び出してフラグを確認し、
+falseになっていたらChara.csの
+DeleteStatusUpByCook関数を呼び出すようにする。
+
+-------------------------------------------------
+
+<街やユニハウスからフィールドに行ったとき、
+ メニューボタンが動かない>------------------------
+
+TABキーを押せなくしている場所に問題がありそう
+
+[MenuActive.cs]
+Update関数のreturn処理にある
+warpField_.GetWarpNowFlag関数がtrueなら
+returnに入る処理を書いてあるところで、
+
+探索中も常にtrueになっているからreturnされている。
+WarpField.csの処理に問題がありそうなので
+さきちゃんに修正を依頼中
+
+修正完了。
+
+-------------------------------------------------
+
+<ギルドとレストランの店名を
+ HouseInteriorCanvasから取り出す>-----------------
+
+HouseInteriorCanvasというゲームオブジェクト自体を
+削除して、Canvas数を減らすようにしたい。
+
+[TownMng.cs]
+外部アタッチのInHouseCanvasが不要になる。
+
+[HouseInfo]はボタンが右から挿入されるやつと
+一緒に動かないように設定しなおす。
+
+[UIMove.cs]
+[HouseInfo]という名前のオブジェクトは動かさない
+ようにする。
+
+OnEnable関数
+for文の中で"HouseInfo"だったら
+localPositionを(500.0f,320.0f,0.0f)とする。
+※アンカーポイントが中央からしか計算できないみたい
+
+Easingのコルーチン内
+while文の中にあるfor文の最初に、
+// 既にフラグがtrueなら飛ばして、次を回す
+if(flag[i])
+{
+  continue;
+}
+
+// HouseInfoならすぐにtrueにして飛ばす
+if (transform.GetChild(i).name == "HouseInfo")
+{
+  flag[i] = true;
+  continue;
+}
+と追加する。
+
+<注意点>
+・店名は、UIMove.csがついているオブジェクトの子に
+　必ずすること
+・子の名前は"HouseInfo"固定とし、その子に"Text"を
+　つけること(例はレストランとか見てください)
+・"HouseInfo"のアンカーポイントは、
+　必ず中央にしておくこと
+
+-------------------------------------------------
+
+さきちゃんに伝える注意点
+・店名は、UIMove.csがついているオブジェクトの子に
+　必ずすること
+・店名オブジェクトの名前は"HouseInfo"固定とし、
+　その子に"Text"をつけること
+　(例はレストランとか見てください)
+・"HouseInfo"のアンカーポイントは、
+　必ず中央にしておくこと
+・所持金の表示処理もUIMove.csで行っているので、
+　所持金を出すテキストはかならずTextMeshProで
+　オブジェクト名を"HaveMoneyText"とすること
+　(例はレストランを見てください)
+
+
+料理効果中は、左上の時計の横に料理マークというか
+アイコンを置いておきたい
+
+クエストのクリア状態をセーブする処理が必要
+お金のセーブも必要
+宝箱と強制戦闘壁のセーブも必要
+終わらなかったキャラの追加部分もする
+土日でがんばろかぁ
 
 *重要*
 タグの判別にはgameObject.tag == “string tag”もあるが、CompareTag()の方が早い

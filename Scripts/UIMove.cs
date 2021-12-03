@@ -23,6 +23,24 @@ public class UIMove : MonoBehaviour
         // 子のボタン数分for文を回す
         for (int i = 0; i < transform.childCount; i++)
         {
+            // HouseInfoという名前のゲームオブジェクトは移動に含まれないようにする
+            if(transform.GetChild(i).name == "HouseInfo")
+            {
+                var houseInfo = transform.GetChild(i);
+                houseInfo.transform.localPosition = new Vector3(500.0f,320.0f,0.0f);
+
+                // 更に、HouseInfoの子にHaveMoneyTextというゲームオブジェクトがあれば、そこに現在の所持金を代入する
+                for(int k = 0; k < houseInfo.childCount; k++)
+                {
+                    if(houseInfo.GetChild(k).name == "HaveMoneyText")
+                    {
+                        houseInfo.GetChild(k).GetComponent<TMPro.TextMeshProUGUI>().text = SceneMng.GetHaveMoney().ToString();
+                    }
+                }
+
+                continue;
+            }
+
             transform.GetChild(i).transform.localPosition = new Vector3(tmpX, tmpY, 0.0f);
             tmpX += 50.0f;
             tmpY -= 100.0f;
@@ -30,15 +48,6 @@ public class UIMove : MonoBehaviour
 
         StartCoroutine(Easing());
     }
-
-    //void Update()
-    //{
-    //    // 永久ループ予防用
-    //    if(Input.GetKeyDown(KeyCode.I))
-    //    {
-    //        StopCoroutine(Easing());
-    //    }
-    //}
 
     // コルーチン  
     private IEnumerator Easing()
@@ -63,6 +72,19 @@ public class UIMove : MonoBehaviour
             // 子のボタン数分for文を回す
             for (int i = 0; i < transform.childCount; i++)
             {
+                // 既にフラグがtrueなら飛ばして、次を回す
+                if(flag[i])
+                {
+                    continue;
+                }
+
+                // HouseInfoならすぐにtrueにして飛ばす
+                if (transform.GetChild(i).name == "HouseInfo")
+                {
+                    flag[i] = true;
+                    continue;
+                }
+
                 var tmp = transform.GetChild(i).transform.localPosition;
 
                 //目標座標より値が大きかったら座標を引いて更新する

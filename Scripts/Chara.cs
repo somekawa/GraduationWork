@@ -12,11 +12,19 @@ public class Chara : CharaBase,InterfaceButtle
     private int barrierNum_ = 0;                    // 防御時に値が入る
     private bool deathFlg_ = false;                 // 死亡状態か確認する変数
 
+    private int[] statusUp = new int[5];            // 一時アップの数値を保存する用
+
     // name,num,animatorは親クラスのコンストラクタを呼び出して設定
     // numは、CharacterNumのenumの取得で使えそうかもだから用意してみた。使わなかったら削除する。
     public Chara(string name, int objNum, Animator animator) : base(name,objNum,animator,null)
     {
         set_ = GetSetting();  // CharaBase.csからGet関数で初期設定する
+
+        // 数字の初期化
+        for(int i = 0; i < statusUp.Length; i++)
+        {
+            statusUp[i] = 0;
+        }
     }
 
     public bool Attack()
@@ -236,6 +244,38 @@ public class Chara : CharaBase,InterfaceButtle
         SetTurnInit();
         // アニメーターはセットしてはいけない
         //setting_.animator = animator;
+    }
+
+    // RestaurantMng.csで呼び出す(あくまでも一時的なUpだから、それぞれに加算した値を別の変数に入れておく)
+    public void SetStatusUpByCook(int[] num)
+    {
+        set_.Attack += num[0];
+        set_.MagicAttack += num[1];
+        set_.Defence += num[2];
+        set_.Speed += num[3];
+        set_.Luck += num[4];
+
+        // 一時アップの数字保存
+        for (int i = 0; i < statusUp.Length; i++)
+        {
+            statusUp[i] = num[i];
+        }
+    }
+
+    public void DeleteStatusUpByCook()
+    {
+        // 一時アップ分、各ステータスからマイナスする
+        set_.Attack -= statusUp[0];
+        set_.MagicAttack -= statusUp[1];
+        set_.Defence -= statusUp[2];
+        set_.Speed -= statusUp[3];
+        set_.Luck -= statusUp[4];
+
+        // 一時アップの数字を初期化する
+        for (int i = 0; i < statusUp.Length; i++)
+        {
+            statusUp[i] = 0;
+        }
     }
 
     public int Speed()

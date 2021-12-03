@@ -21,4 +21,10 @@ public class QuestButton : MonoBehaviour
         Debug.Log(questNum_ + "‚Ì”Ô†‚ğ“n‚µ‚Ü‚·");
         GameObject.Find("HouseInterior/Guild/QuestMng").GetComponent<QuestMng>().SetSelectQuest(questNum_);
     }
+
+    public void TestRButton()
+    {
+        Debug.Log(questNum_ + "‚Ì”Ô†‚ğ“n‚µ‚Ü‚·");
+        GameObject.Find("HouseInterior/Restaurant/RestaurantMng").GetComponent<RestaurantMng>().SetSelectOrder(questNum_);
+    }
 }

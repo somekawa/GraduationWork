@@ -50,8 +50,12 @@ public class SceneMng : MonoBehaviour
     public static SCENE nowScene = SCENE.NON;   // 現在のシーン
     public static float charaRunSpeed = 0.0f;   // キャラの移動速度(MODE毎に調整をする)
 
-    private static string houseName_ = "Mob";    // Excelから読み込んだ建物名
+    private static string houseName_ = "Mob";   // Excelから読み込んだ建物名
+
     private static TIMEGEAR timeGrar_ = TIMEGEAR.MORNING;               // 1日の経過時間の情報を入れる
+    private static (TIMEGEAR,bool) finStatusUpTime_;                    // 料理効果がキレる時間を保存する
+
+    private static int haveMoney_ = 1000;       // 現在の所持金(初期所持金1000)
 
     void Awake()
     {
@@ -150,6 +154,11 @@ public class SceneMng : MonoBehaviour
                     Debug.Log("移動速度変更" + charaRunSpeed);
                     break;
 
+                case SCENE.FIELD3:
+                    charaRunSpeed = 5.0f;
+                    Debug.Log("移動速度変更" + charaRunSpeed);
+                    break;
+
                 case SCENE.UNIHOUSE:
                     charaRunSpeed = 8.0f;
                     Debug.Log("移動速度変更" + charaRunSpeed);
@@ -162,8 +171,11 @@ public class SceneMng : MonoBehaviour
             // sceneでnowSceneを上書き前に、今まで動いていたシーンがフィールドであれば時間経過させる
             if(nowScene != SCENE.TOWN && nowScene != SCENE.UNIHOUSE && nowScene != SCENE.CONVERSATION && nowScene != SCENE.NON)    
             {
-                // タウンでもユニハウスでもNONでもない = どこかのフィールド
-                SetTimeGear(timeGrar_ + 1);
+                if(scene != SCENE.CONVERSATION) // このif文がないと、フィールドをはしごして会話シーンに飛んだら時刻が2つ進んでしまう
+                {
+                    // タウンでもユニハウスでもNONでもない = どこかのフィールド
+                    SetTimeGear(timeGrar_ + 1);
+                }
             }
 
             nowScene = scene;
@@ -244,10 +256,54 @@ public class SceneMng : MonoBehaviour
         {
             timeGrar_ = dayTime;
         }
+
+        // 料理の効果が切れる時間ならフラグをfalseにする
+        if(timeGrar_ == finStatusUpTime_.Item1)
+        {
+            finStatusUpTime_.Item2 = false;
+            Debug.Log("料理効果が切れました");
+        }
     }
 
     public static TIMEGEAR GetTimeGear()
     {
         return timeGrar_;
+    }
+
+    // お金の設定
+    public static void SetHaveMoney(int money)
+    {
+        haveMoney_ = money;
+    }
+
+    // お金を取得する
+    public static int GetHaveMoney()
+    {
+        return haveMoney_;
+    }
+
+    // 料理効果が切れる時刻を保存する
+    public static void SetFinStatusUpTime()
+    {
+        // 2つ先の時刻を設定する
+        var tmpNum = (int)timeGrar_ + 2;
+
+        // 2つ先の時刻が夜を越えた数字になったら
+        if(tmpNum > (int)TIMEGEAR.NIGHT)
+        {
+            // 越えた数字から4を引けばいい
+            tmpNum -= 4;
+        }
+
+        // 計算した数字やそのままの数字を代入して設定する
+        finStatusUpTime_ = ((TIMEGEAR)tmpNum,true);
+
+        Debug.Log("料理効果が切れるのが、" + finStatusUpTime_+ "に設定されました");
+    }
+
+    // 料理効果が切れたかフラグを取得する
+    public static bool GetFinStatusUpTime()
+    {
+        return finStatusUpTime_.Item2;
     }
 }
