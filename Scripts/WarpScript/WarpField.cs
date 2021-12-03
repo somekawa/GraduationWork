@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,7 +12,7 @@ public class WarpField : MonoBehaviour
 
     private string[] sceneName = new string[(int)SceneMng.SCENE.MAX] {
     "","town","house","field0","field1","field2","field3","field4","cancel"};
-    private int stpryProgress_ = (int)SceneMng.SCENE.FIELD1;// どの章まで進んでいるか
+    private int storyProgress_ = (int)SceneMng.SCENE.FIELD2;// どの章まで進んでいるか
 
     private bool fieldEndHit = false;   // ワープオブジェクトに接触したかどうか
     private bool nowTownFlag_ = false;  // 町ワープからのフィールドワープか
@@ -61,7 +59,6 @@ public class WarpField : MonoBehaviour
         locationSelMng_ = dontDestroyCanvas_.transform.Find("LocationSelMng").GetComponent<RectTransform>();
        
        btnParent_ = locationSelMng_.transform.Find("Viewport/Content").GetComponent<RectTransform>();
-        Debug.Log(btnParent_.name);
         for (int i = (int)SceneMng.SCENE.CONVERSATION; i < (int)SceneMng.SCENE.MAX; i++)
         {
             btnMng_[i] = btnParent_.transform.GetChild(i).GetComponent<Image>();
@@ -69,7 +66,7 @@ public class WarpField : MonoBehaviour
             sceneText_[i].text = sceneName[i];
             btnMng_[i].name = sceneName[i];
             // 現在ストーリ以降のフィールドと現在いるシーンは非表示
-            if (((int)SceneMng.nowScene == i) || (stpryProgress_ < i))
+            if (((int)SceneMng.nowScene == i) || (storyProgress_ < i))
             {
                 btnMng_[i].gameObject.SetActive(false);
             }
@@ -180,7 +177,11 @@ public class WarpField : MonoBehaviour
     // ユニちゃんのアニメーションを止められるように、あえて同じスクリプト内でもここからフラグを変更するようにしている
     public void SetWarpNowFlag(bool flag)
     {
-        warpNowFlag_ = true;
+        warpNowFlag_ = flag;
+        if(flag==false)
+        {
+            return;
+        }
         // ワープ選択中はユニちゃんのアニメーションを止めて、移動操作不可
         UniChanController_.StopUniRunAnim();
         UniChanController_.enabled = false;

@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -49,15 +48,16 @@ public class WarpTown : MonoBehaviour
     private static bool tutorialFlag_ = true;
 
     private MenuActive menuActive_;
+   // public Canvas inHouseInfoCanvas_;
 
     // Start関数から名称を変更し、TownMng.csのStart関数で呼び出されるように修正
     public void Init()
     {
-        //if(tutorialFlag_==true)
-        //{
-        //    return;
-        //}
-        menuActive_ = GameObject.Find("SceneMng").transform.GetComponent<MenuActive>();
+           //if(tutorialFlag_==true)
+           //{
+           //    return;
+           //}
+           menuActive_ = GameObject.Find("SceneMng").transform.GetComponent<MenuActive>();
         // ワープする座標を入れるため
         uniChan_ = GameObject.Find("Uni");
 
@@ -140,6 +140,7 @@ public class WarpTown : MonoBehaviour
         }
 
         if (menuActive_.GetActiveFlag() == true)
+         //   || inHouseInfoCanvas_.gameObject.activeSelf==true)
         {
             return;            // バッグ使用中はワープできないようにする
         }
@@ -156,7 +157,7 @@ public class WarpTown : MonoBehaviour
             //// 長針が動かない＝ワープ先を選べない
             if (warpFieldScript_.GetWarpNowFlag() == false)
             {
-                //Debug.Log("warpNowFlag_がfalseの時");
+            //Debug.Log("warpNowFlag_がfalseの時");
                 speeds_[1] += 10.0f * Time.deltaTime;            // 右回転
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
@@ -245,6 +246,7 @@ public class WarpTown : MonoBehaviour
                         CommonWarp(SceneMng.SCENE.UNIHOUSE, SceneMng.SCENE.TOWN);
                     }
                 }
+                warpFieldScript_.SetWarpNowFlag(false);
                 StartCoroutine(WarpCansel());            // ワープ処理リセット
                 yield break;
             }
