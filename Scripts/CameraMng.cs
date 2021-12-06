@@ -25,7 +25,8 @@ public class CameraMng : MonoBehaviour
         mainCamera.SetActive(!flag);
         subCamera.SetActive(flag);
 
-        if(mainCamera.activeSelf)
+        // ユニハウスのSceneでは呼ばれないようにする
+        if(mainCamera.activeSelf && SceneMng.nowScene != SceneMng.SCENE.UNIHOUSE)
         {
             mainCamera.GetComponent<CameraSample>().Init();
         }

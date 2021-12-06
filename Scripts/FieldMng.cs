@@ -1,6 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 // 町の外での画面管理をする。(町中ではnowModeをNONにする)
 // 探索・戦闘・メニュー画面の切り替わり時にenumで変更を行う
@@ -23,6 +23,7 @@ public class FieldMng : MonoBehaviour
         SEARCH,     // 探索中
         BUTTLE,     // 戦闘中
         MENU,       // メニュー画面中
+        FORCEDBUTTLE,   // 強制戦闘中(壁との衝突時に切り替わる)
         MAX
     }
 
@@ -38,6 +39,11 @@ public class FieldMng : MonoBehaviour
     private TMPro.TextMeshProUGUI titleInfo_;      // 宝箱か壁かで表示内容を変更する
     private TMPro.TextMeshProUGUI getChestsInfo_;  // 宝箱から獲得したアイテム内容の表示先
 
+    // string->オブジェクト名,bool->クリア済み判定(falseは未クリア)
+    public static List<(string, bool)> treasureList         = new List<(string, bool)>();
+    public static List<(string, bool)> forcedButtleWallList = new List<(string, bool)>();
+
+    // Excel情報
     private GameObject DataPopPrefab_;
     private ChestList  popChestList_;
 
@@ -121,8 +127,8 @@ public class FieldMng : MonoBehaviour
         GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
 
         // イベント戦発生用の宝箱/壁情報を取得する
-        CheckWallAndChestActive("ButtleWall");
-        CheckWallAndChestActive("Chests");
+        CheckWallAndChestActive("ButtleWall", forcedButtleWallList);
+        CheckWallAndChestActive("Chests", treasureList);
 
         // Chest.xlsから宝箱内容の取得を行う
         DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
@@ -144,7 +150,7 @@ public class FieldMng : MonoBehaviour
     }
 
     // クエストの受注状況に合わせて、壁や宝箱のアクティブ状態を判別する
-    private void CheckWallAndChestActive(string parentName)
+    private void CheckWallAndChestActive(string parentName,List<(string,bool)> list)
     {
         // 現在受注中のクエスト情報を見る
         var orderList = QuestClearCheck.GetOrderQuestsList();
@@ -157,55 +163,68 @@ public class FieldMng : MonoBehaviour
             objChild[i] = objParent.transform.GetChild(i).gameObject;
         }
 
-        // 1つもクエストを受注していない際は、全ての宝箱/壁を非アクティブにする
-        if (orderList.Count <= 0)
+        // 宝箱/壁情報の登録
+        for (int i = 0; i < objChild.Length; i++)
         {
-            for (int i = 0; i < objChild.Length; i++)
+            bool addFlag = true;
+            // そのFieldを初めて訪れたか確認する
+            foreach (var tmpList in list)
             {
-                objChild[i].SetActive(false);    
+                // リスト内にある名前と、登録しようとしているオブジェクト名が1つでも一致していたら
+                if (tmpList.Item1 == objChild[i].name)
+                {
+                    addFlag = false;
+                    break;
+                }
             }
+
+            // 登録フラグがfalseになっていたらfor文からも抜ける
+            if (!addFlag)
+            {
+                break;
+            }
+
+            // 初回登録
+            list.Add((objChild[i].name, false));
         }
 
         // 宝箱/壁の個数でfor文を回す
         for (int i = 0; i < objChild.Length; i++)
         {
+            // 最初はfalseにする
+            objChild[i].SetActive(false);
+
+            // 名前が[クエスト番号 - 配置番号]となっているから、ここで分割してあげる
+            string[] arr = objChild[i].name.Split('-');
+
             // 受注中クエスト個数でfor文を回す
             for (int k = 0; k < orderList.Count; k++)
             {
-                // 名前が[クエスト番号 - 配置番号]となっているから、ここで分割してあげる
-                string[] arr = objChild[i].name.Split('-');
-
-                if (arr[0] == orderList[k].Item1.name)
+                if (arr[0] != orderList[k].Item1.name)
                 {
-                    // 名前一致時の処理
-                    if (orderList[k].Item2)
-                    {
-                        // クリア済みクエストなら宝箱/壁を非アクティブへ
-                        objChild[i].SetActive(false);
-                    }
-                    else
-                    {
-                        // 未クリアなら宝箱/壁をアクティブへ
-                        objChild[i].SetActive(true);
-                    }
-                    break;
+                    continue;
                 }
-                else
+
+                for (int a = 0; a < list.Count; a++)
                 {
-                    // 名前不一致時の処理
-                    objChild[i].SetActive(false);
+                    if (objChild[i].name == list[a].Item1)
+                    {
+                        // 名前一致時の処理
+                        // クリア済みクエストなら宝箱/壁を非アクティブへ、未クリアなら宝箱/壁をアクティブへ
+                        objChild[i].SetActive(!list[a].Item2);
+                        break;
+                    }
                 }
             }
-        }
 
-        // 宝箱/壁の番号が[100-0]のやつはいつ来てもアクティブになるようにする
-        for (int i = 0; i < objChild.Length; i++)
-        {
-            string[] split = objChild[i].name.Split('-');
-            if ((int.Parse(split[1]) == 0 && int.Parse(split[0]) == 100) ||
-                (int.Parse(split[1]) == 0 && int.Parse(split[0]) == 200))
+            if (arr[0] == "100" || arr[0] == "200") // クエストの要素に含まれない野良宝箱と壁の場合
             {
-                objChild[i].SetActive(true);
+                for (int a = 0; a < list.Count; a++)
+                {
+                    // クリア済みクエストなら宝箱/壁を非アクティブへ、未クリアなら宝箱/壁をアクティブへ
+                    objChild[i].SetActive(!list[a].Item2);
+                    continue;
+                }
             }
         }
     }
@@ -265,6 +284,11 @@ public class FieldMng : MonoBehaviour
                 break;
 
             case MODE.MENU:
+                break;
+
+            case MODE.FORCEDBUTTLE:
+                cameraMng_.SetChangeCamera(true);    // サブカメラアクティブ
+                SceneMng.MenuSetActive(false);
                 break;
 
             default:

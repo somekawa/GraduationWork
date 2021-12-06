@@ -2,7 +2,7 @@
 public static class EventMng
 {
     // 自由に店に出入りしたいときは99とかいれとくといいかも。本来は0
-    private static int chapterNum = 15;   // 現在のチャプター進行度(0からスタート)
+    public static int chapterNum = 99;   // 現在のチャプター進行度(0からスタート)
     private static int oldNum = 0;
 
     // チャプター進行度の更新

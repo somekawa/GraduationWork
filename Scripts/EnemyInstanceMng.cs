@@ -142,11 +142,11 @@ public class EnemyInstanceMng : MonoBehaviour
         enemyPos_ = enemyPosSetMap_[mapNum_][num];
 
         // ランダムなキャラを取得する(ただし、死亡したキャラは除外する)
-        //do
-        //{
-        //    attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
-        //} while (SceneMng.charasList_[attackTarget_].HP() <= 0);
-        attackTarget_ = (int)SceneMng.CHARACTERNUM.UNI;
+        do
+        {
+            attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
+        } while (SceneMng.charasList_[attackTarget_].HP() <= 0);
+        //attackTarget_ = (int)SceneMng.CHARACTERNUM.UNI;
 
         // ダメージと速度を渡す
         buttleMng_.SetDamageNum(enemyList_[num].Item1.Damage());
@@ -285,7 +285,7 @@ public class EnemyInstanceMng : MonoBehaviour
 
             // 番号でどの敵をインスタンスするか決める
             int enemyNum = Random.Range(0, enemyTest.transform.childCount);
-            enemyNum = 4;   // (Field3)青色パーティ君固定
+            //enemyNum = 4;   // (Field3)青色パーティ君固定
 
             if (eventEnemy_.Item1 == null)
             {

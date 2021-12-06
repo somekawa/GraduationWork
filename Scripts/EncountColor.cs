@@ -32,7 +32,7 @@ public class EncountColor : MonoBehaviour
 
     void Update()
     {
-        if(FieldMng.nowMode == FieldMng.MODE.BUTTLE)
+        if(FieldMng.nowMode == FieldMng.MODE.BUTTLE || FieldMng.nowMode == FieldMng.MODE.FORCEDBUTTLE)
         {
             // 戦闘モード中なら計算を行わない
             // 値の初期化

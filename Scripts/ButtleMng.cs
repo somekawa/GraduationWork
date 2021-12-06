@@ -26,6 +26,8 @@ public class ButtleMng : MonoBehaviour
 
     private bool lastEnemyFlg_;
 
+    public static string forcedButtleWallName;
+
     void Start()
     {
         characterMng_ = GameObject.Find("CharacterMng").GetComponent<CharacterMng>();
@@ -38,7 +40,7 @@ public class ButtleMng : MonoBehaviour
     void Update()
     {
         // FieldMngで遭遇タイミングを調整しているため、それを参照し、戦闘モード以外ならreturnする
-        if (FieldMng.nowMode != FieldMng.MODE.BUTTLE)
+        if (FieldMng.nowMode != FieldMng.MODE.BUTTLE && FieldMng.nowMode != FieldMng.MODE.FORCEDBUTTLE)
         {
             setCallOnce_ = false;
 
@@ -100,6 +102,22 @@ public class ButtleMng : MonoBehaviour
             {
                 if(enemyInstanceMng_.AllAnimationFin())
                 {
+                    // 現在が強制戦闘中だった時
+                    if(FieldMng.nowMode == FieldMng.MODE.FORCEDBUTTLE)
+                    {
+                        // リストの中のbool部分をtrue(=取得済み)にする
+                        var tmp = FieldMng.forcedButtleWallList;
+                        for (int i = 0; i < tmp.Count; i++)
+                        {
+                            if (tmp[i].Item1 == forcedButtleWallName)
+                            {
+                                // flagをtrueに上書きする
+                                (string, bool) content = (forcedButtleWallName, true);
+                                tmp[i] = content;
+                            }
+                        }
+                    }
+
                     enemyInstanceMng_.DeleteEnemy();
 
                     FieldMng.nowMode = FieldMng.MODE.SEARCH;

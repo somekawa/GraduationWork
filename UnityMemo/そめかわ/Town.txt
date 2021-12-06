@@ -2204,6 +2204,202 @@ if (transform.GetChild(i).name == "HouseInfo")
 
 -------------------------------------------------
 
+<各店に、該当するキャラを設置する>----------------
+
+<ギルド>
+HouseInteriorのGuildに配置する
+
+Position X:-0.6 Y:-0.5 Z:1
+Rotation X:0    Y:150  Z:0
+
+<レストラン>
+Position X:0.7  Y:1.9  Z:-6.5
+Rotation X:0    Y:150  Z:0
+
+<書店>と<魔道具屋>
+Position X:0.5  Y:-0.5 Z:1
+Rotation X:0    Y:-150 Z:0
+
+同様に、他の建物にも配置する
+とりあえずいまはこれだけ。
+最終的にボイスとか動きとか表情遷移とかできたらいいな
+
+-------------------------------------------------
+
+<新たなセーブ用のcsvをつくる>---------------------
+
+[セーブ内容]otherData.csv
+①進行度
+②お金
+③クエストのクリア状態
+④宝箱と強制戦闘壁の取得済み&クリア状態
+
+[SaveCSV.cs]を改良する。
+public enum SAVEDATAをつくり、
+キャラデータの保存か、その他データの保存かを
+分けられるようにする。
+
+SaveStart関数を引数付き(SAVEDATAのenum)にして、
+data.csに書き込むのか、otherData.csvに書き込むのか
+判断できるようにする。
+
+if文で中で判定して、処理を分けるようにする。
+
+[SaveCSV.cs]
+OtherSaveData関数を用意して、そこにSaveData関数を似たような処理を書く。
+※注意点として、項目の間にデータを入れていくように
+　しないといけない
+①の保存
+EventMng.csからGetChapterNumを呼び出す
+②の保存
+SceneMng.csからGetHaveMoneyを呼び出す
+③の保存
+QuestMng.csのquestClearCnt_変数をprivateからpublic
+にして呼び出す
+④の保存
+これが厄介。
+まずは、FieldMng.csで宝箱と壁の情報を入れておく
+リストを作成する。
+
+[FieldMng.cs]
+public staticで宝箱と強制戦闘壁用のListを別々で
+つくり、初めて行くField時にAddして増やす方式にする
+→Listはstringとboolのpair
+(初めていくFieldかの判定方法はその名前で登録が
+ あるかどうか)
+CheckWallAndChestActive関数を大幅に修正し、
+2つのリストのboolからSetActiveを切り替えさせる。
+
+boolをtrueにする処理を書く場所を決めないといけない
+宝箱->とったときだから、LootBox.cs
+壁->中での敵を倒したらだから、
+
+[LootBox.cs]
+Open関数の中に、
+        // リストの中のbool部分をtrue(=取得済み)にする
+        var tmp = FieldMng.treasureList;
+        for(int i = 0; i < tmp.Count; i++)
+        {
+            if(tmp[i].Item1 == name)
+            {
+                // flagをtrueに上書きする
+                (string, bool) content = (name, true);
+                tmp[i] = content;
+            }
+        }
+といれる。
+
+壁の処理はちょっと遠回りになるけど必要な処理がある
+からそっちからはじめる。
+[FieldMng.cs]
+MODEenumに、FORCEDBUTTLEを追加する。
+[ForcedButtle.cs]
+「はい」を選択したときにFORCEDBUTTLEに設定する。
+
+[CharacterMng.cs]
+FORCEDBUTTLEのときは逃げるが押せないようにする。
+
+<強制戦闘に勝利したとき>
+[ButtleMng.cs]
+public static string forcedButtleWallName;
+という変数を用意しておいて、
+戦闘終了時にその戦闘がFORCEDBUTTLEだったときは
+LootBox.csに書いたようなリストのboolを更新するようにする。(nameのところにforcedButtleWallNameを使う)
+
+[ForcedButtle.cs]
+「はい」を選択したときにforcedButtleWallNameに
+オブジェクト名を入れるようにする。
+
+[MenuActive.cs]
+DataSave関数でSaveStart関数とOtherSaveData関数と
+SaveEnd関数を呼び出すようにする。
+
+<強制戦闘に敗北したとき>
+[CharacterMng.cs]
+全滅時の処理の中に、forcedButtleWallNameに入れている名前を""にするようにかく。
+
+ようやく保存処理にはいる。
+[SaveCSV.cs]
+// 宝箱と強制戦闘壁の取得とクリア状態の項目名
+sw.WriteLine(string.Join("\n", "Treasure"));
+
+// 宝箱と強制戦闘壁の取得とクリア状態
+var treasure = FieldMng.treasureList;
+foreach (var pair in treasure)
+{
+    sw.WriteLine(string.Join("\n", pair.Item1.ToString() + "," + pair.Item2.ToString()));
+}
+
+sw.WriteLine(string.Join("\n", "ForcedButtle"));
+
+var wall = FieldMng.forcedButtleWallList;
+foreach (var pair in wall)
+{
+    sw.WriteLine(string.Join("\n", pair.Item1.ToString() + "," + pair.Item2.ToString()));
+}
+という処理を追加する。
+
+これで、宝箱、壁の順番に保存できた。
+
+明日からロード処理しよう。
+
+6~10
+・進行度、お金、宝箱の取得状態、強制戦闘の終了状態　のロード処理  6,7
+・Field4の雑魚とボスを追加 7,8
+・Field4クリア後の会話を追加 7,8
+・Field5の作成 8,9,10
+・回復魔法の処理を追加 8,9
+・補助魔法の処理を追加 8,9
+
+-------------------------------------------------
+
+<otherData.csvのロード処理を行う>-----------------
+[ロード内容]otherData.csv
+①進行度
+②お金
+③クエストのクリア状態
+④宝箱と強制戦闘壁の取得済み&クリア状態
+
+[SaveCSV.cs]
+名前を、「SaveLoadCSV.cs」に変更する
+この中でキャラのロードも、otherData.csvも読み込むようにする。
+
+<キャラの情報ロードを修正>
+LoadData関数をつくり、
+MenuActiveに直接書いているロード処理を移植してくる
+
+<①～④の情報をロードする>
+①について、
+[EventMng.cs]
+chapterNumの変数を、privateからpublicに変更する
+
+[SaveLoadCSV.cs]
+ロード処理で行分けしたときにEventNumという項目を
+みつけたら、次の行を読み込んで
+EventMng.chapterNum = int.Parse(texts[i + 1]);
+とする。
+
+②について、
+SceneMng.SetHaveMoney(int.Parse(texts[i + 1]));
+として、項目のある次の行の数字を入れるようにする。
+
+③について、
+QuestMng.questClearCnt[a] = int.Parse(split[1]);
+みたいにして、データを代入していく
+※情報が連続で入らないように判定が必要
+
+④について、
+ロードするときに無条件でAdd処理しているから同じ
+情報が連続で入らないように判定が必要
+
+あとは似たような処理をまとめて短くする
+→④についてはまとめることができた。
+
+[MenuActive.cs]
+DataLoad関数を呼び出す
+
+-------------------------------------------------
+
 さきちゃんに伝える注意点
 ・店名は、UIMove.csがついているオブジェクトの子に
 　必ずすること
@@ -2220,12 +2416,6 @@ if (transform.GetChild(i).name == "HouseInfo")
 
 料理効果中は、左上の時計の横に料理マークというか
 アイコンを置いておきたい
-
-クエストのクリア状態をセーブする処理が必要
-お金のセーブも必要
-宝箱と強制戦闘壁のセーブも必要
-終わらなかったキャラの追加部分もする
-土日でがんばろかぁ
 
 *重要*
 タグの判別にはgameObject.tag == “string tag”もあるが、CompareTag()の方が早い

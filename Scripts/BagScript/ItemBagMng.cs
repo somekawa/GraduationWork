@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class ItemBagMng : MonoBehaviour
 {
     // データ系
-    private SaveCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
+    private SaveLoadCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
 
     private EventSystem eventSystem_;// ボタンクリックのためのイベント処理
     private GameObject clickbtn_;    // どのボタンをクリックしたか代入する変数
@@ -105,7 +105,7 @@ public class ItemBagMng : MonoBehaviour
     {
         if (menuActive_ == null)
         {
-            saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveCSV>();
+            saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>();
             menuActive_ = GameObject.Find("SceneMng").GetComponent<MenuActive>();
         }
 
@@ -466,7 +466,7 @@ public class ItemBagMng : MonoBehaviour
             bagMagic_.SetStatusMagicCheck(num,true);
         }
 
-        saveCsvSc_.SaveStart();
+        saveCsvSc_.SaveStart(SaveLoadCSV.SAVEDATA.CHARACTER);
         // キャラクター数分のfor文を回す
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
         {

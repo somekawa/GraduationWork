@@ -9,9 +9,7 @@ using System;
 public class MenuActive : MonoBehaviour
 {
     // データ系
-    private SaveCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
-    private const string saveDataFilePath = @"Assets/Resources/data.csv";
-    List<string[]> csvDatas = new List<string[]>(); // CSVの中身を入れるリスト;
+    private SaveLoadCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
 
     //--------------
     private EventSystem eventSystem_;// ボタンクリックのためのイベント処理
@@ -62,7 +60,7 @@ public class MenuActive : MonoBehaviour
 
     void Awake()
     {
-        saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveCSV>();
+        saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>();
         eventSystem_ = GameObject.Find("EventSystem").GetComponent<EventSystem>();
         //  Debug.Log(eventSystem.name + "をクリック");
         warpField_ = GameObject.Find("WarpOut").GetComponent<WarpField>();
@@ -105,7 +103,8 @@ public class MenuActive : MonoBehaviour
     {
         if ((int)SceneMng.nowScene == (int)SceneMng.SCENE.CONVERSATION ||
             warpField_.GetWarpNowFlag() == true ||
-            FieldMng.nowMode == FieldMng.MODE.BUTTLE)
+            FieldMng.nowMode == FieldMng.MODE.BUTTLE ||
+            FieldMng.nowMode == FieldMng.MODE.FORCEDBUTTLE)
         {
             return;
         }
@@ -186,61 +185,27 @@ public class MenuActive : MonoBehaviour
     {
         Debug.Log("セーブボタンが押された");
 
-        saveCsvSc_.SaveStart();
-        // キャラクター数分のfor文を回す
-        for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
-        {
-            saveCsvSc_.SaveData(SceneMng.GetCharasSettings(i));
-        }
+        //saveCsvSc_.SaveStart(SaveCSV.SAVEDATA.CHARACTER);
+        //// キャラクター数分のfor文を回す
+        //for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+        //{
+        //    saveCsvSc_.SaveData(SceneMng.GetCharasSettings(i));
+        //}
+        //saveCsvSc_.SaveEnd();
+
+        // その他データのセーブ
+        saveCsvSc_.SaveStart(SaveLoadCSV.SAVEDATA.OTHER);
+        saveCsvSc_.OtherSaveData();
         saveCsvSc_.SaveEnd();
     }
 
-    // private void DataLoad()
     public void DataLoad()
     {
         Debug.Log("ロードキー押下");
 
-        csvDatas.Clear();
-
-        // 行分けだけにとどめる
-        string[] texts = File.ReadAllText(saveDataFilePath).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-        for (int i = 0; i < texts.Length; i++)
-        {
-            // カンマ区切りでリストへ登録していく(2次元配列状態になる[行番号][カンマ区切り])
-            csvDatas.Add(texts[i].Split(','));
-        }
-
-        Debug.Log("データ数" + csvDatas.Count);
-
         bagMagic_.DataLoad();
-
-        // キャラクター数分のfor文を回す
-        for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
-        {
-            //// 一時変数に入れてからじゃないとsetに入れられない
-            int[] tmpArray = { int.Parse(csvDatas[i + 1][10]),
-                                int.Parse(csvDatas[i + 1][11]),
-                                int.Parse(csvDatas[i + 1][12]),
-                                int.Parse(csvDatas[i + 1][13]) };
-
-            CharaBase.CharacterSetting set = new CharaBase.CharacterSetting
-            {
-                name = csvDatas[i + 1][0],
-                Level = int.Parse(csvDatas[i + 1][1]),
-                HP = int.Parse(csvDatas[i + 1][2]),
-                MP = int.Parse(csvDatas[i + 1][3]),
-                Attack = int.Parse(csvDatas[i + 1][4]),
-                MagicAttack = int.Parse(csvDatas[i + 1][5]),
-                Defence = int.Parse(csvDatas[i + 1][6]),
-                Speed = int.Parse(csvDatas[i + 1][7]),
-                Luck = int.Parse(csvDatas[i + 1][8]),
-                AnimMax = float.Parse(csvDatas[i + 1][9]),
-                Magic = tmpArray,
-            };
-            Debug.Log(csvDatas[i + 1][0] + "            キャラデータをロード中。残り" + i);
-            SceneMng.SetCharasSettings(i, set);
-        }
+        saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.CHARACTER);
+        saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.OTHER);
         parentRectTrans_[(int)CANVAS.BAG].GetComponent<ItemBagMng>().MagicInit();
     }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -361,8 +362,17 @@ public class TextMng : MonoBehaviour
         // キャラ以外をExcel側で"Mob"と登録しているため、"Mob"なら顔の表情を変更しないようにする
         if (popChapter_.param[nowText_].face != "Mob" && !tmpflg)
         {
-            // 顔の表情を変更する
-            charFacesMap_[popChapter_.param[nowText_].name2].OnCallChangeFace(popChapter_.param[nowText_].face);
+            //キャラの名前がQueryちゃんなら別の表情変更用関数を呼ぶ(数字がenumの番号)
+            if(popChapter_.param[nowText_].name2 == "Query")
+            {
+                var tmp = (QuerySDEmotionalController.QueryChanSDEmotionalType)Enum.Parse(typeof(QuerySDEmotionalController.QueryChanSDEmotionalType), popChapter_.param[nowText_].face);
+                GameObject.Find("CharacterList/Query").GetComponent<QuerySDEmotionalController>().ChangeEmotion(tmp);
+            }
+            else
+            {
+                // 顔の表情を変更する
+                charFacesMap_[popChapter_.param[nowText_].name2].OnCallChangeFace(popChapter_.param[nowText_].face);
+            }
         }
 
         // 表示文字数の初期化

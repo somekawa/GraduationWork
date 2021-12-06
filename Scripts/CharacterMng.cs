@@ -213,6 +213,8 @@ public class CharacterMng : MonoBehaviour
                 // 全滅時は町長の家へ飛ばす
                 if (allDeathFlg)
                 {
+                    // 強制戦闘用の壁の名前を保存している所を初期化
+                    ButtleMng.forcedButtleWallName = "";
                     EventMng.SetChapterNum(100, SCENE.CONVERSATION);
                 }
             }
@@ -229,12 +231,19 @@ public class CharacterMng : MonoBehaviour
         // 戦闘から逃げる
         if (!selectFlg_ && Input.GetKeyDown(KeyCode.LeftShift))
         {
-            buttleMng_.CallDeleteEnemy();
+            if(FieldMng.nowMode != FieldMng.MODE.FORCEDBUTTLE)
+            {
+                buttleMng_.CallDeleteEnemy();
 
-            FieldMng.nowMode = FieldMng.MODE.SEARCH;
-            charMap_[CHARACTERNUM.UNI].gameObject.transform.position = keepFieldPos_;
+                FieldMng.nowMode = FieldMng.MODE.SEARCH;
+                charMap_[CHARACTERNUM.UNI].gameObject.transform.position = keepFieldPos_;
 
-            Debug.Log("Uniは逃げ出した");
+                Debug.Log("Uniは逃げ出した");
+            }
+            else
+            {
+                Debug.Log("強制戦闘だ！逃げられない！");
+            }
         }
 
         // ATTACKで敵選択中に、特定のキー(今はTキー)を押下されたらコマンド選択に戻る

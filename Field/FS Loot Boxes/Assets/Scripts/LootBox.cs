@@ -135,6 +135,18 @@ public class LootBox : MonoBehaviour
         // 宝箱を開けることが、クエストのクリア条件であるか調べる
         QuestCheck(int.Parse(arr[0]), int.Parse(arr[1]));
 
+        // リストの中のbool部分をtrue(=取得済み)にする
+        var tmp = FieldMng.treasureList;
+        for(int i = 0; i < tmp.Count; i++)
+        {
+            if(tmp[i].Item1 == name)
+            {
+                // flagをtrueに上書きする
+                (string, bool) content = (name, true);
+                tmp[i] = content;
+            }
+        }
+
         // play the open animation
         if (animator) animator.Play("Open");
 

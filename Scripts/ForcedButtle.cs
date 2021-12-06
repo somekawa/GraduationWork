@@ -79,7 +79,9 @@ public class ForcedButtle : MonoBehaviour
                     GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().SetEnemySpawn(eventEnemy, eventEnemyNum);
 
                     // 強制戦闘が発生する
-                    FieldMng.nowMode = FieldMng.MODE.BUTTLE;
+                    FieldMng.nowMode = FieldMng.MODE.FORCEDBUTTLE;
+                    // 壁のオブジェクト名を保存する
+                    ButtleMng.forcedButtleWallName = name;
                     Debug.Log("ユニが強制戦闘用の壁を通過しました");
 
                     // オブジェクトを非アクティブにする(非アクティブにしないと、連続で戦闘が発生する)
