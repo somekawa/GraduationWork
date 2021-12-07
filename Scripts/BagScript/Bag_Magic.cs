@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Text.RegularExpressions;
 
 public class Bag_Magic : MonoBehaviour
 {
@@ -244,19 +245,22 @@ public class Bag_Magic : MonoBehaviour
 
         for (int k = 0; k < orderList.Count; k++)
         {
+            if (int.Parse(orderList[k].Item1.name) != 3)
+            {
+                continue;
+            }
+
             // 炎単体小のクエストクリア確認
             // 受注したのが炎マテリアの合成クエスト(番号が3)のとき
-            if (int.Parse(orderList[k].Item1.name) == 3)
+            for (int i = 1; i < magicObject.Length; i++)
             {
-                // Magic_番号の番号を見て、1なら「炎単体小」の魔法なのですでに魔法を取得しているからクリア状態にする
-                for (int i = 1; i < magicObject.Length; i++)
+                var tmp = data[int.Parse(Regex.Replace(magicObject[i].name, @"[^0-9]", ""))];
+
+                if (tmp.name == "炎単体小")
                 {
-                    if (int.Parse(magicObject[i].name.Split('_')[1]) == 1)
-                    {
-                        // クリア状態にする
-                        QuestClearCheck.QuestClear(3);
-                        break;  // これ以上for文を回す必要がないから抜ける
-                    }
+                    // クリア状態にする
+                    QuestClearCheck.QuestClear(3);
+                    break;  // これ以上for文を回す必要がないから抜ける
                 }
             }
         }

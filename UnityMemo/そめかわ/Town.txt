@@ -2400,6 +2400,55 @@ DataLoad関数を呼び出す
 
 -------------------------------------------------
 
+<NPCの表所用を変更できるようにする>---------------
+
+<ギルドのテスト>
+[Guild.cs]
+ChangeNPCFace関数を用意しておく。
+npcController_変数を準備、
+もともとQueryちゃんに付属していたScriptの
+QuerySDEmotionalController.csの
+ChangeEmotionを呼びだす。
+
+[QuestMng.cs]
+ギルドに入ってすぐと、クエストの受注/報告時に
+笑顔に切り替える
+
+[QuerySDEmotionalController.cs]
+笑顔からデフォルトの表情に戻るようにコルーチンを書く。
+
+ChangeEmotionの引数にboolを追加する。
+呼び出し時に何も書かなければfalseのままでコルーチンへいかないようにし、trueと書いたら3秒後にデフォルトに戻す処理へ飛ぶようにする。
+
+<レストランのテスト>
+[Restaurant.cs]
+ChangeNPCFace関数を同じく用意して、
+引数部分や変更の仕方が異なるのでそこだけ修正する。
+→TextMng.csを参考にする
+
+MonoBehaviorを継承していないのでコルーチンが使えない。だから、デフォルトに戻すときにもChangeNPCFace関数を呼び出すようにする。
+
+[RestaurantMng.cs]
+private Restaurant restaurant_;変数を用意する。
+Start関数でnewしておいて、
+OnClickMenuOrderButton関数に
+restaurant_.ChangeNPCFace("smile@sd_hmd");を書く。
+
+BackMenu関数に
+restaurant_.ChangeNPCFace("default@sd_hmd"); 
+を入れておく。
+
+店から出る前に、手を振るモーションに切り替えて
+数秒時間をあける処理をいれたほうがいい。
+
+-------------------------------------------------
+
+<あとでやること>
+・店から出る前に、手を振るモーションに切り替えて
+　数秒時間をあける処理をいれたほうがいい。
+・クエストの報酬処理をつくる
+
+
 さきちゃんに伝える注意点
 ・店名は、UIMove.csがついているオブジェクトの子に
 　必ずすること

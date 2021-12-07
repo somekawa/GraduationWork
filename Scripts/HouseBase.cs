@@ -7,10 +7,4 @@ public class HouseBase
     {
         return false;
     }
-
-    // ‹à‘K‚Ì‚â‚è‚Æ‚è‚ğs‚¤
-    public virtual void Buy()
-    {
-
-    }
 }

@@ -72,6 +72,15 @@ public class QuestMng : MonoBehaviour
     private GameObject DataPopPrefab_;
     private QuestInfo popQuestInfo_;
 
+    private void OnEnable()
+    {
+        if(guild_ == null)
+        {
+            guild_ = new Guild();
+        }
+        guild_.ChangeNPCFace(5);    // 表情変更->笑顔
+    }
+
     void Start()
 	{
         DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
@@ -90,7 +99,10 @@ public class QuestMng : MonoBehaviour
         }
 
         // ギルドスクリプトのインスタンス
-        guild_ = new Guild();
+        if (guild_ == null)
+        {
+            guild_ = new Guild();
+        }
 
         // クエスト情報の表示先テキスト
         questInfoText_ = questUI.transform.Find("InfomationPanel/TitleText").GetComponent<Text>();
@@ -245,7 +257,7 @@ public class QuestMng : MonoBehaviour
                 // 受注したのが炎マテリアの合成クエスト(番号が3)のとき
                 if(popQuestInfo_.param[questNum_].num == 3)
                 {
-                    // Magic_番号の番号を見て、1なら「炎単体小」の魔法なのですでに魔法を取得しているからクリア状態にする
+                    // Magic番号の番号を見て、1なら「炎単体小」の魔法なのですでに魔法を取得しているからクリア状態にする
                     for(int i = 1; i < Bag_Magic.magicObject.Length; i++)
                     {
                         // 空白だったら抜ける
@@ -254,7 +266,9 @@ public class QuestMng : MonoBehaviour
                             break;
                         }
 
-                        if (int.Parse(Bag_Magic.magicObject[i].name.Split('_')[1]) == 1)
+                        var tmp = Bag_Magic.data[int.Parse(Regex.Replace(Bag_Magic.magicObject[i].name, @"[^0-9]", ""))];
+
+                        if(tmp.name == "炎単体小")
                         {
                             // クリア状態にする
                             QuestClearCheck.QuestClear(questNum_);
@@ -263,6 +277,8 @@ public class QuestMng : MonoBehaviour
                     }
                 }
             }
+
+            guild_.ChangeNPCFace(5);    // 表情変更->笑顔
         }
     }
 
@@ -448,6 +464,8 @@ public class QuestMng : MonoBehaviour
         questReportButton_.SetActive(false);    // 報告ボタン非表示
 
         ClearQuestUpdate();
+
+        guild_.ChangeNPCFace(5);                // 表情変更->笑顔
 
         Debug.Log("クエストを報告しました");
     }

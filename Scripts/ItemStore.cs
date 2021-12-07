@@ -1,8 +1,11 @@
 
 // HouseBaseを継承している町長の家を管理するクラス
+using UnityEngine;
+
 public class ItemStore : HouseBase
 {
-    // 2回目入ったときもまた会話しちゃうバグ
+    private UnityChan.FaceUpdate npcController_;
+
     public override bool CheckEvent()
     {
         int num = EventMng.GetChapterNum();
@@ -29,4 +32,15 @@ public class ItemStore : HouseBase
 
         return false;
     }
+
+    public void ChangeNPCFace(string faceStr)
+    {
+        if (npcController_ == null)
+        {
+            npcController_ = GameObject.Find("HouseInterior/ItemStore/Akaza").GetComponent<UnityChan.FaceUpdate>();
+        }
+
+        npcController_.OnCallChangeFace(faceStr);
+    }
+
 }

@@ -1,9 +1,12 @@
 
 // HouseBaseを継承している町長の家を管理するクラス
 using System.Collections.Generic;
+using UnityEngine;
 
 public class Guild : HouseBase
 {
+    private QuerySDEmotionalController npcController_;
+
     public override bool CheckEvent()
     {
         // イベント発生
@@ -13,10 +16,10 @@ public class Guild : HouseBase
             EventMng.SetChapterNum(2, SceneMng.SCENE.CONVERSATION);
             return true;
         }
-        else if(EventMng.GetChapterNum() == 7 && SceneMng.GetTimeGear() == SceneMng.TIMEGEAR.MORNING)
+        else if (EventMng.GetChapterNum() == 7 && SceneMng.GetTimeGear() == SceneMng.TIMEGEAR.MORNING)
         {
             // 時間帯を条件に入れないと、挨拶クエスト終了直後に発生する可能性が高い
-            EventMng.SetChapterNum(7, SceneMng.SCENE.CONVERSATION); 
+            EventMng.SetChapterNum(7, SceneMng.SCENE.CONVERSATION);
         }
         else if (EventMng.GetChapterNum() == 10 && SceneMng.GetTimeGear() == SceneMng.TIMEGEAR.MORNING)
         {
@@ -27,9 +30,9 @@ public class Guild : HouseBase
 
     // クエストを受注でイベントが進行するときに使用
     // QuestMngでインスタンスして呼び出す
-    public void GuildQuestEvent(int questNum,bool clearFlg, Dictionary<int, int> clearNum)
+    public void GuildQuestEvent(int questNum, bool clearFlg, Dictionary<int, int> clearNum)
     {
-        if(!clearFlg)   // クエスト受注タイミング
+        if (!clearFlg)   // クエスト受注タイミング
         {
             switch (EventMng.GetChapterNum())
             {
@@ -92,5 +95,16 @@ public class Guild : HouseBase
                     break;
             }
         }
+    }
+
+    // NPCの表情を変化させる
+    public void ChangeNPCFace(int faceNum)
+    {
+        if(npcController_ == null)
+        {
+            npcController_ = GameObject.Find("HouseInterior/Guild/Query").GetComponent<QuerySDEmotionalController>();
+        }
+
+        npcController_.ChangeEmotion((QuerySDEmotionalController.QueryChanSDEmotionalType)faceNum,true);
     }
 }

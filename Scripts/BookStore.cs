@@ -1,7 +1,11 @@
 
 // HouseBase‚ğŒp³‚µ‚Ä‚¢‚é’¬’·‚Ì‰Æ‚ğŠÇ—‚·‚éƒNƒ‰ƒX
+using UnityEngine;
+
 public class BookStore : HouseBase
 {
+    private UnityChan.FaceUpdate npcController_;
+
     public override bool CheckEvent()
     {
         int num = EventMng.GetChapterNum();
@@ -28,4 +32,16 @@ public class BookStore : HouseBase
 
         return false;
     }
+
+    // NPC‚Ì•\î‚ğ•Ï‰»‚³‚¹‚é
+    public void ChangeNPCFace(string faceStr)
+    {
+        if (npcController_ == null)
+        {
+            npcController_ = GameObject.Find("HouseInterior/BookStore/Marie").GetComponent<UnityChan.FaceUpdate>();
+        }
+
+        npcController_.OnCallChangeFace(faceStr);
+    }
+
 }

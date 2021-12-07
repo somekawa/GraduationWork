@@ -1341,25 +1341,251 @@ Animatorはプレハブの中の[SD_QUERY_01]についてる。
 →同じ位置にAutoBlinkをつけられそう
 ※まばたきの設定がうまくいっていない
 
-<魔道具屋>
+進行度を2にしてギルドを訪れたときに指定キャラが
+でるようにしよう。
+モデル名を[Query]にする。
+→ExcelのChapter2を書き直しをしてみる
+※表情切替がうまくいっていない
+
+<表情切替について>明日はここから↓↓
+QuerySDEmotionalController.csを使わないと無理かも
+[TextMng.cs]
+Excelのnameで"Query"が来たときは
+QuerySDEmotionalController.csの
+ChangeEmotion関数を呼び出すようにする。
+
+Excel側の表情は、enumのstringで入れたほうがよさそう
+→番号とはQuerySDEmotionalController.csの
+  QueryChanSDEmotionalTypeというenumのこと
+
+	public enum QueryChanSDEmotionalType
+	{
+		// Normal emotion
+		NORMAL_DEFAULT = 0,
+		NORMAL_ANGER = 1,
+		NORMAL_BLINK = 2,
+		NORMAL_GURUGURU = 3,
+		NORMAL_SAD = 4,
+		NORMAL_SMILE = 5,
+		NORMAL_SURPRISE = 6
+
+	}
+
+stringからenumに変換して顔入れ替え用の関数に
+引数として入れる。
+できたけど、顔入れ替えするときに地味に座標がずれる
+→AnimatorのApplyRootMotionのチェックを外したら
+　なおった！
+
+他のキャラもまったく表情動かないことに気づいた私は
+SANチェック。。。
+
+<他のキャラの表情が動かない問題>
+https://mebiustos.hatenablog.com/entry/2015/09/13/213539
+ここのBlendHelperをつかって表情をつくったほうが
+早いかもしれない。
+
+新しいテスト用のシーンでいろいろためしたほうがいい
+アバターも落としなおす
+→町長はもう鉄仮面でいいや((
+
+<アーカーシャで表情実験じゃ>
+アーカーシャをダウンロードしたときについてきた
+サンプルのシーンでいろいろする。
+まずは服の色を変えよう。
+SD Unity-chan Haon CustomにあるMaterialsの赤っぽい
+のを着せる。
+
+対象となるモデルにBlendShapeEditHelperスクリプトをアタッチしてみる。
+
+バーを動かすだけで表情が変わる！面白い
+ひとまずアーカーシャのデフォルトの顔を作ってみる
+
+興味が薄そうな顔がいいので、
+[EYE_ang]100
+[MTH_ang]50
+[EYE_sad]30
+これでCreateClipを押す
+
+Assetフォルダの直下にClipができあがる。
+Akaza_testControllerをつくり、それのBaseLayerに
+Clipを入れると表情がかわった！
+
+でもあれ？自分でつくったfaceというLayerにつけると
+なにも変化しなくなった。。
+
+！！！
+faceの歯車ボタンを押して、
+Weightを[1]にして、Maskに[_faceOnly]
+をいれたら再生できた！
+
+BaseLayerにはUniのデフォルトを入れておく。
+※ParametersにNextとBackというBoolがないとエラー
+
+FaceUpdateのAnimationsを1にして、
+要素の0に自作したdefault@sd_hmdを入れる。
+
+今回自作したAnimation系はAnimatorフォルダに入れた
+
+AutoBlinkforSDのRef_faceに[akaza_face]をいれる
+
+会話でちゃんと動くか調べてみる！
+
+canversationdataのCharacterListにAkazaを置いて
+座標を町長とかと揃えておく
+ExcelのChapter3の会話で
+name2 : Akaza
+face  : default@sd_hmd
+にする。
+
+うまくいってるかんじある
+また必要になったらBlendShapeEditHelperスクリプトを
+アタッチしてつくる。
+あとはポーズがユニと同じだから別のを探す！
 
 <書店>
+マリエというキャラをダウンロードする
+サンプルシーンで表情をつくる。
+
+Animatorフォルダに
+[Marie_FaceAnim]と[Marie_Controller]をつくる。
+BlendShapeEditHelperをアタッチして、いざ作成！
+
+真顔と笑顔(口ひらきなし)の2つでよさそう
+
+[真顔]default@sd_hmd
+[EYE_sml]10
+[BLW_sml]100
+
+[笑顔]smile@sd_hmd
+[EYE_sml]100
+[BLW_sml]100
+[MLH_sml]100
+
+つくったAnimationをmarie_Controllerに入れる。
+※faceのWeightは1,Maskは_faceOnly
+
+BaseLayerはアーカーシャの部分を丸ごともってくる。
+あとはFaceUpdate.csをアタッチして
+Animationsの要素0にdefault,1にsmileをいれて、
+AutoBlinkforSD.csもアタッチしてmarie_faceをいれる
+
+CharacterListにMarieを入れて町長と同じTransformを
+入れておく。
+会話で確認をしよう。
+
+進行度を4にして、Chapter4の
+name2 : Marie
+face  : default@sd_hmd か smile@sd_hmd
+とする。
+
+確認完了！
 
 <レストラン>
+元気っ子トーコちゃんの出番ですよ
+サンプルシーンで表情をつくる。
 
-<ジャック(会話参加)>
+Animatorフォルダに
+[Toko_FaceAnim]と[Toko_Controller]をつくる。
+BlendShapeEditHelperをアタッチして、いざ作成！
 
+真顔と笑顔でええやろ
+目とかは丸っこい感じにする
+笑顔は口開き大き目に
+[真顔]default@sd_hmd
+[MTH_sml]100
+[EYE_rlx]100
+[EYE_sup]100
+
+[笑顔]smile@sd_hmd
+[EYE_sml]100
+[MTH_sml]100
+[EYE_rlx]100
+[MTH_sml2]100
+[MTH_i]25
+
+あとはFaceUpdate.csをアタッチして
+Animationsの要素0にdefault,1にsmileをいれて、
+AutoBlinkforSD.csもアタッチしてtoko_faceをいれる
+
+CharacterListにTokoを入れて町長と同じTransformを
+入れておく。
+会話で確認をしよう。
+
+進行度を5にして、Chapter5の
+name2 : Toko
+face  : default@sd_hmd か smile@sd_hmd
+とする。
+
+確認完了。
+
+<ジャック>
+そこそこ出番あるからちゃんとつくろう。
+戦闘で使うやつとControllerは分けたほうがよさそう
+
+サンプルシーンで表情をつくる。
+Animatorフォルダに
+[Jack_FaceAnim]と[JackTalk_Controller]をつくる。
+BlendShapeEditHelperをアタッチして、いざ作成！
+
+お兄さんって感じの表情にしたい
+真顔と笑顔と悲しい顔と疲れた顔？
+
+[真顔]default@sd_hmd
+[BLW_sml]100
+
+[笑顔]smile@sd_hmd
+[BLW_sml]100
+[MTH_sml]100
+[EYE_rlx]100
+[BLW_rlx]50
+
+[悲しい顔]sad@sd_hmd
+[MTH_ang]60
+[EYE_sad]80
+[BLW_sad]60
+
+あとはFaceUpdate.csをアタッチして
+Animationsの要素0にdefault,1にsmileをいれて、
+AutoBlinkforSD.csもアタッチしてjack_faceをいれる
+
+CharacterListのJackと差し替え町長と同じTransformを
+入れておく。
+会話で確認をしよう。
+
+進行度を7にして、Chapter7の
+name2 : Jack
+face  : default@sd_hmd か smile@sd_hmd か         sad@sd_hmd
+とする。
+
+これで全キャラの顔表情はできた。
+町長？知らんな。
 
 -------------------------------------------------
-あとは、まばたきの設定が必要になる。
-autoBlinkSD.csを町長にアタッチしておき、
-引数のRef_faceに[yuji_face]をアタッチする。
-町長にアタッチしているAnimationに新規Layerで
-faceを作成。
-そこにuniちゃんのLayerのfaceをコピペする。
-これでまばたきok!
+
+<良いアイドルモーションがほしい>------------------
+
+・アーカーシャ
+・マリエ
+・トーコ
+・ジャック
+
+<女の子モーション系>
+https://assetstore.unity.com/packages/3d/animations/anime-girl-idle-animations-free-150406
+→アイドルモーション以外にも役立ちそう
+
+<もしかしたら使えるかも>
+https://assetstore.unity.com/packages/3d/avatars-game-animations-bible-free-demo-82784
+
+<手を振るやつが使える>
+https://assetstore.unity.com/packages/3d/characters/humanoids/character-pack-free-sample-79870
+
+-------------------------------------------------
 
 <いろいろメモ>
+べつのコスチュームほしいなぁ
+
+
 Functionの参考サイト↓
 https://qiita.com/toRisouP/items/98cc4966d392b7f21c30
 

@@ -152,5 +152,24 @@ FieldMapの子オブジェクトとして
 
 -------------------------------------------------
 
+<登場する雑魚とボスのアセット>--------------------
+
+①幽霊魔法使い(ボス+雑魚)
+https://assetstore.unity.com/packages/3d/characters/creatures/fantasy-monster-wizard-demo-103037
+
+②骸骨兵
+https://assetstore.unity.com/packages/3d/characters/humanoids/fantasy-monster-skeleton-35635
+
+③かわいい蝙蝠
+https://assetstore.unity.com/packages/3d/characters/free-monster-bat-158125
+
+④かわいいミイラ
+https://assetstore.unity.com/packages/3d/characters/free-mummy-monster-134212
+
+⑤よくわからないのと宝箱(宝箱はミミック用)
+https://assetstore.unity.com/packages/3d/characters/creatures/rpg-monster-partners-pbr-polyart-168251
+
+-------------------------------------------------
+
 まだやらないといけないことはあるけど、
 ひとまずField4完成！！

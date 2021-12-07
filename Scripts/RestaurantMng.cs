@@ -30,6 +30,8 @@ public class RestaurantMng : MonoBehaviour
     private List<Transform> cookUIInstanceList_;    // UIのインスタンスを入れる
     private QuestButton[] button_;                  // 左側のボタン生成
 
+    private Restaurant restaurant_;
+
     // Excelからのデータ読み込み
     private GameObject DataPopPrefab_;
     private Cook0 popCookInfo_;
@@ -85,6 +87,8 @@ public class RestaurantMng : MonoBehaviour
         {
             statusUp_[i] = (statusUpStr_[i], 0);
         }
+
+        restaurant_ = new Restaurant();
     }
 
     // 「料理を注文する」のボタン処理
@@ -161,6 +165,8 @@ public class RestaurantMng : MonoBehaviour
                 return;
             }
         }
+
+        restaurant_.ChangeNPCFace("smile@sd_hmd");  // 表情変更->笑顔
 
         BackMenu();
 
@@ -257,5 +263,7 @@ public class RestaurantMng : MonoBehaviour
         {
             statusUp_[i] = (statusUpStr_[i], 0);
         }
+
+        restaurant_.ChangeNPCFace("default@sd_hmd");  // 表情変更->デフォルト
     }
 }

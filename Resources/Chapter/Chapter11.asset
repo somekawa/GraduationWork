@@ -18,9 +18,9 @@ MonoBehaviour:
     face: Mob
     message: Guild
     eventNum: 0
-  - name1: "\u53D7\u4ED8"
-    name2: Yuji
-    face: Mob
+  - name1: "\u30AF\u30A8\u30EA"
+    name2: Query
+    face: NORMAL_SMILE
     message: "\u3042\u308A\u304C\u3068\u3046\u306A\u306E\u30FC\uFF01\\n\u8857\u306E\u4EBA\u3082\u52A9\u304B\u3063\u3066\u305F\u307F\u305F\u3044\u306A\u306E"
     eventNum: 0
   - name1: "\u30E6\u30CB"
@@ -28,9 +28,9 @@ MonoBehaviour:
     face: smile@sd_hmd
     message: "\u305D\u308C\u306F\u3088\u304B\u3063\u305F\uFF01\u79C1\u3082\u7DF4\u7FD2\u306B\u306A\u3063\u305F\u3088"
     eventNum: 0
-  - name1: "\u53D7\u4ED8"
-    name2: Yuji
-    face: Mob
+  - name1: "\u30AF\u30A8\u30EA"
+    name2: Query
+    face: NORMAL_BLINK
     message: "\u3053\u308C\u304B\u3089\u3082\u3001\u30EF\u30FC\u30C9\u63A2\u3057\u306E\u5408\u9593\u306B\u4ED6\u306E\u4F9D\u983C\u3082\u53D7\u3051\u3066\u304F\u308C\u308B\u3068\u52A9\u304B\u308B\u306E\u30FC"
     eventNum: 0
   - name1: "\u30E6\u30CB"
