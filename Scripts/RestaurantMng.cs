@@ -20,7 +20,8 @@ public class RestaurantMng : MonoBehaviour
     private Text numStatusUpInfoText_;         // アップする数字のテキスト
     private Text needFoodText_;                // 必要な素材のテキスト
     private Text haveFoodText_;                // 必要な素材の現在持ち数と、必要個数の数字テキスト
-    private Text moneyText_;                   // 必要なお金のテキスト
+    private TMPro.TextMeshProUGUI moneyText_;  // 必要なお金のテキスト
+    private TMPro.TextMeshProUGUI haveMoneyText_;  // 所持金のテキスト
 
     private (string, int)[] statusUp_ = new (string, int)[5];    // アップステータスの名前とアップ値をペアにした変数
     private readonly string[] statusUpStr_ = { "Attack", "MagicAttack", "Defence", "Speed", "Luck" };   // ステータス順に並べた文字列
@@ -29,6 +30,7 @@ public class RestaurantMng : MonoBehaviour
 
     private List<Transform> cookUIInstanceList_;    // UIのインスタンスを入れる
     private QuestButton[] button_;                  // 左側のボタン生成
+    private GameObject orderButton_;                // 注文を確定するボタン
 
     private Restaurant restaurant_;
 
@@ -47,7 +49,11 @@ public class RestaurantMng : MonoBehaviour
         numStatusUpInfoText_ = restaurantMenuUI.transform.Find("StatusUpInfoText/StatusUpInfoNumText").GetComponent<Text>();
         needFoodText_ = restaurantMenuUI.transform.Find("NeedFoodText").GetComponent<Text>();
         haveFoodText_ = restaurantMenuUI.transform.Find("NeedFoodText/NeedFoodNumText").GetComponent<Text>();
-        moneyText_ = restaurantMenuUI.transform.Find("MoneyText").GetComponent<Text>();
+        moneyText_ = restaurantMenuUI.transform.Find("BlackPanel/MoneyText").GetComponent<TMPro.TextMeshProUGUI>();
+        haveMoneyText_ = restaurantMenuUI.transform.Find("HaveMoneyImage/HaveMoneyText").GetComponent<TMPro.TextMeshProUGUI>();
+        haveMoneyText_.text = SceneMng.GetHaveMoney().ToString();
+
+        orderButton_ = restaurantMenuUI.transform.Find("Image/OrderButton").gameObject;
 
         DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
         popCookInfo_ = DataPopPrefab_.GetComponent<PopList>().GetData<Cook0>(PopList.ListData.RESTAURANT);
@@ -97,6 +103,9 @@ public class RestaurantMng : MonoBehaviour
         Debug.Log("料理を注文するボタンを押下しました");
         restaurantCanvas_.SetActive(false);
         restaurantMenuUI.SetActive(true);
+
+        // この時点では注文確定ボタンはfalseにしておく
+        orderButton_.SetActive(false);
     }
 
     // 各メニューを開いた時の右下の「注文する」のボタン処理
@@ -179,6 +188,9 @@ public class RestaurantMng : MonoBehaviour
     {
         Debug.Log("RestaurantMngで" + num + "を受け取りました");
 
+        //「注文する」ボタンの表示切替
+        orderButton_.SetActive(true);
+
         // 繰り返し利用するので、一時変数に保存して使う
         var tmppop = popCookInfo_.param[num];
 
@@ -240,7 +252,7 @@ public class RestaurantMng : MonoBehaviour
         }
 
         // 必要なお金を出す
-        moneyText_.text = tmppop.needMoney + "ビット";
+        moneyText_.text = tmppop.needMoney.ToString();
 
         // 選択中のメニューを保存する
         num_ = num;

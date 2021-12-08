@@ -142,11 +142,11 @@ public class EnemyInstanceMng : MonoBehaviour
         enemyPos_ = enemyPosSetMap_[mapNum_][num];
 
         // ランダムなキャラを取得する(ただし、死亡したキャラは除外する)
-        do
-        {
-            attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
-        } while (SceneMng.charasList_[attackTarget_].HP() <= 0);
-        //attackTarget_ = (int)SceneMng.CHARACTERNUM.UNI;
+        //do
+        //{
+        //    attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
+        //} while (SceneMng.charasList_[attackTarget_].HP() <= 0);
+        attackTarget_ = (int)SceneMng.CHARACTERNUM.JACK;
 
         // ダメージと速度を渡す
         buttleMng_.SetDamageNum(enemyList_[num].Item1.Damage());
@@ -285,7 +285,7 @@ public class EnemyInstanceMng : MonoBehaviour
 
             // 番号でどの敵をインスタンスするか決める
             int enemyNum = Random.Range(0, enemyTest.transform.childCount);
-            //enemyNum = 4;   // (Field3)青色パーティ君固定
+            enemyNum = 2;   // まじっくすけるとん固定
 
             if (eventEnemy_.Item1 == null)
             {
@@ -299,7 +299,8 @@ public class EnemyInstanceMng : MonoBehaviour
                 // 敵がEagleかStoneMonsterかゴーレムときは、HPバーの高さを上のほうに調整しないといけない
                 if(enemyTest.transform.GetChild(enemyNum).gameObject.name == "Enemy_Eagle" ||
                    enemyTest.transform.GetChild(enemyNum).gameObject.name == "Enemy_StoneMonster" ||
-                   enemyTest.transform.GetChild(enemyNum).gameObject.name == "Enemy_Golem")
+                   enemyTest.transform.GetChild(enemyNum).gameObject.name == "Enemy_Golem" ||
+                   enemyTest.transform.GetChild(enemyNum).gameObject.name == "Enemy_Beholder")
                 {
                     enemyHPPosOffset_ = new Vector3(0.0f, 60.0f,0.0f);
                 }
