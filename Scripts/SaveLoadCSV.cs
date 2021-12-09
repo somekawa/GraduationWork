@@ -185,7 +185,7 @@ public class SaveLoadCSV : MonoBehaviour
             {
                 if(texts[i] == "EventNum" || texts[i] == "EventNum\r")
                 {
-                    EventMng.chapterNum = int.Parse(texts[i + 1]);
+                    EventMng.SetChapterNum(int.Parse(texts[i + 1]),SceneMng.SCENE.NON,true);
                 }
                 else if(texts[i] == "Money" || texts[i] == "Money\r")
                 {
