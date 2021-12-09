@@ -39,7 +39,7 @@ public class UniHouseMng : MonoBehaviour
         GameObject.Find("Managers").GetComponent<Bag_Word>().Init();
         GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
         GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
-        GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad();
+        //GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad();
 
         // メインカメラを最初にアクティブにする
         var cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();

@@ -52,7 +52,7 @@ public class FieldMng : MonoBehaviour
         // Œ»İ‚ÌƒV[ƒ“‚ğFIELD‚Æ‚·‚é
         SceneMng.SetNowScene((SceneMng.SCENE)UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
 
-        GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad();
+        //GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad();
 
         GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().Init();
 
@@ -239,7 +239,7 @@ public class FieldMng : MonoBehaviour
             // ’Tõ’†‚ÌŠÔ‰ÁZˆ—
             if (player_.GetMoveFlag() && time_ < toButtleTime_)
             {
-                //time_ += Time.deltaTime;
+                time_ += Time.deltaTime;
             }
             else if (time_ >= toButtleTime_)
             {

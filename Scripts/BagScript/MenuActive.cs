@@ -185,13 +185,13 @@ public class MenuActive : MonoBehaviour
     {
         Debug.Log("セーブボタンが押された");
 
-        //saveCsvSc_.SaveStart(SaveCSV.SAVEDATA.CHARACTER);
-        //// キャラクター数分のfor文を回す
-        //for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
-        //{
-        //    saveCsvSc_.SaveData(SceneMng.GetCharasSettings(i));
-        //}
-        //saveCsvSc_.SaveEnd();
+        saveCsvSc_.SaveStart(SaveLoadCSV.SAVEDATA.CHARACTER);
+        // キャラクター数分のfor文を回す
+        for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+        {
+            saveCsvSc_.SaveData(SceneMng.GetCharasSettings(i));
+        }
+        saveCsvSc_.SaveEnd();
 
         // その他データのセーブ
         saveCsvSc_.SaveStart(SaveLoadCSV.SAVEDATA.OTHER);
@@ -201,6 +201,7 @@ public class MenuActive : MonoBehaviour
 
     public void DataLoad()
     {
+        // 呼んでいいのはMenuActive.csのロードだけ。Mng系で呼ぶべきじゃない
         Debug.Log("ロードキー押下");
 
         bagMagic_.DataLoad();
