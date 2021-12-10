@@ -18,7 +18,7 @@ public class CharacterMng : MonoBehaviour
     [SerializeField]
     private GameObject uniAttackPrefab_;
 
-    public ItemBagMng itemBagMng_;
+    //public ItemBagMng itemBagMng_;
 
     CHARACTERNUM oldTurnChar_ = CHARACTERNUM.UNI;     // 前に行動順が回ってきていたキャラクター
     CHARACTERNUM nowTurnChar_ = CHARACTERNUM.MAX;     // 現在行動順が回ってきているキャラクター
