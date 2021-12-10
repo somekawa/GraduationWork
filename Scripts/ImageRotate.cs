@@ -36,6 +36,8 @@ public class ImageRotate : MonoBehaviour
 
     private bool rotaFlg_ = true;       // 回転をしてもいいかを判定する(true:回転してよい)
 
+    private bool flag = true;
+
     void Start()
     {
         // コマンド状態の追加
@@ -52,7 +54,7 @@ public class ImageRotate : MonoBehaviour
         //Debug.Log(targetRotate_);
         //Debug.Log(nowCommand_);
 
-        if(!rotaFlg_)
+        if(!rotaFlg_ || !flag)
         {
             return;
         }
@@ -138,11 +140,10 @@ public class ImageRotate : MonoBehaviour
         return nowCommand_;
     }
 
-    // CharacterMng.csのselectFlg_によって、回転できるかできないかのフラグを切り替える
-    public void SetRotaFlg(bool flag)
+    // 表示状態とスクリプトの実行状態を切り替える
+    public void SetEnableAndActive(bool flag)
     {
-        rotaFlg_ = flag;
-        // Commandオブジェクトの表示/非表示切替
-        transform.parent.gameObject.SetActive(flag);
+        gameObject.SetActive(flag);
+        enabled = flag;
     }
 }

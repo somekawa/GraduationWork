@@ -46,10 +46,28 @@ public class HPMPBar : MonoBehaviour
             yield return null;
         }
 
+        while (currentNum_ < num)   // 現在値が目標値より小さかったら足して、while文続行
+        {
+            colFlg_ = true;
+
+            currentNum_ += 1;
+
+            // スライドバーへ反映
+            slider_.value = (float)currentNum_ / (float)maxNum_;
+
+            yield return null;
+        }
+
         // 0以下は全て0と表記する
-        if(currentNum_ < 0)
+        if (currentNum_ < 0)
         {
             currentNum_ = 0;
+        }
+
+        // HPの最大値以上は全て最大値と表記する
+        if(currentNum_ > maxNum_)
+        {
+            currentNum_ = maxNum_;
         }
 
         currentNumText_.text = currentNum_.ToString();

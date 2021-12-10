@@ -118,6 +118,18 @@ public class Chara : CharaBase,InterfaceButtle
     public void SetHP(int hp)
     {
         set_.HP = hp;
+
+        // ç≈è¨ílÇÕ0
+        if(set_.HP < 0)
+        {
+            set_.HP = 0;
+        }
+
+        // ç≈ëÂílÇÕHPÇÃMAXíl
+        if(set_.HP > set_.maxHP)
+        {
+            set_.HP = set_.maxHP;
+        }
     }
 
     public void SetMP(int mp)

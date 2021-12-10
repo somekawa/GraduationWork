@@ -19,14 +19,17 @@ public class CharaUseMagic : MonoBehaviour
 
     private string magicPrefabNum_;    // 10の桁->効果範囲(ヘッド),1の桁->エレメント
     private int headNum_;              // ヘッド番号
+    private int healPower_;            // 回復魔法の威力
 
     private ButtleMng buttleMng_;
     private EnemySelect enemySelect_;
+    private CharacterMng characterMng_;
 
     public void Init()
     {
         buttleMng_ = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
         enemySelect_ = GameObject.Find("ButtleUICanvas/EnemySelectObj").GetComponent<EnemySelect>();
+        characterMng_ = GameObject.Find("CharacterMng").GetComponent<CharacterMng>();
     }
 
     public void CheckUseMagic(Bag_Magic.MagicData magicData, int charaMagicPower)
@@ -40,6 +43,31 @@ public class CharaUseMagic : MonoBehaviour
             // 回復系
             enemySelect_.SetAllActive(false, false);
 
+            //@ 不足処理あり
+
+            // ヘッドワードの種類分け
+            switch (magicData.head)
+            {
+                case 0:     // 単体
+                    characterMng_.SetCharaArrowActive(false,false);  
+                    break;
+                case 1:     // 複数回
+                    characterMng_.SetCharaArrowActive(true,true);
+                    break;
+                case 2:     // 全体
+                    characterMng_.SetCharaArrowActive(true,false);
+                    break;
+                default:
+                    Debug.Log("不明なヘッドワードです");
+                    break;
+            }
+
+            // キャラの魔力依存の回復値を保存しておく
+            healPower_ = magicData.power + (charaMagicPower / 2);
+        }
+        else if(magicData.element == 1)
+        {
+            // 補助系
             //@ 不足処理あり
         }
         else
@@ -78,6 +106,11 @@ public class CharaUseMagic : MonoBehaviour
     public int MPdecrease(Bag_Magic.MagicData magicData)
     {
         return magicData.rate; // 消費MP情報
+    }
+
+    public int GetHealPower()
+    {
+        return healPower_;
     }
 
     public void InstanceMagicInfo(Vector3 charaPos,Vector3 enePos,int targetNum,int instanceNum)

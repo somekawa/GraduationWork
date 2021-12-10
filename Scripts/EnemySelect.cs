@@ -177,10 +177,6 @@ public class EnemySelect : MonoBehaviour
 
         // 矢印の初期位置
         selectNum_ = 0;
-        //this.gameObject.transform.position = posList_.Item1[selectNum_];
-
-        // 戦闘画面に遷移時、すぐにアイコンが表示されたら困るため非表示にする
-        //this.gameObject.SetActive(false);
 
         // 中身を初期化する
         targetImageObjList_.Clear();
@@ -228,19 +224,8 @@ public class EnemySelect : MonoBehaviour
     // CharacterMng.cs側に目標座標を渡す
     public Vector3 GetSelectEnemyPos(int num)
     {
-        // offset値を元に戻してから渡す
-        //Vector3 tmppos = this.gameObject.transform.position;
-        //tmppos.y -= posOffset_Y;
-        //return tmppos;
-
         return posList_.Item1[num];
     }
-
-    // CharacterMng.cs側に選択された番号を渡す
-    //public int GetSelectNum()
-    //{
-    //    return selectNum_;
-    //}
 
     public int[] GetSelectNum()
     {
@@ -271,7 +256,6 @@ public class EnemySelect : MonoBehaviour
                 int randAttackNum = Random.Range(2, 5); // 2以上5未満の値がでる
                 Debug.Log("複数回魔法攻撃の攻撃回数は" + randAttackNum + "回に決定しました");
 
-                // 複数(4回攻撃だから同じ数字が入ってもok)
                 // 生きてる敵の中から攻撃対象をランダムで決定する
                 for (int i = 0; i < randAttackNum; i++)
                 {

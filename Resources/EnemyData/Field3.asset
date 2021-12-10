@@ -1,0 +1,95 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 8
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44bcd4d38745f0e41b217f6e9a969f89, type: 3}
+  m_Name: Field3
+  m_EditorClassIdentifier: 
+  param:
+  - Name: Beholder
+    Level: 8
+    HP: 40
+    MP: 5
+    Attack: 14
+    MagicAttack: 3
+    Defence: 7
+    Speed: 1
+    Luck: 5
+    AnimMax: 1
+    Exp: 70
+    Drop: "\u5927\u304D\u306A\u76EE\u7389"
+    MoveTime: 150
+    MoveDistance: 1.5
+    WeaponTagObjName: Beholder
+    Weak: 2
+  - Name: Skeleton
+    Level: 8
+    HP: 35
+    MP: 5
+    Attack: 16
+    MagicAttack: 3
+    Defence: 5
+    Speed: 8
+    Luck: 2
+    AnimMax: 1
+    Exp: 70
+    Drop: "\u9AA8"
+    MoveTime: 100
+    MoveDistance: 1.5
+    WeaponTagObjName: Skeleton
+    Weak: 4
+  - Name: MagicSkeleton
+    Level: 8
+    HP: 30
+    MP: 5
+    Attack: 17
+    MagicAttack: 3
+    Defence: 3
+    Speed: 5
+    Luck: 2
+    AnimMax: 1
+    Exp: 70
+    Drop: "\u30DC\u30ED\u30DC\u30ED\u306A\u5E03"
+    MoveTime: -1
+    MoveDistance: -1
+    WeaponTagObjName: SpiderAttack(Clone)
+    Weak: 4
+  - Name: Bat
+    Level: 7
+    HP: 25
+    MP: 1
+    Attack: 10
+    MagicAttack: 3
+    Defence: 2
+    Speed: 1
+    Luck: 3
+    AnimMax: 1
+    Exp: 50
+    Drop: "\u30B3\u30A6\u30E2\u30EA\u306E\u7FBD"
+    MoveTime: -1
+    MoveDistance: -1
+    WeaponTagObjName: SpiderAttack(Clone)
+    Weak: 3
+  - Name: PoisonSlime
+    Level: 12
+    HP: 100
+    MP: 0
+    Attack: 20
+    MagicAttack: 0
+    Defence: 4
+    Speed: 1
+    Luck: 1
+    AnimMax: 1
+    Exp: 500
+    Drop: "\u30EF\u30FC\u30C9\u300C\u98A8(\u30A8\u30EC\u30E1\u30F3\u30C8)\u300D"
+    MoveTime: 150
+    MoveDistance: 1.5
+    WeaponTagObjName: PoisonSlime
+    Weak: 3

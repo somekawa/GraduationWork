@@ -94,8 +94,6 @@ public class ButtleMng : MonoBehaviour
         {
             // キャラクターの行動
             characterMng_.Buttle();
-            // コマンド状態の表示/非表示切替
-            //buttleCommandUI_.gameObject.SetActive(!characterMng_.GetSelectFlg());
 
             // キャラクターの攻撃対象が最後の敵だった時
             if (lastEnemyFlg_)
