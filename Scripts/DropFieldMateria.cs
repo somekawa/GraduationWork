@@ -2,85 +2,88 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
-
+using System.Linq;
 public class DropFieldMateria : MonoBehaviour
 {
-    public enum items
+    [SerializeField]
+    private GameObject dropMateriaImage;     // ドロップ時に表示する素材の画像
+
+    public enum MATERIA_NUMBER
     {
         NON = -1,
-        ITEM0,  // カボス    酢の橘
-        ITEM1,  // ハチミツ
-        ITEM2,  // 花の蜜
-        ITEM3,  // きのこ
-        ITEM4,  // 妖精の羽
+        MATERIA_0,  // カボス    酢の橘
+        MATERIA_1,  // ハチミツ
+        MATERIA_2,  // 花の蜜
+        MATERIA_3,  // きのこ
+        MATERIA_4,  // 妖精の羽
         MAX
     }
     // オブジェクトの名前
-    public static string[] objName = new string[(int)items.MAX] {
-         "Item0","Item1","Item2","Item3","Item4"
+    public static string[] objName = new string[(int)MATERIA_NUMBER.MAX] {
+         "Materia0","Materia1","Materia2","Materia3","Materia4"
     };
     // 素材オブジェクトを保存　ポジションチェックで使う
     private GameObject[] itemPointChildren_;
 
     // ーーーーーーーーー画像関連
     private RectTransform parentCanvas_;    // アイテム関連を表示するキャンバス
+    private RectTransform dropMng_;
 
     // 素材イラスト
-    private Image materiaImage_;        // 取得したアイテムを表示する画像
+    private GameObject[] materiaUIObj = new GameObject[5];        // 取得したアイテムを表示する画像
+    private Image[] materiaImage_ = new Image[5];        // 取得したアイテムを表示する画像
     private Vector3 appearPos_;         // 画像出現位置
-    private Vector2 middolePos_;        // 自身の位置と目的地までの中間点
-    private Vector2 destinationPos_;    // 目的地
-    private float iconSpeed_ = 0.0f;      // 放物線移動する際のスピード
+    private Vector2 worldObject_ScreenPosition_;
+
+    private Vector2 randomPos_;// 複数ドロップの場合があるためランダムで座標をずらす
 
     // テロップ（素材名とその背景）
     private Image telopImage_;              // 素材名の背景画像
-    private Text telopText_;                // 素材名表示
+    private TMPro.TextMeshProUGUI telopText_;                // 素材名表示
     private float telopAlpha_ = 0.0f;       // 画像と文字のアルファ値
     private float maxScale_ = 1.5f;
     private float telopScale_ = 0.8f;       // 画像と文字のスケール
+    private bool shootArrowFlag_ = false;
 
     // ーーーーーーーーーエクセルから読み込んだもの
-    private string[] getMaterial_ = new string[(int)items.MAX]; // 取得した素材の名前
+    private string[] materiaName_ = new string[(int)MATERIA_NUMBER.MAX]; // 取得した素材の名前
 
     // ーーーーーーーーーその他
     private UnitychanController uniCtl_;
     private Camera mainCamera;      // 座標空間変更時に使用
 
     // アイテムを取得した回数
-   // private MenuActive menuActive_;
-    private Bag_Materia materia_;
+    private Bag_Materia bagMateria_;
     private int itemNumberCheck_;
     private int fieldNumber_;
 
-    private InitPopList materiaList_;
+    private int dropCnt_ = 1;// 何個拾ったか
 
     void Start()
     {
-        materiaList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
-        fieldNumber_ = materiaList_.SetNowFieldMateriaList();
+        fieldNumber_ = (int)SceneMng.SCENE.FIELD0;
 
         uniCtl_ = GameObject.Find("Uni").GetComponent<UnitychanController>();
         mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
-        parentCanvas_ = GameObject.Find("ItemCanvas").GetComponent<RectTransform>();
-        materiaImage_ = parentCanvas_.transform.Find("MaterialImage").GetComponent<Image>();
-      //  menuActive_ = GameObject.Find("SceneMng").GetComponent<MenuActive>();
-        var gameObject = DontDestroyMng.Instance;
-        materia_ = gameObject.transform.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>();
+
+        // parentCanvasは画像移動の計算で使うためDropMngではなくFieldUICanvasまでにしておく
+        parentCanvas_ = GameObject.Find("FieldUICanvas").GetComponent<RectTransform>();
+        dropMng_ = parentCanvas_.transform.Find("DropMng").GetComponent<RectTransform>();
+
+        bagMateria_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>();
 
 
-        telopImage_ = parentCanvas_.transform.Find("TelopBackImage").GetComponent<Image>();
+        telopImage_ = dropMng_.Find("TelopBackImage").GetComponent<Image>();
         telopImage_.color = new Color(1.0f, 1.0f, 1.0f, telopAlpha_);
         telopImage_.gameObject.SetActive(false);
 
-        telopText_ = telopImage_.transform.GetChild(0).GetComponent<Text>();
-        telopText_.color = new Color(1.0f, 0.0f, 0.7f, telopAlpha_);
-        materiaImage_.gameObject.SetActive(false);
-        // Debug.Log(popUpImage_.transform.position);
+        telopText_ = telopImage_.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>();
+        telopText_.color = new Color(1.0f, 1.0f, 1.0f, telopAlpha_);
 
-        itemPointChildren_ = new GameObject[this.transform.childCount];
-        for (int i = 0; i < (int)items.MAX; i++)
+        itemPointChildren_ = new GameObject[transform.childCount];
+        for (int i = 0; i < (int)MATERIA_NUMBER.MAX; i++)
         {
-            itemPointChildren_[i] = this.transform.GetChild(i).gameObject;
+            itemPointChildren_[i] = transform.GetChild(i).gameObject;
         }
 
 
@@ -91,124 +94,134 @@ public class DropFieldMateria : MonoBehaviour
     {
         // 接触したObjの名前,whileに入ってよいかのフラグ
         NameAndPosCheck(num, name);
-        //itemCnt_++;
-        StartCoroutine(UpPosImages(name, flag));// 取得したアイテムをポップアップさせる
     }
 
     private void NameAndPosCheck(int num, string name)
     {
+        // ユニを動けなくする
+        uniCtl_.enabled = false;
+
+        // 値を保存
         itemNumberCheck_ = num;
 
-        //if (materia_ == null)
-        //{
-        //    materia_ = menuActive_.GetBagMateria();
-        //}
-        materia_.MateriaGetCheck( itemNumberCheck_, getMaterial_[num],3);
+        // 1～5個の素材を拾う
+        dropCnt_ = Random.Range(1, 5);
 
-        telopText_.text = getMaterial_[num];
-        materiaImage_.gameObject.SetActive(true);
+        // 拾った素材の名前を表示
+        telopText_.text = Bag_Materia.materiaState[num].name;
         telopImage_.gameObject.SetActive(true);
-        uniCtl_.enabled = false;
-        // materiaImage_.sprite = materialIcon_[num];
-        
-        
-        
-        
-        materiaImage_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][fieldNumber_* itemNumberCheck_ + itemNumberCheck_];
-       
-        
-        
-        
+
+        // 拾った分をバッグに入れる
+        bagMateria_.MateriaGetCheck(itemNumberCheck_, materiaName_[num], dropCnt_);
+
+        // 素材を拾えるポイントのエフェクトを非表示にする
         itemPointChildren_[num].SetActive(false);
 
+        // 画像表示の初期位置計算
         // オブジェクトのワールド空間positionをビューポート空間に変換
         appearPos_ = mainCamera.WorldToViewportPoint(itemPointChildren_[num].transform.position);
         Debug.Log(appearPos_);
 
         // ビューポートの原点は左下、Canvasは中央のためCanvasのRectTransformのサイズの1/2を引く
-        var WorldObject_ScreenPosition = (appearPos_ * parentCanvas_.sizeDelta) - (parentCanvas_.sizeDelta * 0.5f);
-        // 表示画像のアンカーに座標を代入して座標を決定
-        materiaImage_.transform.localPosition = WorldObject_ScreenPosition;
+        worldObject_ScreenPosition_ = (appearPos_ * parentCanvas_.sizeDelta) - (parentCanvas_.sizeDelta * 0.5f);
 
-        // アイテム名は素材アイコンよりY+40の位置に表示
-        telopImage_.transform.localPosition = new Vector2(WorldObject_ScreenPosition.x,
-            WorldObject_ScreenPosition.y + 70);
-        // Debug.Log("表示後のImage座標" + materiaImage_.anchoredPosition);
+        // アイテム名は素材アイコンよりY+70の位置に表示
+        telopImage_.transform.localPosition = new Vector2(worldObject_ScreenPosition_.x,
+            worldObject_ScreenPosition_.y + 100.0f);
+        Debug.Log("WorldObject_ScreenPosition::" + worldObject_ScreenPosition_);
 
-        // 終点
-        destinationPos_ = -parentCanvas_.sizeDelta / 2;
+        // 拾った個数分画像を生成する　移動はMoveDropImage.cs
+        StartCoroutine(InstanceMateriaUI(dropCnt_, num));
     }
 
-    private IEnumerator UpPosImages(string name, bool flag)
+    private IEnumerator InstanceMateriaUI(int count, int imagenNum)
     {
-        while (flag)
+        int instanceCnt_ = 0;
+        while (true)
         {
-            // 現在座標が出現座標Y+40より低い位置だったら
-            if (telopScale_ < maxScale_)
+            yield return null;
+            if (count <= instanceCnt_)
             {
-                // 素材画像と名前を上昇させる
-                materiaImage_.transform.localPosition += new Vector3(0.0f, 80.0f * Time.deltaTime, 0.0f);
-                telopImage_.transform.localPosition += new Vector3(0.0f, 80.0f * Time.deltaTime, 0.0f);
-                ChangeNums(0.8f, 0.8f);
+                if (telopScale_ < maxScale_)
+                {
+                    // テロップの座標を上昇させる
+                    telopImage_.transform.localPosition += new Vector3(0.0f, 80.0f * Time.deltaTime, 0.0f);
+                    // スケールとアルファ値を大きくする
+                    ChangeNums(0.8f, 0.8f);
+                    Debug.Log("スケールとアルファ値を大きくする");
+                        
+                }
+                else
+                {
+                    uniCtl_.enabled = true;// ユニが動くようにする
+                    shootArrowFlag_ = true;
+                    //// 不透明度をなくしスケールが変化しないように
+                    ChangeNums(1.0f, 1.0f);
+                    Debug.Log("スケールとアルファ値を変化しないように");
+                    yield break;
+                }
             }
             else
             {
-                uniCtl_.enabled = true;// ユニが動くようにする
-                // 始点、終点、始点と終点間の距離を2分の1（0.5）に
-                middolePos_ = Vector3.Lerp(materiaImage_.transform.localPosition, destinationPos_, 0.5f);
-                // 中間座標を求める　
-                middolePos_ = new Vector2(middolePos_.x,
-                    middolePos_.y * (-1) + materiaImage_.transform.localPosition.y);
-
-                // 移動スピード
-                iconSpeed_ = 10 / Vector3.Distance(materiaImage_.transform.localPosition, destinationPos_);
-                //Debug.Log("表示後のImage座標" + popUpImage_.transform.localPosition);
-                StartCoroutine(ShootArrow(materiaImage_.transform.localPosition,
-                    destinationPos_, middolePos_, iconSpeed_));
-                ChangeNums(1.0f, 1.0f);// 不透明度をなくしスケールが変化しないように
-                flag = false;
+                // 生成座標をずらす
+                randomPos_.x = Random.Range(-50.0f, 50.0f);
+                randomPos_.y = Random.Range(-50.0f, 50.0f);
+                // ドロップする個数分画像を生成する
+                materiaUIObj[instanceCnt_] = Instantiate(dropMateriaImage,
+                 new Vector2(0, 0), Quaternion.identity, dropMng_);
+                // 名前を番号にして探しやすくする
+                materiaUIObj[instanceCnt_].name = instanceCnt_.ToString();
+                materiaImage_[instanceCnt_] = materiaUIObj[instanceCnt_].GetComponent<Image>();
+                // 取得した素材の画像を入れる
+                materiaImage_[instanceCnt_].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][imagenNum];
+                // 表示画像のアンカーに座標を代入して座標を決定
+                materiaImage_[instanceCnt_].transform.localPosition = worldObject_ScreenPosition_ + randomPos_;
+                // 取得個数になるまで加算
+                instanceCnt_++;
             }
-            yield return null;
         }
     }
 
-    private IEnumerator ShootArrow(Vector3 start, Vector3 end, Vector3 middle, float speed)
+    public bool GetShootArrowFlag()
     {
-        // ベジェ曲線用の変数の宣言
-        float t = 0.0f;
+        // falseなら上昇　trueなら放物線移動
+        return shootArrowFlag_;
+    }
 
-        // ループを抜けるまで以下を繰り返す
-        while (true)
+    public void SetMoveFinish(bool flag)
+    {
+        if (flag == true)
         {
-            if (t > 1)
-            {
-                // 終着点でこのオブジェクトを削除
-                //Debug.Log("移動終了");
-                materiaImage_.gameObject.SetActive(false);
-                telopImage_.gameObject.SetActive(false);
-                yield break; // ループを抜ける
-            }
-
-            // ベジェ曲線の処理
-            t += speed * Time.deltaTime * 80.0f;
-            Vector3 a = Vector3.Lerp(start, middle, t);
-            Vector3 b = Vector3.Lerp(middle, end, t);
-            // 座標を代入
-            materiaImage_.transform.localPosition = Vector3.Lerp(a, b, t);
-
-            // テロップ画像上昇
+            // 素材画像放物線描き中はテロップ画像上昇
             telopImage_.transform.localPosition += new Vector3(0.0f, 80.0f * Time.deltaTime, 0.0f);
-            ChangeNums(-0.8f, -0.8f);
-            yield return null;
+         //   Debug.Log("     " + telopImage_.transform.localPosition.y);
+            // スケールとアルファ値を小さくする
+             ChangeNums(-0.8f, -0.8f);
+            Debug.Log("スケールとアルファ値を小さくする");
+        }
+        else
+        {
+            shootArrowFlag_ = false;
+            Debug.Log("スケールとアルファ値を初期化 ");
+            // テロップのステータスを初期化する
+            telopImage_.gameObject.SetActive(false);
+            telopAlpha_ = 0.0f;
+            telopScale_ = 0.8f;
+            telopImage_.color = new Color(1.0f, 1.0f, 1.0f, telopAlpha_);
+            telopText_.color = new Color(1.0f, 0.0f, 1.0f, telopAlpha_);
+            telopImage_.transform.localScale = new Vector3(telopScale_, telopScale_, telopScale_);
+            telopImage_.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+            Debug.Log("スケールとアルファ値     telopAlpha_" + telopAlpha_ + "     telopScale_" + telopScale_);
         }
     }
+
 
     private void ChangeNums(float alpha, float scale)
     {
         telopAlpha_ += alpha * Time.deltaTime;
         telopScale_ += scale * Time.deltaTime;
         telopImage_.color = new Color(1.0f, 1.0f, 1.0f, telopAlpha_);
-        telopText_.color = new Color(1.0f, 0.0f, 0.7f, telopAlpha_);
+        telopText_.color = new Color(1.0f, 0.0f, 1.0f, telopAlpha_);
         telopImage_.transform.localScale = new Vector3(telopScale_, telopScale_, telopScale_);
     }
 }

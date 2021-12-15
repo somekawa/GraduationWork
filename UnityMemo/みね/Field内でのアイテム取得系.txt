@@ -1,0 +1,25 @@
+ItemGetメモは紛らわしいから削除しました。
+
+
+・MateriaPointsオブジェクト
+FieldMapの子。素材を拾える場所を設置。
+DropFieldMateria.csとParticleCheck.csをアタッチ
+DropFieldMateria.csのDropMateriaImageには
+PrefabフォルダーFieldフォルダ内にある『DropMateriaImage』をアタッチ
+DropMngの子のMateria0～4のMeshRendererのチェックは外す。
+
+・DropMateriaImageプレハブ
+MoveDropImage.csをアタッチ
+この画像（プレハブ）の移動処理（上昇と放物線）
+画面端に出たらDestroyしてます。Destroyをするとコルーチンも一緒にとまるそうです。
+
+・DropMngオブジェクト
+FieldUICanvasの子。拾ったアイテムを描画
+TelopBackImage-TelopText　拾ったアイテムの名前を表示
+DropInfoBack-DropInfo　アイテムをスペースキーで拾える旨を表示
+
+・FrontColliderオブジェクト
+Uniの子
+Materia0～4と当たり判定をするためのオブジェクト。
+MeshRendererのチェックは外す。
+OtherCollision.csをアタッチ
