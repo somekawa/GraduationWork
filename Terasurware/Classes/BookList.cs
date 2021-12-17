@@ -11,9 +11,10 @@ public class BookList : ScriptableObject
 	{
 		
 		public string BookName;
-		public string Word;
-		public string AddNum;
+		public int WordNumber;
+		public string GetCheck;
 		public int Price;
+		public int ImageNumber;
 		public string Info;
 	}
 }

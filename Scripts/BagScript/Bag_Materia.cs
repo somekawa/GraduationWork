@@ -63,17 +63,18 @@ public class Bag_Materia : MonoBehaviour
                     number = int.Parse(csvDatas_[i + 1][0]),
                     haveCnt = int.Parse(csvDatas_[i + 1][2]),
                 };
+              //  Debug.Log(materiaState[i].name + "の所持数" + materiaState[i].haveCnt);
                 materiaState[i].box.transform.SetParent(materiaParent.transform);
                 // 名前に番号をつけて素材クリック時に情報を取得しやすくする
                 materiaState[i].box.name = materiaState[i].name + i;
 
                 // 生成したプレハブの子になっているImageを見つける
-                materiaState[i].image= materiaState[i].box.transform.Find("MateriaIcon").GetComponent<Image>();
+                materiaState[i].image = materiaState[i].box.transform.Find("MateriaIcon").GetComponent<Image>();
                 materiaState[i].image.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][i];
 
                 // 生成したプレハブの子になっているTextを見つける
                 materiaState[i].cntText = materiaState[i].box.transform.Find("NumBack/Num").GetComponent<Text>();
-                materiaState[i].cntText.text = materiaState[i].haveCnt.ToString() ;
+                materiaState[i].cntText.text = materiaState[i].haveCnt.ToString();
 
                 if (materiaState[i].name == "空のマテリア")
                 {
@@ -84,6 +85,16 @@ public class Bag_Materia : MonoBehaviour
                 materiaState[i].box.SetActive(materiaState[i].getFlag);
             }
         }
+        else
+        {
+            for (int i = 0; i < maxCnt_; i++)
+            {
+                materiaState[i].cntText.text = materiaState[i].haveCnt.ToString();
+                materiaState[i].getFlag = 0 < materiaState[i].haveCnt ? true : false;
+                materiaState[i].box.SetActive(materiaState[i].getFlag);
+            }
+        }
+
         if (materiaState[0].box.transform.parent != materiaParent.transform)
         {
             for (int i = 0; i < maxCnt_; i++)
@@ -104,18 +115,19 @@ public class Bag_Materia : MonoBehaviour
     public void MateriaGetCheck(int materiaNum, string materiaName, int getCnt)
     {
         materiaState[materiaNum].getFlag = true;
-
-        // Debug.Log("     アイテム番号：" + itemNum + "     アイテム名：" + materiaName);
-        if (maxHaveCnt_ <= materiaState[materiaNum].haveCnt)
+        if (getCnt < 0)
         {
-            // 最大所持数は99個
-            materiaState[materiaNum].haveCnt = maxHaveCnt_;
+            // 個数が減る場合は減るを優先する
+            materiaState[materiaNum].haveCnt += getCnt;
+            // 所持数が0以下になったら0を入れておく。違うならそのまま
+            materiaState[materiaNum].haveCnt = materiaState[materiaNum].haveCnt <= 0 ? 0 : materiaState[materiaNum].haveCnt;
         }
         else
         {
-            // 呼ばれた素材番号の素材の所持数を加算
-            materiaState[materiaNum].haveCnt += getCnt;
+            // 最大所持数は99個                // 呼ばれた素材番号の素材の所持数を加算
+            materiaState[materiaNum].haveCnt = maxHaveCnt_ <= materiaState[materiaNum].haveCnt ? maxHaveCnt_ : materiaState[materiaNum].haveCnt + getCnt;
         }
+        Debug.Log(materiaState[materiaNum].haveCnt + "     増減個数：" + getCnt);
 
         if (materiaState[materiaNum].haveCnt < 1)
         {
@@ -130,7 +142,6 @@ public class Bag_Materia : MonoBehaviour
         materiaState[materiaNum].cntText.text = materiaState[materiaNum].haveCnt.ToString();
 
         data[materiaNum].haveCnt = materiaState[materiaNum].haveCnt;
-        DataSave();
     }
 
     public int GetMaxHaveMateriaCnt()
@@ -172,7 +183,6 @@ public class Bag_Materia : MonoBehaviour
             info_.text = "";
         }
         data[clickMateriaNum_].haveCnt = materiaState[clickMateriaNum_].haveCnt;
-        DataSave();
     }
 
     public void DataLoad()
@@ -192,7 +202,7 @@ public class Bag_Materia : MonoBehaviour
         Init();
     }
 
-    private void DataSave()
+    public void DataSave()
     {
         //  Debug.Log("魔法が生成されました。セーブします");
 

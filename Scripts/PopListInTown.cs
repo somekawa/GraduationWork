@@ -26,12 +26,13 @@ public class PopListInTown : MonoBehaviour
 
     // アイテム売買
     // private MateriaList materiaList_;   // 素材のExcelData読み込み
-    private int maxMateriaCnt_ = 0;         //配列の最大値を保存
+    private int maxCnt_ = 0;         //配列の最大値を保存
     //private int singleMateriaCnt_ = 0;         // シートに記載されてる個数
 
     [SerializeField]
     private GameObject itemStorePleate;         // 素材を拾ったときに生成されるプレハブ
     public static GameObject[] materiaPleate;  // 生成したプレハブを保存
+    public static GameObject[] itemPleate;  // 生成したプレハブを保存
     public static Text[] activeText_;         // 表示する素材の名前
     public static Text[] activePrice_;        // 表示する値段
 
@@ -49,59 +50,87 @@ public class PopListInTown : MonoBehaviour
         MAX
     }
 
-    private BookList bookList_;   // 本のExcelData読み込み
+    private BookList[] bookList_=new BookList[(int)BOOK.MAX];   // 本のExcelData読み込み
     private int maxBookCnt_ = 0;         //配列の最大値を保存
     private int singleBookCnt_ = 0;         // シートに記載されてる個数
 
     // 本を買う
     [SerializeField]
     private GameObject bookPlatePrefab;         // 素材を拾ったときに生成されるプレハブ
-    public static GameObject[] bookObj_;  // 生成したプレハブを保存
-    public static int[] bookPrice_;   // 値段
-    public static string[] bookInfo_;
-                                      //---------------
+    public static GameObject[] bookObj;  // 生成したプレハブを保存
+    public static int[] bookImageNum;
+    public static int[] bookWordNum;
+    public static int[] bookPrice;   // 値段
+    public static string[] statusUp;
+    public static string[] bookInfo;
+
+    //---------------
 
     private GameObject DataPopPrefab_;
 
     void Awake()
     {
         DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
-        popLists_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
-        bookList_ = DataPopPrefab_.GetComponent<PopList>().GetData<BookList>(PopList.ListData.BOOK_STORE, 0);
 
-        // 本関連
-        int number = 0;
-        singleBookCnt_ = bookList_.param.Count;
-        maxBookCnt_ = (int)BOOK.MAX * singleBookCnt_;
-
-        bookObj_ = new GameObject[maxBookCnt_];
-        bookPrice_ = new int[maxBookCnt_];
-        bookInfo_ = new string[maxBookCnt_];
         for (int b = 0; b < (int)BOOK.MAX; b++)
         {
-            bookList_ = DataPopPrefab_.GetComponent<PopList>().GetData<BookList>(PopList.ListData.BOOK_STORE, b);
+            bookList_[b] = DataPopPrefab_.GetComponent<PopList>().GetData<BookList>(PopList.ListData.BOOK_STORE, b);
+            maxBookCnt_ += bookList_[b].param.Count;
+        }
+
+        Debug.Log("本の個数" + maxBookCnt_);
+        // 本関連
+        int number = 0;
+        bookObj = new GameObject[maxBookCnt_];
+        bookPrice = new int[maxBookCnt_];
+        bookImageNum = new int[maxBookCnt_];
+        bookWordNum = new int[maxBookCnt_];
+        bookInfo = new string[maxBookCnt_];
+        statusUp = new string[maxBookCnt_];
+
+        for (int b = 0; b < (int)BOOK.MAX; b++)
+        {
+            singleBookCnt_ = bookList_[b].param.Count;
             for (int m = 0; m < singleBookCnt_; m++)
             {
-                number = b * singleBookCnt_ + m;
-                bookObj_[number] = Instantiate(bookPlatePrefab,
-                    new Vector2(0, 0), Quaternion.identity, this.transform);
-                bookObj_[number].name = bookList_.param[m].BookName;
-                bookPrice_[number] = bookList_.param[m].Price;
-                bookInfo_[number] = bookList_.param[m].Info;
+                //if(maxBookCnt_<=number)
+                //{
+                //    break;
+                //}
+                bookObj[number] = Instantiate(bookPlatePrefab,
+                    new Vector2(0, 0), Quaternion.identity, transform);
+                bookObj[number].name = bookList_[b].param[m].BookName;
+                bookWordNum[number] = bookList_[b].param[m].WordNumber;
+                bookImageNum[number] = bookList_[b].param[m].ImageNumber;
+                bookPrice[number] = bookList_[b].param[m].Price;
+                statusUp[number] = bookList_[b].param[m].GetCheck;
+                bookInfo[number] = bookList_[b].param[m].Info;
+               //Debug.Log(number+"           1ページの本の個数" + bookObj[number]);
+                number++;
             }
         }
 
         // 魔道具店関連
-        maxMateriaCnt_ = popLists_.SetMaxMateriaCount();
-        materiaPleate = new GameObject[maxMateriaCnt_];
-        activePrice_ = new Text[maxMateriaCnt_];
-        activeText_ = new Text[maxMateriaCnt_];
-
-        for (int i = 0; i < maxMateriaCnt_; i++)
+        popLists_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
+        maxCnt_ = popLists_.SetMaxMateriaCount();
+        materiaPleate = new GameObject[maxCnt_];
+        activePrice_ = new Text[maxCnt_];
+        activeText_ = new Text[maxCnt_];
+        int count = 0;
+        for (int i = 0; i < maxCnt_; i++)
         {
             materiaPleate[i] = Instantiate(itemStorePleate,
-                new Vector2(0, 0), Quaternion.identity, this.transform);
+                new Vector2(0, 0), Quaternion.identity, transform);
             materiaPleate[i].name = InitPopList.materiaData[i].name;
+            count++;
+        }
+        maxCnt_ = popLists_.SetMaxItemCount();
+        itemPleate = new GameObject[maxCnt_ * 2];
+        for (int i = 0; i < maxCnt_ * 2; i++)
+        {
+            itemPleate[i] = Instantiate(itemStorePleate,
+                    new Vector2(0, 0), Quaternion.identity, transform);
+            // itemPleate[i].name = InitPopList.itemData[i].name;
         }
         Debug.Log("タウンでのデータを読み込み終わりました");
     }

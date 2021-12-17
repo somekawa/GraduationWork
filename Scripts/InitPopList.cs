@@ -20,6 +20,7 @@ public class InitPopList : MonoBehaviour
         public string name;     // アイテム名
         public string info;     // アイテムの説明
         public int sellPrice;   // 売るときの値段
+        public int buyPrice;    // 買う時の値段
         public string materia1; // アイテム合成で必要な素材1
         public string materia2; // アイテム合成で必要な素材2
         public string materia3; // アイテム合成で必要な素材3
@@ -77,16 +78,6 @@ public class InitPopList : MonoBehaviour
     [SerializeField]
     private GameObject wordUIPleate;     // 生成したいオブジェクトのプレハブ
     private int maxWordCnt_ = 0;
-    //public struct WordData
-    //{
-    //    public GameObject pleate;   // インスタンスしたオブジェクトを保存
-    //    public string name;         // ワード名
-    //    public string englishName;
-    //    public int activeNum;       // 表示してよいストーリーの番号
-    //    public WORD kinds;          // ワードの種類
-    //    public int power;
-    //}
-    //public static Dictionary<WORD, WordData[]> wordData = new Dictionary<WORD, WordData[]>();
     public static GameObject[,] pleate;   // インスタンスしたオブジェクトを保存
     public static string[,] name;         // ワード名
     public static string[,] englishName;
@@ -94,8 +85,8 @@ public class InitPopList : MonoBehaviour
     public static WORD[,] kinds;          // ワードの種類
     public static int[,] power;
 
-    public static int[] maxWordKindsCnt = new int[(int)WORD.INFO] ;
-    public static string[] materiaInfo_ ;
+    public static int[] maxWordKindsCnt = new int[(int)WORD.INFO];
+    public static string[] materiaInfo_;
     public IEnumerator<string> information_;
 
     void Awake()
@@ -122,15 +113,17 @@ public class InitPopList : MonoBehaviour
             itemList_ = DataPopPrefab_.GetComponent<PopList>().GetData<ItemList>(PopList.ListData.ITEM);
             maxItemCnt_ = itemList_.param.Count;
             itemData = new ItemData[maxItemCnt_];
-           // Debug.Log("あいてむのしゅるい" + maxItemCnt_);
+            // Debug.Log("あいてむのしゅるい" + maxItemCnt_);
             for (int i = 0; i < maxItemCnt_; i++)
             {
                 itemData[i].box = Instantiate(itemUIBox,
                         new Vector2(0, 0), Quaternion.identity, this.transform);
                 itemData[i].name = itemList_.param[i].ItemName;
+              //  Debug.Log("InitPopListでのアイテムの名前：" + itemData[i].name);
                 itemData[i].info = itemList_.param[i].Information;
                 itemData[i].box.name = itemData[i].name;
                 itemData[i].sellPrice = itemList_.param[i].Price_Sell;
+                itemData[i].buyPrice = itemList_.param[i].Price_Buy;
                 itemData[i].materia1 = itemList_.param[i].WantMateria1;
                 itemData[i].materia2 = itemList_.param[i].WantMateria2;
                 itemData[i].materia3 = itemList_.param[i].WantMateria3;
@@ -162,8 +155,8 @@ public class InitPopList : MonoBehaviour
             // Excelからワードのデータを読み込む
             wordList_ = DataPopPrefab_.GetComponent<PopList>().GetData<WordList>(PopList.ListData.WORD);
             maxWordCnt_ = wordList_.param.Count;
-            pleate =new GameObject[(int)WORD.INFO, maxWordCnt_];   // インスタンスしたオブジェクトを保存
-            name=new string[(int)WORD.INFO, maxWordCnt_];         // ワード名
+            pleate = new GameObject[(int)WORD.INFO, maxWordCnt_];   // インスタンスしたオブジェクトを保存
+            name = new string[(int)WORD.INFO, maxWordCnt_];         // ワード名
             englishName = new string[(int)WORD.INFO, maxWordCnt_];
             activeNum = new int[(int)WORD.INFO, maxWordCnt_];       // 表示してよいストーリーの番号
             kinds = new WORD[(int)WORD.INFO, maxWordCnt_];          // ワードの種類
@@ -174,14 +167,11 @@ public class InitPopList : MonoBehaviour
                 {
                     if (k == wordList_.param[i].KindsNumber)
                     {
-                        // 各ワード種類の最大個数を確認
-                        maxWordKindsCnt[k]++;                
+                        maxWordKindsCnt[k]++;   // 各ワード種類の最大個数を確認
                     }
                 }
-                //Debug.Log((InitPopList.WORD)k + "   InitPopList " + maxWordCnt[k]);
-            //    wordData[(WORD)k] = test((WORD)k, maxWordCnt[k]);
             }
-            int count=0;
+            int count = 0;// 各種類に応じた最大数
             for (int k = 0; k < (int)WORD.INFO; k++)
             {
                 for (int i = 0; i < maxWordCnt_; i++)
@@ -191,47 +181,23 @@ public class InitPopList : MonoBehaviour
                         name[k, count] = wordList_.param[i].Word;
                         pleate[k, count] = Instantiate(wordUIPleate,
                                new Vector2(0, 0), Quaternion.identity, this.transform);
-                   
+
                         pleate[k, count].name = name[k, count];
                         englishName[k, count] = wordList_.param[i].EnglishWord;
                         //Debug.Log(num+ "            " + data[num].name);
                         activeNum[k, count] = wordList_.param[i].ListNumber;
                         kinds[k, count] = (WORD)wordList_.param[i].KindsNumber;
                         power[k, count] = wordList_.param[i].Power;
-                       //Debug.Log((WORD)k+" "+ count + "   "+name[k, count]);
+
+                        //    Debug.Log((WORD)k +"の"+ count + "番"+ name[k, count]);
                         count++;
                     }
                 }
-                count = 0;
+                count = 0;// カウントをリセット
             }
             onceFlag_ = true;
         }
     }
-
-    //public WordData[] test(WORD kind,int maxCnt)
-    //{
-    //    // numはwordList用の番号
-    //    var data = new WordData[maxCnt];
-    //    int count = 0;
-    //    for (int i = 0; i < maxWordCnt_; i++)
-    //    {
-    //        if ((int)kind == wordList_.param[i].KindsNumber)
-    //        {
-    //            data[count].name = wordList_.param[i].Word;
-    //            data[count].pleate = Instantiate(wordUIPleate,
-    //                   new Vector2(0, 0), Quaternion.identity, this.transform);
-    //            data[count].pleate.name = data[count].name;
-    //            data[count].englishName = wordList_.param[i].EnglishWord;
-    //            //Debug.Log(num+ "            " + data[num].name);
-    //            data[count].activeNum = wordList_.param[i].ListNumber;
-    //            data[count].kinds = (WORD)wordList_.param[i].KindsNumber;
-    //            data[count].power = wordList_.param[i].Power;
-    //            count++;
-    //        }
-    //    }
-    //    // Debug.Log(listNum+"数"+num+" "+kind);
-    //    return data;
-    //}
 
     public int SetMaxMateriaCount()
     {

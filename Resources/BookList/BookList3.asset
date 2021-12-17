@@ -2,14 +2,50 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e6997970aeaf6f24b858ce1ad6c07c66, type: 3}
+  m_Script: {fileID: 11500000, guid: 041483e12177250488be5e2e5c2043a8, type: 3}
   m_Name: BookList3
   m_EditorClassIdentifier: 
-  param: []
+  param:
+  - BookName: "\u8D64\u30CE\u672CW"
+    WordNumber: -1
+    GetCheck: Defence_5
+    Price: 4000
+    ImageNumber: 0
+    Info: "\u8D64\u3044\u672C\u3002\n\u9632\u5FA1\u306E\u5927\u5207\u3055\u306B\u3064\u3044\u3066\u66F8\u304B\u308C\u3066\u3044\u308B\u3002"
+  - BookName: "\u9752\u30CE\u672CW"
+    WordNumber: 27
+    GetCheck: 9_0
+    Price: 4000
+    ImageNumber: 1
+    Info: "\u9752\u3044\u672C\u3002\n\u5168\u3066\u3092\u81EA\u5206\u306E\u7CE7\u306B\u3057\u305F\u3044\u3068\u3044\u3046\u9B54\u529B\u3092\u611F\u3058\u308B\u3002"
+  - BookName: "\u7DD1\u30CE\u672CW"
+    WordNumber: -1
+    GetCheck: Luck_5
+    Price: 4000
+    ImageNumber: 2
+    Info: "\u7DD1\u306E\u672C\u3002\n\u304F\u3058\u904B\u306E\u3042\u3052\u65B9\u306B\u3064\u3044\u3066\u66F8\u304B\u308C\u3066\u3044\u308B\u3002"
+  - BookName: "\u9ED2\u30CE\u672CW"
+    WordNumber: -1
+    GetCheck: MagicAttack_5
+    Price: 4000
+    ImageNumber: 3
+    Info: "\u9ED2\u3044\u672C\u3002\n\u66B4\u529B\u885D\u52D5\u306E\u6291\u3048\u65B9\u304C\u66F8\u304B\u308C\u3066\u3044\u308B\u3002"
+  - BookName: "\u767D\u30CE\u672CW"
+    WordNumber: -1
+    GetCheck: Speed_10
+    Price: 4000
+    ImageNumber: 4
+    Info: "\u767D\u3044\u672C\u3002\n\u98A8\u306B\u306A\u308A\u305F\u3044\u3042\u306A\u305F\u3078\u3068\u66F8\u304B\u308C\u3066\u3044\u308B\u3002"
+  - BookName: "\u571F\u30CE\u672CW"
+    WordNumber: 22
+    GetCheck: 7_2
+    Price: 4000
+    ImageNumber: 5
+    Info: "\u571F\u8272\u306E\u672C\u3002\n\u75FA\u308C\u308B\u9B54\u529B\u3092\u611F\u3058\u308B\u3002"

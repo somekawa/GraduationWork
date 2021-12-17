@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -37,12 +36,6 @@ public class Bag_Item : MonoBehaviour
     public static ItemData[] data;
     private int exItemNum_ ;// 大成功を含めたアイテムの数
 
-    //public struct LoadItemData
-    //{
-    //    public string name;
-    //    public int cnt;
-    //}
-
     private int clickItemNum_ = -1;
     private Text info_; // クリックしたアイテムを説明する欄
     private Button throwAwayBtn_;
@@ -65,9 +58,12 @@ public class Bag_Item : MonoBehaviour
             {
                 if (maxCnt_ - 1 < i)
                 {
-                    // 大成功アイテムの生成
-                    itemState[i].box = Instantiate(itemUIBox,
-                             new Vector2(0, 0), Quaternion.identity, transform);
+                    if (itemState[i].box == null)
+                    {
+                        // 大成功アイテムの生成
+                        itemState[i].box = Instantiate(itemUIBox,
+                                 new Vector2(0, 0), Quaternion.identity, transform);
+                    }
                     //Debug.Log(i+":大成功アイテムの生成");
                 }
                 else
@@ -81,6 +77,7 @@ public class Bag_Item : MonoBehaviour
 
                 itemState[i].number = int.Parse(csvDatas_[i + 1][0]);
                 itemState[i].name = csvDatas_[i + 1][1];
+                //Debug.Log("アイテムの名前："+itemState[i].name);
                 itemState[i].haveCnt = int.Parse(csvDatas_[i + 1][2]);
                 // 親の位置を変更
                 itemState[i].box.transform.SetParent(itemParent.transform);
@@ -106,6 +103,7 @@ public class Bag_Item : MonoBehaviour
                 itemState[i].getFlag = 0 < itemState[i].haveCnt ? true : false;
                 itemState[i].box.SetActive(itemState[i].getFlag);
             }
+            checkFlag_ = true;
         }
         else
         {
@@ -129,11 +127,15 @@ public class Bag_Item : MonoBehaviour
 
         }
 
-    public void ItemGetCheck(int itemNum,int createCnt)
+    public void ItemGetCheck(MovePoint.JUDGE judge, int itemNum,int createCnt)
     {
-        itemState[itemNum].haveCnt += createCnt;
+        if(judge == MovePoint.JUDGE.GOOD)
+        {
+            itemNum = itemNum*2;
+        }
+        Debug.Log("加算されるアイテム"+itemState[itemNum].name);
+        itemState[itemNum].haveCnt = itemState[itemNum].haveCnt + createCnt;
         data[itemNum].haveCnt = itemState[itemNum].haveCnt;
-        DataSave();
     }
 
     public void SetItemCntText(int itemNum)
@@ -159,7 +161,7 @@ public class Bag_Item : MonoBehaviour
         Init();
     }
 
-    private void DataSave()
+    public void DataSave()
     {
       //  Debug.Log("魔法が生成されました。セーブします");
 

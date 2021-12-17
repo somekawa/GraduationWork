@@ -59,10 +59,11 @@ public class BookList_importer : AssetPostprocessor
                         var p = new BookList.Param();
 			
 					cell = row.GetCell(0); p.BookName = (cell == null ? "" : cell.StringCellValue);
-					cell = row.GetCell(1); p.Word = (cell == null ? "" : cell.StringCellValue);
-					cell = row.GetCell(2); p.AddNum = (cell == null ? "" : cell.StringCellValue);
+					cell = row.GetCell(1); p.WordNumber = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(2); p.GetCheck = (cell == null ? "" : cell.StringCellValue);
 					cell = row.GetCell(3); p.Price = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(4); p.Info = (cell == null ? "" : cell.StringCellValue);
+					cell = row.GetCell(4); p.ImageNumber = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(5); p.Info = (cell == null ? "" : cell.StringCellValue);
 
                         data.param.Add(p);
                     }

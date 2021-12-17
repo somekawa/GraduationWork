@@ -28,6 +28,7 @@ public class ItemImageMng : MonoBehaviour
 
         spriteMap[IMAGE.ITEM] = ImageMng(2, 6, "/Item/Items");
         spriteMap[IMAGE.MAGIC] = ImageMng(1, 7, "/MagicImage");
+        spriteMap[IMAGE.BOOK] = ImageMng(1, 6, "/BookImage");
 
         // 読み込みたいシート数、シート枚の大きさ、読み込みたい画像
         spriteMap[IMAGE.MATERIA] = ImageMng(5, 7, "/Materia/Materia_Field");

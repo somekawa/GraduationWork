@@ -3,26 +3,14 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Text.RegularExpressions;
 
 public class Bag_Magic : MonoBehaviour
 {
     // データ系
     private SaveCSV_Magic saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
-    private const string saveDataFilePath_ = @"Assets/Resources/magicData.csv";
+    private const string saveDataFilePath_ = @"Assets/Resources/Save/magicData.csv";
     List<string[]> csvDatas = new List<string[]>(); // CSVの中身を入れるリスト;
     string[] texts;
-
-    //public enum HEAD_KIND
-    //{
-    //    NON = -1,
-    //    SINGLE, // 0 単体
-    //    MULTIPLE,// 1 複数回
-    //    OVERALL,// 2 全体
-    //    MAX
-    //}
-    //public static string[] headString = new string[(int)HEAD_KIND.MAX] {
-    //"単体","複数回","全体"};
 
     public enum ELEMENT_KIND
     {
@@ -38,67 +26,6 @@ public class Bag_Magic : MonoBehaviour
     public static string[] elementString = new string[(int)ELEMENT_KIND.MAX] {
     "回復","補助","炎","水","土","風"};
 
-    //public enum TAIL_KIND
-    //{
-    //    NON = -1,
-    //    SMALL, // 0 小
-    //    MEDIUM,// 1 中
-    //    LARGE,// 2 大
-    //    MAXMUM,// 3 極大
-    //    MAX
-    //}
-    //public static string[] tailString = new string[(int)TAIL_KIND.MAX] {
-    //"小","中","大","極大"};
-    //public enum SUB1_KIND
-    //{
-    //    NON = -1,
-    //    FELLOW,//味方
-    //    ENEMY,//敵
-    //    POISON,//毒
-    //    DARK,//暗闇
-    //    PARALYSIS,// 麻痺
-    //    DEATH,//即死
-    //    SUCTION,//吸収
-    //    TARGET,//必中
-    //    MAX
-    //}
-    //public static string[] sub1String_ = new string[(int)SUB1_KIND.MAX] {
-    //"味方","敵","毒","暗闇","麻痺","即死","吸収","必中"};
-
-    //public enum SUB2_KIND
-    //{
-    //    NON = -1,
-    //    HP,//HP
-    //    MAGIC_ATTACK,// 魔法攻撃
-    //    PHYSICS_ATTACK,//物理攻撃
-    //    DEFENCE,//防御力
-    //    SPEED,//命中/回避
-    //    POISON,//毒
-    //    DARK,//暗闇
-    //    PARALYSIS,// 麻痺
-    //    DEATH,//即死
-    //    SUCTION,//吸収
-    //    TARGET,//必中
-    //    MAX
-    //}
-    //public static string[] sub2String_ = new string[(int)SUB2_KIND.MAX] {
-    //"HP","魔法攻撃","物理攻撃","防御力","命中/回避","毒","暗闇","麻痺","即死","吸収","必中"};
-
-    //public enum SUB3_KIND
-    //{
-    //    NON = -1,
-    //    UP,//上昇、
-    //    DOWN,//低下、
-    //    REFLECTION,//反射
-    //    SUCTION,//吸収
-    //    TARGET,//必中
-    //    MAX
-    //}
-    //public static string[] sub3String_ = new string[(int)SUB3_KIND.MAX] {
-    //"上昇","低下","反射","吸収","必中"};
-
-
-
     public struct MagicData
     {
         public int number;
@@ -113,10 +40,9 @@ public class Bag_Magic : MonoBehaviour
         public int sub1;
         public int sub2;
         public int sub3;
-        //  public Sprite sprite;
-        // public int imageNum;
     }
     public static MagicData[] data = new MagicData[20];
+   // public static MagicData[] saveData = new MagicData[20];
     public static Sprite[] magicSpite = new Sprite[20];
 
     // バッグ表示用
@@ -175,7 +101,7 @@ public class Bag_Magic : MonoBehaviour
                 data[i].sub2 = int.Parse(csvDatas[i + 1][10]);
                 data[i].sub3 = int.Parse(csvDatas[i + 1][11]);
 
-                Debug.Log(i + "番目：" + data[i].name + "           " + data[i].element);
+              //  Debug.Log(i + "番目：" + data[i].name + "           " + data[i].element);
                 if (i == 0)
                 {
                     continue;
@@ -219,8 +145,8 @@ public class Bag_Magic : MonoBehaviour
         data[number_].sub1 = sub1;
         data[number_].sub2 = sub2;
         data[number_].sub3 = sub3;
-        Debug.Log("保存した魔法" + data[number_].main + data[number_].sub);
-        DataSave();
+        //Debug.Log("保存した魔法" + data[number_].main + data[number_].sub);
+      //  DataSave();
 
         // バッグ用
         magicObject[number_] = Instantiate(bagMagicUI, new Vector2(0, 0),
@@ -245,22 +171,19 @@ public class Bag_Magic : MonoBehaviour
 
         for (int k = 0; k < orderList.Count; k++)
         {
-            if (int.Parse(orderList[k].Item1.name) != 3)
-            {
-                continue;
-            }
-
             // 炎単体小のクエストクリア確認
             // 受注したのが炎マテリアの合成クエスト(番号が3)のとき
-            for (int i = 1; i < magicObject.Length; i++)
+            if (int.Parse(orderList[k].Item1.name) == 3)
             {
-                var tmp = data[int.Parse(Regex.Replace(magicObject[i].name, @"[^0-9]", ""))];
-
-                if (tmp.name == "炎単体小")
+                // Magic_番号の番号を見て、1なら「炎単体小」の魔法なのですでに魔法を取得しているからクリア状態にする
+                for (int i = 1; i < magicObject.Length; i++)
                 {
-                    // クリア状態にする
-                    QuestClearCheck.QuestClear(3);
-                    break;  // これ以上for文を回す必要がないから抜ける
+                    if (int.Parse(magicObject[i].name.Split('_')[1]) == 1)
+                    {
+                        // クリア状態にする
+                        QuestClearCheck.QuestClear(3);
+                        break;  // これ以上for文を回す必要がないから抜ける
+                    }
                 }
             }
         }
@@ -274,8 +197,8 @@ public class Bag_Magic : MonoBehaviour
             // 範囲外の数値が入ってた場合はreturnする
             return;
         }
-        Debug.Log(flag + "        既に選択されている魔法の番号：" + num);
-        Debug.Log(statusMagicBtn_[num].name + "      " + statusMagicBtn_[num].interactable);
+        //Debug.Log(flag + "        既に選択されている魔法の番号：" + num);
+        //Debug.Log(statusMagicBtn_[num].name + "      " + statusMagicBtn_[num].interactable);
 
 
         // flagがtrueならinteractableをfalseにする
@@ -290,10 +213,7 @@ public class Bag_Magic : MonoBehaviour
 
     public void DataLoad()
     {
-        //   Debug.Log("ロードします");
-
         csvDatas.Clear();
-       // csvMagicDatas.Clear();
 
         // 行分けだけにとどめる
         texts = File.ReadAllText(saveDataFilePath_).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
@@ -306,37 +226,21 @@ public class Bag_Magic : MonoBehaviour
         }
         Debug.Log("データ数" + csvDatas.Count);
         number_ = csvDatas.Count - 1;
-
         Init();
     }
 
-    private void DataSave()
+    public void DataSave()
     {
         Debug.Log("魔法が生成されました。セーブします");
 
         saveCsvSc_.SaveStart();
-
-        for (int i = clickMagicNum_; i < number_; i++)
-        {
-            data[i].number -= 1;
-        }
         // 魔法の個数分回す
         for (int i = 0; i < number_; i++)
         {
-            if (i == (clickMagicNum_ ))
-            {
-                // 削除された行は読み込まない
-                // Debug.Log(magicObject[clickMagicNum_].name+"を削除：行" +i);
-                continue;
-            }
             saveCsvSc_.SaveMagicData(data[i]);
-            //  saveCsvSc_.SaveMagicData((MagicData)csvDatas[i][]);
-
-            Debug.Log("行" + i);
         }
         if (clickMagicNum_ != -1)
         {
-            number_ -= 1;
             clickMagicNum_ = -1;
         }
 
@@ -359,7 +263,7 @@ public class Bag_Magic : MonoBehaviour
         {
             for (int m = 0; m < 3; m++)
             {
-                Debug.Log("セットされてる魔法番号" + charasList_[i].GetMagicNum(m).number);
+               // Debug.Log("セットされてる魔法番号" + charasList_[i].GetMagicNum(m).number);
                 if (charasList_[i].GetMagicNum(m).number==num)
                 {
                     throwAwayBtn_.interactable = false;
@@ -386,29 +290,37 @@ public class Bag_Magic : MonoBehaviour
         throwAwayBtn_.gameObject.SetActive(false);
         info_.text = "";
 
-
-        // 指定の魔法以外をロードする
-        csvDatas.Clear();
-
-        // 行分けだけにとどめる
-        texts = File.ReadAllText(saveDataFilePath_).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-        for (int i = 0; i < texts.Length; i++)
+        int dataNumber = 0;
+        for (int i = 1; i < number_; i++)
         {
-            //Debug.Log("行" + i);
-            if (i == (clickMagicNum_ + 1))
+            
+            if(i==clickMagicNum_)
             {
-                // 削除された行は読み込まない
-                // Debug.Log(magicObject[clickMagicNum_].name+"を削除：行" +i);
+                Debug.Log("削除する魔法の名前：" + data[i].name);
+                // 選択した魔法は読み込まない
                 continue;
             }
-            // カンマ区切りでリストへ登録していく(2次元配列状態になる[行番号][カンマ区切り])
-            csvDatas.Add(texts[i].Split(','));
-            Debug.Log("行" + i);
-            // Debug.Log(magicObject[i].name + "：行" + i);
-        }
-        Debug.Log("データ数" + csvDatas.Count);
+            dataNumber++;// 保存時の番号をずらす
+            Debug.Log(data[dataNumber].name + "       " + data[i].name);
+            data[dataNumber] = data[i];
+            data[dataNumber].number = dataNumber;
 
-        // 指定行を読み込まない状態でセーブをする
-       DataSave();
+            // バッグ用
+            magicObject[dataNumber] = magicObject[i];
+            magicObject[dataNumber].name = "Magic" + data[dataNumber].number;
+            magicImage_[dataNumber] = magicObject[dataNumber].transform.Find("MagicIcon").GetComponent<Image>();
+            magicImage_[dataNumber].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[dataNumber].element];
+
+            // ステータス用
+            statusMagicObject[dataNumber] = statusMagicObject[i];
+            statusMagicObject[dataNumber].name = "Magic" + data[dataNumber].number;
+            statusMagicImage_[dataNumber] = statusMagicObject[dataNumber].transform.Find("MagicIcon").GetComponent<Image>();
+            statusMagicBtn_[dataNumber] = statusMagicObject[dataNumber].GetComponent<Button>();
+            statusMagicImage_[dataNumber].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[dataNumber].element];
+
+        }
+
+        number_ = dataNumber;
+
     }
 }
