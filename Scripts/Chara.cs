@@ -259,18 +259,27 @@ public class Chara : CharaBase,InterfaceButtle
     }
 
     // RestaurantMng.csで呼び出す(あくまでも一時的なUpだから、それぞれに加算した値を別の変数に入れておく)
-    public void SetStatusUpByCook(int[] num)
+    public void SetStatusUpByCook(int[] num,bool temporaryFlag)
     {
         set_.Attack += num[0];
         set_.MagicAttack += num[1];
         set_.Defence += num[2];
         set_.Speed += num[3];
         set_.Luck += num[4];
+        set_.maxHP += num[5];
+        set_.maxMP += num[6];
+        set_.Exp += num[7];
+        set_.HP += num[5];
+        set_.MP += num[6];
 
-        // 一時アップの数字保存
-        for (int i = 0; i < statusUp.Length; i++)
+
+        if (temporaryFlag == true)
         {
-            statusUp[i] = num[i];
+            // 一時アップの数字保存
+            for (int i = 0; i < statusUp.Length; i++)
+            {
+                statusUp[i] = num[i];
+            }
         }
     }
 
