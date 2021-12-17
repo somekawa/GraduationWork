@@ -373,4 +373,56 @@ public class Chara : CharaBase,InterfaceButtle
             set_.animTime = 0.0f;
         }
     }
+
+    public override void SetBS((int, int) num,int hitNum)
+    {
+        // 何らかのバステ効果がある魔法があたる、かつ、敵の命中率がキャラの幸運値+ランダム値より高いとき
+        if (num.Item1 >= 0 &&  hitNum > set_.Luck + Random.Range(0, 100))
+        {
+            // 該当するバッドステータスをtrueにする
+            set_.condition[num.Item1 - 1].Item2 = true;
+            // NONをfalseにする
+            set_.condition[(int)CONDITION.NON - 1].Item2 = false;
+            Debug.Log("キャラは状態異常にかかった");
+        }
+
+        if (num.Item2 >= 0 && hitNum > set_.Luck + Random.Range(0, 100))
+        {
+            // 該当するバッドステータスをtrueにする
+            set_.condition[num.Item2 - 1].Item2 = true;
+            // NONをfalseにする
+            set_.condition[(int)CONDITION.NON - 1].Item2 = false;
+            Debug.Log("キャラは状態異常にかかった");
+        }
+    }
+
+    public override (CONDITION, bool)[] GetBS()
+    {
+        return set_.condition;
+    }
+
+    public override void SetSpeed(int num)
+    {
+        set_.Speed = num;
+    }
+
+    public override void ConditionReset(bool allReset, int targetReset = -1)
+    {
+        if(allReset)
+        {
+            set_.condition[(int)CONDITION.NON - 1].Item2 = true;
+            set_.condition[(int)CONDITION.POISON - 1].Item2 = false;
+            set_.condition[(int)CONDITION.DARK - 1].Item2 = false;
+            set_.condition[(int)CONDITION.PARALYSIS - 1].Item2 = false;
+            set_.condition[(int)CONDITION.DEATH - 1].Item2 = false;
+        }
+        else
+        {
+            // 特定の状態異常だけ回復する
+            if (targetReset > -1)
+            {
+                set_.condition[targetReset].Item2 = false;
+            }
+        }
+    }
 }

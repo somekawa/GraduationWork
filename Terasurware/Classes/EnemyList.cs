@@ -9,7 +9,6 @@ public class EnemyList : ScriptableObject
 	[System.SerializableAttribute]
 	public class Param
 	{
-		
 		public string Name;
 		public int Level;
 		public int HP;
@@ -25,6 +24,7 @@ public class EnemyList : ScriptableObject
         public float MoveTime;
         public float MoveDistance;
         public string WeaponTagObjName;
-
+        public int Weak;
+        public int Bst;
     }
 }

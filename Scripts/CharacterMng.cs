@@ -48,6 +48,7 @@ public class CharacterMng : MonoBehaviour
     private GameObject[] buttleCommandImage_ = new GameObject[4]; // バトルコマンドの画像4種類
     private EnemySelect buttleEnemySelect_;                       // バトル中の選択アイコン情報
     private ButtleMng buttleMng_;                                 // ButtleMng.csの取得
+    private BadStatusMng badStatusMng_;
 
     private GameObject setMagicObj_;                    // 魔法コマンド選択時に表示させるオブジェクト
     private Image[] magicImage_ = new Image[4];         // 魔法画像の貼り付け先(最大4つ表示になる)
@@ -60,6 +61,10 @@ public class CharacterMng : MonoBehaviour
 
     private CharaUseMagic useMagic_;
     private int mpDecrease_ = 0;                       // 魔法発動時に減少させるMPの量
+
+    private IEnumerator rest_;
+    private bool myTurnOnceFlg_;                       // 自分のターンになった最初に1回だけ呼ばれるようにするフラグ
+    private Dictionary<CONDITION,int>[] charaBstTurn_ = new Dictionary<CONDITION, int>[(int)CHARACTERNUM.MAX];  // キャラ毎のバッドステータス回復までのターン数
 
     void Start()
     {
@@ -91,7 +96,9 @@ public class CharacterMng : MonoBehaviour
 
         enemyInstancePos_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().GetEnemyPos();
 
-        buttleMng_ = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
+        var buttleMng = GameObject.Find("ButtleMng");
+        buttleMng_ = buttleMng.GetComponent<ButtleMng>();
+        badStatusMng_ = buttleMng.GetComponent<BadStatusMng>();
 
         setMagicObj_ = buttleUICanvas.transform.Find("SetMagicObj").gameObject;
         // 魔法画像の表示先を設定する
@@ -123,6 +130,10 @@ public class CharacterMng : MonoBehaviour
             charaArrowImage_[i].SetActive(false);
         }
 
+        // バッドステータス持続管理用
+        charaBstTurn_[(int)CHARACTERNUM.UNI] = new Dictionary<CONDITION, int>();
+        charaBstTurn_[(int)CHARACTERNUM.JACK] = new Dictionary<CONDITION, int>();
+
         useMagic_ = new CharaUseMagic();
     }
 
@@ -149,6 +160,11 @@ public class CharacterMng : MonoBehaviour
             buttleCommandRotate_.ResetRotate();   // UIの回転を一番最初に戻す
             magicButtleCommandRotate_.ResetRotate();
         }
+
+        charaHPMPMap_[CHARACTERNUM.UNI].Item1.SetHPMPBar(charasList_[(int)CHARACTERNUM.UNI].HP(), charasList_[(int)CHARACTERNUM.UNI].MaxHP());
+        charaHPMPMap_[CHARACTERNUM.JACK].Item1.SetHPMPBar(charasList_[(int)CHARACTERNUM.JACK].HP(), charasList_[(int)CHARACTERNUM.JACK].MaxHP());
+        charaHPMPMap_[CHARACTERNUM.UNI].Item2.SetHPMPBar(charasList_[(int)CHARACTERNUM.UNI].MP(), charasList_[(int)CHARACTERNUM.UNI].MaxMP());
+        charaHPMPMap_[CHARACTERNUM.JACK].Item2.SetHPMPBar(charasList_[(int)CHARACTERNUM.JACK].MP(), charasList_[(int)CHARACTERNUM.JACK].MaxMP());
 
         anim_ = ANIMATION.IDLE;
         oldAnim_ = ANIMATION.IDLE;
@@ -229,6 +245,24 @@ public class CharacterMng : MonoBehaviour
             }
         }
 
+        // 行動前に発動するバッドステータスの処理
+        if(!myTurnOnceFlg_)
+        {
+            myTurnOnceFlg_ = true;
+            var bst = badStatusMng_.BadStateMoveBefore(charasList_[(int)nowTurnChar_].GetBS(), charasList_[(int)nowTurnChar_], charaHPMPMap_[nowTurnChar_].Item1, true);
+
+            if (bst == (CONDITION.PARALYSIS, true))
+            {
+                // 麻痺で動けない
+                Debug.Log("麻痺だから行動を飛ばす");
+                anim_ = ANIMATION.IDLE;
+                oldAnim_ = ANIMATION.NON;
+                oldAnim_ = anim_;
+                AnimationChange();
+                return;
+            }
+        }
+
         // テスト用(レベルアップ処理)
         if (Input.GetKeyDown(KeyCode.L))
         {
@@ -265,6 +299,12 @@ public class CharacterMng : MonoBehaviour
             buttleCommandFrame_.SetActive(true);
 
             buttleAnounceText_.text = announceText_[0];
+
+            if(rest_ != null)
+            {
+                StopCoroutine(rest_);
+                rest_ = null;
+            }
 
             for (int i = 0; i < (int)CHARACTERNUM.MAX; i++)
             {
@@ -356,6 +396,8 @@ public class CharacterMng : MonoBehaviour
                                 BeforeAttack();    // 攻撃準備
                                 // 攻撃属性を-1にする(弱点とかが無い状態にする)
                                 buttleMng_.SetElement(-1);
+                                // バステの付与を無しに戻す
+                                buttleMng_.SetBadStatus(-1,-1);
                             }
                         }
 
@@ -460,6 +502,33 @@ public class CharacterMng : MonoBehaviour
         {
             case ANIMATION.IDLE:
 
+                // 毒の処理をいれる
+                badStatusMng_.BadStateMoveAfter(charasList_[(int)nowTurnChar_].GetBS(), charasList_[(int)nowTurnChar_], charaHPMPMap_[nowTurnChar_].Item1, true);
+
+                // バステの持続ターン数を-1する
+                for(int i = 0; i < (int)CONDITION.DEATH; i++)
+                {
+                    // キーが存在しなければとばす
+                    if (!charaBstTurn_[(int)nowTurnChar_].ContainsKey((CONDITION)i))
+                    {
+                        continue;
+                    }
+                    // -1ターンする
+                    charaBstTurn_[(int)nowTurnChar_][(CONDITION)i]--;
+                    // ターン数が0以下になったら、マップから削除する
+                    if(charaBstTurn_[(int)nowTurnChar_][(CONDITION)i] <= 0)
+                    {
+                        charaBstTurn_[(int)nowTurnChar_].Remove((CONDITION)i);
+                    }
+                }
+                // 全ての状態異常が治ったとき
+                if(charaBstTurn_[(int)nowTurnChar_].Count <= 0)
+                {
+                    // CONDITIONをNONに戻す
+                    charasList_[(int)nowTurnChar_].ConditionReset(true);
+                    Debug.Log("キャラ状態異常が全て治った");
+                }
+
                 // 前のキャラの行動が終わったからターンを移す
                 buttleMng_.SetMoveTurn();
 
@@ -485,6 +554,8 @@ public class CharacterMng : MonoBehaviour
                 selectFlg_ = false;
                 buttleCommandRotate_.SetEnableAndActive(true);
                 buttleCommandFrame_.SetActive(true);
+
+                myTurnOnceFlg_ = false;
 
                 // コマンド画像を表示にする
                 for (int i = 0; i < buttleCommandImage_.Length; i++)
@@ -532,6 +603,9 @@ public class CharacterMng : MonoBehaviour
     // 攻撃準備処理
     void BeforeAttack()
     {
+        // 行動前に発動するバッドステータスの処理
+        badStatusMng_.BadStateMoveBefore(charasList_[(int)nowTurnChar_].GetBS(), charasList_[(int)nowTurnChar_], charaHPMPMap_[nowTurnChar_].Item1, true);
+
         // キャラの位置を取得する
         charaPos_ = charasList_[(int)nowTurnChar_].GetButtlePos();
         // 敵の位置を取得する
@@ -674,6 +748,9 @@ public class CharacterMng : MonoBehaviour
 
     void MagicAttack()
     {
+        // 行動前に発動するバッドステータスの処理
+        badStatusMng_.BadStateMoveBefore(charasList_[(int)nowTurnChar_].GetBS(), charasList_[(int)nowTurnChar_], charaHPMPMap_[nowTurnChar_].Item1, true);
+
         // キャラの位置を取得する
         charaPos_ = charasList_[(int)nowTurnChar_].GetButtlePos();
 
@@ -688,24 +765,26 @@ public class CharacterMng : MonoBehaviour
         charasList_[(int)nowTurnChar_].SetMP(charasList_[(int)nowTurnChar_].MP() - mpDecrease_);
 
         // 魔法での攻撃対象を決定したときに入る
-        // 選択した敵の番号を渡す
-        var tmp = buttleEnemySelect_.GetSelectNum();
-        //int[] tmp = { 0, 0, 0, 0 }; // デバッグ用(好きな数値で攻撃対象を決められる)
-        for(int i = 0; i < tmp.Length; i++)
+        if(useMagic_.GetElementNum() >= 2) // 2からが炎魔法
         {
-            // tmp内容が-1以外なら攻撃対象がいるので処理を行う
-            if(tmp[i] >= 0)
+            // 選択した敵の番号を渡す
+            var tmp = buttleEnemySelect_.GetSelectNum();
+            //int[] tmp = { 0, 0, 0, 0 }; // デバッグ用(好きな数値で攻撃対象を決められる)
+            for (int i = 0; i < tmp.Length; i++)
             {
-                // 敵の位置を取得する
-                enePos_ = buttleEnemySelect_.GetSelectEnemyPos(tmp[i]);
-                enePos_.y = 0.0f;        // ここで0.0fにしないと斜め上方向に飛んでしまう
-                // 情報を設定する
-                useMagic_.InstanceMagicInfo(charaPos_, enePos_, tmp[i], i);
+                // tmp内容が-1以外なら攻撃対象がいるので処理を行う
+                if (tmp[i] >= 0)
+                {
+                    // 敵の位置を取得する
+                    enePos_ = buttleEnemySelect_.GetSelectEnemyPos(tmp[i]);
+                    enePos_.y = 0.0f;        // ここで0.0fにしないと斜め上方向に飛んでしまう
+                                             // 情報を設定する
+                    useMagic_.InstanceMagicInfo(charaPos_, enePos_, tmp[i], i);
+                }
             }
-        }
 
-        //@ 一時的にコメントアウト
-        //StartCoroutine(useMagic_.InstanceMagicCoroutine());
+            StartCoroutine(useMagic_.InstanceMagicCoroutine());
+        }
 
         buttleCommandRotate_.gameObject.SetActive(true);
         buttleEnemySelect_.SetActive(false);
@@ -739,6 +818,7 @@ public class CharacterMng : MonoBehaviour
 
     public void HPdecrease(int num)
     {
+        int hitProbabilityOffset = 0;   // 命中率
         // ダメージ値の算出
         var damage = 0;
 
@@ -750,17 +830,19 @@ public class CharacterMng : MonoBehaviour
             Debug.Log(criticalRand + "<=" + (10 + buttleMng_.GetLuckNum()) + "なので、敵の攻撃がクリティカル！");
             // クリティカルダメージ
             damage = (buttleMng_.GetDamageNum() * 2) - charasList_[num].Defence(true);
+
+            hitProbabilityOffset = 200; // 100以上の数字が必要になる(バステ付与時に幸運値+ランダムが100を越える可能性があるから)
         }
         else
         {
             // クリティカルじゃないとき
-            Debug.Log(criticalRand + ">" + (10 + charasList_[(int)nowTurnChar_].Luck()) + "なので、敵の攻撃はクリティカルではない");
+            Debug.Log(criticalRand + ">" + (10 + charasList_[num].Luck()) + "なので、敵の攻撃はクリティカルではない");
 
             // 命中計算をする
             // ①攻撃する側のSpeed / 攻撃される側のSpeed * 100 = ％の出力
-            var hitProbability = (int)((float)buttleMng_.GetSpeedNum() / (float)charasList_[(int)nowTurnChar_].Speed() * 100.0f);
+            var hitProbability = (int)((float)buttleMng_.GetSpeedNum() / (float)charasList_[num].Speed() * 100.0f);
             // ②キャラも敵も+10％の補正値を入れる。
-            var hitProbabilityOffset = hitProbability + 10;
+            hitProbabilityOffset = hitProbability + 10;
             // ③hitProbabilityOffsetが100以上なら自動命中で、それ以下ならランダム値を取る。
             if (hitProbabilityOffset < 100)
             {
@@ -781,21 +863,21 @@ public class CharacterMng : MonoBehaviour
             }
             else
             {
-                Debug.Log("命中率" + hitProbabilityOffset + "が100以上ならので、自動命中");
+                Debug.Log("命中率" + hitProbabilityOffset + "が100以上なので、自動命中");
             }
 
             int tmpLuck;
 
             // 命中時にはLuckで回避判定をする
             // 判定の範囲は、100 - 現在のLuckを最大値にして、より回避成功に近づける
-            if (charasList_[(int)nowTurnChar_].Luck() <= 10)
+            if (charasList_[num].Luck() <= 10)
             {
                 tmpLuck = 10;
                 Debug.Log("Luckが10以下なので、10を適用して回避判定をします");
             }
             else
             {
-                tmpLuck = charasList_[(int)nowTurnChar_].Luck();
+                tmpLuck = charasList_[num].Luck();
                 Debug.Log("Luckが10以上なので、現在のステータスのLuckを使って回避判定をします");
             }
 
@@ -819,11 +901,48 @@ public class CharacterMng : MonoBehaviour
             damage = 1;
         }
 
-        // キャラのHPを削る(スライドバー変更)
-        StartCoroutine(charaHPMPMap_[(CHARACTERNUM)num].Item1.MoveSlideBar(charasList_[num].HP() - damage));
+        // バッドステータスが付与されるか判定
+        charasList_[num].SetBS(buttleMng_.GetBadStatus(), hitProbabilityOffset);
 
-        // 内部数値の変更を行う
-        charasList_[num].SetHP(charasList_[num].HP() - damage);
+        var getBs = charasList_[num].GetBS();
+        // バステの効果持続ターンを設定する
+        for(int i = 0; i < (int)CONDITION.DEATH; i++)
+        {
+            // 健康状態以外のコンディションのフラグがtrueになっていたら
+            if(getBs[i].Item2 && getBs[i].Item1 != CONDITION.NON)
+            {
+                // 数字が0か確認する
+                for (int k = 0; k < (int)CONDITION.DEATH; k++)
+                {
+                    if (charaBstTurn_[num].Count <= 0)
+                    {
+                        charaBstTurn_[num].Add(getBs[i].Item1, Random.Range(1, 5));// 1以上5未満
+                    }
+
+                    // 0以下ならまだそのコンディション状態にはなっていないから、ここでかかるようにする
+                    // キーが存在するか確認が必要
+                    if (charaBstTurn_[num].ContainsKey(getBs[k].Item1) && charaBstTurn_[num][getBs[k].Item1] <= 0)
+                    {
+                        charaBstTurn_[num].Add(getBs[i].Item1, Random.Range(1, 5));// 1以上5未満
+                    }
+                }
+            }
+        }
+
+        // 即死用に処理呼び出し
+        var bst = badStatusMng_.BadStateMoveBefore(getBs, charasList_[num], charaHPMPMap_[(CHARACTERNUM)num].Item1, true);
+        if (bst == (CONDITION.DEATH, true))   // 即死処理
+        {
+            StartCoroutine(charaHPMPMap_[(CHARACTERNUM)num].Item1.MoveSlideBar(charasList_[num].HP() - 999));
+            charasList_[num].SetHP(charasList_[num].HP() - 999);
+        }
+        else
+        {
+            // キャラのHPを削る(スライドバー変更)
+            StartCoroutine(charaHPMPMap_[(CHARACTERNUM)num].Item1.MoveSlideBar(charasList_[num].HP() - damage));
+            // 内部数値の変更を行う
+            charasList_[num].SetHP(charasList_[num].HP() - damage);
+        }
 
         if (charasList_[num].HP() <= 0)
         {
@@ -835,7 +954,9 @@ public class CharacterMng : MonoBehaviour
         }
     }
 
-    public void SetCharaArrowActive(bool allflag, bool randFlg)
+    //@ 不足処理あり
+    // 最後の引数がHPかどうかで回復用コルーチンを呼び出すようにする
+    public void SetCharaArrowActive(bool allflag, bool randFlg,int whatHeal)
     {
         // 誰か1人をtrueにする場合は、上から順なので0番の人をtrueにする
         if(!allflag)
@@ -877,30 +998,37 @@ public class CharacterMng : MonoBehaviour
             }
         }
 
-        StartCoroutine(SelectToHealMagicChara(allflag, tmpArray));
+        // 回復コルーチンを呼び出す(=sub2が0番)
+        //if(whatHeal == 0)
+        //{
+        //    rest_ = SelectToHealMagicChara(allflag, tmpArray);
+        //    StartCoroutine(rest_);
+        //}
+
+        rest_ = SelectToHealMagicChara(allflag, tmpArray,whatHeal);
+        StartCoroutine(rest_);
     }
 
-    // 回復魔法の決定
-    private IEnumerator SelectToHealMagicChara(bool allflag,int[] array)
+    private IEnumerator SelectToHealMagicChara(bool allflag, int[] array,int whatHeal)
     {
         bool flag = false;
         var selectChara = CHARACTERNUM.UNI;
 
-        while(!flag)
+        while (!flag)
         {
             yield return null;
 
-            if(!allflag)    // 単体回復魔法の発動時
+            if (!allflag)    // 単体回復魔法の発動時
             {
-                if(Input.GetKeyDown(KeyCode.H))
+                if (Input.GetKeyDown(KeyCode.H))
                 {
                     // ユニより数値が小さくならないようにする
-                    if(--selectChara < CHARACTERNUM.UNI)
+                    if (--selectChara < CHARACTERNUM.UNI)
                     {
                         selectChara = CHARACTERNUM.UNI;
                     }
                 }
-                else if(Input.GetKeyDown(KeyCode.J))
+                else if (Input.GetKeyDown(KeyCode.J))
                 {
                     // ジャックより数値が大きくならないようにする
                     if (++selectChara > CHARACTERNUM.JACK)
@@ -914,7 +1042,7 @@ public class CharacterMng : MonoBehaviour
                 }
 
                 // 1度全てfalseにする
-                for(int i = 0; i < (int)CHARACTERNUM.MAX; i++)
+                for (int i = 0; i < (int)CHARACTERNUM.MAX; i++)
                 {
                     charaArrowImage_[i].SetActive(false);
                 }
@@ -924,37 +1052,144 @@ public class CharacterMng : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                if(!allflag)    // 単体回復
+                if (!allflag)    // 単体回復
                 {
-                    // キャラのHPを増やす(スライドバー変更)
-                    StartCoroutine(charaHPMPMap_[selectChara].Item1.MoveSlideBar(charasList_[(int)selectChara].HP() + useMagic_.GetHealPower()));
+                    // enePosとtargetNumは入れなくてよい(charaPos_に発動相手の座標を入れるようにする)
+                    useMagic_.InstanceMagicInfo(charasList_[(int)selectChara].GetButtlePos(), new Vector3(-1, -1, -1), -1, 0);
 
-                    // 内部数値の変更を行う
-                    charasList_[(int)selectChara].SetHP(charasList_[(int)selectChara].HP() + useMagic_.GetHealPower());
+                    if(whatHeal == 0)   // HP回復
+                    {
+                        // キャラのHPを増やす(スライドバー変更)
+                        StartCoroutine(charaHPMPMap_[selectChara].Item1.MoveSlideBar(charasList_[(int)selectChara].HP() + useMagic_.GetHealPower()));
+                        // 内部数値の変更を行う
+                        charasList_[(int)selectChara].SetHP(charasList_[(int)selectChara].HP() + useMagic_.GetHealPower());
+                    }
+                    else
+                    {
+                        // 毒・暗闇・麻痺回復
+                        charasList_[(int)selectChara].ConditionReset(false,whatHeal);
+                    }
                 }
                 else
                 {
                     // 複数回or全体回復
-                    for(int i = 0; i < array.Length; i++)
+                    for (int i = 0; i < array.Length; i++)
                     {
-                        if(array[i] <= -1)
+                        if (array[i] <= -1)
                         {
                             break;
                         }
 
-                        // キャラのHPを増やす(スライドバー変更)
-                        StartCoroutine(charaHPMPMap_[(CHARACTERNUM)array[i]].Item1.MoveSlideBar(charasList_[array[i]].HP() + useMagic_.GetHealPower()));
+                        // enePosとtargetNumは入れなくてよい(charaPos_に発動相手の座標を入れるようにする)
+                        useMagic_.InstanceMagicInfo(charasList_[array[i]].GetButtlePos(), new Vector3(-1, -1, -1), -1, i);
 
-                        Debug.Log((CHARACTERNUM)array[i] + "のHPを、" + useMagic_.GetHealPower() + "回復しました");
-
-                        // 内部数値の変更を行う
-                        charasList_[(int)selectChara].SetHP(charasList_[array[i]].HP() + useMagic_.GetHealPower());
+                        if (whatHeal == 0)
+                        {
+                            // キャラのHPを増やす(スライドバー変更)
+                            StartCoroutine(charaHPMPMap_[(CHARACTERNUM)array[i]].Item1.MoveSlideBar(charasList_[array[i]].HP() + useMagic_.GetHealPower()));
+                            // 内部数値の変更を行う
+                            charasList_[(int)selectChara].SetHP(charasList_[array[i]].HP() + useMagic_.GetHealPower());
+                            Debug.Log((CHARACTERNUM)array[i] + "のHPを、" + useMagic_.GetHealPower() + "回復しました");
+                        }
+                        else
+                        {
+                            // 毒・暗闇・麻痺回復
+                            charasList_[array[i]].ConditionReset(false, whatHeal);
+                            Debug.Log((CHARACTERNUM)array[i] + "の状態異常を回復しました");
+                        }
                     }
                 }
+
+                StartCoroutine(useMagic_.InstanceMagicCoroutine());
 
                 flag = true;
             }
         }
     }
+
+    // 回復魔法の決定
+    //private IEnumerator SelectToHealMagicChara(bool allflag,int[] array)
+    //{
+    //    bool flag = false;
+    //    var selectChara = CHARACTERNUM.UNI;
+
+    //    while(!flag)
+    //    {
+    //        yield return null;
+
+    //        if(!allflag)    // 単体回復魔法の発動時
+    //        {
+    //            if(Input.GetKeyDown(KeyCode.H))
+    //            {
+    //                // ユニより数値が小さくならないようにする
+    //                if(--selectChara < CHARACTERNUM.UNI)
+    //                {
+    //                    selectChara = CHARACTERNUM.UNI;
+    //                }
+    //            }
+    //            else if(Input.GetKeyDown(KeyCode.J))
+    //            {
+    //                // ジャックより数値が大きくならないようにする
+    //                if (++selectChara > CHARACTERNUM.JACK)
+    //                {
+    //                    selectChara = CHARACTERNUM.JACK;
+    //                }
+    //            }
+    //            else
+    //            {
+    //                // 何も処理を行わない
+    //            }
+
+    //            // 1度全てfalseにする
+    //            for(int i = 0; i < (int)CHARACTERNUM.MAX; i++)
+    //            {
+    //                charaArrowImage_[i].SetActive(false);
+    //            }
+    //            // 該当するキャラの矢印だけtrueにする
+    //            charaArrowImage_[(int)selectChara].SetActive(true);
+    //        }
+
+    //        if (Input.GetKeyDown(KeyCode.Space))
+    //        {
+    //            if(!allflag)    // 単体回復
+    //            {
+    //                // enePosとtargetNumは入れなくてよい(charaPos_に発動相手の座標を入れるようにする)
+    //                useMagic_.InstanceMagicInfo(charasList_[(int)selectChara].GetButtlePos(), new Vector3(-1, -1, -1), -1, 0);
+
+    //                // キャラのHPを増やす(スライドバー変更)
+    //                StartCoroutine(charaHPMPMap_[selectChara].Item1.MoveSlideBar(charasList_[(int)selectChara].HP() + useMagic_.GetHealPower()));
+
+    //                // 内部数値の変更を行う
+    //                charasList_[(int)selectChara].SetHP(charasList_[(int)selectChara].HP() + useMagic_.GetHealPower());
+    //            }
+    //            else
+    //            {
+    //                // 複数回or全体回復
+    //                for(int i = 0; i < array.Length; i++)
+    //                {
+    //                    if(array[i] <= -1)
+    //                    {
+    //                        break;
+    //                    }
+
+    //                    // enePosとtargetNumは入れなくてよい(charaPos_に発動相手の座標を入れるようにする)
+    //                    useMagic_.InstanceMagicInfo(charasList_[array[i]].GetButtlePos(), new Vector3(-1,-1,-1), -1, i);
+
+    //                    // キャラのHPを増やす(スライドバー変更)
+    //                    StartCoroutine(charaHPMPMap_[(CHARACTERNUM)array[i]].Item1.MoveSlideBar(charasList_[array[i]].HP() + useMagic_.GetHealPower()));
+
+    //                    Debug.Log((CHARACTERNUM)array[i] + "のHPを、" + useMagic_.GetHealPower() + "回復しました");
+
+    //                    // 内部数値の変更を行う
+    //                    charasList_[(int)selectChara].SetHP(charasList_[array[i]].HP() + useMagic_.GetHealPower());
+    //                }
+    //            }
+
+    //            StartCoroutine(useMagic_.InstanceMagicCoroutine());
+
+    //            flag = true;
+    //        }
+    //    }
+    //}
 
 }

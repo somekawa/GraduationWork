@@ -27,6 +27,7 @@ public abstract class CharaBase : object
         public int Luck;            // この値にポイントを振り分けると幸運が上がる
         public float AnimMax;       // 攻撃モーションのフレームを時間に直した値が入っている(モーション切り替えで使用する)
         public int[] Magic;
+        public (CONDITION,bool)[] condition; // 各キャラと各敵の状態異常が確認できるようにする
 
         // 敵用の情報
         public int Exp;             // この敵を倒した際にキャラが得られる経験値
@@ -34,7 +35,8 @@ public abstract class CharaBase : object
         public float MoveTime;      // 移動時にdeltaTimeを割る値
         public float MoveDistance;  // キャラとの距離許容範囲
         public string WeaponTagObjName;  // CheckAttackHit.csがアタッチされているオブジェクトの名前
-        public int Weak;
+        public int Weak;            // この敵の弱点属性
+        public int Bst;             // この敵が発動できる状態異常効果
     }
 
     public enum ANIMATION
@@ -46,6 +48,16 @@ public abstract class CharaBase : object
         AFTER,
         //DEATH
     };
+
+    // 状態異常系(magicData.csvと合わせる為にNONを1からスタートしている)
+    public enum CONDITION
+    {
+        NON = 1,    // 健康
+        POISON,     // 毒
+        DARK,       // 暗闇
+        PARALYSIS,  // 麻痺
+        DEATH,      // 即死
+    }
 
     private CharacterSetting setting_;
 
@@ -77,8 +89,7 @@ public abstract class CharaBase : object
             setting_.maxMP = setting_.MP;
 
             // 最大4つまでつけられるのでここで初期化しておく
-         setting_.Magic = new int[4];
-            //   setting_.Magic = new Bag_Magic.MagicData[4];
+            setting_.Magic = new int[4];
         }
         else
         {
@@ -100,6 +111,7 @@ public abstract class CharaBase : object
             setting_.MoveDistance = param.MoveDistance;
             setting_.WeaponTagObjName = param.WeaponTagObjName;
             setting_.Weak = param.Weak;
+            setting_.Bst = param.Bst;
 
             setting_.animator = animator;
             setting_.isMove = false;
@@ -109,6 +121,16 @@ public abstract class CharaBase : object
             setting_.maxHP = setting_.HP;
             setting_.maxMP = setting_.MP;
         }
+
+        // 最初は敵もキャラも共通で健康
+        setting_.condition = new (CONDITION, bool)[(int)CONDITION.DEATH]
+        {
+            (CONDITION.NON,true),
+            (CONDITION.POISON,false),
+            (CONDITION.DARK,false),
+            (CONDITION.PARALYSIS,false),
+            (CONDITION.DEATH,false),
+        };
     }
 
     public CharacterSetting GetSetting()
@@ -124,6 +146,10 @@ public abstract class CharaBase : object
     public abstract void Item();
     public abstract bool ChangeNextChara(); // 次のキャラの操作に切り替える為の準備処理
     public abstract void DamageAnim();      // 攻撃を受けたときのモーション処理
+    public abstract void SetBS((int, int) num, int hitNum);    // 状態異常の設定
+    public abstract void ConditionReset(bool allReset,int targetReset = -1);  // 状態異常をリセットする
+    public abstract (CONDITION, bool)[] GetBS();   // 自分の状態異常を取得
+    public abstract void SetSpeed(int num);
 
     //// override出来る関数
     //public virtual void Talk(string talk)

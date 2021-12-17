@@ -20,8 +20,6 @@ public class HPMPBar : MonoBehaviour
         }
         slider_.value = 1.0f;           // Sliderを満タンにする。
 
-        Debug.Log("Start currentHp : " + currentNum_);
-
         // 現在数値表示場所の取得
         if(currentNumText_ == null)
         {
@@ -40,17 +38,14 @@ public class HPMPBar : MonoBehaviour
 
             currentNum_ -= 1;
 
-            // スライドバーへ反映
-            slider_.value = (float)currentNum_ / (float)maxNum_;
-
-            yield return null;
-        }
-
-        while (currentNum_ < num)   // 現在値が目標値より小さかったら足して、while文続行
-        {
-            colFlg_ = true;
-
-            currentNum_ += 1;
+            if (currentNum_ < 0)
+            {
+                currentNumText_.text = 0.ToString();
+            }
+            else
+            {
+                currentNumText_.text = currentNum_.ToString();
+            }
 
             // スライドバーへ反映
             slider_.value = (float)currentNum_ / (float)maxNum_;
@@ -62,16 +57,39 @@ public class HPMPBar : MonoBehaviour
         if (currentNum_ < 0)
         {
             currentNum_ = 0;
+            currentNumText_.text = currentNum_.ToString();
+            colFlg_ = false;
+            yield return null;
+        }
+
+        while (currentNum_ < num)   // 現在値が目標値より小さかったら足して、while文続行
+        {
+            colFlg_ = true;
+
+            currentNum_ += 1;
+            if (currentNum_ > maxNum_)
+            {
+                currentNumText_.text = maxNum_.ToString();
+            }
+            else
+            {
+                currentNumText_.text = currentNum_.ToString();
+            }
+
+            // スライドバーへ反映
+            slider_.value = (float)currentNum_ / (float)maxNum_;
+
+            yield return null;
         }
 
         // HPの最大値以上は全て最大値と表記する
         if(currentNum_ > maxNum_)
         {
             currentNum_ = maxNum_;
+            currentNumText_.text = currentNum_.ToString();
+            colFlg_ = false;
+            yield return null;
         }
-
-        currentNumText_.text = currentNum_.ToString();
-        colFlg_ = false;
     }
 
     public void SetHPMPBar(int nowHp,int maxHp)
@@ -90,6 +108,9 @@ public class HPMPBar : MonoBehaviour
         {
             currentNumText_ = gameObject.transform.Find("CurrentNum").GetComponent<TMPro.TextMeshProUGUI>();
         }
+
+        Debug.Log("Start currentHp : " + currentNum_);
+
         currentNumText_.text = currentNum_.ToString();
 
     }

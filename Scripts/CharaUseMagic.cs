@@ -19,6 +19,7 @@ public class CharaUseMagic : MonoBehaviour
 
     private string magicPrefabNum_;    // 10の桁->効果範囲(ヘッド),1の桁->エレメント
     private int headNum_;              // ヘッド番号
+    private int elementNum_;
     private int healPower_;            // 回復魔法の威力
 
     private ButtleMng buttleMng_;
@@ -44,18 +45,18 @@ public class CharaUseMagic : MonoBehaviour
             enemySelect_.SetAllActive(false, false);
 
             //@ 不足処理あり
-
+   
             // ヘッドワードの種類分け
             switch (magicData.head)
             {
                 case 0:     // 単体
-                    characterMng_.SetCharaArrowActive(false,false);  
+                    characterMng_.SetCharaArrowActive(false,false,magicData.sub2);  
                     break;
                 case 1:     // 複数回
-                    characterMng_.SetCharaArrowActive(true,true);
+                    characterMng_.SetCharaArrowActive(true,true, magicData.sub2);
                     break;
                 case 2:     // 全体
-                    characterMng_.SetCharaArrowActive(true,false);
+                    characterMng_.SetCharaArrowActive(true,false, magicData.sub2);
                     break;
                 default:
                     Debug.Log("不明なヘッドワードです");
@@ -64,6 +65,16 @@ public class CharaUseMagic : MonoBehaviour
 
             // キャラの魔力依存の回復値を保存しておく
             healPower_ = magicData.power + (charaMagicPower / 2);
+
+            if(magicData.sub2 == 0)
+            {
+                // [エレメント-威力-何を回復するか(sub2が0かそれ以外かで判断させたい)]
+                magicPrefabNum_ = magicData.element.ToString() + "-" + magicData.tail.ToString() + "-" + magicData.sub2.ToString();
+            }
+            else
+            {
+                magicPrefabNum_ = "0-" + magicData.tail.ToString() + "-9";
+            }
         }
         else if(magicData.element == 1)
         {
@@ -97,10 +108,14 @@ public class CharaUseMagic : MonoBehaviour
             buttleMng_.SetDamageNum(magicData.power + charaMagicPower);
             // 攻撃属性をButtleMng.csに渡す
             buttleMng_.SetElement(magicData.element);
+            // 状態異常をButtleMng.csに渡す
+            buttleMng_.SetBadStatus(magicData.sub1, magicData.sub2);
+
+            magicPrefabNum_ = magicData.element.ToString() + "-" + magicData.tail.ToString();
         }
 
-        magicPrefabNum_ = magicData.element.ToString() + "-" + magicData.tail.ToString();
         headNum_ = magicData.head;
+        elementNum_ = magicData.element;
     }
 
     public int MPdecrease(Bag_Magic.MagicData magicData)
@@ -111,6 +126,11 @@ public class CharaUseMagic : MonoBehaviour
     public int GetHealPower()
     {
         return healPower_;
+    }
+
+    public int GetElementNum()
+    {
+        return elementNum_;
     }
 
     public void InstanceMagicInfo(Vector3 charaPos,Vector3 enePos,int targetNum,int instanceNum)
@@ -170,49 +190,65 @@ public class CharaUseMagic : MonoBehaviour
                     (bool, MagicAttackInfo) tmp = (true, list_[t].Item2);
                     list_[t] = tmp;
 
-                    // 弾の方向の計算
-                    var dir = (list_[t].Item2.enePos - list_[t].Item2.charaPos).normalized;
                     // エフェクトの発生位置高さ調整
                     Vector3 adjustPos;
-                    
-                    // 威力が大以上の攻撃魔法なら(極大含む)、敵の頭上にエフェクトをインスタンスさせる
-                    if(int.Parse(magicPrefabNum_.Split('-')[1]) >= 2)
+
+                    // magicPrefabNum_変数をハイフンで分割したときに2つに分けれたら(=攻撃魔法)
+                    if (magicPrefabNum_.Split('-').Length == 2)
                     {
-                        adjustPos = new Vector3(list_[t].Item2.enePos.x, list_[t].Item2.enePos.y, list_[t].Item2.enePos.z);
+                        // 弾の方向の計算
+                        var dir = (list_[t].Item2.enePos - list_[t].Item2.charaPos).normalized;
+
+                        // 威力が大以上の攻撃魔法なら(極大含む)、敵の頭上にエフェクトをインスタンスさせる
+                        if (int.Parse(magicPrefabNum_.Split('-')[1]) >= 2)
+                        {
+                            adjustPos = new Vector3(list_[t].Item2.enePos.x, list_[t].Item2.enePos.y, list_[t].Item2.enePos.z);
+                        }
+                        else
+                        {
+                            adjustPos = new Vector3(list_[t].Item2.charaPos.x, list_[t].Item2.charaPos.y + 0.5f, list_[t].Item2.charaPos.z);
+                        }
+
+                        // 魔法プレハブをインスタンス化(現在は指定した魔法のみ)
+                        GameObject obj = Resources.Load("MagicPrefabs/" + magicPrefabNum_) as GameObject;
+
+                        //var uniAttackInstance = Instantiate(obj, adjustPos, Quaternion.identity); // 回転座標が全て0になるver.
+                        // プレハブの高さも含めた位置に生成する
+                        var uniAttackInstance = Instantiate(obj, adjustPos + obj.transform.position, obj.transform.rotation);
+
+                        MagicMove magicMove = uniAttackInstance.GetComponent<MagicMove>();
+                        // 通常攻撃弾の飛んでいく方向を指定
+                        magicMove.SetDirection(dir);
+
+
+                        // [Weapon]のタグがついているオブジェクトを全て検索する
+                        var weaponTagObj = GameObject.FindGameObjectsWithTag("Weapon");
+                        for (int i = 0; i < weaponTagObj.Length; i++)
+                        {
+                            // 見つけたオブジェクトの名前を比較して、今回攻撃に扱う武器についているCheckAttackHit関数の設定を行う
+                            if (weaponTagObj[i].name == (magicPrefabNum_ + "(Clone)"))
+                            {
+                                // 選択した敵の番号を渡す
+                                weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(list_[t].Item2.targetNum + 1);
+
+                                // 生成した魔法オブジェクト名を[エレメント番号-効果量番号(Clone)-魔法生成番号]に変更する
+                                weaponTagObj[i].name = magicPrefabNum_ + "(Clone)-" + list_[t].Item2.instanceNum;
+
+                                // 敵ヒット時の削除対象として名前を入れる
+                                weaponTagObj[i].GetComponent<CheckAttackHit>().SetCharaMagicStr(weaponTagObj[i].name);
+                            }
+                        }
                     }
                     else
                     {
-                        adjustPos = new Vector3(list_[t].Item2.charaPos.x, list_[t].Item2.charaPos.y + 0.5f, list_[t].Item2.charaPos.z);
-                    }
+                        // 3つに分かれているから回復魔法
+                        // 魔法プレハブをインスタンス化(現在は指定した魔法のみ)
+                        GameObject obj = Resources.Load("MagicPrefabs/" + magicPrefabNum_) as GameObject;
 
-                    // 魔法プレハブをインスタンス化(現在は指定した魔法のみ)
-                    GameObject obj = Resources.Load("MagicPrefabs/" + magicPrefabNum_) as GameObject;
+                        adjustPos = new Vector3(list_[t].Item2.charaPos.x, list_[t].Item2.charaPos.y, list_[t].Item2.charaPos.z);
 
-                    //var uniAttackInstance = Instantiate(obj, adjustPos, Quaternion.identity); // 回転座標が全て0になるver.
-                    // プレハブの高さも含めた位置に生成する
-                    var uniAttackInstance = Instantiate(obj, adjustPos + obj.transform.position, obj.transform.rotation);
-                    
-                    MagicMove magicMove = uniAttackInstance.GetComponent<MagicMove>();
-                    // 通常攻撃弾の飛んでいく方向を指定
-                    magicMove.SetDirection(dir);
-
-
-                    // [Weapon]のタグがついているオブジェクトを全て検索する
-                    var weaponTagObj = GameObject.FindGameObjectsWithTag("Weapon");
-                    for (int i = 0; i < weaponTagObj.Length; i++)
-                    {
-                        // 見つけたオブジェクトの名前を比較して、今回攻撃に扱う武器についているCheckAttackHit関数の設定を行う
-                        if (weaponTagObj[i].name == (magicPrefabNum_ + "(Clone)"))
-                        {
-                            // 選択した敵の番号を渡す
-                            weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(list_[t].Item2.targetNum + 1);
-
-                            // 生成した魔法オブジェクト名を[エレメント番号-効果量番号(Clone)-魔法生成番号]に変更する
-                            weaponTagObj[i].name = magicPrefabNum_ + "(Clone)-" + list_[t].Item2.instanceNum;
-
-                            // 敵ヒット時の削除対象として名前を入れる
-                            weaponTagObj[i].GetComponent<CheckAttackHit>().SetCharaMagicStr(weaponTagObj[i].name);
-                        }
+                        // プレハブの高さも含めた位置に生成する
+                        Instantiate(obj, adjustPos + obj.transform.position, obj.transform.rotation);
                     }
                 }
             }

@@ -27,6 +27,7 @@ public class EnemyInstanceMng : MonoBehaviour
     public static List<(Enemy,HPMPBar)> enemyList_ = new List<(Enemy, HPMPBar)>();   // Enemy.csをキャラ毎にリスト化する
 
     private ButtleMng buttleMng_;
+    private BadStatusMng badStatusMng_;
     private ANIMATION anim_ = ANIMATION.NON;
     private ANIMATION oldAnim_ = ANIMATION.NON;
     private int mapNum_ = 0;                    // マップ上に配置される敵の数
@@ -38,6 +39,7 @@ public class EnemyInstanceMng : MonoBehaviour
     private (GameObject, int) eventEnemy_ = (null, -1);
 
     private BoxCollider changeEnableBoxCollider_;
+    private Dictionary<CONDITION, int>[] enemyBstTurn_ = new Dictionary<CONDITION, int>[4];  // 敵毎のバッドステータス回復までのターン数(最大4体なのでここで確保しとく)
 
     public void Init()
     {
@@ -92,7 +94,15 @@ public class EnemyInstanceMng : MonoBehaviour
             enemyData_ = DataPopPrefab_.GetComponent<PopList>().GetData<EnemyList>(PopList.ListData.ENEMY, (int)SceneMng.nowScene - (int)SceneMng.SCENE.FIELD0, name);
         }
 
-        buttleMng_ = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
+        var buttlemng = GameObject.Find("ButtleMng");
+        buttleMng_ = buttlemng.GetComponent<ButtleMng>();
+        badStatusMng_ = buttlemng.GetComponent<BadStatusMng>();
+
+        for(int i = 0; i < 4; i++)
+        {
+            // バッドステータス持続管理用
+            enemyBstTurn_[i] = new Dictionary<CONDITION, int>();
+        }
 
         // 乱数の値の元になる値(=シード値)を現在の時間をつかって初期化する
         // →シード値を変更しなければ規則的に同じ順番で同じ番号が生成されてしまうから
@@ -147,6 +157,16 @@ public class EnemyInstanceMng : MonoBehaviour
         //    attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
         //} while (SceneMng.charasList_[attackTarget_].HP() <= 0);
         attackTarget_ = (int)SceneMng.CHARACTERNUM.UNI;
+
+        // 行動前に発動するバッドステータスの処理
+        var bst = badStatusMng_.BadStateMoveBefore(enemyList_[num].Item1.GetBS(), enemyList_[num].Item1, enemyList_[num].Item2, false);
+
+        if(bst == (CONDITION.PARALYSIS,true))
+        {
+            // 麻痺で動けない
+            anim_ = ANIMATION.IDLE;
+            return;
+        }
 
         // ダメージと速度を渡す
         buttleMng_.SetDamageNum(enemyList_[num].Item1.Damage());
@@ -285,7 +305,7 @@ public class EnemyInstanceMng : MonoBehaviour
 
             // 番号でどの敵をインスタンスするか決める
             int enemyNum = Random.Range(0, enemyTest.transform.childCount);
-            enemyNum = 3;   // こうもり固定
+            enemyNum = 3;   // ハチ固定
 
             if (eventEnemy_.Item1 == null)
             {
@@ -347,7 +367,7 @@ public class EnemyInstanceMng : MonoBehaviour
             enemyMap_.Add(num, enemy);
 
             // 敵HPの親を、EnemySelectObjにする
-            hpBar.transform.parent = GameObject.Find("ButtleUICanvas/EnemySelectObj").transform;
+            hpBar.transform.SetParent(GameObject.Find("ButtleUICanvas/EnemySelectObj").transform);
 
             num++;
         }
@@ -399,13 +419,46 @@ public class EnemyInstanceMng : MonoBehaviour
 
     private void Attack(int num)
     {
+        // バステの付与を無しに戻す
+        buttleMng_.SetBadStatus(-1, -1);
+
         enemyList_[num].Item1.Attack();
+
+        // その敵が発動できる状態異常を入れる
+        buttleMng_.SetBadStatus(enemyList_[num].Item1.Bst(),-1);
     }
 
     void AfterAttack(int num)
     {
         // 元いた位置に戻る処理
         StartCoroutine(MoveToInitPos(num));
+
+        // 行動終了後のバッドステータス発動処理
+        badStatusMng_.BadStateMoveAfter(enemyList_[num].Item1.GetBS(), enemyList_[num].Item1, enemyList_[num].Item2,false);
+
+        // バステの持続ターン数を-1する
+        for (int i = 0; i < (int)CONDITION.DEATH; i++)
+        {
+            // キーが存在しなければとばす
+            if (!enemyBstTurn_[num].ContainsKey((CONDITION)i))
+            {
+                continue;
+            }
+            // -1ターンする
+            enemyBstTurn_[num][(CONDITION)i]--;
+            // ターン数が0以下になったら、マップから削除する
+            if (enemyBstTurn_[num][(CONDITION)i] <= 0)
+            {
+                enemyBstTurn_[num].Remove((CONDITION)i);
+            }
+        }
+        // 全ての状態異常が治ったとき
+        if (enemyBstTurn_[num].Count <= 0)
+        {
+            // CONDITIONをNONに戻す
+            enemyList_[num].Item1.ConditionReset(true);
+            Debug.Log("敵状態異常が全て治った");
+        }
     }
 
     // 攻撃から戻ってくるコルーチン  
@@ -452,6 +505,7 @@ public class EnemyInstanceMng : MonoBehaviour
             return;
         }
 
+        int hitProbabilityOffset = 0; 
         var damage = 0;
 
         // クリティカルの計算をする(基礎値と幸運値で上限を狭める)
@@ -462,6 +516,8 @@ public class EnemyInstanceMng : MonoBehaviour
             Debug.Log(criticalRand + "<=" + (10 + buttleMng_.GetLuckNum()) + "なので、キャラの攻撃がクリティカル！");
             // クリティカルダメージ
             damage = (buttleMng_.GetDamageNum() * 2) - enemyList_[num].Item1.Defence(true);
+
+            hitProbabilityOffset = 200; // 100以上の数字が必要になる(バステ付与時に幸運値+ランダムが100を越える可能性があるから)
         }
         else
         {
@@ -472,7 +528,7 @@ public class EnemyInstanceMng : MonoBehaviour
             // ①攻撃する側のSpeed / 攻撃される側のSpeed * 100 = ％の出力
             var hitProbability = (int)((float)buttleMng_.GetSpeedNum() / (float)enemyList_[num].Item1.Speed() * 100.0f);
             // ②キャラも敵も+10％の補正値を入れてキャラ側だけに(自分のLuck * 5)％をプラスする。
-            var hitProbabilityOffset = hitProbability + 10 + (buttleMng_.GetLuckNum() * 5);
+            hitProbabilityOffset = hitProbability + 10 + (buttleMng_.GetLuckNum() * 5);
             // ③hitProbabilityOffsetが100以上なら自動命中で、それ以下ならランダム値を取る。
             if (hitProbabilityOffset < 100)
             {
@@ -514,12 +570,49 @@ public class EnemyInstanceMng : MonoBehaviour
             damage = 1;
         }
 
+        // バッドステータスが付与されるか判定
+        enemyList_[num].Item1.SetBS(buttleMng_.GetBadStatus(), hitProbabilityOffset);
+
+        var getBs = enemyList_[num].Item1.GetBS();
+        // バステの効果持続ターンを設定する
+        for (int i = 0; i < (int)CONDITION.DEATH; i++)
+        {
+            // 健康状態以外のコンディションのフラグがtrueになっていたら
+            if (getBs[i].Item2 && getBs[i].Item1 != CONDITION.NON)
+            {
+                // 数字が0か確認する
+                for (int k = 0; k < (int)CONDITION.DEATH; k++)
+                {
+                    if(enemyBstTurn_[num].Count <= 0)
+                    {
+                        enemyBstTurn_[num].Add(getBs[i].Item1, Random.Range(1, 5));// 1以上5未満
+                    }
+
+                    // 0以下ならまだそのコンディション状態にはなっていないから、ここでかかるようにする
+                    // キーが存在するか確認が必要
+                    if (enemyBstTurn_[num].ContainsKey(getBs[k].Item1) && enemyBstTurn_[num][getBs[k].Item1] <= 0)
+                    {
+                        enemyBstTurn_[num].Add(getBs[i].Item1, Random.Range(1, 5));// 1以上5未満
+                    }
+                }
+            }
+        }
+
         StartCoroutine(enemyList_[num].Item2.MoveSlideBar(enemyList_[num].Item1.HP() - damage));
         // 内部数値の変更を行う
-        enemyList_[num].Item1.sethp(enemyList_[num].Item1.HP() - damage);
+        enemyList_[num].Item1.SetHP(enemyList_[num].Item1.HP() - damage);
+
+        // 即死用に処理呼び出し
+        var bst = badStatusMng_.BadStateMoveBefore(getBs, enemyList_[num].Item1, enemyList_[num].Item2, false);
+        if(bst == (CONDITION.DEATH,true))   // 即死処理
+        {
+            StartCoroutine(enemyList_[num].Item2.MoveSlideBar(enemyList_[num].Item1.HP() - 999));
+            // 内部数値の変更を行う
+            enemyList_[num].Item1.SetHP(enemyList_[num].Item1.HP() - 999);
+        }
 
         // もしHPが0になったら、オブジェクトを削除する
-        if(enemyList_[num].Item1.HP() <= 0)
+        if (enemyList_[num].Item1.HP() <= 0)
         {
             // ここで矢印処理を呼び出す(HP減少処理→矢印処理としないと、HPが0の場所に矢印が出てしまうから)
             enemySelectObj.ResetSelectPoint();

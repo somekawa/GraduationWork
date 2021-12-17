@@ -9,6 +9,7 @@ public class Enemy : CharaBase, InterfaceButtle
 
     private CharacterSetting set_;                  // キャラ毎の情報       
     private bool deathFlg_ = false;                 // 死亡状態か確認する変数
+    private readonly string[] bossName = { "YellowKabosu","WaterMonster","BossGolem","BossParty","PoisonSlime" };    // ボスの名前
 
     // name,num,animatorは親クラスのコンストラクタを呼び出して設定
     // numは、CharacterNumのenumの取得で使えそうかもだから用意してみた。使わなかったら削除する。
@@ -117,8 +118,7 @@ public class Enemy : CharaBase, InterfaceButtle
         }
     }
 
-    // テスト用
-    public void sethp(int hp)
+    public void SetHP(int hp)
     {
         set_.HP = hp;
 
@@ -296,5 +296,66 @@ public class Enemy : CharaBase, InterfaceButtle
             return true;
         }
         return false;
+    }
+
+    public override void SetBS((int,int)num, int hitNum)
+    {
+        // 何らかのバステ効果がある魔法があたる、かつ、キャラの命中率が敵の幸運値+ランダム値より高いとき
+        if (num.Item1 >= 0 && hitNum > set_.Luck + Random.Range(0, 80))
+        {
+            // 該当するバッドステータスをtrueにする
+            set_.condition[num.Item1 - 1].Item2 = true;
+            // NONをfalseにする
+            set_.condition[(int)CONDITION.NON - 1].Item2 = false;
+            Debug.Log("敵は状態異常にかかった");
+        }
+
+        if (num.Item2 >= 0 && hitNum > set_.Luck + Random.Range(0, 80))
+        {
+            // 該当するバッドステータスをtrueにする
+            set_.condition[num.Item2 - 1].Item2 = true;
+            // NONをfalseにする
+            set_.condition[(int)CONDITION.NON - 1].Item2 = false;
+            Debug.Log("敵は状態異常にかかった");
+        }
+
+        // 名前部分のアンダーバーで分ける
+        var name = set_.name.Split('_');
+        for (int i = 0; i < bossName.Length; i++)
+        {
+            // 名前一致時(=ボス)
+            if (name[0] == bossName[i])
+            {
+                // 即死無効とする
+                set_.condition[(int)CONDITION.DEATH - 1].Item2 = false;
+            }
+        }
+    }
+
+    public override (CONDITION, bool)[] GetBS()
+    {
+        return set_.condition;
+    }
+
+    public override void SetSpeed(int num)
+    {
+        set_.Speed = num;
+    }
+
+    public int Bst()
+    {
+        return set_.Bst;
+    }
+
+    public override void ConditionReset(bool allReset, int targetReset = -1)
+    {
+        if(allReset)
+        {
+            set_.condition[(int)CONDITION.NON - 1].Item2 = true;
+            set_.condition[(int)CONDITION.POISON - 1].Item2 = false;
+            set_.condition[(int)CONDITION.DARK - 1].Item2 = false;
+            set_.condition[(int)CONDITION.PARALYSIS - 1].Item2 = false;
+            set_.condition[(int)CONDITION.DEATH - 1].Item2 = false;
+        }
     }
 }

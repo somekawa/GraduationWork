@@ -23,6 +23,7 @@ public class ButtleMng : MonoBehaviour
     private int speedNum_ = 0;              // 命中判定用の値
     private int luckNum_ = 0;               // 幸運値の値
     private int element_ = 0;               // エレメント情報
+    private (int,int) badStatusNum_;        // 状態異常の数字
 
     private bool lastEnemyFlg_;
 
@@ -190,6 +191,16 @@ public class ButtleMng : MonoBehaviour
     {
         Debug.Log("***GetElement" + element_);
         return element_;
+    }
+
+    public void SetBadStatus(int sub1,int sub2)
+    {
+        badStatusNum_ = (sub1, sub2);
+    }
+
+    public (int,int) GetBadStatus()
+    {
+        return badStatusNum_;
     }
 
     // ユニたちが逃げる処理の時に使用する
