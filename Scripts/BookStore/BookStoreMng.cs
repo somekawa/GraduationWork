@@ -111,7 +111,7 @@ public class BookStoreMng : MonoBehaviour
         soldOutImage_.gameObject.SetActive(false);
 
         haveMoney_ = SceneMng.GetHaveMoney();
-        haveMoneyText_ = GameObject.Find("CheckArea/Money/Count").GetComponent<TMPro.TextMeshProUGUI>();
+        haveMoneyText_ = bookStoreUI.transform.Find("CheckArea/Money/Count").GetComponent<TMPro.TextMeshProUGUI>();
         haveMoneyText_.text = haveMoney_.ToString();
 
         popBookList_ = GameObject.Find("TownMng").GetComponent<PopListInTown>();

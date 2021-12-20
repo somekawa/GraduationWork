@@ -72,7 +72,9 @@ public abstract class CharaBase : object
             setting_.name = name;
             setting_.Level = popCharacter.param[0].Level;
             setting_.HP = popCharacter.param[0].HP;
+            setting_.maxHP = popCharacter.param[0].MaxHP;
             setting_.MP = popCharacter.param[0].MP;
+            setting_.maxMP = popCharacter.param[0].MaxMP;
             setting_.Attack = popCharacter.param[0].Attack;
             setting_.MagicAttack = popCharacter.param[0].MagicAttack;
             setting_.Defence = popCharacter.param[0].Defence;
@@ -84,9 +86,6 @@ public abstract class CharaBase : object
             setting_.isMove = false;
             setting_.animTime = 0.0f;
             //setting.buttlePos = set.buttlePos;    // 設定のタイミングが異なる
-
-            setting_.maxHP = setting_.HP;
-            setting_.maxMP = setting_.MP;
 
             // 最大4つまでつけられるのでここで初期化しておく
             setting_.Magic = new int[4];

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 // バッドステータスの効果を発動させるためのクラス
 
@@ -136,5 +137,49 @@ public class BadStatusMng : MonoBehaviour
         }
 
         return tmpConditionCheck;
+    }
+
+    public void SetBstIconImage(int num, int bstNum, GameObject[] gameobj,(CharaBase.CONDITION,bool)[] getbs ,bool deleteFlg = false)
+    {
+        if (!deleteFlg) // アイコンを追加する
+        {
+            // 状態異常中のアイコンを設定する
+            var obj = gameobj[num];
+            for (int f = 0; f < obj.transform.childCount; f++)
+            {
+                // [Bst_0]から順に画像が入っているか調べていき、入っていないところに画像をいれるようにする
+                var image = obj.transform.GetChild(f).GetComponent<Image>();
+                if (image.sprite == null)
+                {
+                    image.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BADSTATUSICON][bstNum - (int)CharaBase.CONDITION.POISON];
+                    break;
+                }
+            }
+        }
+        else
+        {
+            // アイコンを削除する(ターン数か治療で治ったとき)
+            // 1回全部消して、フラグがtrueのままのところを入れなおしたほうがいいかも
+            var obj = gameobj[num];
+            for (int f = 0; f < obj.transform.childCount; f++)
+            {
+                obj.transform.GetChild(f).GetComponent<Image>().sprite = null;
+            }
+
+            for (int i = 0; i < (int)CharaBase.CONDITION.DEATH; i++)
+            {
+                // 健康状態以外のコンディションのフラグがtrueになっていたら
+                if (getbs[i].Item2 && getbs[i].Item1 != CharaBase.CONDITION.NON)
+                {
+                    for (int f = 0; f < obj.transform.childCount; f++)
+                    {
+                        var image = obj.transform.GetChild(f).GetComponent<Image>();
+                        image.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BADSTATUSICON][(int)getbs[i].Item1 - (int)CharaBase.CONDITION.POISON];
+                        break;
+                    }
+                }
+            }
+
+        }
     }
 }

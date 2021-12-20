@@ -43,7 +43,7 @@ public class SaveLoadCSV : MonoBehaviour
             }
 
             // ステータスの項目見出し
-            string[] s1 = { "Name", "Level", "HP", "MP", "Attack", "MagicAttack",
+            string[] s1 = { "Name", "Level", "HP","MaxHP", "MP","MaxMP", "Attack", "MagicAttack",
             "Defence", "Speed", "Luck", "AnimMax","Magic0" ,"Magic1","Magic2" ,"Magic3" };
             string s2 = string.Join(",", s1);
             sw.WriteLine(s2);
@@ -76,7 +76,7 @@ public class SaveLoadCSV : MonoBehaviour
     public void SaveData(CharaBase.CharacterSetting set)
     {
         // 実際のステータス値
-        string[] data = { set.name, set.Level.ToString(),set.HP.ToString(),set.MP.ToString(),
+        string[] data = { set.name, set.Level.ToString(),set.HP.ToString(),set.maxHP.ToString(),set.MP.ToString(),set.maxMP.ToString(),
                           set.Attack.ToString(),set.MagicAttack.ToString(),set.Defence.ToString(),
                           set.Speed.ToString(),set.Luck.ToString(),set.AnimMax.ToString(),
                           set.Magic[0].ToString(),set.Magic[1].ToString(),
@@ -152,23 +152,25 @@ public class SaveLoadCSV : MonoBehaviour
             for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
             {
                 //// 一時変数に入れてからじゃないとsetに入れられない
-                int[] tmpArray = { int.Parse(csvDatas[i + 1][10]),
-                                int.Parse(csvDatas[i + 1][11]),
-                                int.Parse(csvDatas[i + 1][12]),
-                                int.Parse(csvDatas[i + 1][13]) };
+                int[] tmpArray = { int.Parse(csvDatas[i + 1][12]),
+                                int.Parse(csvDatas[i + 1][13]),
+                                int.Parse(csvDatas[i + 1][14]),
+                                int.Parse(csvDatas[i + 1][15]) };
 
                 CharaBase.CharacterSetting set = new CharaBase.CharacterSetting
                 {
                     name = csvDatas[i + 1][0],
                     Level = int.Parse(csvDatas[i + 1][1]),
                     HP = int.Parse(csvDatas[i + 1][2]),
-                    MP = int.Parse(csvDatas[i + 1][3]),
-                    Attack = int.Parse(csvDatas[i + 1][4]),
-                    MagicAttack = int.Parse(csvDatas[i + 1][5]),
-                    Defence = int.Parse(csvDatas[i + 1][6]),
-                    Speed = int.Parse(csvDatas[i + 1][7]),
-                    Luck = int.Parse(csvDatas[i + 1][8]),
-                    AnimMax = float.Parse(csvDatas[i + 1][9]),
+                    maxHP = int.Parse(csvDatas[i + 1][3]),
+                    MP = int.Parse(csvDatas[i + 1][4]),
+                    maxMP = int.Parse(csvDatas[i + 1][5]),
+                    Attack = int.Parse(csvDatas[i + 1][6]),
+                    MagicAttack = int.Parse(csvDatas[i + 1][7]),
+                    Defence = int.Parse(csvDatas[i + 1][8]),
+                    Speed = int.Parse(csvDatas[i + 1][9]),
+                    Luck = int.Parse(csvDatas[i + 1][10]),
+                    AnimMax = float.Parse(csvDatas[i + 1][11]),
                     Magic = tmpArray,
                 };
                 Debug.Log(csvDatas[i + 1][0] + "            キャラデータをロード中。残り" + i);

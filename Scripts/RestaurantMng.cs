@@ -142,7 +142,7 @@ public class RestaurantMng : MonoBehaviour
             int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2, statusUp_[4].Item2 };
             for(int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
             {
-                SceneMng.charasList_[i].SetStatusUpByCook(tmp);
+                SceneMng.charasList_[i].SetStatusUpByCook(tmp,true);
             }
         }
         else
@@ -161,7 +161,7 @@ public class RestaurantMng : MonoBehaviour
                 int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2, statusUp_[4].Item2 };
                 for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
                 {
-                    SceneMng.charasList_[i].SetStatusUpByCook(tmp);
+                    SceneMng.charasList_[i].SetStatusUpByCook(tmp,true);
                 }
 
                 // ‘fÞ‚ðŒ¸‚ç‚·

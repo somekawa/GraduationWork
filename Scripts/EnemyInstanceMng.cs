@@ -9,7 +9,7 @@ public class EnemyInstanceMng : MonoBehaviour
     public GameObject enemyTest;                // テスト用の敵
     public GameObject enemyHPBar;               // 敵用のHPバー
     public EnemySelect enemySelectObj;          // 敵選択用アイコン
-                                                // 通常攻撃弾のプレハブ
+
     [SerializeField]
     private GameObject enemyAttackPrefab_;     // ユニの通常攻撃と同じものでテストする
     [SerializeField]
@@ -40,6 +40,8 @@ public class EnemyInstanceMng : MonoBehaviour
 
     private BoxCollider changeEnableBoxCollider_;
     private Dictionary<CONDITION, int>[] enemyBstTurn_ = new Dictionary<CONDITION, int>[4];  // 敵毎のバッドステータス回復までのターン数(最大4体なのでここで確保しとく)
+
+    private GameObject[] enemyBstIconImage_ = new GameObject[4];       // バステアイコン
 
     public void Init()
     {
@@ -156,7 +158,7 @@ public class EnemyInstanceMng : MonoBehaviour
         //{
         //    attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
         //} while (SceneMng.charasList_[attackTarget_].HP() <= 0);
-        attackTarget_ = (int)SceneMng.CHARACTERNUM.UNI;
+        attackTarget_ = (int)SceneMng.CHARACTERNUM.JACK;
 
         // 行動前に発動するバッドステータスの処理
         var bst = badStatusMng_.BadStateMoveBefore(enemyList_[num].Item1.GetBS(), enemyList_[num].Item1, enemyList_[num].Item2, false);
@@ -369,6 +371,9 @@ public class EnemyInstanceMng : MonoBehaviour
             // 敵HPの親を、EnemySelectObjにする
             hpBar.transform.SetParent(GameObject.Find("ButtleUICanvas/EnemySelectObj").transform);
 
+            // 状態異常用のアイコンを1体の敵に対して3つ用意する
+            enemyBstIconImage_[num - 1] = hpBar.transform.Find("BadStateImages").gameObject;
+
             num++;
         }
 
@@ -450,6 +455,7 @@ public class EnemyInstanceMng : MonoBehaviour
             if (enemyBstTurn_[num][(CONDITION)i] <= 0)
             {
                 enemyBstTurn_[num].Remove((CONDITION)i);
+                badStatusMng_.SetBstIconImage(num, -1, enemyBstIconImage_, enemyList_[num].Item1.GetBS(),true);
             }
         }
         // 全ての状態異常が治ったとき
@@ -457,6 +463,7 @@ public class EnemyInstanceMng : MonoBehaviour
         {
             // CONDITIONをNONに戻す
             enemyList_[num].Item1.ConditionReset(true);
+            badStatusMng_.SetBstIconImage(num, -1, enemyBstIconImage_, enemyList_[num].Item1.GetBS(), true);
             Debug.Log("敵状態異常が全て治った");
         }
     }
@@ -580,20 +587,11 @@ public class EnemyInstanceMng : MonoBehaviour
             // 健康状態以外のコンディションのフラグがtrueになっていたら
             if (getBs[i].Item2 && getBs[i].Item1 != CONDITION.NON)
             {
-                // 数字が0か確認する
-                for (int k = 0; k < (int)CONDITION.DEATH; k++)
+                if (!enemyBstTurn_[num].ContainsKey(getBs[i].Item1))
                 {
-                    if(enemyBstTurn_[num].Count <= 0)
-                    {
-                        enemyBstTurn_[num].Add(getBs[i].Item1, Random.Range(1, 5));// 1以上5未満
-                    }
-
-                    // 0以下ならまだそのコンディション状態にはなっていないから、ここでかかるようにする
-                    // キーが存在するか確認が必要
-                    if (enemyBstTurn_[num].ContainsKey(getBs[k].Item1) && enemyBstTurn_[num][getBs[k].Item1] <= 0)
-                    {
-                        enemyBstTurn_[num].Add(getBs[i].Item1, Random.Range(1, 5));// 1以上5未満
-                    }
+                    enemyBstTurn_[num].Add(getBs[i].Item1, Random.Range(1, 5));// 1以上5未満
+                    badStatusMng_.SetBstIconImage(num, (int)enemyList_[num].Item1.GetBS()[i].Item1, enemyBstIconImage_, enemyList_[num].Item1.GetBS());
+                    break;
                 }
             }
         }

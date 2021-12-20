@@ -169,8 +169,8 @@ public class MenuActive : MonoBehaviour
         // 表示する文字の作成
         string str = "名前  :" + data.name + "\n" +
                      "レベル:" + data.Level.ToString() + "\n" +
-                     "HP    :" + data.HP.ToString() + "\n" +
-                     "MP    :" + data.MP.ToString() + "\n" +
+                     "HP    :" + data.HP.ToString() + "/" + data.maxHP.ToString() + "\n" +
+                     "MP    :" + data.MP.ToString() + "/" + data.maxHP.ToString() + "\n" +
                      "物理攻撃力:" + data.Attack.ToString() + "\n" +
                      "魔法攻撃力:" + data.MagicAttack.ToString() + "\n" +
                      "防御力:" + data.Defence.ToString() + "\n" +
