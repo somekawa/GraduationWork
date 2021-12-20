@@ -13,6 +13,7 @@ public class ItemList : ScriptableObject
 		public string ItemName;
 		public string Information;
 		public int ChapterNum;
+		public int Price_Buy;
 		public int Price_Sell;
 		public string WantMateria1;
 		public string WantMateria2;
