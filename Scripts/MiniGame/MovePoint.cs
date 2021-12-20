@@ -18,7 +18,7 @@ public class MovePoint : MonoBehaviour
 
     // カウントダウン表示
     private Image countImage_;
-    private Text countText_;
+    private TMPro.TextMeshProUGUI countText_;
 
     private RectTransform gameGauge_;
     private float gaugeOffsetMin_;
@@ -41,7 +41,7 @@ public class MovePoint : MonoBehaviour
     {
         // カウントダウン関連
         countImage_ = transform.Find("CountImage").GetComponent<Image>();
-        countText_ = countImage_.transform.Find("Count").GetComponent<Text>();
+        countText_ = countImage_.transform.Find("Count").GetComponent<TMPro.TextMeshProUGUI>();
         countImage_.gameObject.SetActive(false);
         // ミニゲーム関連
         gameGauge_ = this.transform.Find("BackImage").GetComponent<RectTransform>();

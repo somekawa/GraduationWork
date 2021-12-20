@@ -22,16 +22,16 @@ public class MagicCreate : MonoBehaviour
     // 画面下部、説明関連
     private string[] topicString_ = new string[(int)Bag_Word.WORD_MNG.MAX] {
     "Head","Element","Tail","Sub1","Sub2","Sub3"};
-    private Text topicText_;    // どのワードの種類を表示しているか
+    private TMPro.TextMeshProUGUI topicText_;    // どのワードの種類を表示しているか
 
     // どれを選択しているかを表示
-    private Text infoText_;
+    private TMPro.TextMeshProUGUI infoText_;
     private string[] seleEngWord_;
     private string[] selectWord_;
     private int targetWordNum_;// 必中ワードの番号を保存
     private int materiaNum_;//空のマテリアの番号を保存
     private Image materiaImage_;// 空のマテリア画像描画
-    private Text materiaCntText_;// 空のマテリアの所持数を描画
+    private TMPro.TextMeshProUGUI materiaCntText_;// 空のマテリアの所持数を描画
 
     //   0.作成開始ボタン　1.魔法合成終了ボタン
     private bool createFlag_ = false;
@@ -53,7 +53,7 @@ public class MagicCreate : MonoBehaviour
     //ミニゲームスタート用
     private MovePoint movePoint_;
     private Image judgeBack_;
-    private Text judgeText_;
+    private TMPro.TextMeshProUGUI judgeText_;
 
     public struct MagicCreateData
     {
@@ -68,7 +68,7 @@ public class MagicCreate : MonoBehaviour
     private int[] mngMaxCnt = new int[(int)Bag_Word.WORD_MNG.MAX];
 
     // 威力関連
-    private Text powerText_;
+    private TMPro.TextMeshProUGUI powerText_;
     private int magicPower_ = 0;
 
 
@@ -168,6 +168,7 @@ public class MagicCreate : MonoBehaviour
                 }
             }
         }
+
         return state;
     }
 
@@ -178,7 +179,12 @@ public class MagicCreate : MonoBehaviour
         data[count].pleate = Bag_Word.wordState[kind][dataNum].pleate;
         data[count].btn = Bag_Word.wordState[kind][dataNum].btn;
         data[count].power = Bag_Word.wordState[kind][dataNum].power;
-        data[count].getFlag = Bag_Word.wordState[kind][dataNum].getFlag;
+        bool flag = false;
+        if(Bag_Word.wordState[kind][dataNum].getFlag==1)
+        {
+            flag = true;
+        }
+        data[count].getFlag = flag;
     }
 
     public void Init()
@@ -194,12 +200,6 @@ public class MagicCreate : MonoBehaviour
         {
             mCreateData[(Bag_Word.WORD_MNG)i] = InitCheck((Bag_Word.WORD_MNG)i);
         }
-        //for (int i = 0; i < mngMaxCnt[(int)Bag_Word.WORD_MNG.ELEMENT]; i++)
-        //{
-        //    Debug.Log(mCreateData[Bag_Word.WORD_MNG.ELEMENT][i].name);
-        //}
-
-
 
 
         bagMagic_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Magic>();
@@ -215,7 +215,7 @@ public class MagicCreate : MonoBehaviour
         // ミニゲーム処理
         movePoint_ = miniGameMng.transform.GetComponent<MovePoint>();
         judgeBack_ = movePoint_.transform.Find("JudgeBack").GetComponent<Image>();
-        judgeText_ = judgeBack_.transform.Find("Text").GetComponent<Text>();
+        judgeText_ = judgeBack_.transform.Find("Text").GetComponent<TMPro.TextMeshProUGUI>();
         judgeBack_.gameObject.SetActive(false);
         miniGameMng.gameObject.SetActive(false);
         judgeText_.text = "";
@@ -229,18 +229,18 @@ public class MagicCreate : MonoBehaviour
         arrowBtn_[1] = viewParent_.transform.Find("RightBtn").GetComponent<Button>();
 
         // どれを種類のワードかを表示する
-        topicText_ = viewParent_.transform.Find("TopicText").GetComponent<Text>();
+        topicText_ = viewParent_.transform.Find("TopicText").GetComponent<TMPro.TextMeshProUGUI>();
         topicText_.text = topicString_[(int)Bag_Word.WORD_MNG.HEAD];
 
         // 選んだワードを表示
-        infoText_ = infoParent_.transform.Find("SelectWord").GetComponent<Text>();
+        infoText_ = infoParent_.transform.Find("SelectWord").GetComponent<TMPro.TextMeshProUGUI>();
         selectWord_ = new string[(int)Bag_Word.WORD_MNG.MAX];
         seleEngWord_ = new string[(int)Bag_Word.WORD_MNG.MAX];
         targetWordNum_ = Bag_Word.targetWordNum;
         materiaNum_ = Bag_Materia.emptyMateriaNum;
 
         materiaImage_ = infoParent_.transform.Find("MateriaArea/MateriaImage").GetComponent<Image>();
-        materiaCntText_ = infoParent_.transform.Find("MateriaArea/CountBack/Count").GetComponent<Text>();
+        materiaCntText_ = infoParent_.transform.Find("MateriaArea/CountBack/Count").GetComponent<TMPro.TextMeshProUGUI>();
         if (0 < Bag_Materia.materiaState[materiaNum_].haveCnt)
         {
             // 空のマテリアを1つでも持っていれば表示
@@ -249,7 +249,7 @@ public class MagicCreate : MonoBehaviour
         }
 
         // 威力を表示
-        powerText_ = infoParent_.transform.Find("PowerArea/PowerText").GetComponent<Text>();
+        powerText_ = infoParent_.transform.Find("PowerArea/PowerText").GetComponent<TMPro.TextMeshProUGUI>();
         powerText_.text = "";
 
         ResetCommon();
@@ -286,7 +286,7 @@ public class MagicCreate : MonoBehaviour
             else if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != "補助")
             {
                 // 攻撃系Elementを選択時に必中をもっていなかったらSub2でストップ
-                if (Bag_Word.wordState[InitPopList.WORD.SUB3][targetWordNum_].getFlag == false)
+                if (Bag_Word.wordState[InitPopList.WORD.SUB3][targetWordNum_].getFlag == 0)
                 {
                     if ((int)Bag_Word.WORD_MNG.SUB2 <= kindNum_)
                     {
@@ -616,19 +616,19 @@ public class MagicCreate : MonoBehaviour
             {
                 // 押下されたワードの番号を代入する
                 saveNumber_[kindNum_] = i;
+                saveWordNum_[kindNum_] = i;
                 break;
             }
         }
         //Debug.Log("選択したワード" + mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].name);
 
-        for (int i = 0; i < mngMaxCnt[kindNum_]; i++)
-        {
-            if (word == mCreateData[(Bag_Word.WORD_MNG)kindNum_][i].name)
-            {
-                saveWordNum_[kindNum_] = i;
-                //Debug.Log((Bag_Word.WORD_MNG)kindNum_ + "   "+word+"     " + saveWordNum_[kindNum_]);
-            }
-        }
+        //for (int i = 0; i < mngMaxCnt[kindNum_]; i++)
+        //{
+        //    if (word == mCreateData[(Bag_Word.WORD_MNG)kindNum_][i].name)
+        //    {
+        //        //Debug.Log((Bag_Word.WORD_MNG)kindNum_ + "   "+word+"     " + saveWordNum_[kindNum_]);
+        //    }
+        //}
 
 
         // -1以外は同じワード種別内で複数のボタンが押されたとき
@@ -707,7 +707,7 @@ public class MagicCreate : MonoBehaviour
             }
             // 攻撃系Element選択時に「必中」を持っていない時
             // Sab2の時点で「必中」を選択時
-            if (Bag_Word.wordState[InitPopList.WORD.SUB3][targetWordNum_].getFlag == false
+            if (Bag_Word.wordState[InitPopList.WORD.SUB3][targetWordNum_].getFlag == 1
              || selectWord_[(int)Bag_Word.WORD_MNG.SUB2] == "必中")
             {
                 if ((int)Bag_Word.WORD_MNG.SUB2 <= kindNum_)
@@ -794,7 +794,22 @@ public class MagicCreate : MonoBehaviour
                 judgeBack_.gameObject.SetActive(true);
 
                 movePoint_.SetMiniGameJudge(MovePoint.JUDGE.NON);// 初期化しておく
-                                                                 // 出来上がった魔法を保存
+
+
+                if(selectWord_[(int)Bag_Word.WORD_MNG.SUB1]=="")
+                {
+                    saveWordNum_[(int)Bag_Word.WORD_MNG.SUB1] = -1;
+                            saveWordNum_[(int)Bag_Word.WORD_MNG.SUB2] = -1;
+                    saveWordNum_[(int)Bag_Word.WORD_MNG.SUB3] = -1;
+
+                }
+                else if (selectWord_[(int)Bag_Word.WORD_MNG.SUB2] == "")
+                {
+                    saveWordNum_[(int)Bag_Word.WORD_MNG.SUB2] = -1;
+                    saveWordNum_[(int)Bag_Word.WORD_MNG.SUB3] = -1;
+                }
+
+                // 出来上がった魔法を保存
                 bagMagic_.MagicCreateCheck(allName_, mainName_, subName_,
                             magicPower_, rate,
                             saveWordNum_[(int)Bag_Word.WORD_MNG.HEAD],
@@ -919,7 +934,7 @@ public class MagicCreate : MonoBehaviour
         // ヘッドのワードは表示させておく
         for (int i = 0; i < mngMaxCnt[(int)InitPopList.WORD.HEAD]; i++)
         {
-            if (Bag_Word.wordState[InitPopList.WORD.HEAD][i].getFlag == true)
+            if (Bag_Word.wordState[InitPopList.WORD.HEAD][i].getFlag == 1)
             {
                 mCreateData[(int)Bag_Word.WORD_MNG.HEAD][i].btn.interactable = true;
                 mCreateData[(int)Bag_Word.WORD_MNG.HEAD][i].pleate.SetActive(true);

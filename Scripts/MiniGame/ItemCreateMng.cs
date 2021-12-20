@@ -21,12 +21,13 @@ public class ItemCreateMng : MonoBehaviour
     private string saveBtnName_ = "";   // どのアイテムを押したかを保存
     private Button saveBtn_;            // どのボタンを押したかを保存
     private int saveItemNum_ = 0;
+   // private string saveName_ = "";
 
     public struct itemRecipe
     {
         public GameObject pleate;   // アイテムを表示するオブジェクト
         public Button btn;          // アイテムクリック
-        public Text nameText;       // アイテムの名前を表示するText
+        public TMPro.TextMeshProUGUI nameText;       // アイテムの名前を表示するText
         public string name;         // アイテムの名前
         public string materia1;     // 合成に必要な素材1
         public string materia2;     // 合成に必要な素材2
@@ -41,14 +42,14 @@ public class ItemCreateMng : MonoBehaviour
     private MovePoint movePoint_;
     private MovePoint.JUDGE judge_ = MovePoint.JUDGE.NON;
     private Image judgeBack_;
-    private Text judgeText_;
+    private TMPro.TextMeshProUGUI judgeText_;
 
     private Button createBtn_;  // 作成開始ボタン
     private Button cancelBtn_;  // 合成終了開始ボタン
 
     // 選択したアイテムの説明欄
-    private Text createName_;   // 合成したいアイテムの名前
-    private Text wantMateria_;  // 合成したいアイテムの必要素材
+    private TMPro.TextMeshProUGUI createName_;   // 合成したいアイテムの名前
+    private TMPro.TextMeshProUGUI wantMateria_;  // 合成したいアイテムの必要素材
 
     void Start()
     {
@@ -68,7 +69,7 @@ public class ItemCreateMng : MonoBehaviour
             itemRecipeState[i].btn = itemRecipeState[i].pleate.GetComponent<Button>();
 
             // 表示するアイテムの名前
-            itemRecipeState[i].nameText = itemRecipeState[i].pleate.transform.Find("Text").GetComponent<Text>();
+            itemRecipeState[i].nameText = itemRecipeState[i].pleate.transform.Find("Text").GetComponent<TMPro.TextMeshProUGUI>();
             itemRecipeState[i].nameText.text = itemRecipeState[i].name;
             //  Debug.Log(wantMap_[WANT.MATERIA_0][number] );
             itemRecipeState[i].materia1 = InitPopList.itemData[i].materia1;
@@ -83,13 +84,13 @@ public class ItemCreateMng : MonoBehaviour
         movePoint_ = miniGameMng.transform.GetComponent<MovePoint>();
         miniGameMng.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
         judgeBack_ = miniGameMng.transform.Find("JudgeBack").GetComponent<Image>();
-        judgeText_ = judgeBack_.transform.Find("Text").GetComponent<Text>();
+        judgeText_ = judgeBack_.transform.Find("Text").GetComponent<TMPro.TextMeshProUGUI>();
 
         cancelBtn_ = transform.Find("CancelBtn").GetComponent<Button>();
         createBtn_ = transform.Find("CreateBtn").GetComponent<Button>();
 
-        createName_ = transform.Find("InfoBack/CreateItemName").GetComponent<Text>();
-        wantMateria_ = transform.Find("InfoBack/WantMateriaNames").GetComponent<Text>();
+        createName_ = transform.Find("InfoBack/CreateItemName").GetComponent<TMPro.TextMeshProUGUI>();
+        wantMateria_ = transform.Find("InfoBack/WantMateriaNames").GetComponent<TMPro.TextMeshProUGUI>();
         ResetCommon();
     }
 
@@ -114,8 +115,7 @@ public class ItemCreateMng : MonoBehaviour
                     judgeText_.text = "大成功";
                 }
                 judgeBack_.gameObject.SetActive(true);
-
-                bagItem_.ItemGetCheck(saveItemNum_, saveBtnName_, 1,judge_);
+                bagItem_.ItemGetCheck(judge_, saveItemNum_,  1);
                 saveBtn_.interactable = true;
                 saveBtnName_ = "";
 
@@ -234,7 +234,7 @@ public class ItemCreateMng : MonoBehaviour
     public void OnClickCancelCtn()
     {
         StopCoroutine(AlchemyRecipeSelect());
-        this.gameObject.SetActive(false);
+        gameObject.SetActive(false);
         uniHouseCanvas.gameObject.SetActive(true);
     }
 
@@ -255,7 +255,8 @@ public class ItemCreateMng : MonoBehaviour
                 SetActiveRecipe(i, saveBtnName_);
                 saveBtn_ = itemRecipeState[i].btn;
                 saveItemNum_ = i;// 番号を保存
-
+                //saveName_ = Bag_Item.data[i].name;
+                //Debug.Log("生成されたアイテム" + saveName_);
                 if (miniGameMng.gameObject.activeSelf == false)
                 {
                     createBtn_.interactable = true;
