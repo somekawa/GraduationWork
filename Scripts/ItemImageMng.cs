@@ -14,6 +14,7 @@ public class ItemImageMng : MonoBehaviour
         MAGIC,
         RESTAURANT,
         BADSTATUSICON,
+        BUFFICON,
         MAX
     }
     public static Dictionary<IMAGE, Sprite[]> spriteMap = new Dictionary<IMAGE, Sprite[]>();
@@ -32,6 +33,8 @@ public class ItemImageMng : MonoBehaviour
         spriteMap[IMAGE.BOOK] = ImageMng(1, 6, "/BookImage");
         // 状態異常中のアイコン
         spriteMap[IMAGE.BADSTATUSICON] = ImageMng(1, 3, "/BadStatusIcon");
+        // 戦闘中のバフアイコン
+        spriteMap[IMAGE.BUFFICON] = ImageMng(1, 6, "/BuffIcon");
 
         // 読み込みたいシート数、シート枚の大きさ、読み込みたい画像
         spriteMap[IMAGE.MATERIA] = ImageMng(5, 7, "/Materia/Materia_Field");

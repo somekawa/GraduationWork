@@ -24,6 +24,7 @@ public class ButtleMng : MonoBehaviour
     private int luckNum_ = 0;               // 幸運値の値
     private int element_ = 0;               // エレメント情報
     private (int,int) badStatusNum_;        // 状態異常の数字
+    private int refNum_ = -1;               // 攻撃反射対象の番号を保存する変数
 
     private bool lastEnemyFlg_;
 
@@ -89,7 +90,7 @@ public class ButtleMng : MonoBehaviour
 
         // 自分の行動外のときにも呼ばれる関数
         characterMng_.NotMyTurn();
-        enemyInstanceMng_.NotMyTurn();
+        enemyInstanceMng_.NotMyTurn(refNum_);
 
         if (moveTurnList_[moveTurnCnt_].Item2 == "Uni" || moveTurnList_[moveTurnCnt_].Item2 == "Jack")
         {
@@ -201,6 +202,11 @@ public class ButtleMng : MonoBehaviour
     public (int,int) GetBadStatus()
     {
         return badStatusNum_;
+    }
+
+    public void SetRefEnemyNum(int num)
+    {
+        refNum_ = num;
     }
 
     // ユニたちが逃げる処理の時に使用する

@@ -69,6 +69,10 @@ public class CharacterMng : MonoBehaviour
         public GameObject charaArrowImage;
         // 各キャラのバッドステータス回復までのターン数
         public Dictionary<CONDITION, int> charaBstTurn;
+        // 各キャラのバフ画像
+        public GameObject buffIconParent;
+        // 各キャラの吸収or反射バフ
+        public GameObject specialBuff;
     }
 
     private EachCharaData[] eachCharaData_ = new EachCharaData[(int)CHARACTERNUM.MAX];
@@ -135,6 +139,10 @@ public class CharacterMng : MonoBehaviour
             eachCharaData_[i].charaBstTurn = new Dictionary<CONDITION, int>();
 
             charaBstIconImage_[i] = buttleUICanvas.transform.Find(charasList_[i].Name() + "CharaData/BadStateImages").gameObject;
+
+            // バフ画像用
+            eachCharaData_[i].buffIconParent = buttleUICanvas.transform.Find(charasList_[i].Name() + "CharaData/BuffImages").gameObject;
+            eachCharaData_[i].specialBuff = buttleUICanvas.transform.Find(charasList_[i].Name() + "CharaData/SpecialBuff").gameObject;
         }
 
         useMagic_ = new CharaUseMagic();
@@ -521,6 +529,7 @@ public class CharacterMng : MonoBehaviour
                     // ターン数が0以下になったら、マップから削除する
                     if(eachCharaData_[(int)nowTurnChar_].charaBstTurn[(CONDITION)i] <= 0)
                     {
+                        charasList_[(int)nowTurnChar_].ConditionReset(false, i);    // 0以下になったものだけ回復
                         eachCharaData_[(int)nowTurnChar_].charaBstTurn.Remove((CONDITION)i);
                         badStatusMng_.SetBstIconImage((int)nowTurnChar_, -1, charaBstIconImage_, charasList_[(int)nowTurnChar_].GetBS(), true);
                     }
@@ -532,6 +541,32 @@ public class CharacterMng : MonoBehaviour
                     charasList_[(int)nowTurnChar_].ConditionReset(true);
                     badStatusMng_.SetBstIconImage((int)nowTurnChar_, -1, charaBstIconImage_, charasList_[(int)nowTurnChar_].GetBS(), true);
                     Debug.Log("キャラ状態異常が全て治った");
+                }
+
+                // バフを1ターン減少させる
+                if(!charasList_[(int)nowTurnChar_].CheckBuffTurn())
+                {
+                    // falseの状態(=何かのバフがきれたら)
+                    var buffMap = charasList_[(int)nowTurnChar_].GetBuff();
+                    for(int i = 0; i < buffMap.Count; i++)
+                    {
+                        if (buffMap[i + 1].Item2 > 0)   
+                        {
+                            continue;
+                        }
+
+                        // 効果が切れた(=ターンが0以下)
+                        var child = eachCharaData_[(int)nowTurnChar_].buffIconParent.transform.GetChild(i);
+                        if(child.GetComponent<Image>().sprite != null)
+                        {
+                            // アイコンをnullにして、上昇矢印も非表示にする
+                            child.GetComponent<Image>().sprite = null;
+                            for (int m = 0; m < child.childCount; m++)
+                            {
+                                child.GetChild(m).gameObject.SetActive(false);
+                            }
+                        }
+                    }
                 }
 
                 // 前のキャラの行動が終わったからターンを移す
@@ -745,7 +780,7 @@ public class CharacterMng : MonoBehaviour
                 }
 
                 // 選択した敵の番号を渡す
-                weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(buttleEnemySelect_.GetSelectNum()[0] + 1);
+                weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(buttleEnemySelect_.GetSelectNum()[0] + 1,-1);
             }
         }
 
@@ -770,7 +805,8 @@ public class CharacterMng : MonoBehaviour
         charasList_[(int)nowTurnChar_].SetMP(charasList_[(int)nowTurnChar_].MP() - mpDecrease_);
 
         // 魔法での攻撃対象を決定したときに入る
-        if(useMagic_.GetElementNum() >= 2) // 2からが炎魔法
+        if (useMagic_.GetElementAndSub1Num().Item1 >= 2 ||  // 属性魔法攻撃もしくは、敵へのデバフ(補助魔法)
+            useMagic_.GetElementAndSub1Num().Item1 == 1 && useMagic_.GetElementAndSub1Num().Item2 == 1) 
         {
             // 選択した敵の番号を渡す
             var tmp = buttleEnemySelect_.GetSelectNum();
@@ -787,7 +823,6 @@ public class CharacterMng : MonoBehaviour
                     useMagic_.InstanceMagicInfo(charaPos_, enePos_, tmp[i], i);
                 }
             }
-
             StartCoroutine(useMagic_.InstanceMagicCoroutine());
         }
 
@@ -821,7 +856,7 @@ public class CharacterMng : MonoBehaviour
         charMap_[CHARACTERNUM.UNI].gameObject.transform.position = keepFieldPos_;
     }
 
-    public void HPdecrease(int num)
+    public void HPdecrease(int num,int fromNum)
     {
         int hitProbabilityOffset = 0;   // 命中率
         // ダメージ値の算出
@@ -906,6 +941,36 @@ public class CharacterMng : MonoBehaviour
             damage = 1;
         }
 
+        //@ バステやダメージ処理よりも先に、反射か吸収のバフを張っているか確認する
+        var spbuff = charasList_[num].GetReflectionOrAbsorption();
+        if(spbuff == Chara.SPECIALBUFF.REF || spbuff == Chara.SPECIALBUFF.REF_M)         // 反射処理
+        {
+            // 攻撃値分相手のHPを減らす
+            buttleMng_.SetRefEnemyNum(fromNum);
+            charasList_[num].SetReflectionOrAbsorption(0,1);  // NONに戻す
+            Debug.Log("攻撃反射");
+
+            eachCharaData_[num].specialBuff.GetComponent<Image>().sprite = null;
+            eachCharaData_[num].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "";
+            return;
+        }
+        else if(spbuff == Chara.SPECIALBUFF.ABS || spbuff == Chara.SPECIALBUFF.ABS_M)    // 吸収処理
+        {
+            // 攻撃値の半分をHP回復する(防御力から引いた値にならないようにGet関数から直接値をとってくる)
+            charasList_[num].SetHP(charasList_[num].HP() + (buttleMng_.GetDamageNum() / 2));
+            charasList_[num].SetReflectionOrAbsorption(0,1);  // NONに戻す
+            Debug.Log("攻撃吸収");
+
+            eachCharaData_[num].specialBuff.GetComponent<Image>().sprite = null;
+            eachCharaData_[num].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "";
+            return;
+        }
+        else
+        {
+            // 何も処理を行わない
+        }
+
+
         // バッドステータスが付与されるか判定
         charasList_[num].SetBS(buttleMng_.GetBadStatus(), hitProbabilityOffset);
 
@@ -950,9 +1015,8 @@ public class CharacterMng : MonoBehaviour
         }
     }
 
-    //@ 不足処理あり
-    // 最後の引数がHPかどうかで回復用コルーチンを呼び出すようにする
-    public void SetCharaArrowActive(bool allflag, bool randFlg,int whatHeal)
+    //@ 不足処理あり(死亡時の回復をnoeffectにしたほうがいい)
+    public void SetCharaArrowActive(bool allflag, bool randFlg,int whatHeal,int sub3Num)
     {
         // 誰か1人をtrueにする場合は、上から順なので0番の人をtrueにする
         if(!allflag)
@@ -993,7 +1057,18 @@ public class CharacterMng : MonoBehaviour
                 tmpArray[i] = i;
             }
         }
-        rest_ = SelectToHealMagicChara(allflag, tmpArray,whatHeal);
+
+        if(useMagic_.GetElementAndSub1Num().Item1 == 0) 
+        {
+            // 回復処理へ
+            rest_ = SelectToHealMagicChara(allflag, tmpArray, whatHeal);
+        }
+        else
+        {
+            // 補助処理へ(バフ)
+            rest_ = SelectToBuffMagicChara(allflag, tmpArray, whatHeal,sub3Num);
+        }
+
         StartCoroutine(rest_);
     }
 
@@ -1015,6 +1090,13 @@ public class CharacterMng : MonoBehaviour
                     {
                         selectChara = CHARACTERNUM.UNI;
                     }
+                    // 1度全てfalseにする
+                    for (int i = 0; i < (int)CHARACTERNUM.MAX; i++)
+                    {
+                        eachCharaData_[i].charaArrowImage.SetActive(false);
+                    }
+                    // 該当するキャラの矢印だけtrueにする
+                    eachCharaData_[(int)selectChara].charaArrowImage.SetActive(true);
                 }
                 else if (Input.GetKeyDown(KeyCode.J))
                 {
@@ -1023,19 +1105,18 @@ public class CharacterMng : MonoBehaviour
                     {
                         selectChara = CHARACTERNUM.JACK;
                     }
+                    // 1度全てfalseにする
+                    for (int i = 0; i < (int)CHARACTERNUM.MAX; i++)
+                    {
+                        eachCharaData_[i].charaArrowImage.SetActive(false);
+                    }
+                    // 該当するキャラの矢印だけtrueにする
+                    eachCharaData_[(int)selectChara].charaArrowImage.SetActive(true);
                 }
                 else
                 {
                     // 何も処理を行わない
                 }
-
-                // 1度全てfalseにする
-                for (int i = 0; i < (int)CHARACTERNUM.MAX; i++)
-                {
-                    eachCharaData_[i].charaArrowImage.SetActive(false);
-                }
-                // 該当するキャラの矢印だけtrueにする
-                eachCharaData_[(int)selectChara].charaArrowImage.SetActive(true);
             }
 
             if (Input.GetKeyDown(KeyCode.Space))
@@ -1092,6 +1173,156 @@ public class CharacterMng : MonoBehaviour
 
                 StartCoroutine(useMagic_.InstanceMagicCoroutine());
 
+                flag = true;
+            }
+        }
+    }
+
+    private IEnumerator SelectToBuffMagicChara(bool allflag, int[] array, int whatBuff,int sub3Num)
+    {
+        bool flag = false;
+        var selectChara = CHARACTERNUM.UNI;
+
+        // バフのアイコン処理
+        System.Action<int,int> action = (int charaNum,int buffnum) => {
+            var bufftra = eachCharaData_[charaNum].buffIconParent.transform;
+            for (int i = 0; i < bufftra.childCount; i++)
+            {
+                if (bufftra.GetChild(i).GetComponent<Image>().sprite == null)
+                {
+                    // アイコンをいれる
+                    bufftra.GetChild(i).GetComponent<Image>().sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BUFFICON][whatBuff - 1];
+                    // 矢印でアップ倍率をいれる
+                    // ▲*1 = バフが1% ~30%,▲*2 = バフが31% ~70%,▲*3 = バフが71%~100%
+                    for (int m = 0; m < bufftra.GetChild(i).childCount; m++)
+                    {
+                        if (m <= buffnum)    // buffnumの数字以下ならtrueにして良い
+                        {
+                            bufftra.GetChild(i).GetChild(m).gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            bufftra.GetChild(i).GetChild(m).gameObject.SetActive(false);
+                        }
+                    }
+
+                    break;
+                }
+            }
+        };
+
+        while (!flag)
+        {
+            yield return null;
+
+            if (!allflag)    // 単体回復魔法の発動時
+            {
+                if (Input.GetKeyDown(KeyCode.H))
+                {
+                    // ユニより数値が小さくならないようにする
+                    if (--selectChara < CHARACTERNUM.UNI)
+                    {
+                        selectChara = CHARACTERNUM.UNI;
+                    }
+                    // 1度全てfalseにする
+                    for (int i = 0; i < (int)CHARACTERNUM.MAX; i++)
+                    {
+                        eachCharaData_[i].charaArrowImage.SetActive(false);
+                    }
+                    // 該当するキャラの矢印だけtrueにする
+                    eachCharaData_[(int)selectChara].charaArrowImage.SetActive(true);
+                }
+                else if (Input.GetKeyDown(KeyCode.J))
+                {
+                    // ジャックより数値が大きくならないようにする
+                    if (++selectChara > CHARACTERNUM.JACK)
+                    {
+                        selectChara = CHARACTERNUM.JACK;
+                    }
+                    // 1度全てfalseにする
+                    for (int i = 0; i < (int)CHARACTERNUM.MAX; i++)
+                    {
+                        eachCharaData_[i].charaArrowImage.SetActive(false);
+                    }
+                    // 該当するキャラの矢印だけtrueにする
+                    eachCharaData_[(int)selectChara].charaArrowImage.SetActive(true);
+                }
+                else
+                {
+                    // 何も処理を行わない
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                if (!allflag)    // 単体バフ
+                {
+                    // enePosとtargetNumは入れなくてよい(charaPos_に発動相手の座標を入れるようにする)
+                    useMagic_.InstanceMagicInfo(charasList_[(int)selectChara].GetButtlePos(), new Vector3(-1, -1, -1), -1, 0);
+
+                    if(sub3Num == 0)
+                    {
+                        // 上昇
+                        var buffnum = charasList_[(int)selectChara].SetBuff(useMagic_.GetTailNum(), whatBuff);
+                        if(!buffnum.Item2)
+                        {
+                            action((int)selectChara, buffnum.Item1);
+                        }
+                    }
+                    else
+                    {
+                        // 反射か吸収
+                        charasList_[(int)selectChara].SetReflectionOrAbsorption(whatBuff-1, sub3Num);
+                        eachCharaData_[(int)selectChara].specialBuff.GetComponent<Image>().sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BUFFICON][whatBuff + 3];
+                        if(sub3Num == 2)
+                        {
+                            eachCharaData_[(int)selectChara].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "反";
+                        }
+                        else
+                        {
+                            eachCharaData_[(int)selectChara].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "吸";
+                        }
+                    }
+                }
+                else
+                {
+                    // 複数回or全体回復
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        if (array[i] <= -1)
+                        {
+                            break;
+                        }
+
+                        // enePosとtargetNumは入れなくてよい(charaPos_に発動相手の座標を入れるようにする)
+                        useMagic_.InstanceMagicInfo(charasList_[array[i]].GetButtlePos(), new Vector3(-1, -1, -1), -1, i);
+
+                        if (sub3Num == 0)
+                        {
+                            // 上昇
+                            var buffnum = charasList_[array[i]].SetBuff(useMagic_.GetTailNum(), whatBuff);
+                            if(!buffnum.Item2)
+                            {
+                                action(array[i], buffnum.Item1);
+                            }
+                        }
+                        else
+                        {
+                            // 反射か吸収
+                            charasList_[array[i]].SetReflectionOrAbsorption(whatBuff-1, sub3Num);
+                            eachCharaData_[array[i]].specialBuff.GetComponent<Image>().sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BUFFICON][whatBuff + 3];
+                            if (sub3Num == 2)
+                            {
+                                eachCharaData_[array[i]].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "反";
+                            }
+                            else
+                            {
+                                eachCharaData_[array[i]].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "吸";
+                            }
+                        }
+                    }
+                }
+                StartCoroutine(useMagic_.InstanceMagicCoroutine());
                 flag = true;
             }
         }

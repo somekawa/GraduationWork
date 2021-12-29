@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 //　抽象クラス(CharaBase)とインタフェース(InterfaceButtle)を継承してCharaクラスを作成
@@ -13,6 +14,21 @@ public class Chara : CharaBase,InterfaceButtle
     private bool deathFlg_ = false;                 // 死亡状態か確認する変数
 
     private int[] statusUp = new int[5];            // 一時アップの数値を保存する用
+    private readonly int[] statusMap_ = new int[4];
+    private Dictionary<int, (int, int)> buffMap_
+        = new Dictionary<int, (int, int)>();        // バフ後の値とターン数を管理する<ワード順,(効果値,バフターン数)>
+
+    // 特殊バフ(基本上書き,発動後はNONに戻す)
+    public enum SPECIALBUFF
+    {
+        NON = 1,    // 無し
+        REF,        // 物理反射
+        REF_M,      // 魔法反射
+        ABS,        // 物理吸収
+        ABS_M       // 魔法反射
+    }
+
+    private SPECIALBUFF spBuff_ = SPECIALBUFF.NON;
 
     // name,num,animatorは親クラスのコンストラクタを呼び出して設定
     // numは、CharacterNumのenumの取得で使えそうかもだから用意してみた。使わなかったら削除する。
@@ -45,7 +61,8 @@ public class Chara : CharaBase,InterfaceButtle
 
     public int Damage()
     {
-        return set_.Attack;
+        return buffMap_[1].Item1;
+        //return set_.Attack;
     }
 
     public int HP()
@@ -161,12 +178,14 @@ public class Chara : CharaBase,InterfaceButtle
     {
         // 被ダメージアニメーションを開始
         set_.animator.SetBool(key_isDamage, flag);
-        return set_.Defence + barrierNum_;
+        return buffMap_[3].Item1 + barrierNum_;
+        //return set_.Defence + barrierNum_;
     }
 
     public override int MagicPower()
     {
-        return set_.MagicAttack;
+        return buffMap_[2].Item1;
+        //return set_.MagicAttack;
     }
     public override void Item()
     {
@@ -225,6 +244,17 @@ public class Chara : CharaBase,InterfaceButtle
     {
         set_.isMove = false;
         set_.animTime = 0.0f;
+
+        statusMap_[0] = set_.Attack;
+        statusMap_[1] = set_.MagicAttack;
+        statusMap_[2] = set_.Defence;
+        statusMap_[3] = set_.Speed;
+
+        buffMap_.Clear();
+        for (int i = 0; i < statusMap_.Length; i++)
+        {
+            buffMap_.Add(i + 1, (statusMap_[i], -1));  // ワードの順番と揃える
+        }
     }
 
     public bool GetIsMove()
@@ -301,7 +331,8 @@ public class Chara : CharaBase,InterfaceButtle
 
     public int Speed()
     {
-        return set_.Speed;
+        return buffMap_[4].Item1;
+        //return set_.Speed;
     }
 
     public int Luck()
@@ -386,7 +417,7 @@ public class Chara : CharaBase,InterfaceButtle
     public override void SetBS((int, int) num,int hitNum)
     {
         // 何らかのバステ効果がある魔法があたる、かつ、敵の命中率がキャラの幸運値+ランダム値より高いとき
-        if (num.Item1 >= 0 &&  hitNum > set_.Luck + Random.Range(0, 100))
+        if (num.Item1 > 0 &&  hitNum > set_.Luck + Random.Range(0, 100))
         {
             // 該当するバッドステータスをtrueにする
             set_.condition[num.Item1 - 1].Item2 = true;
@@ -395,7 +426,7 @@ public class Chara : CharaBase,InterfaceButtle
             Debug.Log("キャラは状態異常にかかった");
         }
 
-        if (num.Item2 >= 0 && hitNum > set_.Luck + Random.Range(0, 100))
+        if (num.Item2 > 0 && hitNum > set_.Luck + Random.Range(0, 100))
         {
             // 該当するバッドステータスをtrueにする
             set_.condition[num.Item2 - 1].Item2 = true;
@@ -433,5 +464,95 @@ public class Chara : CharaBase,InterfaceButtle
                 set_.condition[targetReset].Item2 = false;
             }
         }
+    }
+
+    public override (int, bool) SetBuff(int tail, int buff)
+    {
+        bool flag = false;
+        // バフ/デバフ内容を反映させる
+        // まずは効果量の設定として、威力数字をつくる
+        // 小(0)->2割,中(1)->4割,大(2)->6割とするには、tail+1*2にすればいい
+        float alphaNum = (((float)buffMap_[buff].Item1 - (float)statusMap_[buff - 1]) / (float)statusMap_[buff - 1]) * 10.0f;   // バフの重ね掛け用
+        float buffNum = ((tail + 1) * 2 + alphaNum) * 0.1f;
+        float num = statusMap_[buff - 1] * buffNum;
+        if (num <= 1.0f)
+        {
+            num = 1.0f;
+        }
+
+        // バフの重ね掛けかを残りの効果ターン数をみて判断する
+        if(buffMap_[buff].Item2 > 0)
+        {
+            // 各項目に応じた上昇処理(固定で+1ターンの延長としておく)
+            buffMap_[buff] = (statusMap_[buff - 1] + (int)num, buffMap_[buff].Item2 + 1);
+            flag = true;
+        }
+        else
+        {
+            // 各項目に応じた上昇処理(固定で4ターン後回復としておく)
+            buffMap_[buff] = (statusMap_[buff - 1] + (int)num, 4);
+        }
+
+        // (現在値 - 元値) / 元値 = 倍率 * 100%
+        float tmp = (((float)buffMap_[buff].Item1 - (float)statusMap_[buff - 1]) / (float)statusMap_[buff - 1]) * 100.0f;
+
+        // どの％領域にいるかで返す数字を変更する
+        if(tmp > 0 && tmp <= 30)
+        {
+            tmp = 0;
+        }
+        else if(tmp > 30 && tmp <= 70)
+        {
+            tmp = 1;
+        }
+        else if(tmp > 70 && tmp <= 100)
+        {
+            tmp = 2;
+        }
+        else
+        {
+            tmp = -1;
+        }
+
+        return ((int)tmp,flag);
+    }
+
+    public override bool CheckBuffTurn()
+    {
+        bool flag = true;
+        for (int i = 1; i <= buffMap_.Count; i++)
+        {
+            // もしバフが継続していたら
+            if (buffMap_[i].Item2 > 0)
+            {
+                // -1ターンする
+                buffMap_[i] = (buffMap_[i].Item1, buffMap_[i].Item2 - 1);
+
+                if (buffMap_[i].Item2 <= 0)    // 先ほどの-1で0以下になったならば
+                {
+                    Debug.Log("味方のバフが解除されました");
+                    buffMap_[i] = (statusMap_[i - 1], -1);
+                    flag = false;
+                }
+            }
+        }
+        return flag;
+    }
+
+    // 反射か吸収のバフ処理(基本は効果上書き)
+    public void SetReflectionOrAbsorption(int sub2,int num)
+    {
+        spBuff_ = (SPECIALBUFF)(sub2 + num);
+    }
+
+    // ダメージ処理時によびだされる
+    public SPECIALBUFF GetReflectionOrAbsorption()
+    {
+        return spBuff_;
+    }
+
+    public override Dictionary<int, (int, int)> GetBuff()
+    {
+        return buffMap_;
     }
 }

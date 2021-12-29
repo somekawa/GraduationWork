@@ -49,7 +49,7 @@ public class TownMng : MonoBehaviour
         // WarpField.csの初期化関数を先に呼ぶ
         GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
         // バッグ関連
-        GameObject.Find("Managers").GetComponent<Bag_Word>().Init();
+        GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
         GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
         GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
         GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();

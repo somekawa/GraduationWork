@@ -149,6 +149,9 @@ public abstract class CharaBase : object
     public abstract void ConditionReset(bool allReset,int targetReset = -1);  // 状態異常をリセットする
     public abstract (CONDITION, bool)[] GetBS();   // 自分の状態異常を取得
     public abstract void SetSpeed(int num);
+    public abstract (int,bool) SetBuff(int tail,int buff);
+    public abstract System.Collections.Generic.Dictionary<int, (int, int)> GetBuff();
+    public abstract bool CheckBuffTurn();
 
     //// override出来る関数
     //public virtual void Talk(string talk)

@@ -8,6 +8,8 @@ public class CheckAttackHit : MonoBehaviour
 {
     // 目標の敵か判別する番号
     private int targetNum_ = -1;
+    // 攻撃する側の番号(攻撃反射処理用)
+    private int fromAttackNum_ = -1;
 
     // 敵エフェクトの削除リスト
     private readonly List<string> enemyEffectDeleteList_ = new List<string>()
@@ -18,9 +20,11 @@ public class CheckAttackHit : MonoBehaviour
     // キャラの魔法エフェクトの削除
     private string charaMagicStr_ = "";
 
-    public void SetTargetNum(int num)
+    // キャラから敵への攻撃ではfromNumが必要ないから-1としておく
+    public void SetTargetNum(int num,int fromNum)
     {
         targetNum_ = num;
+        fromAttackNum_ = fromNum;
     }
 
     public void SetCharaMagicStr(string str)
@@ -57,19 +61,39 @@ public class CheckAttackHit : MonoBehaviour
                 else if(this.gameObject.name == charaMagicStr_)
                 {
                     var tmpStr = charaMagicStr_.Split('-');
-                    // 大威力か極大威力か土魔法か風魔法の中なら
-                    if (tmpStr[1] == "2(Clone)" ||
-                        tmpStr[1] == "3(Clone)" ||
-                        tmpStr[0] == "4" ||
-                       (tmpStr[0] == "5" && tmpStr[1] == "1(Clone)"))    
+
+                    if(tmpStr.Length >= 4)
                     {
-                        // アニメーション終了まで削除待つ
-                        this.gameObject.GetComponent<MagicMove>().MoveStop();
+                        // 補助魔法
+                        GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().Debuff(targetNum_ - 1,int.Parse(tmpStr[0]),int.Parse(tmpStr[2]));
+
+                        if(this.gameObject.GetComponent<MagicMove>())   // もしMagicMove.csがアタッチされているなら
+                        {
+                            // アニメーション終了まで削除待つ
+                            this.gameObject.GetComponent<MagicMove>().MoveStop();
+                        }
+                        else
+                        {
+                            Destroy(this.gameObject);
+                        }
                     }
                     else
                     {
-                        // 土魔法以外はすぐに削除する(現状は、)
-                        Destroy(this.gameObject);
+                        // 攻撃魔法
+                        // 大威力か極大威力か土魔法か風魔法の中なら
+                        if (tmpStr[1] == "2(Clone)" ||
+                            tmpStr[1] == "3(Clone)" ||
+                            tmpStr[0] == "4" ||
+                           (tmpStr[0] == "5" && tmpStr[1] == "1(Clone)"))
+                        {
+                            // アニメーション終了まで削除待つ
+                            this.gameObject.GetComponent<MagicMove>().MoveStop();
+                        }
+                        else
+                        {
+                            // 土魔法以外はすぐに削除する(現状は、)
+                            Destroy(this.gameObject);
+                        }
                     }
                 }
                 else
@@ -100,7 +124,7 @@ public class CheckAttackHit : MonoBehaviour
                 Debug.Log("Hit");
 
                 // HP減少処理
-                GameObject.Find("CharacterMng").GetComponent<CharacterMng>().HPdecrease(targetNum_);
+                GameObject.Find("CharacterMng").GetComponent<CharacterMng>().HPdecrease(targetNum_, fromAttackNum_);
 
                 // 自分の名前がBombMonsterであれば、自爆して自分も削除する
                 if (gameObject.name == "BombMonster")

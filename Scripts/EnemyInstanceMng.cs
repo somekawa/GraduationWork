@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using static CharaBase;
 
 public class EnemyInstanceMng : MonoBehaviour
@@ -42,6 +43,7 @@ public class EnemyInstanceMng : MonoBehaviour
     private Dictionary<CONDITION, int>[] enemyBstTurn_ = new Dictionary<CONDITION, int>[4];  // 敵毎のバッドステータス回復までのターン数(最大4体なのでここで確保しとく)
 
     private GameObject[] enemyBstIconImage_ = new GameObject[4];       // バステアイコン
+    private GameObject[] enemyDebuffIconImage_ = new GameObject[4];    // デバフアイコン
 
     public void Init()
     {
@@ -167,6 +169,7 @@ public class EnemyInstanceMng : MonoBehaviour
         {
             // 麻痺で動けない
             anim_ = ANIMATION.IDLE;
+            AfterAttack(num);        // これを呼ばないと、バステやデバフのターンが進まないかも
             return;
         }
 
@@ -237,14 +240,14 @@ public class EnemyInstanceMng : MonoBehaviour
                         changeEnableBoxCollider_ = weaponTagObj[i].GetComponent<BoxCollider>();
 
                         // 攻撃対象のキャラの番号を渡す
-                        weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(attackTarget_);
+                        weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(attackTarget_,num);
                     }
                 }
                 else
                 {
                     // 変換が出来なかった(遠距離攻撃型)
                     // 攻撃対象のキャラの番号を渡す
-                    weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(attackTarget_);
+                    weaponTagObj[i].GetComponent<CheckAttackHit>().SetTargetNum(attackTarget_,num);
                 }
             }
         }
@@ -371,8 +374,10 @@ public class EnemyInstanceMng : MonoBehaviour
             // 敵HPの親を、EnemySelectObjにする
             hpBar.transform.SetParent(GameObject.Find("ButtleUICanvas/EnemySelectObj").transform);
 
-            // 状態異常用のアイコンを1体の敵に対して3つ用意する
+            // 状態異常用のアイコン(1体の敵に対して3つ)
             enemyBstIconImage_[num - 1] = hpBar.transform.Find("BadStateImages").gameObject;
+            // デバフ用のアイコン(1体の敵に対して4つ)
+            enemyDebuffIconImage_[num - 1] = hpBar.transform.Find("BuffImages").gameObject;
 
             num++;
         }
@@ -454,10 +459,38 @@ public class EnemyInstanceMng : MonoBehaviour
             // ターン数が0以下になったら、マップから削除する
             if (enemyBstTurn_[num][(CONDITION)i] <= 0)
             {
+                enemyList_[num].Item1.ConditionReset(false, i);    // 0以下になったものだけ回復
                 enemyBstTurn_[num].Remove((CONDITION)i);
                 badStatusMng_.SetBstIconImage(num, -1, enemyBstIconImage_, enemyList_[num].Item1.GetBS(),true);
             }
         }
+
+        // デバフを1ターン減少させる
+        if (!enemyList_[num].Item1.CheckBuffTurn())
+        {
+            // falseの状態(=何かのデバフがきれたら)
+            var buffMap = enemyList_[num].Item1.GetBuff();
+            for (int i = 0; i < buffMap.Count; i++)
+            {
+                if (buffMap[i + 1].Item2 > 0)
+                {
+                    continue;
+                }
+
+                // 効果が切れた(=ターンが0以下)
+                var child = enemyDebuffIconImage_[num].transform.GetChild(i);
+                if (child.GetComponent<Image>().sprite != null)
+                {
+                    // アイコンをnullにして、低下矢印も非表示にする
+                    child.GetComponent<Image>().sprite = null;
+                    for (int m = 0; m < child.childCount; m++)
+                    {
+                        child.GetChild(m).gameObject.SetActive(false);
+                    }
+                }
+            }
+        }
+
         // 全ての状態異常が治ったとき
         if (enemyBstTurn_[num].Count <= 0)
         {
@@ -504,7 +537,7 @@ public class EnemyInstanceMng : MonoBehaviour
         return enemyPosSetMap_;
     }
 
-    public void HPdecrease(int num)
+    public void HPdecrease(int num,bool refFlg = false)
     {
         // すでにHPが0を下回っていたら処理を抜ける(魔法攻撃連続ヒット用のガード処理)
         if (enemyList_[num].Item1.HP() <= 0)
@@ -515,66 +548,75 @@ public class EnemyInstanceMng : MonoBehaviour
         int hitProbabilityOffset = 0; 
         var damage = 0;
 
-        // クリティカルの計算をする(基礎値と幸運値で上限を狭める)
-        int criticalRand = Random.Range(0, 100 - (10 + buttleMng_.GetLuckNum()));
-        if (criticalRand <= 10 + buttleMng_.GetLuckNum())
+        if(refFlg)
         {
-            // クリティカル発生(必中+ダメージ2倍)10はクリティカルの基礎値
-            Debug.Log(criticalRand + "<=" + (10 + buttleMng_.GetLuckNum()) + "なので、キャラの攻撃がクリティカル！");
-            // クリティカルダメージ
-            damage = (buttleMng_.GetDamageNum() * 2) - enemyList_[num].Item1.Defence(true);
-
-            hitProbabilityOffset = 200; // 100以上の数字が必要になる(バステ付与時に幸運値+ランダムが100を越える可能性があるから)
+            // 防御貫通
+            // 反射時は必中
+            damage = buttleMng_.GetDamageNum();
         }
         else
         {
-            // クリティカルじゃないとき
-            Debug.Log(criticalRand + ">" + (10 + buttleMng_.GetLuckNum()) + "なので、キャラの攻撃はクリティカルではない");
-
-            // 命中計算をする
-            // ①攻撃する側のSpeed / 攻撃される側のSpeed * 100 = ％の出力
-            var hitProbability = (int)((float)buttleMng_.GetSpeedNum() / (float)enemyList_[num].Item1.Speed() * 100.0f);
-            // ②キャラも敵も+10％の補正値を入れてキャラ側だけに(自分のLuck * 5)％をプラスする。
-            hitProbabilityOffset = hitProbability + 10 + (buttleMng_.GetLuckNum() * 5);
-            // ③hitProbabilityOffsetが100以上なら自動命中で、それ以下ならランダム値を取る。
-            if (hitProbabilityOffset < 100)
+            // クリティカルの計算をする(基礎値と幸運値で上限を狭める)
+            int criticalRand = Random.Range(0, 100 - (10 + buttleMng_.GetLuckNum()));
+            if (criticalRand <= 10 + buttleMng_.GetLuckNum())
             {
-                int rand = Random.Range(0, 100);
-                Debug.Log("命中率" + hitProbabilityOffset + "ランダム値" + rand);
+                // クリティカル発生(必中+ダメージ2倍)10はクリティカルの基礎値
+                Debug.Log(criticalRand + "<=" + (10 + buttleMng_.GetLuckNum()) + "なので、キャラの攻撃がクリティカル！");
+                // クリティカルダメージ
+                damage = (buttleMng_.GetDamageNum() * 2) - enemyList_[num].Item1.Defence(true);
 
-                if (rand <= hitProbabilityOffset)
-                {
-                    // 命中
-                    Debug.Log(rand + "<=" + hitProbabilityOffset + "なので、命中");
-                    damage = buttleMng_.GetDamageNum() - enemyList_[num].Item1.Defence(true);
-                }
-                else
-                {
-                    // 回避
-                    Debug.Log(rand + ">" + hitProbabilityOffset + "なので、回避");
-                    return;
-                }
+                hitProbabilityOffset = 200; // 100以上の数字が必要になる(バステ付与時に幸運値+ランダムが100を越える可能性があるから)
             }
             else
             {
-                Debug.Log("命中率" + hitProbabilityOffset + "が100以上ならので、自動命中");
-                damage = buttleMng_.GetDamageNum() - enemyList_[num].Item1.Defence(true);
+                // クリティカルじゃないとき
+                Debug.Log(criticalRand + ">" + (10 + buttleMng_.GetLuckNum()) + "なので、キャラの攻撃はクリティカルではない");
+
+                // 命中計算をする
+                // ①攻撃する側のSpeed / 攻撃される側のSpeed * 100 = ％の出力
+                var hitProbability = (int)((float)buttleMng_.GetSpeedNum() / (float)enemyList_[num].Item1.Speed() * 100.0f);
+                // ②キャラも敵も+10％の補正値を入れてキャラ側だけに(自分のLuck * 5)％をプラスする。
+                hitProbabilityOffset = hitProbability + 10 + (buttleMng_.GetLuckNum() * 5);
+                // ③hitProbabilityOffsetが100以上なら自動命中で、それ以下ならランダム値を取る。
+                if (hitProbabilityOffset < 100)
+                {
+                    int rand = Random.Range(0, 100);
+                    Debug.Log("命中率" + hitProbabilityOffset + "ランダム値" + rand);
+
+                    if (rand <= hitProbabilityOffset)
+                    {
+                        // 命中
+                        Debug.Log(rand + "<=" + hitProbabilityOffset + "なので、命中");
+                        damage = buttleMng_.GetDamageNum() - enemyList_[num].Item1.Defence(true);
+                    }
+                    else
+                    {
+                        // 回避
+                        Debug.Log(rand + ">" + hitProbabilityOffset + "なので、回避");
+                        return;
+                    }
+                }
+                else
+                {
+                    Debug.Log("命中率" + hitProbabilityOffset + "が100以上ならので、自動命中");
+                    damage = buttleMng_.GetDamageNum() - enemyList_[num].Item1.Defence(true);
+                }
             }
-        }
 
-        // 攻撃側の属性と自分の弱点属性が一致してたらダメージ量を2倍にする
-        if (enemyList_[num].Item1.Weak() == buttleMng_.GetElement())
-        {
-            damage *= 2;
-            Debug.Log("敵の弱点属性！ ダメージ量2倍で" + damage);
-        }
+            // 攻撃側の属性と自分の弱点属性が一致してたらダメージ量を2倍にする
+            if (enemyList_[num].Item1.Weak() == buttleMng_.GetElement())
+            {
+                damage *= 2;
+                Debug.Log("敵の弱点属性！ ダメージ量2倍で" + damage);
+            }
 
 
-        // ダメージ値の算出
-        if (damage <= 0)
-        {
-            Debug.Log("キャラの攻撃力より敵の防御力が上回ったのでダメージが1になりました");
-            damage = 1;
+            // ダメージ値の算出
+            if (damage <= 0)
+            {
+                Debug.Log("キャラの攻撃力より敵の防御力が上回ったのでダメージが1になりました");
+                damage = 1;
+            }
         }
 
         // バッドステータスが付与されるか判定
@@ -634,13 +676,59 @@ public class EnemyInstanceMng : MonoBehaviour
         }
     }
 
+    // num:敵番号,tail:威力,debuff:減少効果内容
+    public void Debuff(int num,int tail,int debuff)
+    {
+        // バフのアイコン処理
+        System.Action<int, int> action = (int charaNum, int buffnum) => {
+            var bufftra = enemyDebuffIconImage_[charaNum].transform;
+            for (int i = 0; i < bufftra.childCount; i++)
+            {
+                if (bufftra.GetChild(i).GetComponent<Image>().sprite == null)
+                {
+                    // アイコンをいれる
+                    bufftra.GetChild(i).GetComponent<Image>().sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BUFFICON][debuff - 1];
+                    // 矢印でアップ倍率をいれる
+                    // ▲*1 = バフが1% ~30%,▲*2 = バフが31% ~70%,▲*3 = バフが71%~100%
+                    for (int m = 0; m < bufftra.GetChild(i).childCount; m++)
+                    {
+                        if (m <= buffnum)    // buffnumの数字以下ならtrueにして良い
+                        {
+                            bufftra.GetChild(i).GetChild(m).gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            bufftra.GetChild(i).GetChild(m).gameObject.SetActive(false);
+                        }
+                    }
+
+                    break;
+                }
+            }
+        };
+
+        var debuffnum = enemyList_[num].Item1.SetBuff(tail, debuff);
+
+        if (!debuffnum.Item2)
+        {
+            action(num, debuffnum.Item1);
+        }
+    }
+
     public void SetEnemySpawn(GameObject obj,int num)
     {
         eventEnemy_ = (obj, num);
     }
 
-    public void NotMyTurn()
+    public void NotMyTurn(int refNum)
     {
+        if(refNum >= 0) // 攻撃がキャラによって反射されたとき
+        {
+            // 攻撃をしかけた敵のHPが減るようにする
+            HPdecrease(refNum,true);
+            buttleMng_.SetRefEnemyNum(-1);
+        }
+
         // ダメージを受けたときのモーションを規定時間で終了させる
         for (int i = 0; i < enemyMap_.Count; i++)
         {

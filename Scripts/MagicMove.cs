@@ -7,6 +7,8 @@ public class MagicMove : MonoBehaviour
     // 飛ばす力
     [SerializeField]
     private float power;
+    [SerializeField]
+    private float destroyTime_ = -1.0f;
     // Rigidbody
     private Rigidbody rigid;
     // パーティクルシステム
@@ -20,8 +22,11 @@ public class MagicMove : MonoBehaviour
         //　自身の子要素からParticleSystemを取得
         particle = GetComponentInChildren<ParticleSystem>();
 
-        // 5秒後に消える？
-        //Destroy(this.gameObject,5);
+        if(destroyTime_ > 0.0f)
+        {
+            // 時間指定で消えてほしいエフェクト用
+            Destroy(this.gameObject, destroyTime_);
+        }
     }
 
     void Update()
