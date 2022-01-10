@@ -34,15 +34,20 @@ public class Bag_Item : MonoBehaviour
     }
     public static ItemData[] itemState;
     public static ItemData[] data;
+    public static bool itemUseFlg = false;  // アイテムを使用したらtrue
     private int exItemNum_ ;// 大成功を含めたアイテムの数
 
     private int clickItemNum_ = -1;
     private Text info_; // クリックしたアイテムを説明する欄
     private Button throwAwayBtn_;
+    private Button useBtn_;
+    private UseItem useItem_;
+    private GameObject infoBack_;
+    private GameObject charasText_;
+
     private bool checkFlag_ = false;
 
     public void Init()
-    // void Start()
     {
         if (checkFlag_ == false)
         {
@@ -177,16 +182,20 @@ public class Bag_Item : MonoBehaviour
 
     public void SetItemNumber(int num)
     {
-        // 捨てるボタンを表示
+        // 捨てる/使うボタンを表示
         if (throwAwayBtn_ == null)
         {
-            throwAwayBtn_ = GameObject.Find("ItemBagMng/InfoBack/ItemDelete").GetComponent<Button>();
-            info_ = GameObject.Find("ItemBagMng/InfoBack/InfoText").GetComponent<Text>();
+            infoBack_ = GameObject.Find("ItemBagMng/InfoBack").gameObject;
+            throwAwayBtn_ = infoBack_.transform.Find("ItemDelete").GetComponent<Button>();
+            useBtn_ = infoBack_.transform.Find("ItemUse").GetComponent<Button>();
+            info_ = infoBack_.transform.Find("InfoText").GetComponent<Text>();
         }
         throwAwayBtn_.gameObject.SetActive(true);
-
+        useBtn_.gameObject.SetActive(true);
         // 選択されたアイテムの番号を保存
         clickItemNum_ = num;
+
+        StartCoroutine(MoveObj(false));
     }
 
     public void OnClickThrowAwayButton()
@@ -207,8 +216,134 @@ public class Bag_Item : MonoBehaviour
             // 所持数が0になったら非表示にする
             itemState[clickItemNum_].box.SetActive(false);
             throwAwayBtn_.gameObject.SetActive(false);
+            useBtn_.gameObject.SetActive(false);
             info_.text = "";
         }
     }
 
+    public void OnClickUseButton()
+    {
+        if(useItem_ == null)
+        {
+            useItem_ = GameObject.Find("ItemBagMng").GetComponent<UseItem>();
+        }
+
+        if(infoBack_ == null)
+        {
+            infoBack_ = GameObject.Find("ItemBagMng/InfoBack").gameObject;
+        }
+
+        Text[] text = new Text[2];
+        for(int i = 0; i < charasText_.transform.childCount; i++)
+        {
+            text[i] = charasText_.transform.GetChild(i).GetChild(0).GetComponent<Text>();
+        }
+
+        // ここで返り値を一時変数にいれないと、Use関数を2回通ることになってバグが生じる
+        var tmp = useItem_.Use(clickItemNum_);
+
+        // 今選択中のアイテムを使える
+        if (tmp.Item1)
+        {
+            if (tmp.Item2)
+            {
+                // 対象の選択が必要
+                useItem_.TextInit(text);
+                StartCoroutine(MoveObj(true));
+            }
+            else
+            {
+                // 対象の選択が必要ない
+                // trueで返ってきたときには、使用したアイテムを-1する
+                itemState[clickItemNum_].haveCnt--;
+                itemUseFlg = true;
+            }
+        }
+
+        // 表示中の所持数を更新
+        itemState[clickItemNum_].cntText.text = itemState[clickItemNum_].haveCnt.ToString();
+        if (itemState[clickItemNum_].haveCnt < 1)
+        {
+            // 所持数が0になったら非表示にする
+            itemState[clickItemNum_].box.SetActive(false);
+            throwAwayBtn_.gameObject.SetActive(false);
+            useBtn_.gameObject.SetActive(false);
+            info_.text = "";
+        }
+    }
+
+    // オブジェクト移動のコルーチン
+    private System.Collections.IEnumerator MoveObj(bool outFlg)
+    {
+        if(charasText_ == null)
+        {
+            charasText_ = GameObject.Find("ItemBagMng/CharasText").gameObject;
+        }
+
+        (int, bool)[] tmpPair = new (int, bool)[2];
+        if (outFlg)
+        {
+            tmpPair[0] = (300, false);
+            tmpPair[1] = (-170, false);
+        }
+        else
+        {
+            tmpPair[0] = (105, false);
+            tmpPair[1] = (0, false);
+        }
+
+        bool tmpFlg = false;
+        while(!tmpFlg)
+        {
+            tmpFlg = true;
+
+            if(outFlg)
+            {
+                // テキストは左に、アイテム説明は右にずらす
+                if (!tmpPair[0].Item2)
+                {
+                    infoBack_.transform.position = new Vector3(infoBack_.transform.position.x + 3, infoBack_.transform.position.y, infoBack_.transform.position.z);
+                    if (infoBack_.transform.localPosition.x >= tmpPair[0].Item1)
+                    {
+                        tmpPair[0].Item2 = true;
+                    }
+                }
+                if (!tmpPair[1].Item2)
+                {
+                    charasText_.transform.position = new Vector3(charasText_.transform.position.x - 3, charasText_.transform.position.y, charasText_.transform.position.z);
+                    if (charasText_.transform.localPosition.x <= tmpPair[1].Item1)
+                    {
+                        tmpPair[1].Item2 = true;
+                    }
+                }
+            }
+            else
+            {
+                // テキストは右に、アイテム説明は左に戻す
+                if (!tmpPair[0].Item2)
+                {
+                    infoBack_.transform.position = new Vector3(infoBack_.transform.position.x - 3, infoBack_.transform.position.y, infoBack_.transform.position.z);
+                    if (infoBack_.transform.localPosition.x <= tmpPair[0].Item1)
+                    {
+                        tmpPair[0].Item2 = true;
+                    }
+                }
+                if (!tmpPair[1].Item2)
+                {
+                    charasText_.transform.position = new Vector3(charasText_.transform.position.x + 3, charasText_.transform.position.y, charasText_.transform.position.z);
+                    if (charasText_.transform.localPosition.x >= tmpPair[1].Item1)
+                    {
+                        tmpPair[1].Item2 = true;
+                    }
+                }
+            }
+
+            for (int i = 0; i < tmpPair.Length; i++)
+            {
+                tmpFlg &= tmpPair[i].Item2;
+            }
+
+            yield return null;
+        }
+    }
 }

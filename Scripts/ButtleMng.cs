@@ -214,4 +214,11 @@ public class ButtleMng : MonoBehaviour
     {
         enemyInstanceMng_.DeleteEnemy();
     }
+
+    // アイテムによる固定ダメージ
+    public void ItemDamage(int itemDamageNum)
+    {
+        SetDamageNum(itemDamageNum);    // ダメージ値をセット
+        enemyInstanceMng_.ItemDamage(); // 全エネミー分HPdecrease関数を回すようにする
+    }
 }

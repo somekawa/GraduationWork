@@ -784,4 +784,15 @@ public class EnemyInstanceMng : MonoBehaviour
         // 全ての敵が死亡アニメーションまで終了したらtrueで返す
         return true;
     }
+
+    // キャラからのアイテムによる固定ダメージ
+    public void ItemDamage()
+    {
+        // 対象は全てのエネミー
+        for(int i = 0; i < enemyList_.Count; i++)
+        {
+            HPdecrease(i,true);
+            enemyList_[i].Item1.DamageAnim();
+        }
+    }
 }

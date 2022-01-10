@@ -256,8 +256,56 @@ public class CharacterMng : MonoBehaviour
             }
         }
 
+        // キャラによるアイテムの使用状態を確認
+        if (Bag_Item.itemUseFlg)
+        {
+            Bag_Item.itemUseFlg = false;
+            // アイテム画面を閉じる
+            GameObject.Find("SceneMng").GetComponent<MenuActive>().IsOpenItemMng(false);
+
+            for (int k = 0; k < (int)CHARACTERNUM.MAX; k++)
+            {
+                // HPMPバーの更新
+                eachCharaData_[k].charaHPMPMap.Item1.SetHPMPBar(charasList_[k].HP(), charasList_[k].MaxHP());
+                eachCharaData_[k].charaHPMPMap.Item2.SetHPMPBar(charasList_[k].MP(), charasList_[k].MaxMP());
+
+                // バステの更新
+                var tmpbs = charasList_[k].GetBS();
+                var tmpflg = false;
+                // 治した状態異常を探して、状態異常アイコンを外す
+                for (int i = 0; i < (int)CONDITION.DEATH; i++)
+                {
+                    // NONが最初からtrueならbreakで飛ばす
+                    if (tmpbs[0].Item2)
+                    {
+                        break;
+                    }
+
+                    if (!tmpbs[i].Item2)
+                    {
+                        badStatusMng_.SetBstIconImage(k, -1, charaBstIconImage_, charasList_[k].GetBS(), true);
+                    }
+                    tmpflg |= tmpbs[i].Item2;
+                }
+
+                // GetBSで全てfalseになっていたら、アイテムで全ての状態異常が治ったという証拠
+                if (!tmpflg)
+                {
+                    // CONDITIONをNONに戻す
+                    charasList_[k].ConditionReset(true);
+                    badStatusMng_.SetBstIconImage(k, -1, charaBstIconImage_, charasList_[k].GetBS(), true);
+                    Debug.Log("キャラ状態異常が全て治った");
+                }
+            }
+
+            // 次のキャラor敵に行動が回るようにanim_とoldAnim_を設定する
+            anim_ = ANIMATION.IDLE;
+            oldAnim_ = ANIMATION.NON;
+            Debug.Log("アイテムを使用したので、行動終了");
+        }
+
         // 行動前に発動するバッドステータスの処理
-        if(!myTurnOnceFlg_)
+        if (!myTurnOnceFlg_)
         {
             myTurnOnceFlg_ = true;
             var bst = badStatusMng_.BadStateMoveBefore(charasList_[(int)nowTurnChar_].GetBS(), charasList_[(int)nowTurnChar_], eachCharaData_[(int)nowTurnChar_].charaHPMPMap.Item1, true);
@@ -467,6 +515,9 @@ public class CharacterMng : MonoBehaviour
                         // 防御用の値を0に戻す
                         charasList_[(int)nowTurnChar_].SetBarrierNum();
                         Debug.Log("アイテムコマンドが有効コマンドです");
+
+                        // アイテム画面を開く
+                        GameObject.Find("SceneMng").GetComponent<MenuActive>().IsOpenItemMng(true);
                         break;
                     case ImageRotate.COMMAND.BARRIER:
                         // 次の自分のターンまで防御力を1.5倍にする

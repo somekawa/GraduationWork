@@ -17,9 +17,9 @@ public class PictureBookCheck : MonoBehaviour
     void Start()
     //    public void Init()
     {
-        activePicture_ = new GameObject[(int)DropFieldMateria.items.MAX];
-        posX_ = new float[(int)DropFieldMateria.items.MAX] {
-        -400.0f,-200.0f,0.0f,200.0f,400.0f };
+        //activePicture_ = new GameObject[(int)DropFieldMateria.items.MAX];
+        //posX_ = new float[(int)DropFieldMateria.items.MAX] {
+        //-400.0f,-200.0f,0.0f,200.0f,400.0f };
        //gameObject.SetActive(false);
 
     }

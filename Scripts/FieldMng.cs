@@ -30,8 +30,11 @@ public class FieldMng : MonoBehaviour
     public static MODE nowMode = MODE.SEARCH;      // 現在のモード
     public static MODE oldMode = MODE.NON;         // 前のモード
 
+    public static bool stopEncountTimeFlg = false; // アイテムの効果で一時的にエンカウントを止める
+    private bool stopEncountTimeFlgOld_ = false;   // 1フレーム前と比較する
     private float toButtleTime_ = 1.0f;            // 30秒経過でバトルへ遷移する
     private float time_ = 0.0f;                    // 現在の経過時間
+    private float keepTime_ = 0.0f;                // 現在のエンカウントまでの時間を一時保存しておく
 
     private UnitychanController player_;           // プレイヤー情報格納用
     private CameraMng cameraMng_;
@@ -231,8 +234,15 @@ public class FieldMng : MonoBehaviour
 
     void Update()
     {
-        //Debug.Log("現在のMODE" + nowMode);
-        //Debug.Log(time_);
+        // アイテムの効果でエンカウント率停止
+        if(stopEncountTimeFlg && stopEncountTimeFlg != stopEncountTimeFlgOld_)
+        {
+            // 値を保存しておく
+            keepTime_ = toButtleTime_;
+            stopEncountTimeFlgOld_ = stopEncountTimeFlg;
+            toButtleTime_ = 60.0f;
+            Debug.Log("一時的にエンカウントが停止しました");
+        }
 
         if (nowMode == MODE.SEARCH)
         {
@@ -246,8 +256,17 @@ public class FieldMng : MonoBehaviour
                 nowMode = MODE.BUTTLE;
                 time_ = 0.0f;
 
+                stopEncountTimeFlg = false;
+                if(!stopEncountTimeFlg && stopEncountTimeFlgOld_)
+                {
+                    // 保存しておいた値を入れなおす
+                    stopEncountTimeFlgOld_ = stopEncountTimeFlg;
+                    toButtleTime_ = keepTime_;
+                    Debug.Log("アイテムの効果がきれて、エンカウント再開しました");
+                }
+
                 // まだポップアップ中であったら、非アクティブにする
-                if(fieldUICanvasPopUp_.activeSelf)
+                if (fieldUICanvasPopUp_.activeSelf)
                 {
                     fieldUICanvasPopUp_.SetActive(false);
                 }
@@ -378,5 +397,4 @@ public class FieldMng : MonoBehaviour
             fieldUICanvasPopUp_.transform.Find("Select/Icon").transform.localPosition = new Vector3(40.0f, -60.0f, 0.0f);
         }
     }
-
 }

@@ -170,7 +170,7 @@ public class MenuActive : MonoBehaviour
         string str = "名前  :" + data.name + "\n" +
                      "レベル:" + data.Level.ToString() + "\n" +
                      "HP    :" + data.HP.ToString() + "/" + data.maxHP.ToString() + "\n" +
-                     "MP    :" + data.MP.ToString() + "/" + data.maxHP.ToString() + "\n" +
+                     "MP    :" + data.MP.ToString() + "/" + data.maxMP.ToString() + "\n" +
                      "物理攻撃力:" + data.Attack.ToString() + "\n" +
                      "魔法攻撃力:" + data.MagicAttack.ToString() + "\n" +
                      "防御力:" + data.Defence.ToString() + "\n" +
@@ -304,5 +304,25 @@ public class MenuActive : MonoBehaviour
     public RectTransform GetItemBagMng()
     {
         return parentRectTrans_[(int)CANVAS.BAG];
+    }
+
+    public void IsOpenItemMng(bool flag)
+    {
+        parentRectTrans_[(int)CANVAS.BAG].gameObject.SetActive(flag);
+
+        // 1度全てfalseにする
+        for (int i = 0; i < parentRectTrans_[(int)CANVAS.BAG].childCount; i++)
+        {
+            parentRectTrans_[(int)CANVAS.BAG].GetChild(i).gameObject.SetActive(false);
+        }
+
+        if (flag)
+        {
+            // 必要なものだけtrueにする
+            parentRectTrans_[(int)CANVAS.BAG].Find("ItemMng").gameObject.SetActive(true);
+            parentRectTrans_[(int)CANVAS.BAG].Find("CharasText").gameObject.SetActive(true);
+            parentRectTrans_[(int)CANVAS.BAG].Find("InfoBack").gameObject.SetActive(true);
+            parentRectTrans_[(int)CANVAS.BAG].Find("Topics").gameObject.SetActive(true);
+        }
     }
 }
