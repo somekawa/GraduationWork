@@ -10,6 +10,7 @@ public class EnemyInstanceMng : MonoBehaviour
     public GameObject enemyTest;                // テスト用の敵
     public GameObject enemyHPBar;               // 敵用のHPバー
     public EnemySelect enemySelectObj;          // 敵選択用アイコン
+    public Canvas buttleUICanvas;               // バトル中のキャンバス
 
     [SerializeField]
     private GameObject enemyAttackPrefab_;     // ユニの通常攻撃と同じものでテストする
@@ -44,6 +45,8 @@ public class EnemyInstanceMng : MonoBehaviour
 
     private GameObject[] enemyBstIconImage_ = new GameObject[4];       // バステアイコン
     private GameObject[] enemyDebuffIconImage_ = new GameObject[4];    // デバフアイコン
+
+    private GameObject buttleDamageIconsObj_;   // バトル中のダメージアイコンの親オブジェクト
 
     public void Init()
     {
@@ -108,6 +111,8 @@ public class EnemyInstanceMng : MonoBehaviour
             enemyBstTurn_[i] = new Dictionary<CONDITION, int>();
         }
 
+        buttleDamageIconsObj_ = buttleUICanvas.transform.Find("DamageIcons").gameObject;
+
         // 乱数の値の元になる値(=シード値)を現在の時間をつかって初期化する
         // →シード値を変更しなければ規則的に同じ順番で同じ番号が生成されてしまうから
         Random.InitState(System.DateTime.Now.Millisecond);
@@ -160,7 +165,7 @@ public class EnemyInstanceMng : MonoBehaviour
         //{
         //    attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
         //} while (SceneMng.charasList_[attackTarget_].HP() <= 0);
-        attackTarget_ = (int)SceneMng.CHARACTERNUM.JACK;
+        attackTarget_ = (int)SceneMng.CHARACTERNUM.UNI;
 
         // 行動前に発動するバッドステータスの処理
         var bst = badStatusMng_.BadStateMoveBefore(enemyList_[num].Item1.GetBS(), enemyList_[num].Item1, enemyList_[num].Item2, false);
@@ -372,7 +377,7 @@ public class EnemyInstanceMng : MonoBehaviour
             enemyMap_.Add(num, enemy);
 
             // 敵HPの親を、EnemySelectObjにする
-            hpBar.transform.SetParent(GameObject.Find("ButtleUICanvas/EnemySelectObj").transform);
+            hpBar.transform.SetParent(enemySelectObj.transform);
 
             // 状態異常用のアイコン(1体の敵に対して3つ)
             enemyBstIconImage_[num - 1] = hpBar.transform.Find("BadStateImages").gameObject;
@@ -619,6 +624,25 @@ public class EnemyInstanceMng : MonoBehaviour
             }
         }
 
+        // ダメージアイコン
+        for (int i = 0; i < buttleDamageIconsObj_.transform.childCount; i++)
+        {
+            var tmp = buttleDamageIconsObj_.transform.GetChild(i).gameObject;
+            if (tmp.activeSelf)
+            {
+                continue;
+            }
+
+            // まだ非表示状態の使われていないアイコンを見つけたとき
+            // 座標を被ダメージキャラの頭上にする
+            buttleDamageIconsObj_.transform.GetChild(i).transform.position = enemyHPPos_[mapNum_][num];
+            // ダメージ数値を入れる
+            tmp.transform.GetChild(0).GetComponent<Text>().text = damage.ToString();
+            // 表示状態にする
+            tmp.SetActive(true);
+            break;
+        }
+
         // バッドステータスが付与されるか判定
         enemyList_[num].Item1.SetBS(buttleMng_.GetBadStatus(), hitProbabilityOffset);
 
@@ -793,6 +817,26 @@ public class EnemyInstanceMng : MonoBehaviour
         {
             HPdecrease(i,true);
             enemyList_[i].Item1.DamageAnim();
+        }
+    }
+
+    // 行動ターン数字を代入する
+    public void SetMoveSpeedNum(int num, string enemyNum)
+    {
+        if(enemySelectObj.transform.Find("HPBar_" + enemyNum + "/MoveSpeed"))
+        {
+            var tmp = enemySelectObj.transform.Find("HPBar_" + enemyNum + "/MoveSpeed").GetComponent<TMPro.TextMeshProUGUI>();
+            tmp.text = num.ToString();
+            if(SceneMng.nowScene == SceneMng.SCENE.FIELD3)
+            {
+                // 文字の色を白にする
+                tmp.color = new Color(1.0f, 1.0f, 1.0f);
+            }
+            else
+            {
+                // 文字の色を黒にする
+                tmp.color = new Color(0.0f, 0.0f, 0.0f);
+            }
         }
     }
 }

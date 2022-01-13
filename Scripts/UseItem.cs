@@ -36,6 +36,7 @@ public class UseItem : MonoBehaviour
     private int itemNum_ = -1;
     private (int,int) buff_ = (-1,-1);
     private GameObject charasText_;
+    private string alive = "";
 
     // 画面を開いた時に1回と、回復毎に1回呼ぶ
     public void TextInit(Text[] text)
@@ -94,7 +95,20 @@ public class UseItem : MonoBehaviour
                 SceneMng.SceneLoad((int)SceneMng.SCENE.UNIHOUSE);
                 break;
             case 4:    // ニゲレール(強制戦闘でない場合は使用可能とする)
-                //@ 未実装
+                if (FieldMng.nowMode != FieldMng.MODE.FORCEDBUTTLE)
+                {
+                    var tmp = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
+                    tmp.CallDeleteEnemy();
+                    FieldMng.nowMode = FieldMng.MODE.SEARCH;
+                    SceneMng.charMap_[SceneMng.CHARACTERNUM.UNI].gameObject.transform.position = tmp.GetFieldPos();
+                    // アイテム画面を閉じる
+                    GameObject.Find("SceneMng").GetComponent<MenuActive>().IsOpenItemMng(false);
+                    Debug.Log("Uniは逃げ出した");
+                }
+                else
+                {
+                    return (false, tmpFlg);
+                }
                 break;
             case 5:    // 物理/魔法攻撃力アップ(単体)
                 tmpFlg = true;
@@ -131,8 +145,8 @@ public class UseItem : MonoBehaviour
                 //@ 現在のエンカウント色のまま、一定時間エンカウントしなくなるようにする
                 FieldMng.stopEncountTimeFlg = true;
                 break;
-            case 14:    // 蘇生(HP小状態で)
-                //@ 未実装
+            case 14:    // 蘇生(最大HPの半分)
+                alive = "half";
                 tmpFlg = true;
                 break;
             case 15:    // HPポーション(大)
@@ -144,11 +158,10 @@ public class UseItem : MonoBehaviour
                 tmpFlg = true;
                 break;
             case 17:    // 即死身代わり
-                // 持っているだけで効果がでるようにしたい
-                //@ 未実装
+                // 持っているだけで効果がでるから、ここに処理は書かない
                 break;
             case 18:    // 蘇生(HP全快)
-                //@ 未実装
+                alive = "all";
                 tmpFlg = true;
                 break;
         }
@@ -209,6 +222,24 @@ public class UseItem : MonoBehaviour
         {
             var tmp = SceneMng.charasList_[num].SetBuff(1, buff_.Item2);
             action(num, tmp.Item1, buff_.Item2);
+        }
+
+        // 蘇生処理
+        if(alive != "")
+        {
+            if(alive == "half")
+            {
+                // 半回復状態で立ち上がらせる
+                SceneMng.charasList_[num].SetHP(SceneMng.charasList_[num].HP() + (SceneMng.charasList_[num].MaxHP() / 2));
+                SceneMng.charasList_[num].SetDeathFlg(false);   // 死亡状態を解除
+            }
+            else
+            {
+                // 全回復状態で立ち上がらせる
+                SceneMng.charasList_[num].SetHP(SceneMng.charasList_[num].HP() + SceneMng.charasList_[num].MaxHP());
+                SceneMng.charasList_[num].SetDeathFlg(false);   // 死亡状態を解除
+            }
+            alive = ""; // 文字列初期化
         }
 
         if (charasText_ == null)

@@ -388,9 +388,39 @@ public class Chara : CharaBase,InterfaceButtle
 
     public void SetDeathFlg(bool flag)
     {
-        // 死亡アニメーションに切り替える
-        set_.animator.SetBool(key_isDeath, true);
+        if(flag)
+        {
+            // 死亡アニメーションに切り替える
+            set_.animator.SetBool(key_isDeath, true);
+        }
+        else
+        {
+            // 立つアニメーションに切り替える
+            set_.animator.SetBool(key_isDeath, false);
+        }
         deathFlg_ = flag;
+    }
+
+    public void ButtleInit(bool flag = true)
+    {
+        if(flag)
+        {
+            // 最初のモーション設定
+            set_.animator.Play("Standing@loop");
+        }
+
+        // バステを全て消す
+        ConditionReset(true);
+
+        // バフを全て消す
+        for (int i = 1; i <= buffMap_.Count; i++)
+        {
+            // もしバフが継続していたら
+            if (buffMap_[i].Item2 > 0)
+            {
+                buffMap_[i] = (statusMap_[i - 1], -1);
+            }
+        }
     }
 
     public override void DamageAnim()

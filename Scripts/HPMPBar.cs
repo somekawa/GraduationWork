@@ -21,12 +21,7 @@ public class HPMPBar : MonoBehaviour
         slider_.value = 1.0f;           // Sliderを満タンにする。
 
         // 現在数値表示場所の取得
-        if(currentNumText_ == null)
-        {
-            currentNumText_ = gameObject.transform.Find("CurrentNum").GetComponent<TMPro.TextMeshProUGUI>();
-        }
-
-        currentNumText_.text = currentNum_.ToString();
+        SettingCurrntNum();
     }
 
     // コルーチン
@@ -54,7 +49,7 @@ public class HPMPBar : MonoBehaviour
         }
 
         // 0以下は全て0と表記する
-        if (currentNum_ < 0)
+        if (currentNum_ <= 0)
         {
             currentNum_ = 0;
             currentNumText_.text = currentNum_.ToString();
@@ -88,7 +83,6 @@ public class HPMPBar : MonoBehaviour
             currentNum_ = maxNum_;
             currentNumText_.text = currentNum_.ToString();
             colFlg_ = false;
-            yield return null;
         }
     }
 
@@ -104,20 +98,25 @@ public class HPMPBar : MonoBehaviour
         // スライドバーへ反映
         slider_.value = (float)currentNum_ / (float)maxNum_;
 
-        if (currentNumText_ == null)
-        {
-            currentNumText_ = gameObject.transform.Find("CurrentNum").GetComponent<TMPro.TextMeshProUGUI>();
-        }
-
-        Debug.Log("Start currentHp : " + currentNum_);
-
-        currentNumText_.text = currentNum_.ToString();
-
+        SettingCurrntNum();
     }
 
     // コルーチン処理中かを確かめるフラグの取得
     public bool GetColFlg()
     {
         return colFlg_;
+    }
+
+    private void SettingCurrntNum()
+    {
+        if (currentNumText_ == null && gameObject.transform.Find("CurrentNum"))
+        {
+            currentNumText_ = gameObject.transform.Find("CurrentNum").GetComponent<TMPro.TextMeshProUGUI>();
+        }
+
+        if (currentNumText_ != null)
+        {
+            currentNumText_.text = currentNum_.ToString();
+        }
     }
 }

@@ -295,6 +295,7 @@ public class FieldMng : MonoBehaviour
             case MODE.SEARCH:
                 cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
                 SceneMng.MenuSetActive(true);
+
                 break;
 
             case MODE.BUTTLE:

@@ -23,7 +23,6 @@ public class CharacterMng : MonoBehaviour
     private bool selectFlg_ = false;                  // 敵を選択中かのフラグ
     private bool lastEnemytoAttackFlg_ = false;       // キャラの攻撃対象が最後の敵であるか     
 
-    private Vector3 keepFieldPos_;                    // 戦闘に入る直前のキャラの座標を保存しておく 
     private const int buttleCharMax_ = 2;             // バトル参加可能キャラ数の最大値(最終的には3にする)
     private Vector3[] buttleWarpPointsPos_ = new Vector3[buttleCharMax_];            // 戦闘時の配置位置を保存しておく変数
     private Quaternion[] buttleWarpPointsRotate_ = new Quaternion[buttleCharMax_];   // 戦闘時の回転角度を保存しておく変数(クォータニオン)
@@ -43,6 +42,9 @@ public class CharacterMng : MonoBehaviour
     private GameObject buttleCommandFrame_;                       // 大枠のframe部分の画像
     private GameObject[] buttleCommandImage_ = new GameObject[4]; // バトルコマンドの画像4種類
     private EnemySelect buttleEnemySelect_;                       // バトル中の選択アイコン情報
+    private GameObject buttleItemBackButtonObj_;                  // バトル中のアイテム画面から戻るアイコン
+    private GameObject buttleDamageIconsObj_;                     // バトル中のダメージアイコンの親オブジェクト
+    private Vector3[] buttleDamgeIconPopUpPos_ = new Vector3[2];  // ダメージアイコンの表示位置
     private ButtleMng buttleMng_;                                 // ButtleMng.csの取得
     private BadStatusMng badStatusMng_;
 
@@ -61,6 +63,8 @@ public class CharacterMng : MonoBehaviour
     private IEnumerator rest_;
     private bool myTurnOnceFlg_;                       // 自分のターンになった最初に1回だけ呼ばれるようにするフラグ
 
+    private readonly int deathBstNoEffectItemNum_ = 17; // 即死肩代わりアイテムの番号
+
     public struct EachCharaData
     {
         // 各キャラのHP情報
@@ -73,6 +77,8 @@ public class CharacterMng : MonoBehaviour
         public GameObject buffIconParent;
         // 各キャラの吸収or反射バフ
         public GameObject specialBuff;
+        // 各キャラの行動順番の数字
+        public TMPro.TextMeshProUGUI turnNum;
     }
 
     private EachCharaData[] eachCharaData_ = new EachCharaData[(int)CHARACTERNUM.MAX];
@@ -104,6 +110,11 @@ public class CharacterMng : MonoBehaviour
         }
         buttleCommandFrame_ = buttleUICanvas.transform.Find("Command/Frame").gameObject;
         buttleEnemySelect_ = buttleUICanvas.transform.Find("EnemySelectObj").GetComponent<EnemySelect>();
+        buttleItemBackButtonObj_ = buttleUICanvas.transform.Find("ItemBackButton").gameObject;
+        buttleItemBackButtonObj_.SetActive(false);  // 最初は非表示
+        buttleDamageIconsObj_ = buttleUICanvas.transform.Find("DamageIcons").gameObject;
+        buttleDamgeIconPopUpPos_[0] = new Vector3(-260,   0, 0);
+        buttleDamgeIconPopUpPos_[1] = new Vector3(-260, 100, 0);
 
         enemyInstancePos_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().GetEnemyPos();
 
@@ -143,6 +154,9 @@ public class CharacterMng : MonoBehaviour
             // バフ画像用
             eachCharaData_[i].buffIconParent = buttleUICanvas.transform.Find(charasList_[i].Name() + "CharaData/BuffImages").gameObject;
             eachCharaData_[i].specialBuff = buttleUICanvas.transform.Find(charasList_[i].Name() + "CharaData/SpecialBuff").gameObject;
+
+            // 行動順番の数字
+            eachCharaData_[i].turnNum = buttleUICanvas.transform.Find(charasList_[i].Name() + "CharaData/MoveSpeed").GetComponent<TMPro.TextMeshProUGUI>();
         }
 
         useMagic_ = new CharaUseMagic();
@@ -172,10 +186,25 @@ public class CharacterMng : MonoBehaviour
             magicButtleCommandRotate_.ResetRotate();
         }
 
-        eachCharaData_[(int)CHARACTERNUM.UNI].charaHPMPMap.Item1.SetHPMPBar(charasList_[(int)CHARACTERNUM.UNI].HP(), charasList_[(int)CHARACTERNUM.UNI].MaxHP());
-        eachCharaData_[(int)CHARACTERNUM.JACK].charaHPMPMap.Item1.SetHPMPBar(charasList_[(int)CHARACTERNUM.JACK].HP(), charasList_[(int)CHARACTERNUM.JACK].MaxHP());
-        eachCharaData_[(int)CHARACTERNUM.UNI].charaHPMPMap.Item2.SetHPMPBar(charasList_[(int)CHARACTERNUM.UNI].MP(), charasList_[(int)CHARACTERNUM.UNI].MaxMP());
-        eachCharaData_[(int)CHARACTERNUM.JACK].charaHPMPMap.Item2.SetHPMPBar(charasList_[(int)CHARACTERNUM.JACK].MP(), charasList_[(int)CHARACTERNUM.JACK].MaxMP());
+        for (int i = 0; i < (int)CHARACTERNUM.MAX; i++)
+        {
+            eachCharaData_[i].charaHPMPMap.Item1.SetHPMPBar(charasList_[i].HP(), charasList_[i].MaxHP());
+            eachCharaData_[i].charaHPMPMap.Item2.SetHPMPBar(charasList_[i].MP(), charasList_[i].MaxMP());
+
+            // バステやバフのアイコンを消す
+            badStatusMng_.SetBstIconImage(i, -1, charaBstIconImage_, charasList_[i].GetBS(), true);
+            // 効果が切れた(=ターンが0以下)
+            var child = eachCharaData_[(int)nowTurnChar_].buffIconParent.transform.GetChild(i);
+            if (child.GetComponent<Image>().sprite != null)
+            {
+                // アイコンをnullにして、上昇矢印も非表示にする
+                child.GetComponent<Image>().sprite = null;
+                for (int m = 0; m < child.childCount; m++)
+                {
+                    child.GetChild(m).gameObject.SetActive(false);
+                }
+            }
+        }
 
         anim_ = ANIMATION.IDLE;
         oldAnim_ = ANIMATION.IDLE;
@@ -190,7 +219,7 @@ public class CharacterMng : MonoBehaviour
         lastEnemytoAttackFlg_ = false;
 
         // 戦闘前の座標を保存しておく
-        keepFieldPos_ = charMap_[CHARACTERNUM.UNI].gameObject.transform.position;
+        buttleMng_.SetFieldPos(charMap_[CHARACTERNUM.UNI].gameObject.transform.position);
 
         // 戦闘用座標と回転角度を代入する
         // キャラの角度を変更は、ButtleWarpPointの箱の角度を回転させると可能。(1体1体向きを変えることもできる)
@@ -201,7 +230,6 @@ public class CharacterMng : MonoBehaviour
 
             // ここで座標を保存しておくことで、メニュー画面での並び替えでも反映できるだろうし、
             // 攻撃エフェクトの発生位置の目安になる
-            //charSetting[(int)character.Key].buttlePos  = character.Value.gameObject.transform.position;
             charasList_[(int)character.Key].SetButtlePos(character.Value.gameObject.transform.position);
 
             // 行動順に関連する値を初期化する
@@ -230,6 +258,22 @@ public class CharacterMng : MonoBehaviour
             }
             else
             {
+                // バステとバフの削除
+                charasList_[(int)nowTurnChar_].ButtleInit(false);
+                // バステやバフのアイコンを消す
+                badStatusMng_.SetBstIconImage((int)nowTurnChar_, -1, charaBstIconImage_, charasList_[(int)nowTurnChar_].GetBS(), true);
+                // 効果が切れた(=ターンが0以下)
+                var child = eachCharaData_[(int)nowTurnChar_].buffIconParent.transform.GetChild((int)nowTurnChar_);
+                if (child.GetComponent<Image>().sprite != null)
+                {
+                    // アイコンをnullにして、上昇矢印も非表示にする
+                    child.GetComponent<Image>().sprite = null;
+                    for (int m = 0; m < child.childCount; m++)
+                    {
+                        child.GetChild(m).gameObject.SetActive(false);
+                    }
+                }
+
                 oldAnim_ = anim_;
                 Debug.Log("死亡中だから行動を飛ばす");
                 anim_ = ANIMATION.IDLE;
@@ -262,6 +306,7 @@ public class CharacterMng : MonoBehaviour
             Bag_Item.itemUseFlg = false;
             // アイテム画面を閉じる
             GameObject.Find("SceneMng").GetComponent<MenuActive>().IsOpenItemMng(false);
+            buttleItemBackButtonObj_.SetActive(false);  
 
             for (int k = 0; k < (int)CHARACTERNUM.MAX; k++)
             {
@@ -338,7 +383,7 @@ public class CharacterMng : MonoBehaviour
                 buttleMng_.CallDeleteEnemy();
 
                 FieldMng.nowMode = FieldMng.MODE.SEARCH;
-                charMap_[CHARACTERNUM.UNI].gameObject.transform.position = keepFieldPos_;
+                charMap_[CHARACTERNUM.UNI].gameObject.transform.position = buttleMng_.GetFieldPos();
 
                 Debug.Log("Uniは逃げ出した");
             }
@@ -518,6 +563,7 @@ public class CharacterMng : MonoBehaviour
 
                         // アイテム画面を開く
                         GameObject.Find("SceneMng").GetComponent<MenuActive>().IsOpenItemMng(true);
+                        buttleItemBackButtonObj_.SetActive(true);
                         break;
                     case ImageRotate.COMMAND.BARRIER:
                         // 次の自分のターンまで防御力を1.5倍にする
@@ -558,6 +604,26 @@ public class CharacterMng : MonoBehaviour
         }
     }
 
+    // 行動ターン数字を代入する
+    public bool SetMoveSpeedNum(int num,string name)
+    {
+        if(name == "Uni")
+        {
+            eachCharaData_[(int)CHARACTERNUM.UNI].turnNum.text = num.ToString();
+            return true;
+        }
+        else if(name == "Jack")
+        {
+            eachCharaData_[(int)CHARACTERNUM.JACK].turnNum.text = num.ToString();
+            return true;
+        }
+        else
+        {
+            // 何も処理を行わない
+        }
+        return false;
+    }
+
     void AnimationChange()
     {
         switch (anim_)
@@ -566,9 +632,8 @@ public class CharacterMng : MonoBehaviour
 
                 // 毒の処理をいれる
                 badStatusMng_.BadStateMoveAfter(charasList_[(int)nowTurnChar_].GetBS(), charasList_[(int)nowTurnChar_], eachCharaData_[(int)nowTurnChar_].charaHPMPMap.Item1, true);
-
                 // バステの持続ターン数を-1する
-                for(int i = 0; i < (int)CONDITION.DEATH; i++)
+                for (int i = 0; i < (int)CONDITION.DEATH; i++)
                 {
                     // キーが存在しなければとばす
                     if (!eachCharaData_[(int)nowTurnChar_].charaBstTurn.ContainsKey((CONDITION)i))
@@ -904,7 +969,7 @@ public class CharacterMng : MonoBehaviour
 
     public void SetCharaFieldPos()
     {
-        charMap_[CHARACTERNUM.UNI].gameObject.transform.position = keepFieldPos_;
+        charMap_[CHARACTERNUM.UNI].gameObject.transform.position = buttleMng_.GetFieldPos();
     }
 
     public void HPdecrease(int num,int fromNum)
@@ -992,7 +1057,7 @@ public class CharacterMng : MonoBehaviour
             damage = 1;
         }
 
-        //@ バステやダメージ処理よりも先に、反射か吸収のバフを張っているか確認する
+        // バステやダメージ処理よりも先に、反射か吸収のバフを張っているか確認する
         var spbuff = charasList_[num].GetReflectionOrAbsorption();
         if(spbuff == Chara.SPECIALBUFF.REF || spbuff == Chara.SPECIALBUFF.REF_M)         // 反射処理
         {
@@ -1021,6 +1086,24 @@ public class CharacterMng : MonoBehaviour
             // 何も処理を行わない
         }
 
+        // ダメージアイコン
+        for (int i = 0; i < buttleDamageIconsObj_.transform.childCount; i++)
+        {
+            var tmp = buttleDamageIconsObj_.transform.GetChild(i).gameObject;
+            if (tmp.activeSelf)
+            {
+                continue;
+            }
+
+            // まだ非表示状態の使われていないアイコンを見つけたとき
+            // 座標を被ダメージキャラの頭上にする
+            buttleDamageIconsObj_.transform.GetChild(i).transform.localPosition = buttleDamgeIconPopUpPos_[num];
+            // ダメージ数値を入れる
+            tmp.transform.GetChild(0).GetComponent<Text>().text = damage.ToString();
+            // 表示状態にする
+            tmp.SetActive(true);
+            break;
+        }
 
         // バッドステータスが付与されるか判定
         charasList_[num].SetBS(buttleMng_.GetBadStatus(), hitProbabilityOffset);
@@ -1045,6 +1128,14 @@ public class CharacterMng : MonoBehaviour
         var bst = badStatusMng_.BadStateMoveBefore(getBs, charasList_[num], eachCharaData_[num].charaHPMPMap.Item1, true);
         if (bst == (CONDITION.DEATH, true))   // 即死処理
         {
+            // 身代わりアイテムを持っているか調べる
+            if(Bag_Item.itemState[deathBstNoEffectItemNum_].haveCnt > 0)
+            {
+                Bag_Item.itemState[deathBstNoEffectItemNum_].haveCnt--;
+                Debug.Log("アイテムが即死を肩代わりしてくれた");
+                return;
+            }
+
             StartCoroutine(eachCharaData_[num].charaHPMPMap.Item1.MoveSlideBar(charasList_[num].HP() - 999));
             charasList_[num].SetHP(charasList_[num].HP() - 999);
         }
@@ -1060,7 +1151,6 @@ public class CharacterMng : MonoBehaviour
         {
             Debug.Log("キャラが死亡");
             charasList_[num].SetHP(0);
-            //anim_ = ANIMATION.DEATH;
             // Chara.csに死亡情報を入れる
             charasList_[num].SetDeathFlg(true);
         }

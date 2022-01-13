@@ -322,7 +322,6 @@ public class MenuActive : MonoBehaviour
             parentRectTrans_[(int)CANVAS.BAG].Find("ItemMng").gameObject.SetActive(true);
             parentRectTrans_[(int)CANVAS.BAG].Find("CharasText").gameObject.SetActive(true);
             parentRectTrans_[(int)CANVAS.BAG].Find("InfoBack").gameObject.SetActive(true);
-            parentRectTrans_[(int)CANVAS.BAG].Find("Topics").gameObject.SetActive(true);
         }
     }
 }

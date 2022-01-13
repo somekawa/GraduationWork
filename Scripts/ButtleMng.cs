@@ -12,10 +12,10 @@ public class ButtleMng : MonoBehaviour
 
     private bool setCallOnce_ = false;      // 戦闘モードに切り替わった最初のタイミングだけ切り替わる
 
-    //private Transform buttleCommandUI_;         // 金の大枠を含めた情報を取得
-
     private CharacterMng characterMng_;         // キャラクター管理クラスの情報
     private EnemyInstanceMng enemyInstanceMng_; // 敵インスタンス管理クラスの情報
+
+    private Transform EneSelObj_;           // 敵の指定マーク
 
     private List<(int,string)> moveTurnList_ = new List<(int, string)>();   // キャラと敵の行動順をまとめるリスト
     private int moveTurnCnt_ = 0;           // 自分の行動が終わったら値を増やす
@@ -25,6 +25,7 @@ public class ButtleMng : MonoBehaviour
     private int element_ = 0;               // エレメント情報
     private (int,int) badStatusNum_;        // 状態異常の数字
     private int refNum_ = -1;               // 攻撃反射対象の番号を保存する変数
+    private Vector3 keepPos_;
 
     private bool lastEnemyFlg_;
 
@@ -84,6 +85,18 @@ public class ButtleMng : MonoBehaviour
             moveTurnList_.Sort();    // 昇順にソート
             moveTurnList_.Reverse(); // 降順にするために逆転させる
 
+            // 順番用の数字を作る為の一時変数
+            for(int i = 0; i < moveTurnList_.Count; i++)
+            {
+                // キャラの行動ターン数字を代入する(0からカウントしてるからi+1とする) 
+                if(!characterMng_.SetMoveSpeedNum(i+1,moveTurnList_[i].Item2))
+                {
+                    // 敵の行動ターン数字を代入する
+                    string[] arr = moveTurnList_[i].Item2.Split('_');
+                    enemyInstanceMng_.SetMoveSpeedNum(i + 1, arr[1]);
+                }
+            }
+
             // Character管理クラスに敵の出現数を渡す
             characterMng_.SetEnemyNum(correctEnemyNum);
         }
@@ -118,7 +131,19 @@ public class ButtleMng : MonoBehaviour
                         }
                     }
 
-                    enemyInstanceMng_.DeleteEnemy();
+                    CallDeleteEnemy();
+
+                    for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+                    {
+                        // バトルで死亡したまま終了していたときは、HP1の状態で立ち上がらせる
+                        if (SceneMng.charasList_[i].GetDeathFlg())
+                        {
+                            SceneMng.charasList_[i].SetDeathFlg(false);
+                            SceneMng.charasList_[i].SetHP(1);
+                        }
+                        SceneMng.charasList_[i].ButtleInit();
+                    }
+
 
                     FieldMng.nowMode = FieldMng.MODE.SEARCH;
                     characterMng_.SetCharaFieldPos();
@@ -209,10 +234,19 @@ public class ButtleMng : MonoBehaviour
         refNum_ = num;
     }
 
-    // ユニたちが逃げる処理の時に使用する
+    // ユニたちが逃げる処理や戦闘終了時に使用する
     public void CallDeleteEnemy()
     {
         enemyInstanceMng_.DeleteEnemy();
+        if (EneSelObj_ == null)
+        {
+            EneSelObj_ = GameObject.Find("ButtleUICanvas/EnemySelectObj").transform;
+        }
+        // EnemySelectObjからその戦闘でつかった敵のHPバーとかを削除する
+        for (int i = 0; i < EneSelObj_.childCount; ++i)
+        {
+            Destroy(EneSelObj_.GetChild(i).gameObject);
+        }
     }
 
     // アイテムによる固定ダメージ
@@ -220,5 +254,22 @@ public class ButtleMng : MonoBehaviour
     {
         SetDamageNum(itemDamageNum);    // ダメージ値をセット
         enemyInstanceMng_.ItemDamage(); // 全エネミー分HPdecrease関数を回すようにする
+    }
+
+    public Vector3 GetFieldPos()
+    {
+        return keepPos_;
+    }
+
+    public void SetFieldPos(Vector3 pos)
+    {
+        keepPos_ = pos;
+    }
+
+    public void OnClickItemBackButton()
+    {
+        // アイテム画面を閉じる
+        GameObject.Find("SceneMng").GetComponent<MenuActive>().IsOpenItemMng(false);
+        buttleUICanvas.transform.Find("ItemBackButton").gameObject.SetActive(false);
     }
 }

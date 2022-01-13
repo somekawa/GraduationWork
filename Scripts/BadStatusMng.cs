@@ -24,6 +24,13 @@ public class BadStatusMng : MonoBehaviour
                         {
                             var enemy = (Enemy)(object)obj;
                             int damage = (int)(enemy.MaxHP() * 0.2f);
+
+                            // 現在HP < 毒ダメージのときは、現在HP-1した値をダメージとする(これで絶対HPが1残る)
+                            if(enemy.HP() < damage)
+                            {
+                                damage = enemy.HP() - 1;
+                            }
+
                             StartCoroutine(hpmpBar.MoveSlideBar(enemy.HP() - damage));
                             // 内部数値の変更を行う
                             enemy.SetHP(enemy.HP() - damage);
@@ -35,6 +42,13 @@ public class BadStatusMng : MonoBehaviour
                         {
                             var chara = (Chara)(object)obj;
                             int damage = (int)(chara.MaxHP() * 0.2f);
+
+                            // 現在HP < 毒ダメージのときは、現在HP-1した値をダメージとする(これで絶対HPが1残る)
+                            if (chara.HP() < damage)
+                            {
+                                damage = chara.HP() - 1;
+                            }
+
                             StartCoroutine(hpmpBar.MoveSlideBar(chara.HP() - damage));
                             // 内部数値の変更を行う
                             chara.SetHP(chara.HP() - damage);
