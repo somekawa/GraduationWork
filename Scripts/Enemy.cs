@@ -321,7 +321,7 @@ public class Enemy : CharaBase, InterfaceButtle
         // 何らかのバステ効果がある魔法があたる、かつ、キャラの命中率が敵の幸運値+ランダム値より高いとき
         if (num.Item1 > 0 && hitNum > set_.Luck + Random.Range(0, 80))
         {
-            // 該当するバッドステータスをtrueにする
+            // 該当するバッドステータスをtrueにする(2,3,4,5)
             set_.condition[num.Item1 - 1].Item2 = true;
             // NONをfalseにする
             set_.condition[(int)CONDITION.NON - 1].Item2 = false;
@@ -330,8 +330,8 @@ public class Enemy : CharaBase, InterfaceButtle
 
         if (num.Item2 > 0 && hitNum > set_.Luck + Random.Range(0, 80))
         {
-            // 該当するバッドステータスをtrueにする
-            set_.condition[num.Item2 - 1].Item2 = true;
+            // 該当するバッドステータスをtrueにする(5,6,7,8)
+            set_.condition[num.Item2 - 4].Item2 = true;
             // NONをfalseにする
             set_.condition[(int)CONDITION.NON - 1].Item2 = false;
             Debug.Log("敵は状態異常にかかった");

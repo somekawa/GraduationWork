@@ -165,6 +165,12 @@ public class CharaUseMagic : MonoBehaviour
             // 状態異常をButtleMng.csに渡す
             buttleMng_.SetBadStatus(magicData.sub1, magicData.sub2);
 
+            if(magicData.sub3 == 4)
+            {
+                // 必中効果あり
+                buttleMng_.SetAutoHit(true);
+            }
+
             magicPrefabNum_ = magicData.element.ToString() + "-" + magicData.tail.ToString();
         }
     }
@@ -292,15 +298,18 @@ public class CharaUseMagic : MonoBehaviour
             var tmpStr = magicPrefabNum_;
             var split = tmpStr.Split('-');
             // 反射と吸収はエフェクトの数字設定
-            if (split[3] == 2.ToString() && split.Length == 4)
+            if (split.Length == 4)
             {
-                // 反射魔法の時(同じエフェクトを使うから固定番号)
-                obj = Resources.Load("MagicPrefabs/0-0-1-2") as GameObject;
-            }
-            else if (split[3] == 3.ToString() && split.Length == 4)
-            {
-                // 吸収魔法の時(同じエフェクトを使うから固定番号)
-                obj = Resources.Load("MagicPrefabs/0-0-1-3") as GameObject;
+                if (split[3] == 2.ToString())
+                {
+                    // 反射魔法の時(同じエフェクトを使うから固定番号)
+                    obj = Resources.Load("MagicPrefabs/0-0-1-2") as GameObject;
+                }
+                else
+                {
+                    // 吸収魔法の時(同じエフェクトを使うから固定番号)
+                    obj = Resources.Load("MagicPrefabs/0-0-1-3") as GameObject;
+                }
             }
             else
             {
@@ -355,5 +364,199 @@ public class CharaUseMagic : MonoBehaviour
                 }
             }
         }
+    }
+
+    public string MagicInfoMake(Bag_Magic.MagicData magicData)
+    {
+        string info = "";
+        string info2 = "";
+        string info3 = "";
+        string info4 = "";
+
+        // 攻撃系か回復系かで分ける
+        if (magicData.element == 0)
+        {
+            // 回復系
+            info = "味方";
+            info3 = "回復";
+            switch (magicData.sub2)
+            {
+                case 0:     // HP
+                    info2 = "HP";
+                    break;
+                case 1:     // 毒
+                    info2 = "毒";
+                    break;
+                case 2:     // 暗闇
+                    info2 = "暗闇";
+                    break;
+                case 3:     // 麻痺
+                    info2 = "麻痺";
+                    break;
+                default:
+                    Debug.Log("不明なsub2ワードです");
+                    break;
+            }
+        }
+        else if (magicData.element == 1)
+        {
+            // 補助系
+            info3 = "付与";
+
+            switch (magicData.sub2)
+            {
+                case 1:     // 物理攻撃力
+                    info2 = "物理攻撃力";
+                    break;
+                case 2:     // 魔法攻撃力
+                    info2 = "魔法攻撃力";
+                    break;
+                case 3:     // 防御力
+                    info2 = "防御力";
+                    break;
+                case 4:     // 命中/回避力
+                    info2 = "命中/回避力";
+                    break;
+                default:
+                    Debug.Log("不明なsub2ワードです");
+                    break;
+            }
+
+            if (magicData.sub1 == 1)
+            {
+                info = "敵";
+                info2 += "低下";
+            }
+            else if (magicData.sub1 == 0)
+            {
+                info = "味方";
+                switch (magicData.sub3)
+                {
+                    case 0:     // 上昇
+                        info2 += "上昇";
+                        break;
+                    case 2:     // 反射
+                        info2 += "反射";
+                        break;
+                    case 3:     // 吸収
+                        info2 += "吸収";
+                        break;
+                    default:
+                        Debug.Log("不明なsub3ワードです");
+                        break;
+                }
+            }
+            else
+            {
+                // 何も処理を行わない
+            }
+        }
+        else
+        {
+            // 攻撃系
+            info = "敵";
+            info3 = "攻撃";
+
+            switch (magicData.element)
+            {
+                case 2:     // 炎
+                    info2 = "炎属性";
+                    break;
+                case 3:     // 水
+                    info2 = "水属性";
+                    break;
+                case 4:     // 土
+                    info2 = "土属性";
+                    break;
+                case 5:     // 風
+                    info2 = "風属性";
+                    break;
+                default:
+                    Debug.Log("不明なelementワードです");
+                    break;
+            }
+
+            switch (magicData.sub1)
+            {
+                case 2:     // 毒
+                    info4 = "(毒)";
+                    break;
+                case 3:     // 暗闇
+                    info4 = "(暗闇)";
+                    break;
+                case 4:     // 麻痺
+                    info4 = "(麻痺)";
+                    break;
+                case 5:     // 即死
+                    info4 = "(即死)";
+                    break;
+                default:
+                    Debug.Log("不明なsub1ワードです");
+                    break;
+            }
+
+            switch (magicData.sub2)
+            {
+                case 5:     // 毒
+                    info4 += "(毒)";
+                    break;
+                case 6:     // 暗闇
+                    info4 += "(暗闇)";
+                    break;
+                case 7:     // 麻痺
+                    info4 += "(麻痺)";
+                    break;
+                case 8:     // 即死
+                    info4 += "(即死)";
+                    break;
+                default:
+                    Debug.Log("不明なsub2ワードです");
+                    break;
+            }
+
+            if(magicData.sub3 == 4)
+            {
+                info4 += "(必中)";
+            }
+        }
+
+        // ヘッドワードの種類分け
+        switch (magicData.head)
+        {
+            case 0:     // 単体
+                info += "単体に";
+                break;
+            case 1:     // 複数回
+                info += "ランダム複数回に";
+                break;
+            case 2:     // 全体
+                info += "全体に";
+                break;
+            default:
+                Debug.Log("不明なヘッドワードです");
+                break;
+        }
+
+        // テイルワードの種類分け
+        switch (magicData.tail)
+        {
+            case 0:     // 小
+                info += "小威力の";
+                break;
+            case 1:     // 中
+                info += "中威力の";
+                break;
+            case 2:     // 大
+                info += "大威力の";
+                break;
+            case 3:     // 極大
+                info += "極大威力の";
+                break;
+            default:
+                Debug.Log("不明なヘッドワードです");
+                break;
+        }
+
+        return info + info2 + info3 + info4;
     }
 }

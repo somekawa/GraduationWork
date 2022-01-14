@@ -31,7 +31,7 @@ public class BadStatusMng : MonoBehaviour
                                 damage = enemy.HP() - 1;
                             }
 
-                            StartCoroutine(hpmpBar.MoveSlideBar(enemy.HP() - damage));
+                            StartCoroutine(hpmpBar.MoveSlideBar(enemy.HP() - damage, enemy.HP()));
                             // 内部数値の変更を行う
                             enemy.SetHP(enemy.HP() - damage);
 
@@ -49,7 +49,7 @@ public class BadStatusMng : MonoBehaviour
                                 damage = chara.HP() - 1;
                             }
 
-                            StartCoroutine(hpmpBar.MoveSlideBar(chara.HP() - damage));
+                            StartCoroutine(hpmpBar.MoveSlideBar(chara.HP() - damage, chara.HP()));
                             // 内部数値の変更を行う
                             chara.SetHP(chara.HP() - damage);
 

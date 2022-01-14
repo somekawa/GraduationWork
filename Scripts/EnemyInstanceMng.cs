@@ -553,11 +553,22 @@ public class EnemyInstanceMng : MonoBehaviour
         int hitProbabilityOffset = 0; 
         var damage = 0;
 
-        if(refFlg)
+        if(refFlg || buttleMng_.GetAutoHit())
         {
             // 防御貫通
             // 反射時は必中
             damage = buttleMng_.GetDamageNum();
+
+            if(buttleMng_.GetAutoHit())
+            {
+                // 攻撃側の属性と自分の弱点属性が一致してたらダメージ量を2倍にする
+                if (enemyList_[num].Item1.Weak() == buttleMng_.GetElement())
+                {
+                    damage *= 2;
+                    Debug.Log("敵の弱点属性！ ダメージ量2倍で" + damage);
+                }
+                buttleMng_.SetAutoHit(false);
+            }
         }
         else
         {
@@ -657,12 +668,11 @@ public class EnemyInstanceMng : MonoBehaviour
                 {
                     enemyBstTurn_[num].Add(getBs[i].Item1, Random.Range(1, 5));// 1以上5未満
                     badStatusMng_.SetBstIconImage(num, (int)enemyList_[num].Item1.GetBS()[i].Item1, enemyBstIconImage_, enemyList_[num].Item1.GetBS());
-                    break;
                 }
             }
         }
 
-        StartCoroutine(enemyList_[num].Item2.MoveSlideBar(enemyList_[num].Item1.HP() - damage));
+        StartCoroutine(enemyList_[num].Item2.MoveSlideBar(enemyList_[num].Item1.HP() - damage, enemyList_[num].Item1.HP()));
         // 内部数値の変更を行う
         enemyList_[num].Item1.SetHP(enemyList_[num].Item1.HP() - damage);
 
@@ -670,7 +680,7 @@ public class EnemyInstanceMng : MonoBehaviour
         var bst = badStatusMng_.BadStateMoveBefore(getBs, enemyList_[num].Item1, enemyList_[num].Item2, false);
         if(bst == (CONDITION.DEATH,true))   // 即死処理
         {
-            StartCoroutine(enemyList_[num].Item2.MoveSlideBar(enemyList_[num].Item1.HP() - 999));
+            StartCoroutine(enemyList_[num].Item2.MoveSlideBar(enemyList_[num].Item1.HP() - 999, enemyList_[num].Item1.HP()));
             // 内部数値の変更を行う
             enemyList_[num].Item1.SetHP(enemyList_[num].Item1.HP() - 999);
         }

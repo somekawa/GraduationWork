@@ -45,10 +45,13 @@ public class CharacterMng : MonoBehaviour
     private GameObject buttleItemBackButtonObj_;                  // バトル中のアイテム画面から戻るアイコン
     private GameObject buttleDamageIconsObj_;                     // バトル中のダメージアイコンの親オブジェクト
     private Vector3[] buttleDamgeIconPopUpPos_ = new Vector3[2];  // ダメージアイコンの表示位置
+    private GameObject buttleMagicInfoFrame_;                     // バトル中に魔法コマンドを選択したときの魔法説明欄
+    private TMPro.TextMeshProUGUI magicInfoText_;                 // 魔法の説明テキスト
     private ButtleMng buttleMng_;                                 // ButtleMng.csの取得
     private BadStatusMng badStatusMng_;
 
     private GameObject setMagicObj_;                    // 魔法コマンド選択時に表示させるオブジェクト
+    private int magicCommandNumOld_;                    // 魔法コマンドの1フレーム前の数字  
     private Image[] magicImage_ = new Image[4];         // 魔法画像の貼り付け先(最大4つ表示になる)
 
     private int enemyNum_ = 0;                                    // バトル時の敵の数
@@ -115,6 +118,9 @@ public class CharacterMng : MonoBehaviour
         buttleDamageIconsObj_ = buttleUICanvas.transform.Find("DamageIcons").gameObject;
         buttleDamgeIconPopUpPos_[0] = new Vector3(-260,   0, 0);
         buttleDamgeIconPopUpPos_[1] = new Vector3(-260, 100, 0);
+        buttleMagicInfoFrame_ = buttleUICanvas.transform.Find("MagicInfoFrame").gameObject;
+        magicInfoText_ = buttleMagicInfoFrame_.transform.Find("MagicInfoText").GetComponent<TMPro.TextMeshProUGUI>();
+        buttleMagicInfoFrame_.SetActive(false);     // 最初は非表示
 
         enemyInstancePos_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().GetEnemyPos();
 
@@ -210,6 +216,7 @@ public class CharacterMng : MonoBehaviour
         oldAnim_ = ANIMATION.IDLE;
 
         buttleAnounceText_.text = announceText_[0];
+        magicCommandNumOld_ = -1;
 
         // 最初の行動キャラを指定する
         //@ キャラ同士で速度を見て、早い人を入れないとだめ
@@ -419,6 +426,7 @@ public class CharacterMng : MonoBehaviour
             if (setMagicObj_.activeSelf || buttleEnemySelect_.gameObject.activeSelf)
             {
                 Debug.Log("魔法コマンドの選択を解除します");
+                buttleMagicInfoFrame_.SetActive(false);
                 magicButtleCommandRotate_.SetEnableAndActive(false);
 
                 // コマンド画像を表示にする
@@ -438,9 +446,8 @@ public class CharacterMng : MonoBehaviour
             {
                 // 魔法コマンド選択中のとき
                 buttleAnounceText_.text = announceText_[1];
-                Debug.Log("現在は魔法コマンドが有効コマンドです");
 
-                var tmp = (int)setMagicObj_.GetComponent<ImageRotate>().GetNowCommand() - 1;
+                var tmp = (int)magicButtleCommandRotate_.GetNowCommand() - 1;
                 mpDecrease_ = useMagic_.MPdecrease(charasList_[(int)nowTurnChar_].GetMagicNum(tmp));
 
                 Debug.Log(tmp + "番の魔法を使用しようとしています");
@@ -527,6 +534,7 @@ public class CharacterMng : MonoBehaviour
                                 Debug.Log("魔法コマンドが有効コマンドです");
                                 selectFlg_ = true;
 
+                                buttleMagicInfoFrame_.SetActive(true);
                                 magicButtleCommandRotate_.SetEnableAndActive(true);
                                 buttleCommandRotate_.SetEnableAndActive(false);
 
@@ -580,6 +588,26 @@ public class CharacterMng : MonoBehaviour
                         Debug.Log("無効なコマンドです");
                         break;
                 }
+            }
+        }
+        else
+        {
+            if (setMagicObj_.activeSelf)    // 魔法コマンド選択中のとき
+            {
+                var tmp = (int)magicButtleCommandRotate_.GetNowCommand() - 1;
+                if(tmp >= 0 && magicCommandNumOld_ != tmp)
+                {
+                    if(charasList_[(int)nowTurnChar_].GetMagicNum(tmp).number > 0)
+                    {
+                        magicInfoText_.text = useMagic_.MagicInfoMake(charasList_[(int)nowTurnChar_].GetMagicNum(tmp));
+                    }
+                    else
+                    {
+                        magicInfoText_.text = "";       // 魔法をセットしていないところにコマンドが回転したときは、内容を未記入にする
+                    }
+                }
+                magicCommandNumOld_ = tmp;
+                Debug.Log("魔法選択中-----現在は" + tmp + "番のコマンド上");
             }
         }
 
@@ -916,7 +944,7 @@ public class CharacterMng : MonoBehaviour
 
         // MP減少処理
         StartCoroutine(eachCharaData_[(int)nowTurnChar_].charaHPMPMap.Item2.MoveSlideBar
-        (charasList_[(int)nowTurnChar_].MP() - mpDecrease_));
+        (charasList_[(int)nowTurnChar_].MP() - mpDecrease_, charasList_[(int)nowTurnChar_].MP()));
         // 内部数値の変更を行う
         charasList_[(int)nowTurnChar_].SetMP(charasList_[(int)nowTurnChar_].MP() - mpDecrease_);
 
@@ -1136,13 +1164,13 @@ public class CharacterMng : MonoBehaviour
                 return;
             }
 
-            StartCoroutine(eachCharaData_[num].charaHPMPMap.Item1.MoveSlideBar(charasList_[num].HP() - 999));
+            StartCoroutine(eachCharaData_[num].charaHPMPMap.Item1.MoveSlideBar(charasList_[num].HP() - 999, charasList_[num].HP()));
             charasList_[num].SetHP(charasList_[num].HP() - 999);
         }
         else
         {
             // キャラのHPを削る(スライドバー変更)
-            StartCoroutine(eachCharaData_[num].charaHPMPMap.Item1.MoveSlideBar(charasList_[num].HP() - damage));
+            StartCoroutine(eachCharaData_[num].charaHPMPMap.Item1.MoveSlideBar(charasList_[num].HP() - damage, charasList_[num].HP()));
             // 内部数値の変更を行う
             charasList_[num].SetHP(charasList_[num].HP() - damage);
         }
@@ -1270,7 +1298,7 @@ public class CharacterMng : MonoBehaviour
                     if(whatHeal == 0)   // HP回復
                     {
                         // キャラのHPを増やす(スライドバー変更)
-                        StartCoroutine(eachCharaData_[(int)selectChara].charaHPMPMap.Item1.MoveSlideBar(charasList_[(int)selectChara].HP() + useMagic_.GetHealPower()));
+                        StartCoroutine(eachCharaData_[(int)selectChara].charaHPMPMap.Item1.MoveSlideBar(charasList_[(int)selectChara].HP() + useMagic_.GetHealPower(), charasList_[(int)selectChara].HP()));
                         // 内部数値の変更を行う
                         charasList_[(int)selectChara].SetHP(charasList_[(int)selectChara].HP() + useMagic_.GetHealPower());
                     }
@@ -1297,7 +1325,7 @@ public class CharacterMng : MonoBehaviour
                         if (whatHeal == 0)
                         {
                             // キャラのHPを増やす(スライドバー変更)
-                            StartCoroutine(eachCharaData_[array[i]].charaHPMPMap.Item1.MoveSlideBar(charasList_[array[i]].HP() + useMagic_.GetHealPower()));
+                            StartCoroutine(eachCharaData_[array[i]].charaHPMPMap.Item1.MoveSlideBar(charasList_[array[i]].HP() + useMagic_.GetHealPower(), charasList_[array[i]].HP()));
                             // 内部数値の変更を行う
                             charasList_[array[i]].SetHP(charasList_[array[i]].HP() + useMagic_.GetHealPower());
                             Debug.Log((CHARACTERNUM)array[i] + "のHPを、" + useMagic_.GetHealPower() + "回復しました");

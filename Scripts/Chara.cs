@@ -459,7 +459,7 @@ public class Chara : CharaBase,InterfaceButtle
         if (num.Item2 > 0 && hitNum > set_.Luck + Random.Range(0, 100))
         {
             // 該当するバッドステータスをtrueにする
-            set_.condition[num.Item2 - 1].Item2 = true;
+            set_.condition[num.Item2 - 4].Item2 = true;
             // NONをfalseにする
             set_.condition[(int)CONDITION.NON - 1].Item2 = false;
             Debug.Log("キャラは状態異常にかかった");

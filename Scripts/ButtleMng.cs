@@ -25,6 +25,7 @@ public class ButtleMng : MonoBehaviour
     private int element_ = 0;               // エレメント情報
     private (int,int) badStatusNum_;        // 状態異常の数字
     private int refNum_ = -1;               // 攻撃反射対象の番号を保存する変数
+    private bool autoHitFlg_ = false;       // 命中効果のフラグ
     private Vector3 keepPos_;
 
     private bool lastEnemyFlg_;
@@ -264,6 +265,16 @@ public class ButtleMng : MonoBehaviour
     public void SetFieldPos(Vector3 pos)
     {
         keepPos_ = pos;
+    }
+
+    public void SetAutoHit(bool flag)
+    {
+        autoHitFlg_ = flag;
+    }
+
+    public bool GetAutoHit()
+    {
+        return autoHitFlg_;
     }
 
     public void OnClickItemBackButton()
