@@ -18,7 +18,7 @@ public class Bag_Item : MonoBehaviour
                                           
     // すべてのアイテム数
     private InitPopList popItemList_;
-    private int maxCnt_ = 0;// xlsから読み込むアイテムの数
+    private int maxCnt_ = 0;// xlsから読み込むアイテムの数(Exアイテムも含む
 
     public struct ItemData
     {
