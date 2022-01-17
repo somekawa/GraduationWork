@@ -30,7 +30,7 @@ public class Character_importer : AssetPostprocessor
 
                 foreach (string sheetName in sheetNames)
                 {
-                    var exportPath = "Assets/ExcelData/" + sheetName + ".asset";
+                    var exportPath = "Assets/Resources/" + sheetName + ".asset";
                     
                     // check scriptable object
                     var data = (CharacterList)AssetDatabase.LoadAssetAtPath(exportPath, typeof(CharacterList));
