@@ -18,5 +18,8 @@ public class QuestInfo : ScriptableObject
         public string reward;
         public int questType;
         public string delivery;
+        public int money;
+        public string materia;
+        public string item;
     }
 }
