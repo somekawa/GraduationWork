@@ -10,6 +10,7 @@ public class ItemList : ScriptableObject
 	public class Param
 	{
 		
+		public int ItemNum;
 		public string ItemName;
 		public string Information;
 		public int ChapterNum;
