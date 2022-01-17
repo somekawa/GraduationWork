@@ -52,6 +52,7 @@ public class Bag_Materia : MonoBehaviour
             maxCnt_ = popMateriaList_.SetMaxMateriaCount();
             materiaState = new MateriaData[maxCnt_];
             data = new MateriaData[maxCnt_];
+            Debug.Log(maxCnt_+"      "+materiaParent.transform);
             for (int i = 0; i < maxCnt_; i++)
             {
                 materiaState[i] = new MateriaData
@@ -63,7 +64,8 @@ public class Bag_Materia : MonoBehaviour
                     number = int.Parse(csvDatas_[i + 1][0]),
                     haveCnt = int.Parse(csvDatas_[i + 1][2]),
                 };
-              //  Debug.Log(materiaState[i].name + "の所持数" + materiaState[i].haveCnt);
+             //   Debug.Log(i + "番目のアイテム" + materiaState[i].name + "の所持数" + materiaState[i].haveCnt);
+
                 materiaState[i].box.transform.SetParent(materiaParent.transform);
                 // 名前に番号をつけて素材クリック時に情報を取得しやすくする
                 materiaState[i].box.name = materiaState[i].name + i;
@@ -95,13 +97,13 @@ public class Bag_Materia : MonoBehaviour
             }
         }
 
-        if (materiaState[0].box.transform.parent != materiaParent.transform)
-        {
-            for (int i = 0; i < maxCnt_; i++)
-            {
-                materiaState[i].box.transform.SetParent(materiaParent.transform);
-            }
-        }
+        //////////////////if (materiaState[0].box.transform.parent != materiaParent.transform)
+        //////////////////{
+        //////////////////    for (int i = 0; i < maxCnt_; i++)
+        //////////////////    {
+        //////////////////        materiaState[i].box.transform.SetParent(materiaParent.transform);
+        //////////////////    }
+        //////////////////}
 
 
         //// デバッグ用 全部の素材を5個取得した状態で始まる

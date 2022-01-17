@@ -35,11 +35,12 @@ public class UniHouseMng : MonoBehaviour
         // WarpField.csの初期化関数を先に呼ぶ
         GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
 
-        // バッグ関連
-        GameObject.Find("Managers").GetComponent<Bag_Word>().Init();
-        GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
-        GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
-        //GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad();
+
+        //////////// *デバッグ用
+        //////////GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
+        //////////GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
+        //////////GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
+        //////////GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
 
         // メインカメラを最初にアクティブにする
         var cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
@@ -81,12 +82,12 @@ public class UniHouseMng : MonoBehaviour
     public void ClickMagicCreateButton()
     {    
         // 空のマテリアを1つ以上持っていたらワード合成ができる
-        if (0 < Bag_Materia.materiaState[Bag_Materia.emptyMateriaNum].haveCnt)
-        {
-            magicCreateMng.gameObject.SetActive(true);
+        //if (0 < Bag_Materia.materiaState[Bag_Materia.emptyMateriaNum].haveCnt)
+        //{
             uniHouseCanvas.gameObject.SetActive(false);
-          GameObject.Find("MagicCreateMng").GetComponent<MagicCreate>().Init();
-        }
+            magicCreateMng.gameObject.SetActive(true);
+            magicCreateMng.GetComponent<MagicCreate>().Init();
+      //  }
         Debug.Log("魔法作成ボタンが押下されました");
     }
 }

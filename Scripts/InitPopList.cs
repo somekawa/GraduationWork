@@ -28,7 +28,6 @@ public class InitPopList : MonoBehaviour
     public static ItemData[] itemData;
 
     // 素材関連
-
     public enum FIELD_NUM
     {
         NON = -1,
@@ -46,6 +45,7 @@ public class InitPopList : MonoBehaviour
     private int maxMateriaCnt_ = 0;         //配列の最大値を保存
     private int singleMateriaCnt_ = 0;         // シートに記載されてる個数
     public static GameObject[] materiaBox_; // 生成したプレハブを保存
+    public static int[,] dropNum;//
 
     public struct MateriaData
     {
@@ -131,17 +131,24 @@ public class InitPopList : MonoBehaviour
 
             // Excelから素材のデータを読み込む
             materiaList_ = DataPopPrefab_.GetComponent<PopList>().GetData<MateriaList>(PopList.ListData.MATERIA, fieldNumber_);
-            singleMateriaCnt_ = materiaList_.param.Count;
-            maxMateriaCnt_ = (int)FIELD_NUM.MAX * singleMateriaCnt_;
+            //singleMateriaCnt_ = materiaList_.param.Count;
+            maxMateriaCnt_ = 34;// (int)FIELD_NUM.MAX * singleMateriaCnt_;
             materiaData = new MateriaData[maxMateriaCnt_];
             materiaInfo_ = new string[maxMateriaCnt_];
+
+            // 1つのフィールドにつきドロップするのは3種類のため
+           // dropNum = new int[9, 3];// singleMateriaCnt_,3];
+
             int number = 0;
             for (int f = 0; f < (int)FIELD_NUM.MAX; f++)
             {
                 materiaList_ = DataPopPrefab_.GetComponent<PopList>().GetData<MateriaList>(PopList.ListData.MATERIA, f);
+                singleMateriaCnt_= materiaList_.param.Count;
                 for (int i = 0; i < singleMateriaCnt_; i++)
                 {
-                    number = f * singleMateriaCnt_ + i;
+                   // number = f * singleMateriaCnt_ + i;
+                    
+                  //  Debug.Log(number+"      "+ materiaData[number].name);
                     materiaData[number].box = Instantiate(materiaUIBox,
                         new Vector2(0, 0), Quaternion.identity, this.transform);
                     materiaData[number].name = materiaList_.param[i].MateriaName;
@@ -149,6 +156,12 @@ public class InitPopList : MonoBehaviour
                     materiaData[number].buyPrice = materiaList_.param[i].Price_Buy;
                     materiaData[number].sellPrice = materiaList_.param[i].Price_Sell;
                     materiaData[number].info = materiaList_.param[i].Info;
+                    //if (i < 3)
+                    //{
+                    //    dropNum[f, i] = number;
+                    //    Debug.Log((FIELD_NUM)f + "の" + i + "番目は" + number);
+                    //}
+                    number++;
                 }
             }
 
