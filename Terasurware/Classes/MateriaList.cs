@@ -10,6 +10,7 @@ public class MateriaList : ScriptableObject
 	public class Param
 	{
 		
+		public int Number;
 		public string MateriaName;
 		public int Price_Buy;
 		public int Price_Sell;

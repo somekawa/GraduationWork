@@ -30,7 +30,7 @@ public class Character_importer : AssetPostprocessor
 
                 foreach (string sheetName in sheetNames)
                 {
-                    var exportPath = "Assets/Resources/" + sheetName + ".asset";
+                    var exportPath = "Assets/ExcelData/" + sheetName + ".asset";
                     
                     // check scriptable object
                     var data = (CharacterList)AssetDatabase.LoadAssetAtPath(exportPath, typeof(CharacterList));
@@ -61,13 +61,16 @@ public class Character_importer : AssetPostprocessor
 					cell = row.GetCell(0); p.Name = (cell == null ? "" : cell.StringCellValue);
 					cell = row.GetCell(1); p.Level = (int)(cell == null ? 0 : cell.NumericCellValue);
 					cell = row.GetCell(2); p.HP = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(3); p.MP = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(4); p.Attack = (int)(cell == null ? 0 : cell.NumericCellValue);
-                    cell = row.GetCell(5); p.MagicAttack = (int)(cell == null ? 0 : cell.NumericCellValue);
-                    cell = row.GetCell(6); p.Defence = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(7); p.Speed = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(8); p.Luck = (int)(cell == null ? 0 : cell.NumericCellValue);
-                    cell = row.GetCell(9); p.AnimMax = (float)(cell == null ? 0.0f : cell.NumericCellValue);
+					cell = row.GetCell(3); p.MaxHP = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(4); p.MP = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(5); p.MaxMP = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(6); p.Attack = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(7); p.MagicAttack = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(8); p.Defence = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(9); p.Speed = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(10); p.Luck = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(11); p.AnimMax = (float)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(12); p.Exp = (int)(cell == null ? 0 : cell.NumericCellValue);
 
                         data.param.Add(p);
                     }

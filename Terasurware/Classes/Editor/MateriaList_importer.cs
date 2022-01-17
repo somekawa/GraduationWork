@@ -58,10 +58,11 @@ public class MateriaList_importer : AssetPostprocessor
                         
                         var p = new MateriaList.Param();
 			
-					cell = row.GetCell(0); p.MateriaName = (cell == null ? "" : cell.StringCellValue);
-					cell = row.GetCell(1); p.Price_Buy = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(2); p.Price_Sell = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(3); p.Info = (cell == null ? "" : cell.StringCellValue);
+					cell = row.GetCell(0); p.Number = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(1); p.MateriaName = (cell == null ? "" : cell.StringCellValue);
+					cell = row.GetCell(2); p.Price_Buy = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(3); p.Price_Sell = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(4); p.Info = (cell == null ? "" : cell.StringCellValue);
 
                         data.param.Add(p);
                     }
