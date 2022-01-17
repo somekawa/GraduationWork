@@ -32,10 +32,9 @@ public class Bag_Item : MonoBehaviour
         public bool getFlag;    // 所持しているかどうか
         public int haveCnt;     // 指定アイテムの所持数
     }
-    public static ItemData[] itemState;
-    public static ItemData[] data;
+    public static ItemData[] itemState;// xlsデータから読み込んだものを保存
+    public static ItemData[] data;// csvデータから読み込んだものを保存
     public static bool itemUseFlg = false;  // アイテムを使用したらtrue
-    private int exItemNum_ ;// 大成功を含めたアイテムの数
 
     private int clickItemNum_ = -1;
     private Text info_; // クリックしたアイテムを説明する欄
@@ -48,41 +47,28 @@ public class Bag_Item : MonoBehaviour
     private bool checkFlag_ = false;
 
     public void Init()
+    // void Start()
     {
         if (checkFlag_ == false)
         {
             popItemList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
 
             maxCnt_ = popItemList_.SetMaxItemCount();
-            Debug.Log("csvアイテム数" + exItemNum_ + "         xlsアイテム数" + maxCnt_);
-            //exItemNum_ =maxCnt_;
-            itemState = new ItemData[exItemNum_];
-            data = new ItemData[exItemNum_];
+            itemState = new ItemData[maxCnt_];
+            data = new ItemData[maxCnt_];
             saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_HaveItem>();
-            for (int i = 0; i < exItemNum_; i++)
+            for (int i = 0; i < maxCnt_; i++)
             {
-                if (maxCnt_ - 1 < i)
+                itemState[i] = new ItemData
                 {
-                    if (itemState[i].box == null)
-                    {
-                        // 大成功アイテムの生成
-                        itemState[i].box = Instantiate(itemUIBox,
-                                 new Vector2(0, 0), Quaternion.identity, transform);
-                    }
-                    //Debug.Log(i+":大成功アイテムの生成");
-                }
-                else
-                {
-                    itemState[i] = new ItemData
-                    {
-                        box = InitPopList.itemData[i].box,
-                        info = InitPopList.itemData[i].info,
-                    };
-                }
+                    box = InitPopList.itemData[i].box,
+                    info = InitPopList.itemData[i].info,
+                };
 
                 itemState[i].number = int.Parse(csvDatas_[i + 1][0]);
                 itemState[i].name = csvDatas_[i + 1][1];
                 //Debug.Log("アイテムの名前："+itemState[i].name);
+                // アイテムの所持数を確認
                 itemState[i].haveCnt = int.Parse(csvDatas_[i + 1][2]);
                 // 親の位置を変更
                 itemState[i].box.transform.SetParent(itemParent.transform);
@@ -92,18 +78,17 @@ public class Bag_Item : MonoBehaviour
 
                 // 生成したプレハブの子になっているImageを見つける
                 itemState[i].image = itemState[i].box.transform.Find("ItemIcon").GetComponent<Image>();
-                int num = maxCnt_ - 1 < i ? i - maxCnt_ : i;
+                int num = maxCnt_ / 2 < i ? i - maxCnt_ / 2 : i;
                 itemState[i].image.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.ITEM][num];
 
                 // Exアイテムの目印を表示するかしないか
                 itemState[i].EX = itemState[i].box.transform.Find("SymbolImage").GetComponent<Image>();
-                bool flag = maxCnt_ - 1 < i ? true : false;
+                bool flag = maxCnt_ / 2 < i ? true : false;
                 itemState[i].EX.gameObject.SetActive(flag);
 
                 // 生成したプレハブの子になっているTextを見つける
                 itemState[i].cntText = itemState[i].box.transform.Find("NumBack/Num").GetComponent<Text>();
                 itemState[i].cntText.text = itemState[i].haveCnt.ToString();
-                //itemCnt_[i] = 0;// すべてのアイテムの所持数を0にする
 
                 itemState[i].getFlag = 0 < itemState[i].haveCnt ? true : false;
                 itemState[i].box.SetActive(itemState[i].getFlag);
@@ -113,7 +98,7 @@ public class Bag_Item : MonoBehaviour
         else
         {
             // 店かアイテム使用でアイテム個数が変更されたとき
-            for (int i = 0; i < exItemNum_; i++)
+            for (int i = 0; i < maxCnt_; i++)
             {
                 itemState[i].cntText.text = itemState[i].haveCnt.ToString();
                 itemState[i].getFlag = 0 < itemState[i].haveCnt ? true : false;
@@ -122,15 +107,15 @@ public class Bag_Item : MonoBehaviour
         }
 
 
-            //// デバッグ用 全部の素材を5個取得した状態で始まる
-            //for (int i = 0; i < exItemNum_; i++)
-            //{
-            //    ItemGetCheck(i, itemState[i].name, 10, MovePoint.JUDGE.NORMAL);
-            //   // Debug.Log(i + "番目の素材" + itemState[i].name);
-            //}
-            //ItemGetCheck(0, itemState[0].name, 10, MovePoint.JUDGE.GOOD);
+        //// デバッグ用 全部の素材を5個取得した状態で始まる
+        //for (int i = 0; i < exItemNum_; i++)
+        //{
+        //    ItemGetCheck(i, itemState[i].name, 10, MovePoint.JUDGE.NORMAL);
+        //   // Debug.Log(i + "番目の素材" + itemState[i].name);
+        //}
+        //ItemGetCheck(0, itemState[0].name, 10, MovePoint.JUDGE.GOOD);
 
-        }
+    }
 
     public void ItemGetCheck(MovePoint.JUDGE judge, int itemNum,int createCnt)
     {
@@ -162,18 +147,15 @@ public class Bag_Item : MonoBehaviour
             // カンマ区切りでリストへ登録していく(2次元配列状態になる[行番号][カンマ区切り])
             csvDatas_.Add(texts[i].Split(','));
         }
-        exItemNum_ = csvDatas_.Count - 1;
         Init();
     }
 
     public void DataSave()
     {
-      //  Debug.Log("魔法が生成されました。セーブします");
-
         saveCsvSc_.SaveStart();
 
-        // 魔法の個数分回す
-        for (int i = 0; i < exItemNum_; i++)
+        // アイテムの個数分回す
+        for (int i = 0; i < maxCnt_; i++)
         {
             saveCsvSc_.SaveItemData(data[i]);
         }
@@ -182,7 +164,7 @@ public class Bag_Item : MonoBehaviour
 
     public void SetItemNumber(int num)
     {
-        // 捨てる/使うボタンを表示
+        // 捨てるボタンを表示
         if (throwAwayBtn_ == null)
         {
             infoBack_ = GameObject.Find("ItemBagMng/InfoBack").gameObject;
@@ -192,6 +174,7 @@ public class Bag_Item : MonoBehaviour
         }
         throwAwayBtn_.gameObject.SetActive(true);
         useBtn_.gameObject.SetActive(true);
+
         // 選択されたアイテムの番号を保存
         clickItemNum_ = num;
 
@@ -223,18 +206,18 @@ public class Bag_Item : MonoBehaviour
 
     public void OnClickUseButton()
     {
-        if(useItem_ == null)
+        if (useItem_ == null)
         {
             useItem_ = GameObject.Find("ItemBagMng").GetComponent<UseItem>();
         }
 
-        if(infoBack_ == null)
+        if (infoBack_ == null)
         {
             infoBack_ = GameObject.Find("ItemBagMng/InfoBack").gameObject;
         }
 
         Text[] text = new Text[2];
-        for(int i = 0; i < charasText_.transform.childCount; i++)
+        for (int i = 0; i < charasText_.transform.childCount; i++)
         {
             text[i] = charasText_.transform.GetChild(i).GetChild(0).GetComponent<Text>();
         }
@@ -272,10 +255,11 @@ public class Bag_Item : MonoBehaviour
         }
     }
 
+
     // オブジェクト移動のコルーチン
     private System.Collections.IEnumerator MoveObj(bool outFlg)
     {
-        if(charasText_ == null)
+        if (charasText_ == null)
         {
             charasText_ = GameObject.Find("ItemBagMng/CharasText").gameObject;
         }
@@ -293,11 +277,11 @@ public class Bag_Item : MonoBehaviour
         }
 
         bool tmpFlg = false;
-        while(!tmpFlg)
+        while (!tmpFlg)
         {
             tmpFlg = true;
 
-            if(outFlg)
+            if (outFlg)
             {
                 // テキストは左に、アイテム説明は右にずらす
                 if (!tmpPair[0].Item2)
@@ -346,4 +330,5 @@ public class Bag_Item : MonoBehaviour
             yield return null;
         }
     }
+
 }
