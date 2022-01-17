@@ -28,7 +28,7 @@ public class ItemImageMng : MonoBehaviour
             return;
         }
 
-        spriteMap[IMAGE.ITEM] = ImageMng(2, 6, "/Item/Items");
+        spriteMap[IMAGE.ITEM] = ImageMng(4, 6, "/Item/Items");
         spriteMap[IMAGE.MAGIC] = ImageMng(1, 7, "/MagicImage");
         spriteMap[IMAGE.BOOK] = ImageMng(1, 6, "/BookImage");
         // ó‘ÔˆÙí’†‚ÌƒAƒCƒRƒ“
