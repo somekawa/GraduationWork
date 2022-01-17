@@ -68,6 +68,8 @@ public class QuestMng : MonoBehaviour
     private int[] nowDeliveryNum_ = new int[2];      // 現在の納品予定数
     private IEnumerator[] rest_ = new IEnumerator[2];         // 納品処理のコルーチンを保存する
 
+    private Dictionary<int, float> rewardGradeUp_ = new Dictionary<int, float>();   // キー:クエスト番号,値:納品する大成功アイテム数に応じて数値が変化する
+
     // Excelからのデータ読み込み
     private GameObject DataPopPrefab_;
     private QuestInfo popQuestInfo_;
@@ -332,7 +334,7 @@ public class QuestMng : MonoBehaviour
                 tmpNum += nowDeliveryNum_[i];
             }
             // 合計の納品予定数とmaxで比較する
-            if (int.Parse(slider.maxValue.ToString()) == tmpNum)
+            if (int.Parse(str) == tmpNum)
             {
                 // 納品数がぴったりのとき
                 button.interactable = true;
@@ -356,6 +358,30 @@ public class QuestMng : MonoBehaviour
         var split = popQuestInfo_.param[questNum_].delivery.Split(',');
         int[] numSplit = new int[split.Length];
 
+        // 報酬のグレードアップ処理
+        var persent = nowDeliveryNum_[1] / int.Parse(Regex.Replace(popQuestInfo_.param[questNum_].detail, @"[^0-9]", "")) * 100;
+        // 4段階ぐらい差をつける
+        if(persent >= 80 && persent <= 100)
+        {
+            // 80 % ～ 100 % --報酬1.8倍
+            rewardGradeUp_.Add(questNum_, 1.8f);
+        }
+        else if (persent >= 50 && persent < 80)
+        {
+            // 50 % ～ 79 % --報酬1.5倍
+            rewardGradeUp_.Add(questNum_, 1.5f);
+        }
+        else if (persent >= 1 && persent < 50)
+        {
+            // 1 %  ～ 49 % --報酬1.2倍
+            rewardGradeUp_.Add(questNum_, 1.2f);
+        }
+        else
+        {
+            // 0 % --報酬0倍
+            rewardGradeUp_.Add(questNum_, 0.0f);
+        }
+
         for (int i = 0; i < split.Length; i++)
         {
             numSplit[i] = int.Parse(split[i]);
@@ -363,7 +389,6 @@ public class QuestMng : MonoBehaviour
             StopCoroutine(rest_[i]); //一時停止
             rest_[i] = null;         //リセット
             nowDeliveryNum_[i] = 0; // 納品予定数の初期化
-
         }
 
         OrderQuestCommon();
@@ -430,7 +455,25 @@ public class QuestMng : MonoBehaviour
     // クリアクエストの報告をする
     public void ClickReportButton()
     {
-        //@ 報酬処理
+        // 報酬処理
+        // お金
+        SceneMng.SetHaveMoney(SceneMng.GetHaveMoney() + popQuestInfo_.param[questNum_].money + (int)(popQuestInfo_.param[questNum_].money * rewardGradeUp_[questNum_]));
+        // 素材
+        if (popQuestInfo_.param[questNum_].materia != "")
+        {
+            var materia = popQuestInfo_.param[questNum_].materia.Split('_');
+            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>().MateriaGetCheck(int.Parse(materia[0]), "", int.Parse(materia[1]) + (int)(int.Parse(materia[1]) * rewardGradeUp_[questNum_]));
+        }
+        // アイテム
+        if (popQuestInfo_.param[questNum_].item != "")
+        {
+            var item = popQuestInfo_.param[questNum_].item.Split('_');
+            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>().ItemGetCheck(MovePoint.JUDGE.NORMAL, int.Parse(item[0]), int.Parse(item[1]) + (int)(int.Parse(item[1]) * rewardGradeUp_[questNum_]));
+        }
+
+        // 数字の初期化
+        rewardGradeUp_[questNum_] = 0.0f;
+
 
         // ハンコをアクティブにする
         stampImg_.gameObject.SetActive(true);

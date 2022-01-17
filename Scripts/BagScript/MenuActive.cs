@@ -125,6 +125,19 @@ public class MenuActive : MonoBehaviour
     private IEnumerator MoveMenuButtons(int puramai)
     {
         parentMenuBtn_.gameObject.SetActive(true);
+
+        // 街とユニハウスではセーブ可能にし、それ以外では不可能にする
+        if (SceneMng.nowScene != SceneMng.SCENE.TOWN && SceneMng.nowScene != SceneMng.SCENE.UNIHOUSE)
+        {
+            //設定した色をstage_buttonを押した時の色へ設定
+            ButtonStateColorChange(false);
+        }
+        else
+        {
+            //設定した色をstage_buttonを押した時の色へ設定
+            ButtonStateColorChange(true);
+        }
+
         while (true)
         {
             yield return null;
@@ -207,6 +220,12 @@ public class MenuActive : MonoBehaviour
         bagMagic_.DataLoad();
         saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.CHARACTER);
         saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.OTHER);
+
+        GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
+        GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
+        GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
+        GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
+
         parentRectTrans_[(int)CANVAS.BAG].GetComponent<ItemBagMng>().MagicInit();
     }
 
@@ -323,5 +342,22 @@ public class MenuActive : MonoBehaviour
             parentRectTrans_[(int)CANVAS.BAG].Find("CharasText").gameObject.SetActive(true);
             parentRectTrans_[(int)CANVAS.BAG].Find("InfoBack").gameObject.SetActive(true);
         }
+    }
+
+    // セーブボタンの状態切替
+    private void ButtonStateColorChange(bool flag)
+    {
+        var tmp = parentMenuBtn_.Find("Save").GetComponent<Button>();
+        ColorBlock colorblock = tmp.colors;
+        tmp.interactable = flag;
+        if (flag)
+        {
+            colorblock.normalColor = new Color(1.0f,1.0f,1.0f);
+        }
+        else
+        {
+            colorblock.normalColor = new Color(0.5f, 0.5f, 0.5f);
+        }
+        tmp.colors = colorblock;
     }
 }

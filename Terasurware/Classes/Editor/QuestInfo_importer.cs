@@ -67,6 +67,9 @@ public class QuestInfo_importer : AssetPostprocessor
                         cell = row.GetCell(6); p.reward = (cell == null ? "" : cell.StringCellValue);
                         cell = row.GetCell(7); p.questType = (int)(cell == null ? 0 : cell.NumericCellValue);
                         cell = row.GetCell(8); p.delivery = (cell == null ? "" : cell.StringCellValue);
+                        cell = row.GetCell(9); p.money = (int)(cell == null ? 0 : cell.NumericCellValue);
+                        cell = row.GetCell(10); p.materia = (cell == null ? "" : cell.StringCellValue);
+                        cell = row.GetCell(11); p.item = (cell == null ? "" : cell.StringCellValue);
                         data.param.Add(p);
                     }
                     
