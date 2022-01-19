@@ -6,6 +6,10 @@ using UnityEngine;
 
 public class SaveLoadCSV : MonoBehaviour
 {
+    [SerializeField]
+    // クエストを受注したときに生成されるプレハブ
+    private GameObject completePrefab;
+
     // セーブ内容
     public enum SAVEDATA
     {
@@ -100,9 +104,51 @@ public class SaveLoadCSV : MonoBehaviour
 
         // クエスト
         var quest = QuestMng.questClearCnt;
+        var orderQuest = QuestClearCheck.GetOrderQuestsList();
+        var clearQuest = QuestClearCheck.GetClearedQuestsList();
+        bool tmpFlg = false;
         foreach (var pair in quest)
         {
-            sw.WriteLine(string.Join("\n", pair.Key.ToString() + "," + pair.Value.ToString()));
+            // 受注中で、クリアしてない状態のもの→回数の末尾に"_"をつけるようにする。
+            for (int i = 0; i < orderQuest.Count; i++)
+            {
+                if(orderQuest[i].Item1.name == pair.Key.ToString())
+                {
+                    if(QuestMng.rewardGradeUp.ContainsKey(pair.Key))
+                    {
+                        sw.WriteLine(string.Join("\n", pair.Key.ToString() + "," + pair.Value.ToString() + "_," + QuestMng.rewardGradeUp[pair.Key]));
+                    }
+                    else
+                    {
+                        sw.WriteLine(string.Join("\n", pair.Key.ToString() + "," + pair.Value.ToString() + "_," + 0.0));
+                    }
+                    tmpFlg = true;
+                    continue;
+                }
+            }
+
+            // 受注中で、クリアしたが報告していないもの→回数の末尾に"_c"をつけるようにする。
+            for (int i = 0; i < clearQuest.Count; i++)
+            {
+                if (clearQuest[i].name == pair.Key.ToString())
+                {
+                    if (QuestMng.rewardGradeUp.ContainsKey(pair.Key))
+                    {
+                        sw.WriteLine(string.Join("\n", pair.Key.ToString() + "," + pair.Value.ToString() + "_c," + QuestMng.rewardGradeUp[pair.Key]));
+                    }
+                    else
+                    {
+                        sw.WriteLine(string.Join("\n", pair.Key.ToString() + "," + pair.Value.ToString() + "_c," + 0.0));
+                    }
+                    tmpFlg = true;
+                    continue;
+                }
+            }
+
+            if(!tmpFlg)
+            {
+                sw.WriteLine(string.Join("\n", pair.Key.ToString() + "," + pair.Value.ToString()));
+            }
         }
 
         // 宝箱と強制戦闘壁の取得とクリア状態の項目名
@@ -208,6 +254,29 @@ public class SaveLoadCSV : MonoBehaviour
                         // FieldMngにあるリストに追加していく
                         var split = texts[k].Split(',');
 
+                        if(split[1].Contains("_c") || split[1].Contains("_"))
+                        {
+                            // 受注中クエストの共通処理
+                            // プレハブのインスタンス
+                            var prefab = Instantiate(completePrefab);
+                            // クエスト番号の設定
+                            prefab.GetComponent<CompleteQuest>().SetMyNum(int.Parse(split[0]));
+                            // クエストクリアを確認するスクリプトのリストに登録する
+                            QuestClearCheck.SetOrderQuestsList(prefab);
+
+                            // 指定したキーが存在するかどうか
+                            if (!QuestMng.rewardGradeUp.ContainsKey(int.Parse(split[0])))
+                            {
+                                QuestMng.rewardGradeUp.Add(int.Parse(split[0]), 0.0f);    
+                            }
+
+                            // 受注中で、クリアしたが報告していないもの→回数の末尾に"_c"をつけるようにする。
+                            if (split[1].Contains("_c"))
+                            {
+                                QuestClearCheck.QuestClear(int.Parse(split[0]));
+                            }
+                        }
+
                         bool tmp = false;
                         // すでにデータがある場合、
                         for (int a = 0; a < QuestMng.questClearCnt.Count; a++)
@@ -224,7 +293,7 @@ public class SaveLoadCSV : MonoBehaviour
                         // まだデータが存在しない場合、
                         if (!tmp)
                         {
-                            QuestMng.questClearCnt.Add(int.Parse(split[0]), int.Parse(split[1]));
+                            QuestMng.questClearCnt.Add(int.Parse(split[0]), int.Parse(System.Text.RegularExpressions.Regex.Replace(split[1], @"[^0-9]", "")));
                         }
                     }
                 }

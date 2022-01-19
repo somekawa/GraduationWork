@@ -59,7 +59,8 @@ public class QuestMng : MonoBehaviour
 
     private int totalQuestNum_;                      // 全クエストの数
     private int questNum_;                           // 選択中のクエスト番号を保存する変数
-    public static Dictionary<int, int> questClearCnt = new Dictionary<int, int>();   // キー:クエスト番号,値:クエスト達成回数
+    public static Dictionary<int, int> questClearCnt = new Dictionary<int, int>();      // キー:クエスト番号,値:クエスト達成回数
+    public static Dictionary<int, float> rewardGradeUp = new Dictionary<int, float>();  // キー:クエスト番号,値:納品する大成功アイテム数に応じて数値が変化する
 
     private Guild guild_ = null;                     // ギルドスクリプトのインスタンス
 
@@ -68,7 +69,7 @@ public class QuestMng : MonoBehaviour
     private int[] nowDeliveryNum_ = new int[2];      // 現在の納品予定数
     private IEnumerator[] rest_ = new IEnumerator[2];         // 納品処理のコルーチンを保存する
 
-    private Dictionary<int, float> rewardGradeUp_ = new Dictionary<int, float>();   // キー:クエスト番号,値:納品する大成功アイテム数に応じて数値が変化する
+    private static bool onceFlg_ = false;
 
     // Excelからのデータ読み込み
     private GameObject DataPopPrefab_;
@@ -156,12 +157,16 @@ public class QuestMng : MonoBehaviour
             }
         }
 
-        // 初回のみ登録する(初回 = 登録数が0)
-        if(questClearCnt.Count <= 0)
+        // 初回のみ登録する
+        if(!onceFlg_)
         {
+            onceFlg_ = true;
             for (int i = 0; i < totalQuestNum_; i++)    // 全クエスト分で回す
             {
-                questClearCnt.Add(i, 0);   // クリア回数を0回で設定
+                if(!questClearCnt.ContainsKey(i))
+                {
+                    questClearCnt.Add(i, 0);   // クリア回数を0回で設定
+                }
             }
         }
 
@@ -228,6 +233,13 @@ public class QuestMng : MonoBehaviour
         else
         {
             // まだ3つ以下だから受けられる
+
+            // 指定したキーが存在するかどうか
+            if (!rewardGradeUp.ContainsKey(questNum_))
+            {
+                rewardGradeUp.Add(questNum_, 0.0f);
+            }
+
             // 納品クエストかを確認する
             if (popQuestInfo_.param[questNum_].questType == 0)
             {
@@ -359,27 +371,26 @@ public class QuestMng : MonoBehaviour
         int[] numSplit = new int[split.Length];
 
         // 報酬のグレードアップ処理
-        var persent = nowDeliveryNum_[1] / int.Parse(Regex.Replace(popQuestInfo_.param[questNum_].detail, @"[^0-9]", "")) * 100;
+        var persent = (int)((float)nowDeliveryNum_[1] / float.Parse(Regex.Replace(popQuestInfo_.param[questNum_].detail, @"[^0-9]", "")) * 100.0f);
         // 4段階ぐらい差をつける
         if(persent >= 80 && persent <= 100)
         {
             // 80 % ～ 100 % --報酬1.8倍
-            rewardGradeUp_.Add(questNum_, 1.8f);
+            rewardGradeUp[questNum_] = 1.8f;
         }
         else if (persent >= 50 && persent < 80)
         {
             // 50 % ～ 79 % --報酬1.5倍
-            rewardGradeUp_.Add(questNum_, 1.5f);
+            rewardGradeUp[questNum_] = 1.5f;
         }
         else if (persent >= 1 && persent < 50)
         {
             // 1 %  ～ 49 % --報酬1.2倍
-            rewardGradeUp_.Add(questNum_, 1.2f);
+            rewardGradeUp[questNum_] = 1.2f;
         }
         else
         {
             // 0 % --報酬0倍
-            rewardGradeUp_.Add(questNum_, 0.0f);
         }
 
         for (int i = 0; i < split.Length; i++)
@@ -455,31 +466,45 @@ public class QuestMng : MonoBehaviour
     // クリアクエストの報告をする
     public void ClickReportButton()
     {
+        string text1 = "";
+        string text2 = "";
+        int addMoney = (int)(popQuestInfo_.param[questNum_].money * rewardGradeUp[questNum_]) - popQuestInfo_.param[questNum_].money;
         // 報酬処理
         // お金
-        SceneMng.SetHaveMoney(SceneMng.GetHaveMoney() + popQuestInfo_.param[questNum_].money + (int)(popQuestInfo_.param[questNum_].money * rewardGradeUp_[questNum_]));
+        SceneMng.SetHaveMoney(SceneMng.GetHaveMoney() + popQuestInfo_.param[questNum_].money + addMoney);
         // 素材
         if (popQuestInfo_.param[questNum_].materia != "")
         {
             var materia = popQuestInfo_.param[questNum_].materia.Split('_');
-            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>().MateriaGetCheck(int.Parse(materia[0]), "", int.Parse(materia[1]) + (int)(int.Parse(materia[1]) * rewardGradeUp_[questNum_]));
+            var add = (int)(int.Parse(materia[1]) * rewardGradeUp[questNum_]) - int.Parse(materia[1]);
+            text1 = "・素材 +" + add + "\n";
+            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>().MateriaGetCheck(int.Parse(materia[0]), "", int.Parse(materia[1]) + add);
         }
         // アイテム
         if (popQuestInfo_.param[questNum_].item != "")
         {
             var item = popQuestInfo_.param[questNum_].item.Split('_');
-            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>().ItemGetCheck(MovePoint.JUDGE.NORMAL, int.Parse(item[0]), int.Parse(item[1]) + (int)(int.Parse(item[1]) * rewardGradeUp_[questNum_]));
+            var add = (int)(int.Parse(item[1]) * rewardGradeUp[questNum_]) - int.Parse(item[1]);
+            text1 = "・アイテム +" + add;
+            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>().ItemGetCheck(MovePoint.JUDGE.NORMAL, int.Parse(item[0]), int.Parse(item[1]) + add);
         }
-
-        // 数字の初期化
-        rewardGradeUp_[questNum_] = 0.0f;
-
 
         // ハンコをアクティブにする
         stampImg_.gameObject.SetActive(true);
 
-        // 報酬内容を記載する
-        rewardText_.text = popQuestInfo_.param[questNum_].reward;
+        if (rewardGradeUp[questNum_] > 0.0f)
+        {
+            // 報酬内容を記載する
+            rewardText_.text = popQuestInfo_.param[questNum_].reward + "\n追加報酬\n・" + addMoney + "バイト\n" + text1 + text2;
+        }
+        else
+        {
+            // 報酬内容を記載する
+            rewardText_.text = popQuestInfo_.param[questNum_].reward;
+        }
+
+        // 数字の初期化
+        rewardGradeUp[questNum_] = 0.0f;
 
         // ポップアップをアクティブにする
         popUpReward_.SetActive(true);

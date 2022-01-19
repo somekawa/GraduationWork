@@ -72,10 +72,16 @@ public class FieldMng : MonoBehaviour
             EventMng.SetChapterNum(13, SceneMng.SCENE.CONVERSATION);
             nowMode = MODE.NON;
         }
-        else if (EventMng.GetChapterNum() == 16 && SceneMng.nowScene == SceneMng.SCENE.FIELD2)
+        else if(EventMng.GetChapterNum() == 16 && SceneMng.nowScene == SceneMng.SCENE.FIELD2)
         {
             // 進行度16 かつ Field3
             EventMng.SetChapterNum(16, SceneMng.SCENE.CONVERSATION);
+            nowMode = MODE.NON;
+        }
+        else if(EventMng.GetChapterNum() == 19 && SceneMng.nowScene == SceneMng.SCENE.FIELD3)
+        {
+            // 進行度19 かつ Field4
+            EventMng.SetChapterNum(19, SceneMng.SCENE.CONVERSATION);
             nowMode = MODE.NON;
         }
         else
@@ -249,7 +255,7 @@ public class FieldMng : MonoBehaviour
             // 探索中の時間加算処理
             if (player_.GetMoveFlag() && time_ < toButtleTime_)
             {
-                time_ += Time.deltaTime;
+                //time_ += Time.deltaTime;
             }
             else if (time_ >= toButtleTime_)
             {

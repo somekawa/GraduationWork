@@ -61,6 +61,12 @@ public class Guild : HouseBase
                         EventMng.SetChapterNum(18, SceneMng.SCENE.CONVERSATION);
                     }
                     break;
+                case 21:// 現在の進行度が21で、クエスト7番を受注したら
+                    if (questNum == 7)
+                    {
+                        EventMng.SetChapterNum(21, SceneMng.SCENE.CONVERSATION);
+                    }
+                    break;
                 default:
                     break;
             }
@@ -102,6 +108,13 @@ public class Guild : HouseBase
                     {
                         SceneMng.SetTimeGear(SceneMng.TIMEGEAR.NOON);      // 時間経過
                         EventMng.SetChapterNum(17, SceneMng.SCENE.CONVERSATION);
+                    }
+                    break;
+                case 20:// 現在の進行度が20で、クエスト6番を達成したら
+                    if (questNum == 6)
+                    {
+                        SceneMng.SetTimeGear(SceneMng.TIMEGEAR.NOON);      // 時間経過
+                        EventMng.SetChapterNum(20, SceneMng.SCENE.CONVERSATION);
                     }
                     break;
                 default:
