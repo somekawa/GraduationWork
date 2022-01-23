@@ -253,6 +253,16 @@ public class Enemy : CharaBase, InterfaceButtle
         deathFlg_ = flag;
     }
 
+    public int GetExp()
+    {
+        return set_.Exp;
+    }
+
+    public string DropMateria()
+    {
+        return set_.Drop;
+    }
+
     public override void DamageAnim()
     {
         // まずアニメーションがないときは処理を抜ける

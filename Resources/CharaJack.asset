@@ -16,10 +16,15 @@ MonoBehaviour:
   - Name: Jack
     Level: 1
     HP: 20
+    MaxHP: 20
     MP: 10
+    MaxMP: 10
     Attack: 7
     MagicAttack: 4
     Defence: 5
     Speed: 2
     Luck: 2
     AnimMax: 1
+    Exp: 0
+    MaxExp: 10
+    SumExp: 0

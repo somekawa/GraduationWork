@@ -1,0 +1,22 @@
+戦闘リザルト
+・処理
+ButtleMngにButtleResult.csをアタッチ
+ResultCanvasにResultCanvas
+DropPrefabにPrefabフォルダーButtleフォルダ内にあるDropPrefab
+CharaImageは2で　0にUni　1にJack　の全身イラスト
+
+・DropPrefab
+DropPrefab　Image:frame_text
+ドロップ時の親の変更はButtleResult.cs内で処理
+
+・ResultCanvas
+ーUniIconFrame　Image：frame_command
+　ーMaskImage　Image：whiteFrameMask
+　　ーFaceImage　Image:UniFaceIcon
+
+ーJackIconFrame　Image：frame_command
+　ーMaskImage　Image：whiteFrameMask
+　　ーFaceImage　Image:JackFaceIcon
+
+ーLevelUpMng
+　ーLevelBackImage　Image：InHouseButton

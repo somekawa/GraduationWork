@@ -23,5 +23,7 @@ public class CharacterList : ScriptableObject
 		public int Luck;
 		public float AnimMax;
 		public int Exp;
+		public int MaxExp;
+		public int SumExp;
 	}
 }

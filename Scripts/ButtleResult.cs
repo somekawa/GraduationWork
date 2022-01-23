@@ -1,0 +1,354 @@
+using System.Text.RegularExpressions;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class ButtleResult : MonoBehaviour
+{
+    [SerializeField]
+    private Canvas resultCanvas;    // 戦闘処理後に表示するリザルト用キャンバス
+    [SerializeField]
+    private GameObject dropPrefab;    // Drop物を表示する画像
+    [SerializeField]
+    private Sprite[] CharaImage;// キャラ画像
+
+    private GameObject DataPopPrefab_;
+    private EnemyList enemyData_ = null;        // フィールド毎の敵情報を保存する
+    private List<Enemy> enemyList_ = new List<Enemy>();
+
+    // 経験値関連
+    private Slider[] expSlider_ = new Slider[(int)SceneMng.CHARACTERNUM.MAX];    // Exp用のSlider
+    private TMPro.TextMeshProUGUI[] expText_ = new TMPro.TextMeshProUGUI[(int)SceneMng.CHARACTERNUM.MAX];  // 現在数値を表示するテキスト
+    private TMPro.TextMeshProUGUI[] levelText_ = new TMPro.TextMeshProUGUI[(int)SceneMng.CHARACTERNUM.MAX];  // 現在数値を表示するテキスト
+    private static int[] level_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// キャラの現在レベル
+    private static int[] nextExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 次のレベルまでに必要なEXP
+    private static int[] sumExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 今まで獲得した合計Exp
+    private int[] oldLevel_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// レベルアップする前のレベル
+    private int[] getExp_= new int[(int)SceneMng.CHARACTERNUM.MAX];// 獲得EXP
+    private int saveSumExp_ = 0;// 獲得EXPの合計
+    private int[] saveSumMaxExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];
+
+    // ドロップ関連
+    private GameObject[] dropObj_;  // プレハブ生成時に使用
+    private Image[] dropImage_;     // どの素材を拾ったか
+    private Text[] dropCntText_;    // 何個ドロップしたかを表示
+    private int enemyCnt_ = 0;// 敵の数＝ドロップ表示数
+    private int[] dropCnt_;        // 何個ドロップしたか
+
+    // Chara.csをキャラ毎にリスト化する
+    private List<Chara> charasList_ = new List<Chara>();
+    public static bool onceFlag_=false;// ロードしてからの1回しか入らなくていい箇所
+
+    // レベルアップ時のステータス表示関連
+    private RectTransform levelMng;    // レベルアップ時に使用するMng
+    private Image charaImage_;      // レベルが上がったキャラの表示
+    private RectTransform charaRect_;
+    private Text levelUpText_;        // どのくらいレベルが上がったか
+    private Text nextExpText_;      // 次のレベルまでの必要経験値
+    private Text statusText_;       // ステータスの種類
+    private Text statusNumText_;    // 加算されたステータスの値（変化しないものも含む）
+
+    // バッグ
+    private Bag_Materia bagMateria_;
+
+    void Start()
+    {
+        resultCanvas.gameObject.SetActive(false);
+        DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        expSlider_[(int)SceneMng.CHARACTERNUM.UNI] = resultCanvas.transform.Find("UniIconFrame/EXPSlider").GetComponent<Slider>();
+        expSlider_[(int)SceneMng.CHARACTERNUM.JACK] = resultCanvas.transform.Find("JackIconFrame/EXPSlider").GetComponent<Slider>();
+
+        charasList_ = SceneMng.charasList_;
+
+        for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+        {            
+            if (onceFlag_ == false)
+            {
+                level_[i] = charasList_[i].Level();
+                oldLevel_[i] = level_[i];
+                Debug.Log("レベル"+charasList_[i].Level());
+                sumExp_[i] = charasList_[i].CharacterSumExp();
+                expSlider_[i].maxValue = charasList_[i].CharacterMaxExp();
+                expSlider_[i].value = charasList_[i].CharacterExp();
+            }
+
+            // レベル関連
+            levelText_[i] = expSlider_[i].transform.Find("LvText").GetComponent<TMPro.TextMeshProUGUI>();
+            levelText_[i].text = level_[i].ToString();
+
+            // 経験値関連
+            expText_[i] = expSlider_[i].transform.Find("AddExpText").GetComponent<TMPro.TextMeshProUGUI>();
+        }
+        onceFlag_ = true;
+
+        // レベルアップ時のステータス表示関連
+        levelMng = resultCanvas.transform.Find("LvUpMng").GetComponent<RectTransform>();
+        levelUpText_ = levelMng.Find("LevelBackImage/LevelUpText").GetComponent<Text>();
+        nextExpText_ = levelMng.Find("NextLevelBackImage/NextLevelText").GetComponent<Text>();
+        statusText_ = levelMng.Find("StatusUpBack/StatusNameText").GetComponent<Text>();
+        statusNumText_ = levelMng.Find("StatusUpBack/StatusNumText").GetComponent<Text>();
+        charaImage_ = levelMng.Find("CharaImage").GetComponent<Image>();
+        charaRect_ = charaImage_.GetComponent<RectTransform>();
+        levelMng.gameObject.SetActive(false);
+
+        // 素材取得用
+        bagMateria_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>();
+    }
+
+    public void DropCheck(int enemyCnt, int[] num)
+    {
+        Debug.Log("リザルトを表示します");
+        Debug.Log(enemyCnt + "        " + num[0] + "     " + num[1]);
+        enemyCnt_ = enemyCnt;
+
+        // 素材系
+        if (enemyData_ == null)
+        {
+            enemyData_ = DataPopPrefab_.GetComponent<PopList>().GetData<EnemyList>(PopList.ListData.ENEMY, (int)SceneMng.nowScene - (int)SceneMng.SCENE.FIELD0, name);
+        }
+
+        int[] materiaNum = new int[enemyCnt];
+        Debug.Log(enemyCnt_);
+        for (int i = 0; i < enemyCnt_; i++)
+        {
+            enemyList_.Add(new Enemy(num[i].ToString(), 1, null, enemyData_.param[num[i]]));
+            Debug.Log(i + "番目：" + enemyList_[i].GetExp());
+            Debug.Log(i + "番目：" + enemyList_[i].DropMateria());
+            // Drop物の番号を確認する
+            materiaNum[i] = int.Parse(Regex.Replace(enemyList_[i].DropMateria(), @"[^0-9]", ""));
+            saveSumExp_ += enemyList_[i].GetExp();
+            saveSumMaxExp_[i] = 10;
+        }
+
+        resultCanvas.gameObject.SetActive(true);
+        // 表示する親の位置を確定
+        Transform dropParent = resultCanvas.transform.Find("DropMng/Viewport/DropParent").GetComponent<Transform>();
+
+        dropCnt_ = new int[enemyCnt_];
+        dropObj_ = new GameObject[enemyCnt_];
+        dropImage_ = new Image[enemyCnt_];
+        dropCntText_ = new Text[enemyCnt_];
+
+        for (int i = 0; i < enemyCnt; i++)
+        {
+            // 各アイテムのドロップ数を1～5のランダムで取得
+            dropCnt_[i] = Random.Range(1, 5);
+
+            // ドロップ物を表示するためにプレハブを生成
+            dropObj_[i] = Instantiate(dropPrefab,
+                new Vector2(0, 0), Quaternion.identity, dropParent);
+            dropCntText_[i] = dropObj_[i].transform.Find("DropCnt").GetComponent<Text>();
+            dropImage_[i] = dropObj_[i].transform.Find("DropImage").GetComponent<Image>();
+
+            dropCntText_[i].text = "×" + dropCnt_[i];
+            dropImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][materiaNum[i]];
+            bagMateria_.MateriaGetCheck(materiaNum[i], dropCnt_[i]);
+        }
+
+        for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+        {
+            // 経験値のスライダーを動かす
+            StartCoroutine(ActiveExpSlider(i, SceneMng.charasList_[i].GetDeathFlg(), saveSumExp_));
+        }
+    }
+
+    private IEnumerator ActiveExpSlider(int charaNum, bool deathFlag,  int sumExp)
+    {
+        float saveValue = 0;
+        // バトルで死亡したまま終了していたときは,獲得経験値を半分に
+        int nowExp = deathFlag == true ? sumExp / 2 : sumExp;
+        sumExp_[charaNum] = nowExp;
+        getExp_[charaNum] = nowExp;
+        expText_[charaNum].text = "+" + nowExp.ToString();
+        Debug.Log("獲得EXP" + nowExp);
+        while (true)
+        {
+            yield return null;
+            if (nowExp < expSlider_[charaNum].maxValue)
+            {
+                Debug.Log(saveValue + "       スライダーの移動が終了しました");
+                nextExp_[charaNum] = (int)(expSlider_[charaNum].maxValue - expSlider_[charaNum].value);
+
+                if (charaNum == (int)SceneMng.CHARACTERNUM.UNI)
+                {
+                    yield break;
+                }
+                else
+                {
+                    // ジャックのスライダー移動まで終わったらレベルが上がったかのチェックをする
+                    if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+                    {
+                        StartCoroutine(ActiveResult());
+                        yield break;
+                    }
+                }
+            }
+            else
+            {
+                if (expSlider_[charaNum].value >= expSlider_[charaNum].maxValue)
+                {
+                    // 上限に来るまで加算する
+                    saveValue += 2;//
+                    expSlider_[charaNum].value += 2;
+                }
+                else
+                {
+                    // 該当キャラのレベルを上げる
+                    level_[charaNum]++;
+                    levelText_[charaNum].text = "Lv " + level_[charaNum].ToString();
+                    nowExp -= (int)expSlider_[charaNum].maxValue;
+
+                    // 上限を変更
+                    expSlider_[charaNum].maxValue = (int)(expSlider_[charaNum].maxValue * 1.1f);
+                    Debug.Log(charaNum + "    " + level_[charaNum] + "  上限" + expSlider_[charaNum].maxValue);
+                    saveSumMaxExp_[charaNum] += (int)expSlider_[charaNum].maxValue;
+                    // valueが上限まで来たら0に戻す
+                    expSlider_[charaNum].value = 0.0f;
+                }
+            }
+        }
+    }
+
+    private IEnumerator ActiveResult()
+    {
+        // ジャックの経験値スライダーまで終わったら処理をする
+        // 0 Uni    1 Jack
+        bool[] levelUpFlag =new bool[(int)SceneMng.CHARACTERNUM.MAX] { false, false };
+        for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+        {
+            Debug.Log(i + "番目のキャラのレベル遷移：" + oldLevel_[i] + "→" + level_[i]);
+            levelUpFlag[i] = oldLevel_[i] < level_[i] ? true : false;
+        }
+
+        saveSumExp_ = 0;
+        // 誰のレベルも上がってなかったら何もしない
+        if (levelUpFlag[(int)SceneMng.CHARACTERNUM.UNI] == false
+         && levelUpFlag[(int)SceneMng.CHARACTERNUM.JACK] == false)
+        {
+            FieldMng.nowMode = FieldMng.MODE.SEARCH;
+            resultCanvas.gameObject.SetActive(false);
+            enemyCnt_ = 0;
+            yield break;
+        }
+
+        while (true)
+        {
+            yield return null;
+            if (levelUpFlag[(int)SceneMng.CHARACTERNUM.UNI] == false
+             && levelUpFlag[(int)SceneMng.CHARACTERNUM.JACK] == false)
+            {
+                FieldMng.nowMode = FieldMng.MODE.SEARCH;
+                levelMng.gameObject.SetActive(false);
+                resultCanvas.gameObject.SetActive(false);
+                enemyCnt_ = 0;
+                for (int i = 0; i < enemyCnt_; i++)
+                {
+                    // リザルト非表示にDropオブジェクト削除
+                    Destroy(dropObj_[i]);
+                }
+                yield break;
+            }
+
+            if (levelMng.gameObject.activeSelf == false)
+            {
+                levelMng.gameObject.SetActive(true);
+            }
+
+            // ユニのレベルアップ用の画像を表示する
+            if (levelUpFlag[(int)SceneMng.CHARACTERNUM.UNI] == true)
+            {
+                if (oldLevel_[(int)SceneMng.CHARACTERNUM.UNI] != level_[(int)SceneMng.CHARACTERNUM.UNI])
+                {
+                    LevelRelation(new Vector2(-350.0f, -105.0f),SceneMng.CHARACTERNUM.UNI,
+                    oldLevel_[(int)SceneMng.CHARACTERNUM.UNI],
+                    level_[(int)SceneMng.CHARACTERNUM.UNI],
+                    nextExp_[(int)SceneMng.CHARACTERNUM.UNI],
+                    getExp_[(int)SceneMng.CHARACTERNUM.UNI]);
+                }
+                // 左ボタン押下かスペースキー押下でレベルアップ用の画像を表示
+                if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+                {
+                    // 確認し終わったらfalseにする
+                    levelUpFlag[(int)SceneMng.CHARACTERNUM.UNI] = false;
+                }
+            }
+            else
+            {
+                if (levelUpFlag[(int)SceneMng.CHARACTERNUM.JACK] == true)
+                {
+                    // ユニがレベルアップして表示している可能性があるためチェックする
+                    if (oldLevel_[(int)SceneMng.CHARACTERNUM.JACK] != level_[(int)SceneMng.CHARACTERNUM.JACK])
+                    {
+                        LevelRelation(new Vector2(-350.0f, -240.0f),
+                            SceneMng.CHARACTERNUM.JACK,
+                        oldLevel_[(int)SceneMng.CHARACTERNUM.JACK],
+                        level_[(int)SceneMng.CHARACTERNUM.JACK],
+                        nextExp_[(int)SceneMng.CHARACTERNUM.JACK],
+                          getExp_[(int)SceneMng.CHARACTERNUM.JACK]);
+                    }
+                    // 左ボタン押下かスペースキー押下でレベルアップ用の画像を表示
+                    if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+                    {
+                        levelUpFlag[(int)SceneMng.CHARACTERNUM.JACK] = false;
+                    }
+                }
+            }
+        }
+    }
+
+    private void LevelRelation(Vector2 pos, SceneMng.CHARACTERNUM chara,
+        int oldLevel, int nowLevel, int nextExp, int exp)
+    {
+        // 上昇させる分を入れる
+        int[] tmp = new int[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
+        // 0Attack 1MagicAttack 2Defence 3Speed 4Luck 5HP 6MP 7 EXP
+        int differenceLv = nowLevel - oldLevel;
+        // ユニ、ジャック共通部分
+        if ((nowLevel % 3 == 0) || (3 <= differenceLv))
+        {
+            tmp[3] = 1;            // 3レベル毎にスピードを上げる
+        }
+        if ((nowLevel % 5 == 0) || (5 <= differenceLv))
+        {
+            tmp[4] = 1;            // 5レベル毎に幸運を上げる
+        }
+
+        // 複数レベル上がった場合
+        for (int i = oldLevel; i < nowLevel; i++)
+        {
+            if (i % 2 == 1)
+            {
+                tmp[2] += chara == SceneMng.CHARACTERNUM.UNI ? 2 : 3;
+            }
+            else
+            {
+                tmp[0] += chara == SceneMng.CHARACTERNUM.UNI ? 2 : 3;
+                tmp[1] += chara == SceneMng.CHARACTERNUM.UNI ? 3 : 2;
+            }
+        }
+        // 1レベル上昇するたびに10加算
+        tmp[5] = differenceLv * 10;
+        tmp[6] = differenceLv * 10;
+
+        charaRect_.sizeDelta = new Vector2(CharaImage[(int)chara].rect.width, CharaImage[(int)chara].rect.height);
+        charaImage_.sprite = CharaImage[(int)chara];
+        charaRect_.localPosition = pos;
+
+        levelUpText_.text = "Lv　" + oldLevel.ToString() + "→" + nowLevel.ToString();
+        nextExpText_.text = "次のレベルまで　" + nextExp.ToString() + "EXP";
+        statusText_.text = "HP\nMP\nAttack\nMagicAttack\nDefence\nSpeed\nLuck";
+        statusNumText_.text = "+" + tmp[5].ToString() +
+                            "\n+" + tmp[6].ToString() +
+                            "\n+" + tmp[0].ToString() +
+                            "\n+" + tmp[1].ToString() +
+                            "\n+" + tmp[2].ToString() +
+                            "\n+" + tmp[3].ToString() +
+                            "\n+" + tmp[4].ToString();
+
+        tmp[7] = exp;
+     //   SceneMng.charasList_[(int)chara].SetStatusUpByCook(tmp, false);
+
+        oldLevel_[(int)chara] = level_[(int)chara];
+    }
+}

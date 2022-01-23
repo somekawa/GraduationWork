@@ -132,7 +132,7 @@ public class InitPopList : MonoBehaviour
             // ExcelÇ©ÇÁëfçﬁÇÃÉfÅ[É^Çì«Ç›çûÇﬁ
             materiaList_ = DataPopPrefab_.GetComponent<PopList>().GetData<MateriaList>(PopList.ListData.MATERIA, fieldNumber_);
             //singleMateriaCnt_ = materiaList_.param.Count;
-            maxMateriaCnt_ = 34;// (int)FIELD_NUM.MAX * singleMateriaCnt_;
+            maxMateriaCnt_ = 35;// (int)FIELD_NUM.MAX * singleMateriaCnt_;
             materiaData = new MateriaData[maxMateriaCnt_];
             materiaInfo_ = new string[maxMateriaCnt_];
 
@@ -146,9 +146,7 @@ public class InitPopList : MonoBehaviour
                 singleMateriaCnt_= materiaList_.param.Count;
                 for (int i = 0; i < singleMateriaCnt_; i++)
                 {
-                   // number = f * singleMateriaCnt_ + i;
-                    
-                  //  Debug.Log(number+"      "+ materiaData[number].name);
+                  // Debug.Log(number+"      "+ materiaData[number].name);
                     materiaData[number].box = Instantiate(materiaUIBox,
                         new Vector2(0, 0), Quaternion.identity, this.transform);
                     materiaData[number].name = materiaList_.param[i].MateriaName;
@@ -156,11 +154,6 @@ public class InitPopList : MonoBehaviour
                     materiaData[number].buyPrice = materiaList_.param[i].Price_Buy;
                     materiaData[number].sellPrice = materiaList_.param[i].Price_Sell;
                     materiaData[number].info = materiaList_.param[i].Info;
-                    //if (i < 3)
-                    //{
-                    //    dropNum[f, i] = number;
-                    //    Debug.Log((FIELD_NUM)f + "ÇÃ" + i + "î‘ñ⁄ÇÕ" + number);
-                    //}
                     number++;
                 }
             }

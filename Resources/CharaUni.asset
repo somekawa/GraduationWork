@@ -16,10 +16,15 @@ MonoBehaviour:
   - Name: Uni
     Level: 1
     HP: 15
+    MaxHP: 15
     MP: 16
+    MaxMP: 16
     Attack: 5
     MagicAttack: 6
     Defence: 3
     Speed: 3
     Luck: 3
     AnimMax: 1
+    Exp: 0
+    MaxExp: 10
+    SumExp: 0

@@ -33,6 +33,9 @@ public class ButtleMng : MonoBehaviour
 
     public static string forcedButtleWallName;
 
+    private ButtleResult buttleResult_;// 戦闘リザルト用
+    private int[] saveEnemyNum_ = new int[5];
+
     void Start()
     {
         characterMng_ = GameObject.Find("CharacterMng").GetComponent<CharacterMng>();
@@ -40,6 +43,8 @@ public class ButtleMng : MonoBehaviour
 
         //buttleCommandUI_ = buttleUICanvas.transform.Find("Command");
         buttleUICanvas.gameObject.SetActive(false);
+
+        buttleResult_ = gameObject.GetComponent<ButtleResult>();
     }
 
     void Update()
@@ -135,6 +140,9 @@ public class ButtleMng : MonoBehaviour
 
                     CallDeleteEnemy();
 
+                    // リザルト処理： エネミーの数、エネミーの番号（配列）
+                    buttleResult_.DropCheck(EneSelObj_.childCount, saveEnemyNum_);
+
                     for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
                     {
                         // バトルで死亡したまま終了していたときは、HP1の状態で立ち上がらせる
@@ -146,8 +154,6 @@ public class ButtleMng : MonoBehaviour
                         SceneMng.charasList_[i].ButtleInit();
                     }
 
-
-                    FieldMng.nowMode = FieldMng.MODE.SEARCH;
                     characterMng_.SetCharaFieldPos();
                 }
             }
@@ -261,6 +267,11 @@ public class ButtleMng : MonoBehaviour
     public Vector3 GetFieldPos()
     {
         return keepPos_;
+    }
+
+    public void SetEnemyNum(int[] num)
+    {
+        saveEnemyNum_ = num;
     }
 
     public void SetFieldPos(Vector3 pos)

@@ -71,6 +71,8 @@ public class Character_importer : AssetPostprocessor
 					cell = row.GetCell(10); p.Luck = (int)(cell == null ? 0 : cell.NumericCellValue);
 					cell = row.GetCell(11); p.AnimMax = (float)(cell == null ? 0 : cell.NumericCellValue);
 					cell = row.GetCell(12); p.Exp = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(13); p.MaxExp = (int)(cell == null ? 0 : cell.NumericCellValue);
+					cell = row.GetCell(14); p.SumExp = (int)(cell == null ? 0 : cell.NumericCellValue);
 
                         data.param.Add(p);
                     }

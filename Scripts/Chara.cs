@@ -154,6 +154,25 @@ public class Chara : CharaBase,InterfaceButtle
         set_.MP = mp;
     }
 
+    public int Level()
+    {
+        return set_.Level;
+    }
+    public int CharacterSumExp()
+    {
+        return set_.CharacterSumExp;
+    }
+    public int CharacterMaxExp()
+    {
+        return set_.CharacterMaxExp;
+    }
+    public int CharacterExp()
+    {
+        return set_.CharacterExp;
+    }
+
+
+
     // CharaBaseクラスの抽象メソッドを実装する
     public override void LevelUp()
     {
