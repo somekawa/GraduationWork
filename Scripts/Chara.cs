@@ -162,6 +162,7 @@ public class Chara : CharaBase,InterfaceButtle
     {
         return set_.CharacterSumExp;
     }
+
     public int CharacterMaxExp()
     {
         return set_.CharacterMaxExp;
@@ -171,6 +172,18 @@ public class Chara : CharaBase,InterfaceButtle
         return set_.CharacterExp;
     }
 
+    public void SetCharacterExp(int num)
+    {
+        set_.CharacterExp = num;
+    }
+    public void SetCharacterSumExp(int num)
+    {
+        set_.CharacterSumExp = num;
+    }
+    public void SetCharacterMaxExp(int num)
+    {
+        set_.CharacterMaxExp = num;
+    }
 
 
     // CharaBaseクラスの抽象メソッドを実装する
@@ -373,6 +386,8 @@ public class Chara : CharaBase,InterfaceButtle
     {
         set_.Magic[arrayNum] = num;
     }
+
+
 
     public Bag_Magic.MagicData GetMagicNum(int arrayNum)
     {

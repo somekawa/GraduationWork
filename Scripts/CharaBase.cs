@@ -27,6 +27,9 @@ public abstract class CharaBase : object
         public int Luck;            // この値にポイントを振り分けると幸運が上がる
         public float AnimMax;       // 攻撃モーションのフレームを時間に直した値が入っている(モーション切り替えで使用する)
         public int[] Magic;
+        public int CharacterExp;// 取得経験値
+        public int CharacterMaxExp;// 取得経験値
+        public int CharacterSumExp;// 取得経験値
         public (CONDITION,bool)[] condition; // 各キャラと各敵の状態異常が確認できるようにする
 
         // 敵用の情報
@@ -81,11 +84,14 @@ public abstract class CharaBase : object
             setting_.Speed = popCharacter.param[0].Speed;
             setting_.Luck = popCharacter.param[0].Luck;
             setting_.AnimMax = popCharacter.param[0].AnimMax;
-
             setting_.animator = animator;
             setting_.isMove = false;
             setting_.animTime = 0.0f;
             //setting.buttlePos = set.buttlePos;    // 設定のタイミングが異なる
+
+            setting_.CharacterExp = popCharacter.param[0].Exp;
+            setting_.CharacterExp = popCharacter.param[0].MaxExp;
+            setting_.CharacterExp = popCharacter.param[0].SumExp;
 
             // 最大4つまでつけられるのでここで初期化しておく
             setting_.Magic = new int[4];
