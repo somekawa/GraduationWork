@@ -47,6 +47,8 @@ public class Bag_Materia : MonoBehaviour
         popMateriaList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
         saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_Materia>();
 
+        
+
         if (maxCnt_ == 0)
         {
             maxCnt_ = popMateriaList_.SetMaxMateriaCount();
@@ -85,6 +87,7 @@ public class Bag_Materia : MonoBehaviour
 
                 materiaState[i].getFlag = 0 < materiaState[i].haveCnt ? true : false;
                 materiaState[i].box.SetActive(materiaState[i].getFlag);
+              //  Debug.Log(i + "       " + materiaState[i].getFlag);
             }
         }
         else
@@ -97,24 +100,16 @@ public class Bag_Materia : MonoBehaviour
             }
         }
 
-        //////////////////if (materiaState[0].box.transform.parent != materiaParent.transform)
-        //////////////////{
-        //////////////////    for (int i = 0; i < maxCnt_; i++)
-        //////////////////    {
-        //////////////////        materiaState[i].box.transform.SetParent(materiaParent.transform);
-        //////////////////    }
-        //////////////////}
-
-
-        //// デバッグ用 全部の素材を5個取得した状態で始まる
-        //for (int i = 0; i < maxCnt_; i++)
-        //{
-        //    MateriaGetCheck(i, materiaState[i].name, 5);
-        //    //Debug.Log(i + "番目の素材" + materiaState[i].name);
-        //}
+        if (materiaState[0].box.transform.parent != materiaParent.transform)
+        {
+            for (int i = 0; i < maxCnt_; i++)
+            {
+                materiaState[i].box.transform.SetParent(materiaParent.transform);
+            }
+        }
     }
 
-    public void MateriaGetCheck(int materiaNum, string materiaName, int getCnt)
+    public void MateriaGetCheck(int materiaNum, int getCnt)
     {
         materiaState[materiaNum].getFlag = true;
         if (getCnt < 0)

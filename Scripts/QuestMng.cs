@@ -478,7 +478,7 @@ public class QuestMng : MonoBehaviour
             var materia = popQuestInfo_.param[questNum_].materia.Split('_');
             var add = (int)(int.Parse(materia[1]) * rewardGradeUp[questNum_]) - int.Parse(materia[1]);
             text1 = "・素材 +" + add + "\n";
-            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>().MateriaGetCheck(int.Parse(materia[0]), "", int.Parse(materia[1]) + add);
+            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>().MateriaGetCheck(int.Parse(materia[0]),  int.Parse(materia[1]) + add);
         }
         // アイテム
         if (popQuestInfo_.param[questNum_].item != "")
