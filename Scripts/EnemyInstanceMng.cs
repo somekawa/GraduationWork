@@ -782,13 +782,19 @@ public class EnemyInstanceMng : MonoBehaviour
         // 敵とそのHPバーの削除処理
         for(int i = 0; i < enemyMap_.Count; i++)
         {
+            Debug.Log("敵" + i + "を削除しました");
             Destroy(enemyMap_[i + 1]);
             Destroy(GameObject.Find(enemyList_[i].Item2.name));
         }
+
+        // 毎回使用前に初期化する
+        enemyList_.Clear();
+        enemyMap_.Clear();
     }
 
     public bool AllAnimationFin()
     {
+        Debug.Log("AllAnimationFin処理");
         for (int i = 0; i < enemyMap_.Count; i++)
         {
             // まだ1体でも死亡アニメーション中ならfalseで返す
