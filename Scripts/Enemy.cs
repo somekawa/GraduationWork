@@ -10,7 +10,7 @@ public class Enemy : CharaBase, InterfaceButtle
 
     private CharacterSetting set_;                  // キャラ毎の情報       
     private bool deathFlg_ = false;                 // 死亡状態か確認する変数
-    private readonly string[] bossName_ = { "YellowKabosu","WaterMonster","BossGolem","BossParty","PoisonSlime" };    // ボスの名前
+    private readonly string[] bossName_ = { "YellowKabosu","WaterMonster","BossGolem","BossParty","PoisonSlime","Dragon" };    // ボスの名前
     private readonly int[] statusMap_ = new int[4];
     private Dictionary<int, (int, int)> Debuffmap_ 
         = new Dictionary<int, (int, int)>();   // デバフ後の値とターン数を管理する<ワード順,(効果値,デバフターン数)>

@@ -649,6 +649,7 @@ GameObject:
   - component: {fileID: 7509643149038248058}
   - component: {fileID: 555068378200026162}
   - component: {fileID: 6390963136114250069}
+  - component: {fileID: 8002804890734614096}
   m_Layer: 0
   m_Name: PoisonSlime
   m_TagString: Weapon
@@ -693,5 +694,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2a5f1792d5873ec4c9ff35dcb8b3b82f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &8002804890734614096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5270839180187245850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1834933937763054b82674137c6dde93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
