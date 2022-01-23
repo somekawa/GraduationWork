@@ -93,6 +93,12 @@ public class ForcedButtle : MonoBehaviour
                     // -transform.forwardÇ™å„ÇÎ
                     Vector3 velocity = (-gameObject.transform.forward) * 3.0f;
                     uniChan_.transform.position += velocity;
+
+                    if(SceneMng.nowScene == SceneMng.SCENE.FIELD4)
+                    {
+                        // Yé≤Çè„Ç…è„Ç∞Ç»Ç¢Ç∆ÅAñﬂÇµÇΩéûÇ…óéâ∫ÇµÇƒÇµÇ‹Ç§
+                        uniChan_.transform.position += new Vector3(0.0f,0.5f,0.0f);
+                    }
                 }
             }
         }

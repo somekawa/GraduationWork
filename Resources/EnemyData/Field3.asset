@@ -29,6 +29,7 @@ MonoBehaviour:
     MoveDistance: 1.5
     WeaponTagObjName: Beholder
     Weak: 2
+    Bst: -1
   - Name: Skeleton
     Level: 8
     HP: 35
@@ -45,6 +46,7 @@ MonoBehaviour:
     MoveDistance: 1.5
     WeaponTagObjName: Skeleton
     Weak: 4
+    Bst: -1
   - Name: MagicSkeleton
     Level: 8
     HP: 30
@@ -61,6 +63,7 @@ MonoBehaviour:
     MoveDistance: -1
     WeaponTagObjName: SpiderAttack(Clone)
     Weak: 4
+    Bst: 5
   - Name: Bat
     Level: 7
     HP: 25
@@ -77,6 +80,7 @@ MonoBehaviour:
     MoveDistance: -1
     WeaponTagObjName: SpiderAttack(Clone)
     Weak: 3
+    Bst: 4
   - Name: PoisonSlime
     Level: 12
     HP: 100
@@ -93,3 +97,4 @@ MonoBehaviour:
     MoveDistance: 1.5
     WeaponTagObjName: PoisonSlime
     Weak: 3
+    Bst: 2

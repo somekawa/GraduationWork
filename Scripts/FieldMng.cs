@@ -84,6 +84,12 @@ public class FieldMng : MonoBehaviour
             EventMng.SetChapterNum(19, SceneMng.SCENE.CONVERSATION);
             nowMode = MODE.NON;
         }
+        else if (EventMng.GetChapterNum() == 22 && SceneMng.nowScene == SceneMng.SCENE.FIELD4)
+        {
+            // êiçsìx22 Ç©Ç¬ Field5
+            EventMng.SetChapterNum(22, SceneMng.SCENE.CONVERSATION);
+            nowMode = MODE.NON;
+        }
         else
         {
             nowMode = MODE.SEARCH;
@@ -252,10 +258,15 @@ public class FieldMng : MonoBehaviour
 
         if (nowMode == MODE.SEARCH)
         {
+            if(SceneMng.nowScene == SceneMng.SCENE.FIELD4)
+            {
+                return;
+            }
+
             // íTçıíÜÇÃéûä‘â¡éZèàóù
             if (player_.GetMoveFlag() && time_ < toButtleTime_)
             {
-                //time_ += Time.deltaTime;
+                time_ += Time.deltaTime;
             }
             else if (time_ >= toButtleTime_)
             {

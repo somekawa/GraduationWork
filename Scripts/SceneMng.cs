@@ -159,6 +159,11 @@ public class SceneMng : MonoBehaviour
                     Debug.Log("移動速度変更" + charaRunSpeed);
                     break;
 
+                case SCENE.FIELD4:
+                    charaRunSpeed = 10.0f;
+                    Debug.Log("移動速度変更" + charaRunSpeed);
+                    break;
+
                 case SCENE.UNIHOUSE:
                     charaRunSpeed = 8.0f;
                     Debug.Log("移動速度変更" + charaRunSpeed);

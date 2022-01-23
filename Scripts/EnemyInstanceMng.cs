@@ -157,6 +157,9 @@ public class EnemyInstanceMng : MonoBehaviour
             return;
         }
 
+        // 初期設定では必ずfalseとする
+        buttleMng_.SetIsAttackMagicFlg(false);
+
         // 自分の位置を取得する
         enemyPos_ = enemyPosSetMap_[mapNum_][num];
 
@@ -194,6 +197,7 @@ public class EnemyInstanceMng : MonoBehaviour
         // 遠距離攻撃型の敵が使う魔法の弾生成
         if (enemyList_[num].Item1.MoveTime() < 0)
         {
+            buttleMng_.SetIsAttackMagicFlg(true);      // 魔法攻撃なのでtrueにする
             GameObject obj = null;
             // enemyAttackPrefab_の子から、今回の敵が使用するエフェクトを名前で探し出す
             for (int m = 0; m < enemyAttackPrefab_.transform.childCount; m++)
@@ -208,21 +212,17 @@ public class EnemyInstanceMng : MonoBehaviour
                 }
             }
 
-            // 遠距離攻撃型の敵が使う魔法の弾生成
-            if (enemyList_[num].Item1.MoveTime() < 0)
-            {
-                // 通常攻撃弾の方向の計算
-                var dir = (charaPos_ - enemyPos_).normalized;
-                // エフェクトの発生位置高さ調整
-                // キャラとエフェクトの発生方向が逆だから、forwardの減算に気を付ける事(Z軸はマイナスしないとだめ)
-                var adjustPos = new Vector3(enemyPos_.x, enemyPos_.y + 0.3f, enemyPos_.z - transform.forward.z);
+            // 通常攻撃弾の方向の計算
+            var dir = (charaPos_ - enemyPos_).normalized;
+            // エフェクトの発生位置高さ調整
+            // キャラとエフェクトの発生方向が逆だから、forwardの減算に気を付ける事(Z軸はマイナスしないとだめ)
+            var adjustPos = new Vector3(enemyPos_.x, enemyPos_.y + 0.3f, enemyPos_.z - transform.forward.z);
 
-                // 通常攻撃弾プレハブをインスタンス化(保存していたobj変数のオブジェクトを使用する)
-                var uniAttackInstance = Instantiate(obj, adjustPos, Quaternion.identity);
-                MagicMove magicMove = uniAttackInstance.GetComponent<MagicMove>();
-                // 通常攻撃弾の飛んでいく方向を指定
-                magicMove.SetDirection(dir);
-            }
+            // 通常攻撃弾プレハブをインスタンス化(保存していたobj変数のオブジェクトを使用する)
+            var uniAttackInstance = Instantiate(obj, adjustPos, Quaternion.identity);
+            MagicMove magicMove = uniAttackInstance.GetComponent<MagicMove>();
+            // 通常攻撃弾の飛んでいく方向を指定
+            magicMove.SetDirection(dir);
         }
 
         // [Weapon]のタグがついているオブジェクトを全て検索する
@@ -315,7 +315,7 @@ public class EnemyInstanceMng : MonoBehaviour
 
             // 番号でどの敵をインスタンスするか決める
             int enemyNum = Random.Range(0, enemyTest.transform.childCount);
-            enemyNum = 3;   // ハチ固定
+            enemyNum = 0;   // ハチ固定
 
             if (eventEnemy_.Item1 == null)
             {
@@ -552,6 +552,8 @@ public class EnemyInstanceMng : MonoBehaviour
 
         int hitProbabilityOffset = 0; 
         var damage = 0;
+        bool weakFlg = false;
+        bool criticalFlg = false;
 
         if(refFlg || buttleMng_.GetAutoHit())
         {
@@ -566,6 +568,7 @@ public class EnemyInstanceMng : MonoBehaviour
                 {
                     damage *= 2;
                     Debug.Log("敵の弱点属性！ ダメージ量2倍で" + damage);
+                    weakFlg = true;
                 }
                 buttleMng_.SetAutoHit(false);
             }
@@ -582,6 +585,7 @@ public class EnemyInstanceMng : MonoBehaviour
                 damage = (buttleMng_.GetDamageNum() * 2) - enemyList_[num].Item1.Defence(true);
 
                 hitProbabilityOffset = 200; // 100以上の数字が必要になる(バステ付与時に幸運値+ランダムが100を越える可能性があるから)
+                criticalFlg = true;
             }
             else
             {
@@ -609,6 +613,7 @@ public class EnemyInstanceMng : MonoBehaviour
                     {
                         // 回避
                         Debug.Log(rand + ">" + hitProbabilityOffset + "なので、回避");
+                        DamageIcon(num, "ミス",false,false);
                         return;
                     }
                 }
@@ -624,6 +629,7 @@ public class EnemyInstanceMng : MonoBehaviour
             {
                 damage *= 2;
                 Debug.Log("敵の弱点属性！ ダメージ量2倍で" + damage);
+                weakFlg = true;
             }
 
 
@@ -636,23 +642,7 @@ public class EnemyInstanceMng : MonoBehaviour
         }
 
         // ダメージアイコン
-        for (int i = 0; i < buttleDamageIconsObj_.transform.childCount; i++)
-        {
-            var tmp = buttleDamageIconsObj_.transform.GetChild(i).gameObject;
-            if (tmp.activeSelf)
-            {
-                continue;
-            }
-
-            // まだ非表示状態の使われていないアイコンを見つけたとき
-            // 座標を被ダメージキャラの頭上にする
-            buttleDamageIconsObj_.transform.GetChild(i).transform.position = enemyHPPos_[mapNum_][num];
-            // ダメージ数値を入れる
-            tmp.transform.GetChild(0).GetComponent<Text>().text = damage.ToString();
-            // 表示状態にする
-            tmp.SetActive(true);
-            break;
-        }
+        DamageIcon(num, damage.ToString(),weakFlg,criticalFlg);
 
         // バッドステータスが付与されるか判定
         enemyList_[num].Item1.SetBS(buttleMng_.GetBadStatus(), hitProbabilityOffset);
@@ -847,6 +837,32 @@ public class EnemyInstanceMng : MonoBehaviour
                 // 文字の色を黒にする
                 tmp.color = new Color(0.0f, 0.0f, 0.0f);
             }
+        }
+    }
+
+    private void DamageIcon(int num,string str, bool weakFlg, bool criticallFlg)
+    {
+        // ダメージアイコン
+        for (int i = 0; i < buttleDamageIconsObj_.transform.childCount; i++)
+        {
+            var tmp = buttleDamageIconsObj_.transform.GetChild(i).gameObject;
+            if (tmp.activeSelf)
+            {
+                continue;
+            }
+
+            // まだ非表示状態の使われていないアイコンを見つけたとき
+            // 座標を被ダメージキャラの頭上にする
+            buttleDamageIconsObj_.transform.GetChild(i).transform.position = enemyHPPos_[mapNum_][num];
+            // ダメージ数値を入れる
+            tmp.transform.GetChild(0).GetComponent<Text>().text = str;
+            // 表示状態にする
+            tmp.SetActive(true);
+
+            tmp.transform.GetChild(0).Find("Weak").gameObject.SetActive(weakFlg);
+            tmp.transform.GetChild(0).Find("Critical").gameObject.SetActive(criticallFlg);
+
+            break;
         }
     }
 }

@@ -23,7 +23,7 @@ public class PopList : MonoBehaviour
 
         if (list == null)
         {
-            Debug.Log("PopMob.cs‚Ìlistî•ñ‚ªnull‚Å‚·");
+            Debug.Log(dataName + "PopMob.cs‚Ìlistî•ñ‚ªnull‚Å‚·");
         }
 
         return list;

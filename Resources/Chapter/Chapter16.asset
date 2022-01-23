@@ -31,10 +31,11 @@ MonoBehaviour:
   - name1: "\u30E6\u30CB"
     name2: Uni
     face: default@sd_hmd
-    message: "\u308F\u304B\u3063\u305F\u3002\u3067\u304D\u308B\u3060\u3051\u614E\u91CD\u306B\u9032\u3082\u3046\uFF01"
+    message: "\u308F\u304B\u3063\u305F\u3002\u3067\u304D\u308B\u3060\u3051\u614E\u91CD\u306B\u9032\u3093\u3067\u3001\u8D64\u8272\u306E\u30B4\u30FC\u30EC\u30E0\u3092\u5012\u305D\u3046\uFF01"
     eventNum: 0
   - name1: Scene
     name2: FIELD2
     face: Mob
-    message: "<Chapter16  Field3\u3092\u9032\u3081 \u5B8C>"
+    message: "<Chapter16  \u8D64\u3044\u30B4\u30FC\u30EC\u30E0\u3092\u5012\u305B
+      \u5B8C>"
     eventNum: 17

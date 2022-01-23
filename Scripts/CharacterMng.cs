@@ -1003,8 +1003,8 @@ public class CharacterMng : MonoBehaviour
     public void HPdecrease(int num,int fromNum)
     {
         int hitProbabilityOffset = 0;   // 命中率
-        // ダメージ値の算出
-        var damage = 0;
+        var damage = 0;                 // ダメージ値の算出
+        bool criticallFlg = false;      // クリティカル判断用のフラグ
 
         // クリティカルの計算をする(基礎値と幸運値で上限を狭める)
         int criticalRand = Random.Range(0, 100 - (10 + buttleMng_.GetLuckNum()));
@@ -1016,6 +1016,7 @@ public class CharacterMng : MonoBehaviour
             damage = (buttleMng_.GetDamageNum() * 2) - charasList_[num].Defence(true);
 
             hitProbabilityOffset = 200; // 100以上の数字が必要になる(バステ付与時に幸運値+ランダムが100を越える可能性があるから)
+            criticallFlg = true;
         }
         else
         {
@@ -1042,6 +1043,7 @@ public class CharacterMng : MonoBehaviour
                 {
                     // 回避
                     Debug.Log(rand + ">" + hitProbabilityOffset + "なので、回避");
+                    DamageIcon(num, "ミス",false,false);
                     return;
                 }
             }
@@ -1069,6 +1071,7 @@ public class CharacterMng : MonoBehaviour
             if (randLuck <= tmpLuck)
             {
                 Debug.Log(randLuck + "<=" + tmpLuck + "以下なので、回避成功");
+                DamageIcon(num, "ミス", false, false);
                 return;
             }
             else
@@ -1089,49 +1092,70 @@ public class CharacterMng : MonoBehaviour
         var spbuff = charasList_[num].GetReflectionOrAbsorption();
         if(spbuff == Chara.SPECIALBUFF.REF || spbuff == Chara.SPECIALBUFF.REF_M)         // 反射処理
         {
-            // 攻撃値分相手のHPを減らす
-            buttleMng_.SetRefEnemyNum(fromNum);
-            charasList_[num].SetReflectionOrAbsorption(0,1);  // NONに戻す
-            Debug.Log("攻撃反射");
+            bool tmpFlg = false;
+            if(!buttleMng_.GetIsAttackMagicFlg() && spbuff == Chara.SPECIALBUFF.REF)
+            {
+                // 物理攻撃に物理反射
+                tmpFlg = true;
+            }
+            else if(buttleMng_.GetIsAttackMagicFlg() && spbuff == Chara.SPECIALBUFF.REF_M)
+            {
+                // 魔法攻撃に魔法反射
+                tmpFlg = true;
+            }
+            else
+            {
+                Debug.Log("敵の攻撃と反射の条件が違うので処理なし");
+            }
 
-            eachCharaData_[num].specialBuff.GetComponent<Image>().sprite = null;
-            eachCharaData_[num].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "";
-            return;
+            if(tmpFlg)
+            {
+                // 攻撃値分相手のHPを減らす
+                buttleMng_.SetRefEnemyNum(fromNum);
+                charasList_[num].SetReflectionOrAbsorption(0, 1);  // NONに戻す
+                Debug.Log("攻撃反射");
+
+                eachCharaData_[num].specialBuff.GetComponent<Image>().sprite = null;
+                eachCharaData_[num].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "";
+                return;
+            }
         }
         else if(spbuff == Chara.SPECIALBUFF.ABS || spbuff == Chara.SPECIALBUFF.ABS_M)    // 吸収処理
         {
-            // 攻撃値の半分をHP回復する(防御力から引いた値にならないようにGet関数から直接値をとってくる)
-            charasList_[num].SetHP(charasList_[num].HP() + (buttleMng_.GetDamageNum() / 2));
-            charasList_[num].SetReflectionOrAbsorption(0,1);  // NONに戻す
-            Debug.Log("攻撃吸収");
+            bool tmpFlg = false;
+            if (!buttleMng_.GetIsAttackMagicFlg() && spbuff == Chara.SPECIALBUFF.ABS)
+            {
+                // 物理攻撃に物理吸収
+                tmpFlg = true;
+            }
+            else if (buttleMng_.GetIsAttackMagicFlg() && spbuff == Chara.SPECIALBUFF.ABS_M)
+            {
+                // 魔法攻撃に魔法吸収
+                tmpFlg = true;
+            }
+            else
+            {
+                Debug.Log("敵の攻撃と吸収の条件が違うので処理なし");
+            }
 
-            eachCharaData_[num].specialBuff.GetComponent<Image>().sprite = null;
-            eachCharaData_[num].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "";
-            return;
+            if (tmpFlg)
+            {
+                // 攻撃値の半分をHP回復する(防御力から引いた値にならないようにGet関数から直接値をとってくる)
+                charasList_[num].SetHP(charasList_[num].HP() + (buttleMng_.GetDamageNum() / 2));
+                charasList_[num].SetReflectionOrAbsorption(0, 1);  // NONに戻す
+                Debug.Log("攻撃吸収");
+
+                eachCharaData_[num].specialBuff.GetComponent<Image>().sprite = null;
+                eachCharaData_[num].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "";
+                return;
+            }
         }
         else
         {
             // 何も処理を行わない
         }
 
-        // ダメージアイコン
-        for (int i = 0; i < buttleDamageIconsObj_.transform.childCount; i++)
-        {
-            var tmp = buttleDamageIconsObj_.transform.GetChild(i).gameObject;
-            if (tmp.activeSelf)
-            {
-                continue;
-            }
-
-            // まだ非表示状態の使われていないアイコンを見つけたとき
-            // 座標を被ダメージキャラの頭上にする
-            buttleDamageIconsObj_.transform.GetChild(i).transform.localPosition = buttleDamgeIconPopUpPos_[num];
-            // ダメージ数値を入れる
-            tmp.transform.GetChild(0).GetComponent<Text>().text = damage.ToString();
-            // 表示状態にする
-            tmp.SetActive(true);
-            break;
-        }
+        DamageIcon(num,damage.ToString(), false,criticallFlg);
 
         // バッドステータスが付与されるか判定
         charasList_[num].SetBS(buttleMng_.GetBadStatus(), hitProbabilityOffset);
@@ -1494,6 +1518,33 @@ public class CharacterMng : MonoBehaviour
                 StartCoroutine(useMagic_.InstanceMagicCoroutine());
                 flag = true;
             }
+        }
+    }
+
+    // ダメージアイコンの表示処理
+    private void DamageIcon(int num,string str,bool weakFlg,bool criticallFlg)
+    {
+        // ダメージアイコン
+        for (int i = 0; i < buttleDamageIconsObj_.transform.childCount; i++)
+        {
+            var tmp = buttleDamageIconsObj_.transform.GetChild(i).gameObject;
+            if (tmp.activeSelf)
+            {
+                continue;
+            }
+
+            // まだ非表示状態の使われていないアイコンを見つけたとき
+            // 座標を被ダメージキャラの頭上にする
+            buttleDamageIconsObj_.transform.GetChild(i).transform.localPosition = buttleDamgeIconPopUpPos_[num];
+            // ダメージ数値を入れる
+            tmp.transform.GetChild(0).GetComponent<Text>().text = str;
+            // 表示状態にする
+            tmp.SetActive(true);
+
+            tmp.transform.GetChild(0).Find("Weak").gameObject.SetActive(weakFlg);
+            tmp.transform.GetChild(0).Find("Critical").gameObject.SetActive(criticallFlg);
+
+            break;
         }
     }
 }

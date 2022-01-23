@@ -16,7 +16,12 @@ public class UnitychanController : MonoBehaviour
     private KeyCode[] keyArray_ = new KeyCode[4] { KeyCode.UpArrow, KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow };
 
     private Vector3 moveDir_ = Vector3.zero;
-    private float height_ = 0.0f;
+
+    private Ray ray; // 飛ばすレイ
+    private float distance = 0.5f; // レイを飛ばす距離
+    private RaycastHit hit; // レイが何かに当たった時の情報
+    private bool isGroundFlg_;
+
 
     void Start()
     {
@@ -65,15 +70,21 @@ public class UnitychanController : MonoBehaviour
             moveDir_.x = Input.GetAxis("Horizontal");
         }
 
-        // ユニが一定以上の高さにいるときはマイナスする
-        if(rigid_.position.y > 0.2f)
+        ray = new Ray(transform.position, transform.up * -1); // レイを下に飛ばす
+        //Debug.DrawRay(ray.origin, ray.direction * distance, Color.red, 1.0f); // レイを赤色で表示させる
+
+        if (Physics.Raycast(ray, out hit, distance)) // レイが当たった時の処理
         {
-            //Debug.Log("地面から離れています");
-            height_ = -1.0f;
+            isGroundFlg_ = true;
+            //Debug.Log("地面に触れた");
         }
         else
         {
-            height_ = 0.0f;
+            isGroundFlg_ = false;
+            rigid_.velocity += Vector3.down * 2.0f;
+            rigid_.MovePosition(rigid_.position + rigid_.velocity * Time.deltaTime);
+            //Debug.Log("地面に触れてない");
+            //Debug.Log(rigid_.position + rigid_.velocity * Time.deltaTime);
         }
     }
 
@@ -104,9 +115,7 @@ public class UnitychanController : MonoBehaviour
 
         if (moveDir_ != Vector3.zero)
         {
-            // 速度ベクトルを作成（3次元用）Y座標は-1.0fで必ず固定する
-            // yを0.0fで固定してしまうと、少し浮いた時に地面に戻らなくなる
-            var speed = new Vector3(moveDir_.x, height_, moveDir_.z);
+            var speed = new Vector3(moveDir_.x, 0.0f, moveDir_.z);
             // 速度に正規化したベクトルに、移動速度をかけて代入する
             rigid_.velocity = speed.normalized * SceneMng.charaRunSpeed;
 
@@ -116,7 +125,22 @@ public class UnitychanController : MonoBehaviour
             // キャラ方向転換
             transform.rotation = Quaternion.LookRotation(moveDir_);
         }
+        else
+        {
+            if(!isGroundFlg_)
+            {
+                rigid_.velocity += Vector3.down * 2.0f;
+                rigid_.MovePosition(rigid_.position + rigid_.velocity * Time.deltaTime);
+            }
+            else
+            {
+                // キャラにかかっている慣性を止める
+                rigid_.velocity = Vector3.zero;
+                rigid_.angularVelocity = Vector3.zero;
+            }
+        }
 
+        isGroundFlg_ = true;
         moveDir_ = Vector3.zero;
         rigid_.velocity = Vector3.zero;
     }

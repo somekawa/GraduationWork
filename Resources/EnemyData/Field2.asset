@@ -29,6 +29,7 @@ MonoBehaviour:
     MoveDistance: 1.5
     WeaponTagObjName: TurtleShell
     Weak: 4
+    Bst: -1
   - Name: Golem
     Level: 5
     HP: 25
@@ -45,6 +46,7 @@ MonoBehaviour:
     MoveDistance: 2.5
     WeaponTagObjName: Golem
     Weak: 3
+    Bst: -1
   - Name: Chicken
     Level: 5
     HP: 35
@@ -61,6 +63,7 @@ MonoBehaviour:
     MoveDistance: 1.5
     WeaponTagObjName: Chicken
     Weak: 2
+    Bst: 4
   - Name: PartyMonsterY
     Level: 8
     HP: 50
@@ -77,6 +80,7 @@ MonoBehaviour:
     MoveDistance: 2
     WeaponTagObjName: PartyMonsterY
     Weak: 3
+    Bst: -1
   - Name: PartyMonsterB
     Level: 8
     HP: 50
@@ -93,6 +97,7 @@ MonoBehaviour:
     MoveDistance: 2
     WeaponTagObjName: PartyMonsterB
     Weak: 4
+    Bst: 2
   - Name: BossGolem
     Level: 10
     HP: 100
@@ -109,6 +114,7 @@ MonoBehaviour:
     MoveDistance: 2.5
     WeaponTagObjName: BossGolem
     Weak: 3
+    Bst: -1
   - Name: BossParty
     Level: 9
     HP: 80
@@ -125,3 +131,4 @@ MonoBehaviour:
     MoveDistance: 2
     WeaponTagObjName: BossParty
     Weak: 2
+    Bst: 3

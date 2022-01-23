@@ -17,16 +17,17 @@ public class ButtleMng : MonoBehaviour
 
     private Transform EneSelObj_;           // 敵の指定マーク
 
-    private List<(int,string)> moveTurnList_ = new List<(int, string)>();   // キャラと敵の行動順をまとめるリスト
+    private List<(int, string)> moveTurnList_ = new List<(int, string)>();   // キャラと敵の行動順をまとめるリスト
     private int moveTurnCnt_ = 0;           // 自分の行動が終わったら値を増やす
     private int damageNum_ = 0;             // ダメージの値
     private int speedNum_ = 0;              // 命中判定用の値
     private int luckNum_ = 0;               // 幸運値の値
     private int element_ = 0;               // エレメント情報
-    private (int,int) badStatusNum_;        // 状態異常の数字
+    private (int, int) badStatusNum_;        // 状態異常の数字
     private int refNum_ = -1;               // 攻撃反射対象の番号を保存する変数
     private bool autoHitFlg_ = false;       // 命中効果のフラグ
     private Vector3 keepPos_;
+    private bool isAttackMagicFlg_ = false;        // 敵の攻撃が物理か魔法かを判定する(近距離は物理:false,遠距離は魔法:true)
 
     private bool lastEnemyFlg_;
 
@@ -54,7 +55,7 @@ public class ButtleMng : MonoBehaviour
         }
 
         // 戦闘開始時に設定される項目
-        if(!setCallOnce_)
+        if (!setCallOnce_)
         {
             lastEnemyFlg_ = false;
             setCallOnce_ = true;
@@ -87,10 +88,10 @@ public class ButtleMng : MonoBehaviour
             moveTurnList_.Reverse(); // 降順にするために逆転させる
 
             // 順番用の数字を作る為の一時変数
-            for(int i = 0; i < moveTurnList_.Count; i++)
+            for (int i = 0; i < moveTurnList_.Count; i++)
             {
                 // キャラの行動ターン数字を代入する(0からカウントしてるからi+1とする) 
-                if(!characterMng_.SetMoveSpeedNum(i+1,moveTurnList_[i].Item2))
+                if (!characterMng_.SetMoveSpeedNum(i + 1, moveTurnList_[i].Item2))
                 {
                     // 敵の行動ターン数字を代入する
                     string[] arr = moveTurnList_[i].Item2.Split('_');
@@ -114,10 +115,10 @@ public class ButtleMng : MonoBehaviour
             // キャラクターの攻撃対象が最後の敵だった時
             if (lastEnemyFlg_)
             {
-                if(enemyInstanceMng_.AllAnimationFin())
+                if (enemyInstanceMng_.AllAnimationFin())
                 {
                     // 現在が強制戦闘中だった時
-                    if(FieldMng.nowMode == FieldMng.MODE.FORCEDBUTTLE)
+                    if (FieldMng.nowMode == FieldMng.MODE.FORCEDBUTTLE)
                     {
                         // リストの中のbool部分をtrue(=取得済み)にする
                         var tmp = FieldMng.forcedButtleWallList;
@@ -163,7 +164,7 @@ public class ButtleMng : MonoBehaviour
     public void SetMoveTurn()
     {
         // 加算値がリストの上限を越えたら0に戻す
-        if(++moveTurnCnt_ > moveTurnList_.Count - 1)
+        if (++moveTurnCnt_ > moveTurnList_.Count - 1)
         {
             moveTurnCnt_ = 0;
         }
@@ -220,12 +221,12 @@ public class ButtleMng : MonoBehaviour
         return element_;
     }
 
-    public void SetBadStatus(int sub1,int sub2)
+    public void SetBadStatus(int sub1, int sub2)
     {
         badStatusNum_ = (sub1, sub2);
     }
 
-    public (int,int) GetBadStatus()
+    public (int, int) GetBadStatus()
     {
         return badStatusNum_;
     }
@@ -282,5 +283,15 @@ public class ButtleMng : MonoBehaviour
         // アイテム画面を閉じる
         GameObject.Find("SceneMng").GetComponent<MenuActive>().IsOpenItemMng(false);
         buttleUICanvas.transform.Find("ItemBackButton").gameObject.SetActive(false);
+    }
+
+    public void SetIsAttackMagicFlg(bool flag)
+    {
+        isAttackMagicFlg_ = flag;
+    }
+
+    public bool GetIsAttackMagicFlg()
+    {
+        return isAttackMagicFlg_;
     }
 }
