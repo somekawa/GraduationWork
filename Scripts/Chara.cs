@@ -117,7 +117,7 @@ public class Chara : CharaBase,InterfaceButtle
 
         float distance = Vector3.Distance(myPos, targetPos);
 
-        if (distance <= 0.15f)  // 目標地点0.0fにすると誤差で辿り着けなくなるから0.15fにしている
+        if (distance <= 0.5f)  // 目標地点0.0fにすると誤差で辿り着けなくなるから0.5fにしている
         {
             // 指定箇所まできたらtrueを返す
             Debug.Log("ジャック目的敵到着");

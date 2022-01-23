@@ -652,6 +652,7 @@ GameObject:
   - component: {fileID: 7564652659796971122}
   - component: {fileID: 1890346202464204533}
   - component: {fileID: 6189717784836146366}
+  - component: {fileID: 8405667644553401703}
   m_Layer: 0
   m_Name: BossGolem
   m_TagString: Weapon
@@ -768,6 +769,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2a5f1792d5873ec4c9ff35dcb8b3b82f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &8405667644553401703
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7572672148479313060}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1834933937763054b82674137c6dde93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &7572674449060173618
