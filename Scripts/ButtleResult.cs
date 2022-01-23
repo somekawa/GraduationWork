@@ -24,6 +24,7 @@ public class ButtleResult : MonoBehaviour
     private static int[] level_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// キャラの現在レベル
     private static int[] nextExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 次のレベルまでに必要なEXP
     private static int[] sumExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 今まで獲得した合計Exp
+    private static int[] allExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 今まで獲得した合計Exp
     private int[] oldLevel_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// レベルアップする前のレベル
     private int[] getExp_= new int[(int)SceneMng.CHARACTERNUM.MAX];// 獲得EXP
     private int saveSumExp_ = 0;// 獲得EXPの合計
@@ -69,8 +70,10 @@ public class ButtleResult : MonoBehaviour
                 oldLevel_[i] = level_[i];
                 Debug.Log("レベル"+charasList_[i].Level());
                 sumExp_[i] = charasList_[i].CharacterSumExp();
+                allExp_[i] = sumExp_[i];
                 expSlider_[i].maxValue = charasList_[i].CharacterMaxExp();
                 expSlider_[i].value = charasList_[i].CharacterExp();
+                Debug.Log(sumExp_[i] + "  上限" + expSlider_[i].maxValue);
             }
 
             // レベル関連
@@ -161,7 +164,9 @@ public class ButtleResult : MonoBehaviour
         sumExp_[charaNum] = nowExp;
         getExp_[charaNum] = nowExp;
         expText_[charaNum].text = "+" + nowExp.ToString();
+        int test = 2;
         Debug.Log("獲得EXP" + nowExp);
+        allExp_[charaNum] += sumExp_[charaNum];// 今までの合計を保存
         while (true)
         {
             yield return null;
@@ -169,6 +174,11 @@ public class ButtleResult : MonoBehaviour
             {
                 Debug.Log(saveValue + "       スライダーの移動が終了しました");
                 nextExp_[charaNum] = (int)(expSlider_[charaNum].maxValue - expSlider_[charaNum].value);
+
+                // 増えた値を保存
+                charasList_[charaNum].SetCharacterExp(nextExp_[charaNum]);
+                charasList_[charaNum].SetCharacterMaxExp((int)expSlider_[charaNum].maxValue);
+                charasList_[charaNum].SetCharacterSumExp(allExp_[charaNum]);
 
                 if (charaNum == (int)SceneMng.CHARACTERNUM.UNI)
                 {
@@ -186,13 +196,7 @@ public class ButtleResult : MonoBehaviour
             }
             else
             {
-                if (expSlider_[charaNum].value >= expSlider_[charaNum].maxValue)
-                {
-                    // 上限に来るまで加算する
-                    saveValue += 2;//
-                    expSlider_[charaNum].value += 2;
-                }
-                else
+                if (  expSlider_[charaNum].maxValue<= expSlider_[charaNum].value)
                 {
                     // 該当キャラのレベルを上げる
                     level_[charaNum]++;
@@ -205,6 +209,13 @@ public class ButtleResult : MonoBehaviour
                     saveSumMaxExp_[charaNum] += (int)expSlider_[charaNum].maxValue;
                     // valueが上限まで来たら0に戻す
                     expSlider_[charaNum].value = 0.0f;
+                }
+                else
+                {
+                    // 上限に来るまで加算する
+                    saveValue += 2;//
+                    expSlider_[charaNum].value += 2;
+                    Debug.Log(expSlider_[charaNum].value + "  上限");
                 }
             }
         }

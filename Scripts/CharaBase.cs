@@ -90,8 +90,9 @@ public abstract class CharaBase : object
             //setting.buttlePos = set.buttlePos;    // 設定のタイミングが異なる
 
             setting_.CharacterExp = popCharacter.param[0].Exp;
-            setting_.CharacterExp = popCharacter.param[0].MaxExp;
-            setting_.CharacterExp = popCharacter.param[0].SumExp;
+            setting_.CharacterMaxExp = popCharacter.param[0].MaxExp;
+            setting_.CharacterSumExp = popCharacter.param[0].SumExp;
+            
 
             // 最大4つまでつけられるのでここで初期化しておく
             setting_.Magic = new int[4];

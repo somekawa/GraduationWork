@@ -48,7 +48,7 @@ public class SaveLoadCSV : MonoBehaviour
 
             // ステータスの項目見出し
             string[] s1 = { "Name", "Level", "HP","MaxHP", "MP","MaxMP", "Attack", "MagicAttack",
-            "Defence", "Speed", "Luck", "AnimMax","Magic0" ,"Magic1","Magic2" ,"Magic3" };
+            "Defence", "Speed", "Luck", "AnimMax","Magic0" ,"Magic1","Magic2" ,"Magic3","Exp","MaxExp","SumExp" };
             string s2 = string.Join(",", s1);
             sw.WriteLine(s2);
         }
@@ -84,7 +84,8 @@ public class SaveLoadCSV : MonoBehaviour
                           set.Attack.ToString(),set.MagicAttack.ToString(),set.Defence.ToString(),
                           set.Speed.ToString(),set.Luck.ToString(),set.AnimMax.ToString(),
                           set.Magic[0].ToString(),set.Magic[1].ToString(),
-                          set.Magic[2].ToString(),set.Magic[3].ToString()};
+                          set.Magic[2].ToString(),set.Magic[3].ToString(),
+                          set.CharacterExp.ToString(),set.CharacterMaxExp.ToString(),set.CharacterSumExp.ToString()};
         string write = string.Join(",", data);
         sw.WriteLine(write);
     }
