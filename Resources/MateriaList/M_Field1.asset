@@ -2,7 +2,7 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
-  m_ObjectHideFlags: 8
+  m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -12,32 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2821f08f126191418ae31f3b9cd7cd5, type: 3}
   m_Name: M_Field1
   m_EditorClassIdentifier: 
-  param:
-  - MateriaName: "\u6E05\u3089\u304B\u306A\u6C34"
-    Price_Buy: 500
-    Price_Sell: 250
-    Info: "\u6E05\u3089\u304B\u306A\u6C34\u306E\u8AAC\u660E"
-  - MateriaName: "\u67AF\u308C\u305F\u679D"
-    Price_Buy: 400
-    Price_Sell: 200
-    Info: "\u67AF\u308C\u305F\u679D\u306E\u8AAC\u660E"
-  - MateriaName: "\u3055\u3089\u3055\u3089\u306E\u571F"
-    Price_Buy: 300
-    Price_Sell: 150
-    Info: "\u3055\u3089\u3055\u3089\u306E\u571F\u306E\u8AAC\u660E"
-  - MateriaName: "\u6697\u95C7\u30EA\u30F3\u30B4"
-    Price_Buy: 200
-    Price_Sell: 100
-    Info: "\u6697\u95C7\u30EA\u30F3\u30B4\u306E\u8AAC\u660E"
-  - MateriaName: "\u308F\u305F\u96F2"
-    Price_Buy: 100
-    Price_Sell: 50
-    Info: "\u308F\u305F\u96F2\u306E\u8AAC\u660E"
-  - MateriaName: "\u7A7A\u306E\u30DE\u30C6\u30EA\u30A2"
-    Price_Buy: 100
-    Price_Sell: 50
-    Info: "\u30EF\u30FC\u30C9\u5408\u6210\u3067\u4F7F\u3044\u307E\u3059\u3002"
-  - MateriaName: "\u65B0\u3057\u3044\u7D20\u6750"
-    Price_Buy: 100
-    Price_Sell: 50
-    Info: "\u65B0\u3057\u3044\u7D20\u6750\u306E\u8AAC\u660E"
+  param: []
