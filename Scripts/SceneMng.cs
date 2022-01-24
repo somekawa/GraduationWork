@@ -16,6 +16,7 @@ public class SceneMng : MonoBehaviour
     public enum SCENE
     {
         NON = -1,
+        TITLE,          // タイトルに戻るボタン
         CONVERSATION,   // 会話シーン
         TOWN,           // 街シーン
         UNIHOUSE,       // ユニちゃんの家
@@ -24,6 +25,7 @@ public class SceneMng : MonoBehaviour
         FIELD2,          // フィールドシーン
         FIELD3,          // フィールドシーン
         FIELD4,          // フィールドシーン
+        END,// エンド用シーン
         CANCEL,          // ワープ先表示用
         MAX
     }

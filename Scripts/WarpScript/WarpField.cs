@@ -11,7 +11,7 @@ public class WarpField : MonoBehaviour
     private RectTransform btnParent_;       // ボタンの親にあたるオブジェクト
 
     private string[] sceneName = new string[(int)SceneMng.SCENE.MAX] {
-    "","town","house","field0","field1","field2","field3","field4","cancel"};
+   "Title", "","town","house","field0","field1","field2","field3","field4","","cancel" };
     private int storyProgress_ = (int)SceneMng.SCENE.FIELD2;// どの章まで進んでいるか
 
     private bool fieldEndHit = false;   // ワープオブジェクトに接触したかどうか
@@ -59,14 +59,14 @@ public class WarpField : MonoBehaviour
         locationSelMng_ = dontDestroyCanvas_.transform.Find("LocationSelMng").GetComponent<RectTransform>();
        
        btnParent_ = locationSelMng_.transform.Find("Viewport/Content").GetComponent<RectTransform>();
-        for (int i = (int)SceneMng.SCENE.CONVERSATION; i < (int)SceneMng.SCENE.MAX; i++)
+        for (int i = (int)SceneMng.SCENE.TITLE; i < (int)SceneMng.SCENE.MAX ; i++)
         {
             btnMng_[i] = btnParent_.transform.GetChild(i).GetComponent<Image>();
             sceneText_[i] = btnMng_[i].transform.GetChild(0).GetComponent<Text>();
             sceneText_[i].text = sceneName[i];
             btnMng_[i].name = sceneName[i];
             // 現在ストーリ以降のフィールドと現在いるシーンは非表示
-            if (((int)SceneMng.nowScene == i) || (storyProgress_ < i))
+            if (((int)SceneMng.nowScene == i))// || (storyProgress_ < i))
             {
                 btnMng_[i].gameObject.SetActive(false);
             }
@@ -74,15 +74,22 @@ public class WarpField : MonoBehaviour
             {
                 btnMng_[i].gameObject.SetActive(true);
             }
+
+            if(sceneName[i]=="")
+            {
+                btnMng_[i].gameObject.SetActive(false);// 0番目はずっと非表示
+            }
         }
-        btnMng_[(int)SceneMng.SCENE.CONVERSATION].gameObject.SetActive(false);// 0番目はずっと非表示
-        btnMng_[(int)SceneMng.SCENE.CANCEL].gameObject.SetActive(true);// キャンセルはずっと必要はずっと非表示
+        // タイトルに戻るボタンは一番後ろに表示
+        btnMng_[(int)SceneMng.SCENE.TITLE].transform.SetSiblingIndex((int)SceneMng.SCENE.MAX);
+        // キャンセルはずっと表示
+        btnMng_[(int)SceneMng.SCENE.CANCEL].gameObject.SetActive(true);
 
         // マップ端にあるオブジェクトを検索（フィールドによって個数が違うため子の個数で見る）
-        warpObject_ = new GameObject[this.transform.childCount];
-        for (int i = 0; i < this.transform.childCount; i++)
+        warpObject_ = new GameObject[transform.childCount];
+        for (int i = 0; i < transform.childCount; i++)
         {
-            warpObject_[i] = this.transform.GetChild(i).gameObject;
+            warpObject_[i] = transform.GetChild(i).gameObject;
             //Debug.Log(warpObject_[i].name + "側のワープ座表" + warpObject_[i].transform.position);
         }
         // フィールド選択キャンバスを非表示
@@ -91,7 +98,7 @@ public class WarpField : MonoBehaviour
 
     private void UniPushBack()
     {
-        for (int i = 0; i < this.transform.childCount; i++)
+        for (int i = 0; i < transform.childCount; i++)
         {
             uniNormalized_ = (uniPositions_[1] - warpObject_[i].transform.position).normalized;
             //Debug.Log(warpObject_[i].name + "との正規化" + uniNormalized_);
