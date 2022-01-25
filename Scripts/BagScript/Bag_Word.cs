@@ -17,6 +17,9 @@ public class Bag_Word : MonoBehaviour
     private int[] maxCnt_ = new int[(int)InitPopList.WORD.INFO];
     [SerializeField]
     private RectTransform wordParent;    // 素材を拾ったときに生成されるプレハブ
+    [SerializeField]
+    private Button headBtn;    // 素材を拾ったときに生成されるプレハブ
+
     public enum WORD_MNG
     {
         NON = -1,
@@ -88,16 +91,13 @@ public class Bag_Word : MonoBehaviour
                 {
                     // バッグ内の親に変更数
                     wordState[(InitPopList.WORD)k][i].pleate.transform.SetParent(wordParent.transform);
+                    // クリックできない状態にする
+                    wordState[(InitPopList.WORD)k][i].btn.enabled = false ;
                     if (wordState[(InitPopList.WORD)k][i].name == "必中")
                     {
                         targetWordNum = i;
                         //Debug.Log((InitPopList.WORD)k + "の中で必中を保存している番号："+targetWordNum);
                     }
-
-                    //----デバッグ用
-                    //WordGetCheck((InitPopList.WORD)k, i);
-                    //wordState[(InitPopList.WORD)k][i].pleate.SetActive(false);
-                    //----ここまで
                 }
             }
         }
@@ -114,10 +114,26 @@ public class Bag_Word : MonoBehaviour
                 }
             }
         }
-
-        // WordGetCheck(InitPopList.WORD.HEAD, 1);
-
         ActiveCheck(WORD_MNG.HEAD);
+        if(kindsBtn_ != null)
+        {
+            // もしHead以外が選択されていた場合そのボタンを押下可能にする
+            kindsBtn_.interactable = true;
+        }
+        else
+        {
+            // デバッグ用
+            WordGetCheck(InitPopList.WORD.HEAD, 0, 0);//単体
+            WordGetCheck(InitPopList.WORD.ELEMENT_ATTACK, 0, 5);// 炎
+            WordGetCheck(InitPopList.WORD.ELEMENT_HEAL, 0, 3);// 回復
+            WordGetCheck(InitPopList.WORD.TAIL, 0, 9);// 小
+            WordGetCheck(InitPopList.WORD.TAIL, 1, 10);// 中
+            WordGetCheck(InitPopList.WORD.TAIL, 2, 11);// 大
+            WordGetCheck(InitPopList.WORD.TAIL, 3, 12);// 極大
+
+        }
+        kindsBtn_ = headBtn;
+        kindsBtn_.interactable = false;
     }
 
 
@@ -153,12 +169,13 @@ public class Bag_Word : MonoBehaviour
 
     public void WordGetCheck(InitPopList.WORD kinds, int wordNum, int dataNum)
     {
+        Debug.Log(kinds + "の" + wordNum + " " + dataNum);
         Debug.Log(kinds + "の" + wordNum + "番目のワード：" + wordState[kinds][wordNum].name);
         Debug.Log(data[dataNum].name + "は" + dataNum + "番目です");
         wordState[kinds][wordNum].getFlag = 1;// 取得をしたら1を入れる;
 
         data[dataNum].getFlag = wordState[kinds][wordNum].getFlag;
-
+        Debug.Log(data[dataNum].name +""+data[dataNum].getFlag);
     }
 
     public void OnClickWordKindsBtn()
@@ -169,6 +186,8 @@ public class Bag_Word : MonoBehaviour
             eventSystem_ = GameObject.Find("EventSystem").GetComponent<EventSystem>();
         }
         clickbtn_ = eventSystem_.currentSelectedGameObject;
+        kindsBtn_.interactable = true;// 1つ前に選択していたボタンは押下可能に
+        // 今回押したのはどのボタンか
         kindsBtn_ = clickbtn_.GetComponent<Button>();
         kindsBtn_.interactable = false;
         // どの種類のボタンを押したか
@@ -177,10 +196,6 @@ public class Bag_Word : MonoBehaviour
             if (clickbtn_.name == btnName[i])
             {
                 ActiveCheck((WORD_MNG)i);
-            }
-            else
-            {
-                kindsBtn_.interactable = true;
             }
         }
     }
