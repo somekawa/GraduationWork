@@ -47,6 +47,7 @@ public class CharacterMng : MonoBehaviour
     private Vector3[] buttleDamgeIconPopUpPos_ = new Vector3[2];  // ダメージアイコンの表示位置
     private GameObject buttleMagicInfoFrame_;                     // バトル中に魔法コマンドを選択したときの魔法説明欄
     private TMPro.TextMeshProUGUI magicInfoText_;                 // 魔法の説明テキスト
+    private TMPro.TextMeshProUGUI magicUseMPText_;                // 魔法で消費するMPに関するテキスト
     private ButtleMng buttleMng_;                                 // ButtleMng.csの取得
     private BadStatusMng badStatusMng_;
 
@@ -120,6 +121,8 @@ public class CharacterMng : MonoBehaviour
         buttleDamgeIconPopUpPos_[1] = new Vector3(-260, 100, 0);
         buttleMagicInfoFrame_ = buttleUICanvas.transform.Find("MagicInfoFrame").gameObject;
         magicInfoText_ = buttleMagicInfoFrame_.transform.Find("MagicInfoText").GetComponent<TMPro.TextMeshProUGUI>();
+        magicUseMPText_ = buttleMagicInfoFrame_.transform.Find("UseMP/MPText").GetComponent<TMPro.TextMeshProUGUI>();
+
         buttleMagicInfoFrame_.SetActive(false);     // 最初は非表示
 
         enemyInstancePos_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().GetEnemyPos();
@@ -197,17 +200,22 @@ public class CharacterMng : MonoBehaviour
             eachCharaData_[i].charaHPMPMap.Item1.SetHPMPBar(charasList_[i].HP(), charasList_[i].MaxHP());
             eachCharaData_[i].charaHPMPMap.Item2.SetHPMPBar(charasList_[i].MP(), charasList_[i].MaxMP());
 
+
             // バステやバフのアイコンを消す
             badStatusMng_.SetBstIconImage(i, -1, charaBstIconImage_, charasList_[i].GetBS(), true);
-            // 効果が切れた(=ターンが0以下)
-            var child = eachCharaData_[(int)nowTurnChar_].buffIconParent.transform.GetChild(i);
-            if (child.GetComponent<Image>().sprite != null)
+            eachCharaData_[i].specialBuff.GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+
+            for (int m = 0; m < eachCharaData_[i].buffIconParent.transform.childCount; m++)
             {
+                // 効果が切れた(=ターンが0以下)
+                var child = eachCharaData_[i].buffIconParent.transform.GetChild(m);
                 // アイコンをnullにして、上昇矢印も非表示にする
                 child.GetComponent<Image>().sprite = null;
-                for (int m = 0; m < child.childCount; m++)
+                child.GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+
+                for(int a = 0; a < child.transform.childCount; a++)
                 {
-                    child.GetChild(m).gameObject.SetActive(false);
+                    child.GetChild(a).gameObject.SetActive(false);
                 }
             }
         }
@@ -219,8 +227,15 @@ public class CharacterMng : MonoBehaviour
         magicCommandNumOld_ = -1;
 
         // 最初の行動キャラを指定する
-        //@ キャラ同士で速度を見て、早い人を入れないとだめ
-        nowTurnChar_ = CHARACTERNUM.UNI;
+        // キャラ同士で速度を見て、早い人を入れる(同値ならユニが先に動く)
+        if(charasList_[(int)CHARACTERNUM.UNI].Speed() >= charasList_[(int)CHARACTERNUM.JACK].Speed())
+        {
+            nowTurnChar_ = CHARACTERNUM.UNI;
+        }
+        else
+        {
+            nowTurnChar_ = CHARACTERNUM.JACK;
+        }
 
         // フラグの初期化を行う
         lastEnemytoAttackFlg_ = false;
@@ -275,6 +290,7 @@ public class CharacterMng : MonoBehaviour
                 {
                     // アイコンをnullにして、上昇矢印も非表示にする
                     child.GetComponent<Image>().sprite = null;
+                    child.GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
                     for (int m = 0; m < child.childCount; m++)
                     {
                         child.GetChild(m).gameObject.SetActive(false);
@@ -373,14 +389,6 @@ public class CharacterMng : MonoBehaviour
                 return;
             }
         }
-
-        // テスト用(レベルアップ処理)
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            charasList_[0].LevelUp();
-            charasList_[1].LevelUp();
-        }
-
 
         // 戦闘から逃げる
         if (!selectFlg_ && Input.GetKeyDown(KeyCode.LeftShift))
@@ -538,7 +546,7 @@ public class CharacterMng : MonoBehaviour
                                 magicButtleCommandRotate_.SetEnableAndActive(true);
                                 buttleCommandRotate_.SetEnableAndActive(false);
 
-                                //@ 行動中のキャラに設定された魔法画像を描画する
+                                // 行動中のキャラに設定された魔法画像を描画する
                                 for (int i = 0; i < 4; i++)
                                 {
                                     if (charasList_[(int)nowTurnChar_].GetMagicImage(i) == null)
@@ -597,13 +605,16 @@ public class CharacterMng : MonoBehaviour
                 var tmp = (int)magicButtleCommandRotate_.GetNowCommand() - 1;
                 if(tmp >= 0 && magicCommandNumOld_ != tmp)
                 {
-                    if(charasList_[(int)nowTurnChar_].GetMagicNum(tmp).number > 0)
+                    var magicNum = charasList_[(int)nowTurnChar_].GetMagicNum(tmp);
+                    if (magicNum.number > 0)
                     {
-                        magicInfoText_.text = useMagic_.MagicInfoMake(charasList_[(int)nowTurnChar_].GetMagicNum(tmp));
+                        magicInfoText_.text = useMagic_.MagicInfoMake(magicNum);
+                        magicUseMPText_.text = " MP -" + useMagic_.MPdecrease(magicNum).ToString();
                     }
                     else
                     {
                         magicInfoText_.text = "";       // 魔法をセットしていないところにコマンドが回転したときは、内容を未記入にする
+                        magicUseMPText_.text = "";
                     }
                 }
                 magicCommandNumOld_ = tmp;
@@ -658,6 +669,10 @@ public class CharacterMng : MonoBehaviour
         {
             case ANIMATION.IDLE:
 
+                buttleMagicInfoFrame_.SetActive(false);
+                magicInfoText_.text = "";
+                magicUseMPText_.text = "";
+
                 // 毒の処理をいれる
                 badStatusMng_.BadStateMoveAfter(charasList_[(int)nowTurnChar_].GetBS(), charasList_[(int)nowTurnChar_], eachCharaData_[(int)nowTurnChar_].charaHPMPMap.Item1, true);
                 // バステの持続ターン数を-1する
@@ -705,6 +720,7 @@ public class CharacterMng : MonoBehaviour
                         {
                             // アイコンをnullにして、上昇矢印も非表示にする
                             child.GetComponent<Image>().sprite = null;
+                            child.GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
                             for (int m = 0; m < child.childCount; m++)
                             {
                                 child.GetChild(m).gameObject.SetActive(false);
@@ -1116,6 +1132,8 @@ public class CharacterMng : MonoBehaviour
                 Debug.Log("攻撃反射");
 
                 eachCharaData_[num].specialBuff.GetComponent<Image>().sprite = null;
+                eachCharaData_[num].specialBuff.GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+
                 eachCharaData_[num].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "";
                 return;
             }
@@ -1146,6 +1164,7 @@ public class CharacterMng : MonoBehaviour
                 Debug.Log("攻撃吸収");
 
                 eachCharaData_[num].specialBuff.GetComponent<Image>().sprite = null;
+                eachCharaData_[num].specialBuff.GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
                 eachCharaData_[num].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "";
                 return;
             }
@@ -1385,6 +1404,8 @@ public class CharacterMng : MonoBehaviour
                 {
                     // アイコンをいれる
                     bufftra.GetChild(i).GetComponent<Image>().sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BUFFICON][whatBuff - 1];
+                    bufftra.GetChild(i).GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+
                     // 矢印でアップ倍率をいれる
                     // ▲*1 = バフが1% ~30%,▲*2 = バフが31% ~70%,▲*3 = バフが71%~100%
                     for (int m = 0; m < bufftra.GetChild(i).childCount; m++)
@@ -1467,7 +1488,9 @@ public class CharacterMng : MonoBehaviour
                         // 反射か吸収
                         charasList_[(int)selectChara].SetReflectionOrAbsorption(whatBuff-1, sub3Num);
                         eachCharaData_[(int)selectChara].specialBuff.GetComponent<Image>().sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BUFFICON][whatBuff + 3];
-                        if(sub3Num == 2)
+                        eachCharaData_[(int)selectChara].specialBuff.GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+
+                        if (sub3Num == 2)
                         {
                             eachCharaData_[(int)selectChara].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "反";
                         }
@@ -1504,6 +1527,8 @@ public class CharacterMng : MonoBehaviour
                             // 反射か吸収
                             charasList_[array[i]].SetReflectionOrAbsorption(whatBuff-1, sub3Num);
                             eachCharaData_[array[i]].specialBuff.GetComponent<Image>().sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BUFFICON][whatBuff + 3];
+                            eachCharaData_[array[i]].specialBuff.GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+
                             if (sub3Num == 2)
                             {
                                 eachCharaData_[array[i]].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "反";

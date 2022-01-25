@@ -166,6 +166,7 @@ public class BadStatusMng : MonoBehaviour
                 if (image.sprite == null)
                 {
                     image.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BADSTATUSICON][bstNum - (int)CharaBase.CONDITION.POISON];
+                    obj.transform.GetChild(f).GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
                     break;
                 }
             }
@@ -178,6 +179,7 @@ public class BadStatusMng : MonoBehaviour
             for (int f = 0; f < obj.transform.childCount; f++)
             {
                 obj.transform.GetChild(f).GetComponent<Image>().sprite = null;
+                obj.transform.GetChild(f).GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
             }
 
             for (int i = 0; i < (int)CharaBase.CONDITION.DEATH; i++)
@@ -189,6 +191,7 @@ public class BadStatusMng : MonoBehaviour
                     {
                         var image = obj.transform.GetChild(f).GetComponent<Image>();
                         image.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BADSTATUSICON][(int)getbs[i].Item1 - (int)CharaBase.CONDITION.POISON];
+                        obj.transform.GetChild(f).GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
                         break;
                     }
                 }

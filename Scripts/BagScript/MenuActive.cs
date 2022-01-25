@@ -62,8 +62,6 @@ public class MenuActive : MonoBehaviour
     {
         saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>();
         eventSystem_ = GameObject.Find("EventSystem").GetComponent<EventSystem>();
-        //  Debug.Log(eventSystem.name + "をクリック");
-        warpField_ = GameObject.Find("WarpOut").GetComponent<WarpField>();
 
         parentCanvas_ = GameObject.Find("DontDestroyCanvas").GetComponent<Canvas>();
         backPanel_ = parentCanvas_.transform.Find("BackPanel").GetComponent<Image>();
@@ -101,7 +99,12 @@ public class MenuActive : MonoBehaviour
 
     void Update()
     {
-        if ((int)SceneMng.nowScene == (int)SceneMng.SCENE.CONVERSATION ||
+        if(warpField_ == null)
+        {
+            warpField_ = GameObject.Find("WarpOut").GetComponent<WarpField>();
+        }
+
+        if (SceneMng.nowScene == SceneMng.SCENE.CONVERSATION ||
             warpField_.GetWarpNowFlag() == true ||
             FieldMng.nowMode == FieldMng.MODE.BUTTLE ||
             FieldMng.nowMode == FieldMng.MODE.FORCEDBUTTLE)
@@ -214,6 +217,8 @@ public class MenuActive : MonoBehaviour
 
     public void DataLoad()
     {
+        MenuClose();
+
         // 呼んでいいのはMenuActive.csのロードだけ。Mng系で呼ぶべきじゃない
         Debug.Log("ロードキー押下");
 
@@ -227,6 +232,9 @@ public class MenuActive : MonoBehaviour
         GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
 
         parentRectTrans_[(int)CANVAS.BAG].GetComponent<ItemBagMng>().MagicInit();
+
+        // 強制的にゲームスタート先をTOWNにする
+        SceneMng.SceneLoad((int)SceneMng.SCENE.TOWN);
     }
 
     public bool GetActiveFlag()
@@ -245,14 +253,7 @@ public class MenuActive : MonoBehaviour
         clickbtn_ = eventSystem_.currentSelectedGameObject;
         if (clickbtn_.name == btnName_[(int)CANVAS.CANCEL])
         {
-            backPanel_.gameObject.SetActive(false);
-            StartCoroutine(MoveMenuButtons(-1));
-            bagImage_.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-            FieldMng.nowMode = FieldMng.MODE.SEARCH;
-            for (int i = (int)CANVAS.BAG; i < (int)CANVAS.CANCEL; i++)
-            {
-                parentRectTrans_[i].gameObject.SetActive(false);
-            }
+            MenuClose();
             return;
         }
 
@@ -359,5 +360,18 @@ public class MenuActive : MonoBehaviour
             colorblock.normalColor = new Color(0.5f, 0.5f, 0.5f);
         }
         tmp.colors = colorblock;
+    }
+
+    // キャンセルボタン等、メニュー画面を閉じる処理
+    private void MenuClose()
+    {
+        backPanel_.gameObject.SetActive(false);
+        StartCoroutine(MoveMenuButtons(-1));
+        bagImage_.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+        FieldMng.nowMode = FieldMng.MODE.SEARCH;
+        for (int i = (int)CANVAS.BAG; i < (int)CANVAS.CANCEL; i++)
+        {
+            parentRectTrans_[i].gameObject.SetActive(false);
+        }
     }
 }

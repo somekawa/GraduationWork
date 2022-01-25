@@ -168,7 +168,7 @@ public class EnemyInstanceMng : MonoBehaviour
         //{
         //    attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
         //} while (SceneMng.charasList_[attackTarget_].HP() <= 0);
-        attackTarget_ = (int)SceneMng.CHARACTERNUM.UNI;
+        attackTarget_ = (int)SceneMng.CHARACTERNUM.JACK;
 
         // 行動前に発動するバッドステータスの処理
         var bst = badStatusMng_.BadStateMoveBefore(enemyList_[num].Item1.GetBS(), enemyList_[num].Item1, enemyList_[num].Item2, false);
@@ -315,7 +315,7 @@ public class EnemyInstanceMng : MonoBehaviour
 
             // 番号でどの敵をインスタンスするか決める
             int enemyNum = Random.Range(0, enemyTest.transform.childCount);
-            enemyNum = 0;   // ハチ固定
+            enemyNum = 3;   // ハチ固定
 
             if (eventEnemy_.Item1 == null)
             {
@@ -381,8 +381,19 @@ public class EnemyInstanceMng : MonoBehaviour
 
             // 状態異常用のアイコン(1体の敵に対して3つ)
             enemyBstIconImage_[num - 1] = hpBar.transform.Find("BadStateImages").gameObject;
+            // アイコンの透過
+            for(int icon = 0; icon < enemyBstIconImage_[num - 1].transform.childCount; icon++)
+            {
+                enemyBstIconImage_[num - 1].transform.GetChild(icon).GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+            }
+
             // デバフ用のアイコン(1体の敵に対して4つ)
             enemyDebuffIconImage_[num - 1] = hpBar.transform.Find("BuffImages").gameObject;
+            // アイコンの透過
+            for (int icon = 0; icon < enemyDebuffIconImage_[num - 1].transform.childCount; icon++)
+            {
+                enemyDebuffIconImage_[num - 1].transform.GetChild(icon).GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+            }
 
             num++;
         }
@@ -488,6 +499,7 @@ public class EnemyInstanceMng : MonoBehaviour
                 {
                     // アイコンをnullにして、低下矢印も非表示にする
                     child.GetComponent<Image>().sprite = null;
+                    child.GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
                     for (int m = 0; m < child.childCount; m++)
                     {
                         child.GetChild(m).gameObject.SetActive(false);
@@ -712,6 +724,8 @@ public class EnemyInstanceMng : MonoBehaviour
                 {
                     // アイコンをいれる
                     bufftra.GetChild(i).GetComponent<Image>().sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BUFFICON][debuff - 1];
+                    bufftra.GetChild(i).GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+
                     // 矢印でアップ倍率をいれる
                     // ▲*1 = バフが1% ~30%,▲*2 = バフが31% ~70%,▲*3 = バフが71%~100%
                     for (int m = 0; m < bufftra.GetChild(i).childCount; m++)

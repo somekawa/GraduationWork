@@ -285,7 +285,7 @@ public class SaveLoadCSV : MonoBehaviour
                             // 名前が一致したところを書き換える
                             if (a == int.Parse(split[0]))
                             {
-                                QuestMng.questClearCnt[a] = int.Parse(split[1]);
+                                QuestMng.questClearCnt[a] = int.Parse(System.Text.RegularExpressions.Regex.Replace(split[1], @"[^0-9]", ""));
                                 tmp = true;
                                 break;
                             }

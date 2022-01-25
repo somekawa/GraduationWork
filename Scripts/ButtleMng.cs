@@ -143,16 +143,16 @@ public class ButtleMng : MonoBehaviour
                     // リザルト処理： エネミーの数、エネミーの番号（配列）
                     buttleResult_.DropCheck(EneSelObj_.childCount, saveEnemyNum_);
 
-                    for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
-                    {
-                        // バトルで死亡したまま終了していたときは、HP1の状態で立ち上がらせる
-                        if (SceneMng.charasList_[i].GetDeathFlg())
-                        {
-                            SceneMng.charasList_[i].SetDeathFlg(false);
-                            SceneMng.charasList_[i].SetHP(1);
-                        }
-                        SceneMng.charasList_[i].ButtleInit();
-                    }
+                    //for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+                    //{
+                    //    // バトルで死亡したまま終了していたときは、HP1の状態で立ち上がらせる
+                    //    if (SceneMng.charasList_[i].GetDeathFlg())
+                    //    {
+                    //        SceneMng.charasList_[i].SetDeathFlg(false);
+                    //        SceneMng.charasList_[i].SetHP(1);
+                    //    }
+                    //    SceneMng.charasList_[i].ButtleInit();
+                    //}
 
                     characterMng_.SetCharaFieldPos();
                 }
@@ -254,6 +254,17 @@ public class ButtleMng : MonoBehaviour
         for (int i = 0; i < EneSelObj_.childCount; ++i)
         {
             Destroy(EneSelObj_.GetChild(i).gameObject);
+        }
+
+        for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+        {
+            // バトルで死亡したまま終了していたときは、HP1の状態で立ち上がらせる
+            if (SceneMng.charasList_[i].GetDeathFlg())
+            {
+                SceneMng.charasList_[i].SetDeathFlg(false);
+                SceneMng.charasList_[i].SetHP(1);
+            }
+            SceneMng.charasList_[i].ButtleInit();
         }
     }
 
