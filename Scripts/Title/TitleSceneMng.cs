@@ -1,29 +1,88 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class TitleSceneMng : MonoBehaviour
 {
-    //プレイヤーを変数に格納
-    public GameObject Player;
+    // 見栄えをよくするため（ゲーム起動後は非表示
+    private Image panel_;
 
-    //回転させるスピード
-    public float rotateSpeed = 0.5f;
+    // カメラ変更タイミングでフェードアウト、インさせる
+    private Fade fade_;
+    private bool fadeFlag_=false;
 
-    public Camera camera;
-    
-    // Start is called before the first frame update
+    // 縦（Z）移動カメラ
+    private Camera zMoveCamera;
+    private Vector3 zC_StartPos_ = new Vector3(2.0f, 31.5f, 108.5f);// スタート座標
+    private Vector3 zC_MaxPos_ = new Vector3(2.0f, 31.5f, 120.0f);// マックス座標
+
+    // 横（X)移動カメラ
+    private Camera xMoveCamera;
+    private Vector3 xC_StartPos_ = new Vector3(-55.0f, 6.5f, 90.0f);// スタート座標
+    private Vector3 xC_MaxPos_ = new Vector3(40.0f, 6.5f, 90.0f);// マックス座標
+
+    // シーン遷移先の名前
+    private string sceneName_ = "";
+
     void Start()
     {
-        Debug.Log("カメラを動かせます");
-       //// StartCoroutine(MoveCamera());
+        panel_ = GameObject.Find("Canvas/Panel").GetComponent<Image>();
+        fade_ = GameObject.Find("FadeCanvas").GetComponent<Fade>();
+
+        zMoveCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
+        zMoveCamera.transform.position = zC_StartPos_;
+        zMoveCamera.depth = 1;
+
+        xMoveCamera = GameObject.Find("SubCamera").GetComponent<Camera>();
+        xMoveCamera.transform.position = xC_StartPos_;
+        xMoveCamera.depth = -1;
+
+        StartCoroutine(FadeOutAndIn()); 
     }
 
-    void Update()
+    private IEnumerator FadeOutAndIn()
     {
-        camera.transform.RotateAround(Player.transform.position, new Vector3(0, 1, 0), 0.5f);
+        fade_.FadeIn(1);
+        fadeFlag_ = true;
+        yield return new WaitForSeconds(0.5f);
+
+        fade_.FadeOut(1);
+
+        if (panel_.gameObject.activeSelf == true)
+        {
+            panel_.gameObject.SetActive(false);
+            StartCoroutine(MoveCamera());
+        }
+        else
+        {
+            // カメラ変更
+            if (zMoveCamera.depth == 1)
+            {
+                zMoveCamera.depth = -1;// 動かない
+                xMoveCamera.depth = 1;// 動く
+                // 初期位置に戻す
+                zMoveCamera.transform.position = zC_StartPos_;
+            }
+            else
+            {
+                zMoveCamera.depth = 1;// 動く
+                xMoveCamera.depth = -1;// 動かない
+                // 初期位置に戻す
+                xMoveCamera.transform.position = xC_StartPos_;
+            }
+
+            if (sceneName_ != "")
+            {
+                Debug.Log("シーン移動します");
+                // シーン遷移するタイミングで入る
+                // カメラの動きを止める
+                StopCoroutine(MoveCamera());
+                SceneManager.LoadScene(sceneName_);// 指定のシーンに移動
+            }
+        }
+        fadeFlag_ = false;
+        yield break; // ループを抜ける
     }
 
     private IEnumerator MoveCamera()
@@ -31,32 +90,45 @@ public class TitleSceneMng : MonoBehaviour
         while (true)
         {
             yield return null;
-            //回転させる角度
-            float angle = Input.GetAxis("Horizontal") * rotateSpeed;
-
-            //プレイヤー位置情報
-            Vector3 playerPos = Player.transform.position;
-
-            //カメラを回転させる
-            transform.RotateAround(playerPos, Vector3.up, angle);
-
-            // 左ボタン押下かスペースキー押下でレベルアップ用の画像を表示
-            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+            if (fadeFlag_ == false)
             {
-                Debug.Log("コルーチンを止めました");
-                yield break;
+                if (zMoveCamera.depth == 1)
+                {
+                    if (zC_MaxPos_.z - 1.0f < zMoveCamera.transform.position.z)
+                    {
+                        // フェードアウト開始タイミング
+                        StartCoroutine(FadeOutAndIn());
+                    }
+                }
+                else
+                {
+                    if (xC_MaxPos_.x - 1.0f < xMoveCamera.transform.position.x)
+                    {
+                        // フェードアウト開始タイミング
+                        StartCoroutine(FadeOutAndIn());
+                    }
+                }
             }
-
+            if (zMoveCamera.depth == 1)
+            {
+                zMoveCamera.transform.position += new Vector3(0.0f, 0.0f, 0.05f);// 移動
+            }
+            else
+            {
+                xMoveCamera.transform.position += new Vector3(0.03f, 0.0f, 0.0f);// 移動
+            }
         }
     }
 
     public void OnClickNewGame()
     {
-        SceneManager.LoadScene("conversationdata");
+        sceneName_ = "conversationdata";
+        StartCoroutine(FadeOutAndIn());
     }
 
     public void OnClickLoadGame()
     {
-        SceneManager.LoadScene("Town");
+        sceneName_ = "Town";
+        StartCoroutine(FadeOutAndIn());
     }
 }
