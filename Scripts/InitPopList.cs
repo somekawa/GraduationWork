@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
 public class InitPopList : MonoBehaviour
 {
@@ -45,7 +44,7 @@ public class InitPopList : MonoBehaviour
     private int maxMateriaCnt_ = 0;         //配列の最大値を保存
     private int singleMateriaCnt_ = 0;         // シートに記載されてる個数
     public static GameObject[] materiaBox_; // 生成したプレハブを保存
-    public static int[,] dropNum;//
+    public static int[,] dropNum = new int[5,3];//
 
     public struct MateriaData
     {
@@ -137,23 +136,33 @@ public class InitPopList : MonoBehaviour
             materiaInfo_ = new string[maxMateriaCnt_];
 
             // 1つのフィールドにつきドロップするのは3種類のため
-           // dropNum = new int[9, 3];// singleMateriaCnt_,3];
+            dropNum = new int[9, 3];// singleMateriaCnt_,3];
 
             int number = 0;
+            int test=0;
             for (int f = 0; f < (int)FIELD_NUM.MAX; f++)
             {
                 materiaList_ = DataPopPrefab_.GetComponent<PopList>().GetData<MateriaList>(PopList.ListData.MATERIA, f);
                 singleMateriaCnt_= materiaList_.param.Count;
+                test += materiaList_.param.Count;
+               //     Debug.Log(test + "      ");
                 for (int i = 0; i < singleMateriaCnt_; i++)
                 {
-                  // Debug.Log(number+"      "+ materiaData[number].name);
                     materiaData[number].box = Instantiate(materiaUIBox,
-                        new Vector2(0, 0), Quaternion.identity, this.transform);
+                        new Vector2(0, 0), Quaternion.identity, transform);
                     materiaData[number].name = materiaList_.param[i].MateriaName;
                     materiaData[number].box.name = materiaData[number].name;
                     materiaData[number].buyPrice = materiaList_.param[i].Price_Buy;
                     materiaData[number].sellPrice = materiaList_.param[i].Price_Sell;
                     materiaData[number].info = materiaList_.param[i].Info;
+
+                    if (i < 3)
+                    {
+                        dropNum[f, i] = number;
+                       // Debug.Log(i + "      " + dropNum[f, i]);
+                        // drop_Field0_[i] = number;
+                    }
+
                     number++;
                 }
             }
@@ -195,7 +204,7 @@ public class InitPopList : MonoBehaviour
                         kinds[k, count] = (WORD)wordList_.param[i].KindsNumber;
                         power[k, count] = wordList_.param[i].Power;
 
-                        //    Debug.Log((WORD)k +"の"+ count + "番"+ name[k, count]);
+                       //    Debug.Log((WORD)k +"の"+ count + "番"+ name[k, count]);
                         count++;
                     }
                 }

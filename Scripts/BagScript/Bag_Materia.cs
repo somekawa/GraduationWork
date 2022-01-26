@@ -124,7 +124,7 @@ public class Bag_Materia : MonoBehaviour
             // Å‘åŠ”‚Í99ŒÂ                // ŒÄ‚Î‚ê‚½‘fŞ”Ô†‚Ì‘fŞ‚ÌŠ”‚ğ‰ÁZ
             materiaState[materiaNum].haveCnt = maxHaveCnt_ <= materiaState[materiaNum].haveCnt ? maxHaveCnt_ : materiaState[materiaNum].haveCnt + getCnt;
         }
-        Debug.Log(materiaState[materiaNum].haveCnt + "     ‘Œ¸ŒÂ”F" + getCnt);
+       // Debug.Log(materiaState[materiaNum].haveCnt + "     ‘Œ¸ŒÂ”F" + getCnt);
 
         if (materiaState[materiaNum].haveCnt < 1)
         {

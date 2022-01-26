@@ -28,7 +28,7 @@ public class ItemImageMng : MonoBehaviour
             return;
         }
 
-        spriteMap[IMAGE.ITEM] = ImageMng(4, 6, "/Item/Items");
+        spriteMap[IMAGE.ITEM] = ImageMng(3, 7, "/Item/Items_");
         spriteMap[IMAGE.MAGIC] = ImageMng(1, 7, "/MagicImage");
         spriteMap[IMAGE.BOOK] = ImageMng(1, 6, "/BookImage");
         // 状態異常中のアイコン
@@ -37,7 +37,7 @@ public class ItemImageMng : MonoBehaviour
         spriteMap[IMAGE.BUFFICON] = ImageMng(1, 6, "/BuffIcon");
 
         // 読み込みたいシート数、シート枚の大きさ、読み込みたい画像
-        spriteMap[IMAGE.MATERIA] = ImageMng(5, 7, "/Materia/Materia_Field");
+        spriteMap[IMAGE.MATERIA] = ImageMng(5, 8, "/Materia/Materia_");
         onceFlag_ = true;
     }
 

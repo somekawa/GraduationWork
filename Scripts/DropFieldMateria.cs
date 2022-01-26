@@ -11,19 +11,19 @@ public class DropFieldMateria : MonoBehaviour
     public enum MATERIA_NUMBER
     {
         NON = -1,
-        MATERIA_0,  // カボス    酢の橘
-        MATERIA_1,  // ハチミツ
-        MATERIA_2,  // 花の蜜
-        MATERIA_3,  // きのこ
-        MATERIA_4,  // 妖精の羽
+        MATERIA_0,  // 
+        MATERIA_1,  // 
+        MATERIA_2,  // 
+        MATERIA_3,  // 
+        MATERIA_4,  // 
         MAX
     }
+
     // オブジェクトの名前
-    public static string[] objName = new string[(int)MATERIA_NUMBER.MAX] {
-         "Materia0","Materia1","Materia2","Materia3","Materia4"
-    };
-    // 素材オブジェクトを保存　ポジションチェックで使う
-    private GameObject[] itemPointChildren_;
+    public static string[] objName = new string[(int)MATERIA_NUMBER.MAX];
+
+// 素材オブジェクトを保存　ポジションチェックで使う
+private GameObject[] itemPointChildren_;
 
     // ーーーーーーーーー画像関連
     private RectTransform parentCanvas_;    // アイテム関連を表示するキャンバス
@@ -59,9 +59,30 @@ public class DropFieldMateria : MonoBehaviour
 
     private int dropCnt_ = 1;// 何個拾ったか
 
-    void Start()
+    private int[,] test = new int[5, 5];
+    private int[] forestMateriaNum_ = new int[3] { 2, 3, 4 };  // 花の蜜,きのこ,妖精の羽
+    private int[] desertMateriaNum_ = new int[3] { 7, 9, 10 };  // 清らかな水	,さらさらの土,暗闇リンゴ	
+                                                                //private int[] field3MateriaNum_ = new int[3] { 2, 3, 4 };  // 花の蜜,きのこ,妖精の羽
+                                                                //private int[] field4MateriaNum_ = new int[3] { 7, 9, 10 };  // 花の蜜,きのこ,妖精の羽
+                                                                //private int[] field5MateriaNum_ = new int[3] { 7, 9, 10 };  // 花の蜜,きのこ,妖精の羽
+  
+    private int[,] dropMateriaNum_=new int[5,3];
+
+   public void Init()
     {
-        fieldNumber_ = (int)SceneMng.SCENE.FIELD0;
+        // nowSceneに値が入る前に呼ばれることがあるためFieldMng.csでここのInitを呼ぶ
+
+        fieldNumber_ = (int)SceneMng.nowScene - (int)SceneMng.SCENE.FIELD0;
+        Debug.Log(fieldNumber_+"番のフィールドです");
+        for (int i = 0; i < 3; i++)
+        {
+            Debug.Log(i);
+            dropMateriaNum_[fieldNumber_, i] = InitPopList.dropNum[fieldNumber_, i];
+        }
+
+
+        // nowScene=ForestFiledなら3番　0～6　5個配置
+        Debug.Log(SceneMng.nowScene + "現在のフィールド" + fieldNumber_);
 
         uniCtl_ = GameObject.Find("Uni").GetComponent<UnitychanController>();
         mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
@@ -84,42 +105,43 @@ public class DropFieldMateria : MonoBehaviour
         for (int i = 0; i < (int)MATERIA_NUMBER.MAX; i++)
         {
             itemPointChildren_[i] = transform.GetChild(i).gameObject;
+            objName[i] = "Materia"+i+"_" + Random.Range(dropMateriaNum_[fieldNumber_, 0], dropMateriaNum_[fieldNumber_, 2]);
+            itemPointChildren_[i].name = objName[i];
+            Debug.Log(itemPointChildren_[i].name+"      " + objName[i]);
         }
-
-
-        // Debug.Log(telopImage_.transform.localPosition);
     }
 
-    public void SetItemName(int num, string name, bool flag)
+    public void SetItemName(int materiaNum,int objNum)
     {
         // 接触したObjの名前,whileに入ってよいかのフラグ
-        NameAndPosCheck(num, name);
+        NameAndPosCheck(materiaNum, objNum);
+        Debug.Log(materiaNum);
     }
 
-    private void NameAndPosCheck(int num, string name)
+    private void NameAndPosCheck(int materiaNum,int objNum)
     {
         // ユニを動けなくする
         uniCtl_.enabled = false;
 
         // 値を保存
-        itemNumberCheck_ = num;
+        itemNumberCheck_ = materiaNum;
 
         // 1～5個の素材を拾う
         dropCnt_ = Random.Range(1, 5);
 
         // 拾った素材の名前を表示
-        telopText_.text = Bag_Materia.materiaState[num].name;
+        telopText_.text = Bag_Materia.materiaState[materiaNum].name;
         telopImage_.gameObject.SetActive(true);
 
         // 拾った分をバッグに入れる
-        bagMateria_.MateriaGetCheck(itemNumberCheck_, materiaName_[num], dropCnt_);
+        bagMateria_.MateriaGetCheck(itemNumberCheck_, dropCnt_);
 
         // 素材を拾えるポイントのエフェクトを非表示にする
-        itemPointChildren_[num].SetActive(false);
+        itemPointChildren_[objNum].SetActive(false);
 
         // 画像表示の初期位置計算
         // オブジェクトのワールド空間positionをビューポート空間に変換
-        appearPos_ = mainCamera.WorldToViewportPoint(itemPointChildren_[num].transform.position);
+        appearPos_ = mainCamera.WorldToViewportPoint(itemPointChildren_[objNum].transform.position);
         Debug.Log(appearPos_);
 
         // ビューポートの原点は左下、Canvasは中央のためCanvasのRectTransformのサイズの1/2を引く
@@ -131,12 +153,18 @@ public class DropFieldMateria : MonoBehaviour
         Debug.Log("WorldObject_ScreenPosition::" + worldObject_ScreenPosition_);
 
         // 拾った個数分画像を生成する　移動はMoveDropImage.cs
-        StartCoroutine(InstanceMateriaUI(dropCnt_, num));
+        StartCoroutine(InstanceMateriaUI(dropCnt_, materiaNum));
     }
 
-    private IEnumerator InstanceMateriaUI(int count, int imagenNum)
+    private IEnumerator InstanceMateriaUI(int count, int imageNum)
     {
-        int instanceCnt_ = 0;
+        int instanceCnt_ = 0;// 何個生成するか
+        //int dropNumber = 0;// 何番の素材を取得したか
+        //for (int i=0;i<3;i++)
+        //{
+        //    dropMateriaNum_[fieldNumber_, i]
+
+        //}
         while (true)
         {
             yield return null;
@@ -173,7 +201,8 @@ public class DropFieldMateria : MonoBehaviour
                 materiaUIObj[instanceCnt_].name = instanceCnt_.ToString();
                 materiaImage_[instanceCnt_] = materiaUIObj[instanceCnt_].GetComponent<Image>();
                 // 取得した素材の画像を入れる
-                materiaImage_[instanceCnt_].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][imagenNum];
+                materiaImage_[instanceCnt_].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][imageNum];
+                Debug.Log("画像番号"+imageNum);
                 // 表示画像のアンカーに座標を代入して座標を決定
                 materiaImage_[instanceCnt_].transform.localPosition = worldObject_ScreenPosition_ + randomPos_;
                 // 取得個数になるまで加算

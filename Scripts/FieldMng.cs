@@ -162,6 +162,8 @@ public class FieldMng : MonoBehaviour
                 SceneMng.charasList_[i].DeleteStatusUpByCook();
             }
         }
+
+        GameObject.Find("FieldMap/MateriaPoints").GetComponent<DropFieldMateria>().Init();
     }
 
     // クエストの受注状況に合わせて、壁や宝箱のアクティブ状態を判別する

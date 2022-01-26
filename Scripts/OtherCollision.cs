@@ -1,10 +1,14 @@
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class OtherCollision : MonoBehaviour
 {
-    private DropFieldMateria itemGet_;
     private RectTransform parentCanvas_;    // アイテム関連を表示するキャンバス
+
+    private string objName_;
+    private int materiaNum_;
+    private DropFieldMateria itemGet_;
     private Image infoImage_;           // 接触範囲に入ったら指示を出す
 
     void Start()
@@ -20,12 +24,21 @@ public class OtherCollision : MonoBehaviour
         // 接触中
         if (Input.GetKey(KeyCode.Space))
         {
+            Debug.Log(other.name);
+            Debug.Log("スペースキーを押下しました");
+            var nameCheck = other.name.Split('_');
+            // オブジェクト名+番号
+            objName_ = nameCheck[0];
+            // オブジェクトの番号
+            int objNum = int.Parse(Regex.Replace(objName_, @"[^0-9]", ""));
+            // 素材の番号
+            materiaNum_ = int.Parse(nameCheck[1]);
             for (int i = 0; i < (int)DropFieldMateria.MATERIA_NUMBER.MAX; i++)
             {
                 if (DropFieldMateria.objName[i] == other.name)
                 {
-                 //   Debug.Log("FrontColliderと接触したオブジェクト" + other.name);
-                    itemGet_.SetItemName(i, other.name, true);
+                    Debug.Log(i + "       FrontColliderと接触したオブジェクト" + other.name);
+                    itemGet_.SetItemName(materiaNum_, objNum);
                     infoImage_.gameObject.SetActive(false);
                 }
             }
@@ -34,10 +47,13 @@ public class OtherCollision : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // 接触した瞬間
-        if (infoImage_.gameObject.activeSelf == false)
+        if (other.CompareTag("Drop"))
         {
-            infoImage_.gameObject.SetActive(true);
+            // 接触した瞬間
+            if (infoImage_.gameObject.activeSelf == false)
+            {
+                infoImage_.gameObject.SetActive(true);
+            }
         }
     }
 

@@ -18,7 +18,7 @@ public class Bag_Item : MonoBehaviour
                                           
     // すべてのアイテム数
     private InitPopList popItemList_;
-    private int maxCnt_ = 0;// xlsから読み込むアイテムの数(Exアイテムも含む
+    private int maxCnt_ = 0;// xlsから読み込むアイテムの数
 
     public struct ItemData
     {
@@ -67,7 +67,7 @@ public class Bag_Item : MonoBehaviour
 
                 itemState[i].number = int.Parse(csvDatas_[i + 1][0]);
                 itemState[i].name = csvDatas_[i + 1][1];
-                //Debug.Log("アイテムの名前："+itemState[i].name);
+              //  Debug.Log(i+"アイテムの名前："+itemState[i].name);
                 // アイテムの所持数を確認
                 itemState[i].haveCnt = int.Parse(csvDatas_[i + 1][2]);
                 // 親の位置を変更
@@ -78,12 +78,12 @@ public class Bag_Item : MonoBehaviour
 
                 // 生成したプレハブの子になっているImageを見つける
                 itemState[i].image = itemState[i].box.transform.Find("ItemIcon").GetComponent<Image>();
-                int num = maxCnt_ / 2 < i ? i - maxCnt_ / 2 : i;
+                int num = maxCnt_ / 2 <= i ? i - maxCnt_ / 2 : i;
                 itemState[i].image.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.ITEM][num];
 
                 // Exアイテムの目印を表示するかしないか
                 itemState[i].EX = itemState[i].box.transform.Find("SymbolImage").GetComponent<Image>();
-                bool flag = maxCnt_ / 2 < i ? true : false;
+                bool flag = maxCnt_ / 2 <= i ? true : false;
                 itemState[i].EX.gameObject.SetActive(flag);
 
                 // 生成したプレハブの子になっているTextを見つける
