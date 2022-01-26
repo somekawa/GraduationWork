@@ -22,24 +22,27 @@ public class OtherCollision : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
         // 接触中
-        if (Input.GetKey(KeyCode.Space))
+        if (other.CompareTag("Drop"))
         {
-            Debug.Log(other.name);
-            Debug.Log("スペースキーを押下しました");
-            var nameCheck = other.name.Split('_');
-            // オブジェクト名+番号
-            objName_ = nameCheck[0];
-            // オブジェクトの番号
-            int objNum = int.Parse(Regex.Replace(objName_, @"[^0-9]", ""));
-            // 素材の番号
-            materiaNum_ = int.Parse(nameCheck[1]);
-            for (int i = 0; i < (int)DropFieldMateria.MATERIA_NUMBER.MAX; i++)
+            if (Input.GetKey(KeyCode.Space))
             {
-                if (DropFieldMateria.objName[i] == other.name)
+                Debug.Log(other.name);
+                Debug.Log("スペースキーを押下しました");
+                var nameCheck = other.name.Split('_');
+                // オブジェクト名+番号
+                objName_ = nameCheck[0];
+                // オブジェクトの番号
+                int objNum = int.Parse(Regex.Replace(objName_, @"[^0-9]", ""));
+                // 素材の番号
+                materiaNum_ = int.Parse(nameCheck[1]);
+                for (int i = 0; i < (int)DropFieldMateria.MATERIA_NUMBER.MAX; i++)
                 {
-                    Debug.Log(i + "       FrontColliderと接触したオブジェクト" + other.name);
-                    itemGet_.SetItemName(materiaNum_, objNum);
-                    infoImage_.gameObject.SetActive(false);
+                    if (DropFieldMateria.objName[i] == other.name)
+                    {
+                        Debug.Log(i + "       FrontColliderと接触したオブジェクト" + other.name);
+                        itemGet_.SetItemName(materiaNum_, objNum);
+                        infoImage_.gameObject.SetActive(false);
+                    }
                 }
             }
         }

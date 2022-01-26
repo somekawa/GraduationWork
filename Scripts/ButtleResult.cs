@@ -22,6 +22,8 @@ public class ButtleResult : MonoBehaviour
     private TMPro.TextMeshProUGUI[] expText_ = new TMPro.TextMeshProUGUI[(int)SceneMng.CHARACTERNUM.MAX];  // 現在数値を表示するテキスト
     private TMPro.TextMeshProUGUI[] levelText_ = new TMPro.TextMeshProUGUI[(int)SceneMng.CHARACTERNUM.MAX];  // 現在数値を表示するテキスト
     private static int[] level_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// キャラの現在レベル
+    private static int[] maxExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// キャラのレベルに対する上限経験値
+    private static int[] nowExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// キャラの経験値
     private static int[] nextExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 次のレベルまでに必要なEXP
     private static int[] sumExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 今まで獲得した合計Exp
     private static int[] allExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 今まで獲得した合計Exp
@@ -57,6 +59,7 @@ public class ButtleResult : MonoBehaviour
     {
         resultCanvas.gameObject.SetActive(false);
         DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        Debug.Log("resultCanvas" + resultCanvas.transform.Find("UniIconFrame/EXPSlider").GetComponent<Slider>());
         expSlider_[(int)SceneMng.CHARACTERNUM.UNI] = resultCanvas.transform.Find("UniIconFrame/EXPSlider").GetComponent<Slider>();
         expSlider_[(int)SceneMng.CHARACTERNUM.JACK] = resultCanvas.transform.Find("JackIconFrame/EXPSlider").GetComponent<Slider>();
 
@@ -67,21 +70,22 @@ public class ButtleResult : MonoBehaviour
             if (onceFlag_ == false)
             {
                 level_[i] = charasList_[i].Level();
-                oldLevel_[i] = level_[i];
                 Debug.Log("レベル"+charasList_[i].Level());
                 sumExp_[i] = charasList_[i].CharacterSumExp();
-                allExp_[i] = sumExp_[i];
-                expSlider_[i].maxValue = charasList_[i].CharacterMaxExp();
-                expSlider_[i].value = charasList_[i].CharacterExp();
-                Debug.Log(sumExp_[i] + "  上限" + expSlider_[i].maxValue);
+                maxExp_[i] = charasList_[i].CharacterMaxExp();
+                nowExp_[i]= charasList_[i].CharacterExp();
             }
 
             // レベル関連
+            oldLevel_[i] = level_[i];
             levelText_[i] = expSlider_[i].transform.Find("LvText").GetComponent<TMPro.TextMeshProUGUI>();
             levelText_[i].text = level_[i].ToString();
 
             // 経験値関連
+            allExp_[i] = sumExp_[i];
             expText_[i] = expSlider_[i].transform.Find("AddExpText").GetComponent<TMPro.TextMeshProUGUI>();
+            expSlider_[i].maxValue = maxExp_[i];
+            expSlider_[i].value = nowExp_[i];
         }
         onceFlag_ = true;
 
@@ -102,7 +106,6 @@ public class ButtleResult : MonoBehaviour
     public void DropCheck(int enemyCnt, int[] num)
     {
         Debug.Log("リザルトを表示します");
-        Debug.Log(enemyCnt + "        " + num[0] + "     " + num[1]);
         enemyCnt_ = enemyCnt;
 
         // 素材系
@@ -115,6 +118,7 @@ public class ButtleResult : MonoBehaviour
         Debug.Log(enemyCnt_);
         for (int i = 0; i < enemyCnt_; i++)
         {
+            Debug.Log(enemyCnt + "体中 " + num[i]+"体目" );
             enemyList_.Add(new Enemy(num[i].ToString(), 1, null, enemyData_.param[num[i]]));
             Debug.Log(i + "番目：" + enemyList_[i].GetExp());
             Debug.Log(i + "番目：" + enemyList_[i].DropMateria());
@@ -152,7 +156,7 @@ public class ButtleResult : MonoBehaviour
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
         {
             // 経験値のスライダーを動かす
-            StartCoroutine(ActiveExpSlider(i, SceneMng.charasList_[i].GetDeathFlg(), saveSumExp_));
+            StartCoroutine(ActiveExpSlider(i, charasList_[i].GetDeathFlg(), saveSumExp_));
         }
     }
 
@@ -164,24 +168,46 @@ public class ButtleResult : MonoBehaviour
         sumExp_[charaNum] = nowExp;
         getExp_[charaNum] = nowExp;
         expText_[charaNum].text = "+" + nowExp.ToString();
-        int test = 2;
-        Debug.Log("獲得EXP" + nowExp);
         allExp_[charaNum] += sumExp_[charaNum];// 今までの合計を保存
+        Debug.Log(deathFlag + "死亡確認     獲得EXP" + nowExp);
+        int sumMaxExp = (int)expSlider_[charaNum].maxValue;
+        bool onceFlag = true;
         while (true)
         {
             yield return null;
-            if (nowExp < expSlider_[charaNum].maxValue)
+            if (sumExp_[charaNum]<= saveValue )
             {
-                Debug.Log(saveValue + "       スライダーの移動が終了しました");
-                nextExp_[charaNum] = (int)(expSlider_[charaNum].maxValue - expSlider_[charaNum].value);
+                if (onceFlag == true)
+                {
+                    // 加算分だけスライダーを移動させたら移動を終了させる
+                    Debug.Log(saveValue + "       スライダーの移動が終了しました");
+                    nextExp_[charaNum] = (int)(expSlider_[charaNum].maxValue - expSlider_[charaNum].value);
 
-                // 増えた値を保存
-                charasList_[charaNum].SetCharacterExp(nextExp_[charaNum]);
-                charasList_[charaNum].SetCharacterMaxExp((int)expSlider_[charaNum].maxValue);
-                charasList_[charaNum].SetCharacterSumExp(allExp_[charaNum]);
+                    // 増えた値を保存
+                    charasList_[charaNum].SetCharacterExp(nextExp_[charaNum]);
+                    charasList_[charaNum].SetCharacterMaxExp((int)expSlider_[charaNum].maxValue);
+                    charasList_[charaNum].SetCharacterSumExp(allExp_[charaNum]);
+
+                    if (expSlider_[charaNum].value == expSlider_[charaNum].maxValue)
+                    {
+                        // もし同値で終わってしまった場合
+                        level_[charaNum]++;
+                        levelText_[charaNum].text = "Lv " + level_[charaNum].ToString();
+                        // 上限を変更
+                        expSlider_[charaNum].maxValue = (int)(expSlider_[charaNum].maxValue * 1.1f);
+                        Debug.Log(charaNum + "    " + level_[charaNum] + "  上限" + expSlider_[charaNum].maxValue);
+                        saveSumMaxExp_[charaNum] += (int)expSlider_[charaNum].maxValue;
+                        // valueが上限まで来たら0に戻す
+                        expSlider_[charaNum].value = 0.0f;
+                        nextExp_[charaNum] = (int)expSlider_[charaNum].maxValue;
+                    }
+                    onceFlag = false;
+                }
 
                 if (charaNum == (int)SceneMng.CHARACTERNUM.UNI)
                 {
+                    maxExp_[charaNum] = (int)expSlider_[charaNum].maxValue;
+                    nowExp_[charaNum] = (int)expSlider_[charaNum].value;
                     yield break;
                 }
                 else
@@ -189,6 +215,8 @@ public class ButtleResult : MonoBehaviour
                     // ジャックのスライダー移動まで終わったらレベルが上がったかのチェックをする
                     if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
                     {
+                        maxExp_[charaNum] = (int)expSlider_[charaNum].maxValue;
+                        nowExp_[charaNum] = (int)expSlider_[charaNum].value;
                         StartCoroutine(ActiveResult());
                         yield break;
                     }
@@ -202,7 +230,7 @@ public class ButtleResult : MonoBehaviour
                     level_[charaNum]++;
                     levelText_[charaNum].text = "Lv " + level_[charaNum].ToString();
                     nowExp -= (int)expSlider_[charaNum].maxValue;
-
+                    sumMaxExp+= (int)expSlider_[charaNum].maxValue;
                     // 上限を変更
                     expSlider_[charaNum].maxValue = (int)(expSlider_[charaNum].maxValue * 1.1f);
                     Debug.Log(charaNum + "    " + level_[charaNum] + "  上限" + expSlider_[charaNum].maxValue);
@@ -213,9 +241,9 @@ public class ButtleResult : MonoBehaviour
                 else
                 {
                     // 上限に来るまで加算する
-                    saveValue += 2;//
-                    expSlider_[charaNum].value += 2;
-                    Debug.Log(expSlider_[charaNum].value + "  上限");
+                    saveValue += 1;//
+                    expSlider_[charaNum].value += 1;
+                   // Debug.Log(expSlider_[charaNum].value + "  上限");
                 }
             }
         }

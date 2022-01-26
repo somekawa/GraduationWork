@@ -306,8 +306,13 @@ public class EnemyInstanceMng : MonoBehaviour
         enemyMap_.Clear();
 
         int num = 1;
+
+        // 生成した敵の番号保存用
+        int cnt = 0;
+        int[] saveNum = new int[mapNum_];
+
         // 指定されたマップのリストを取り出して、foreach文で回す
-        foreach(Vector3 pos in enemyPosSetMap_[mapNum_])
+        foreach (Vector3 pos in enemyPosSetMap_[mapNum_])
         {
             // 敵プレハブをインスタンス
             GameObject enemy = null;
@@ -352,6 +357,10 @@ public class EnemyInstanceMng : MonoBehaviour
                     enemyHPPosOffset_ = new Vector3(0.0f, 60.0f, 0.0f);
                 }
             }
+
+            // 生成したエネミーの番号を保存
+            saveNum[cnt] = enemyNum;
+            cnt++;
 
             enemy.name = num.ToString();
 
@@ -398,8 +407,11 @@ public class EnemyInstanceMng : MonoBehaviour
             num++;
         }
 
+        // 番号を渡す
+        buttleMng_.SetEnemyNum(saveNum);
+        
         // 1度読み込んだらeventEnemy_をnullにする
-        if(eventEnemy_.Item1)
+        if (eventEnemy_.Item1)
         {
             eventEnemy_ = (null, -1);
         }
