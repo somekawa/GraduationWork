@@ -42,11 +42,13 @@ public class Bag_Materia : MonoBehaviour
     private Text info_; // クリックしたアイテムを説明する欄
     private Button throwAwayBtn_;
 
+    private static bool newGameFlag_ = false;
     public void NewGameInit()
     {
         popMateriaList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
         saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_Materia>();
         // タイトルでNewGameボタンを押したときに呼ばれるInit
+        newGameFlag_ = true;
         maxCnt_ = popMateriaList_.SetMaxMateriaCount();
         data = new MateriaData[maxCnt_];
         for (int i = 0; i < maxCnt_; i++)
@@ -62,15 +64,14 @@ public class Bag_Materia : MonoBehaviour
     public void Init()
     {
         popMateriaList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
-        saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_Materia>();
+        saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_Materia>();        
 
-        
-
-        if (maxCnt_ == 0)
+        if (maxCnt_ == 0|| newGameFlag_ ==true)
         {
             maxCnt_ = popMateriaList_.SetMaxMateriaCount();
             materiaState = new MateriaData[maxCnt_];
             data = new MateriaData[maxCnt_];
+            newGameFlag_ = false;
             Debug.Log(maxCnt_+"      "+materiaParent.transform);
             for (int i = 0; i < maxCnt_; i++)
             {
@@ -225,7 +226,7 @@ public class Bag_Materia : MonoBehaviour
         // 魔法の個数分回す
         for (int i = 0; i < maxCnt_; i++)
         {
-            saveCsvSc_.SaveMateriaData(materiaState[i]);
+            saveCsvSc_.SaveMateriaData(data[i]);
         }
         saveCsvSc_.SaveEnd();
     }
