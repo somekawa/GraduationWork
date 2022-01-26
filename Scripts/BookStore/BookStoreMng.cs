@@ -76,6 +76,7 @@ public class BookStoreMng : MonoBehaviour
     // アップステータスの名前とアップ値をペアにした変数 どれを選択したかを保存する
     private (string, int)[] statusUp_ = new (string, int)[8];
 
+    private int[] boolActiveTiming_ = new int[5] { 5, 10, 16,22,28 };
     void Start()
     {
         // 初期化
@@ -110,31 +111,64 @@ public class BookStoreMng : MonoBehaviour
         soldOutImage_ = bookStoreUI.transform.Find("ScrollView/Viewport/SoldOut").GetComponent<Image>();
         soldOutImage_.gameObject.SetActive(false);
 
-        haveMoney_ = SceneMng.GetHaveMoney();
+       // haveMoney_ = SceneMng.GetHaveMoney();
         haveMoneyText_ = bookStoreUI.transform.Find("CheckArea/Money/Count").GetComponent<TMPro.TextMeshProUGUI>();
         haveMoneyText_.text = haveMoney_.ToString();
 
         popBookList_ = GameObject.Find("TownMng").GetComponent<PopListInTown>();
 
         singleCnt_ = popBookList_.SetSingleBookCount();
-        maxCnt_ = popBookList_.SetMaxBookCount();
+       // maxCnt_ = popBookList_.SetMaxBookCount();
 
-        bookState_ = new BookData[maxCnt_];
+     //   bookState_ = new BookData[maxCnt_];
         DataLoad();
-        //  Debug.Log("本の個数" + bookList_.param.Count);
+
+        if (19 < EventMng.GetChapterNum())
+        {
+            maxCnt_ = boolActiveTiming_[4];
+        }
+        else if (16 < EventMng.GetChapterNum())
+        {
+            maxCnt_ = boolActiveTiming_[3];
+        }
+        else if (13 < EventMng.GetChapterNum())
+        {
+            maxCnt_ = boolActiveTiming_[2];
+        }
+        else if (8 < EventMng.GetChapterNum())
+        {
+            maxCnt_ = boolActiveTiming_[1];
+        }
+        else if (0 < EventMng.GetChapterNum())
+        {
+            maxCnt_ = boolActiveTiming_[0];
+        }
+        bookState_ = new BookData[maxCnt_];
+
+
+        Debug.Log("イベント進行度チェック："+EventMng.GetChapterNum());
         for (int i = 0; i < maxCnt_; i++)
         {
+            Debug.Log(i + "番目");
             bookState_[i] = new BookData
             {
                 name = csvDatas_[i + 1][0],
-                readFlag = int.Parse(csvDatas_[i + 1][1]),
-                obj = PopListInTown.bookObj[i],
+            obj = PopListInTown.bookObj[i],
                 wordDataNum = PopListInTown.bookWordNum[i],
                 statusMng = PopListInTown.statusUp[i],
                 price = PopListInTown.bookPrice[i],
                 info = PopListInTown.bookInfo[i],
                 imageNum = PopListInTown.bookImageNum[i],
             };
+            if (EventMng.GetChapterNum()<1)
+            {
+                bookState_[i].readFlag = 0;
+            }
+            else
+            {
+                bookState_[i].readFlag = int.Parse(csvDatas_[i + 1][1]);
+            }
+
             var underbarSplit = bookState_[i].statusMng.Split('_');
             //アンダーバーで区切ったものを、別々のリストへ入れる
             bookState_[i].kinds = underbarSplit[0];
@@ -158,10 +192,6 @@ public class BookStoreMng : MonoBehaviour
             bookState_[i].checkMark = bookState_[i].checkBox.transform.Find("CheckMark").GetComponent<Image>();
             bookState_[i].checkMark.gameObject.SetActive(false);
 
-
-            //// 親の位置を変える
-            bookState_[i].obj.transform.SetParent(bookStoreParent.transform);
-
             // 読んだことがない本だけを表示
             bool flag = bookState_[i].readFlag == 0 ? true : false;
             bookState_[i].obj.gameObject.SetActive(flag);
@@ -179,6 +209,12 @@ public class BookStoreMng : MonoBehaviour
         Debug.Log("本を見るボタンを押下しました");
         bookStoreCanvas_.SetActive(false);
         bookStoreUI.SetActive(true);
+        for(int i=0;i<maxCnt_;i++)
+        {
+            // 親が非アクティブの時に親を変えるとスケールが0になるときがあるため
+            // アクティブにした後に親を変える
+            bookState_[i].obj.transform.SetParent(bookStoreParent.transform);
+        }
     }
 
     public void OnClickBackButton()
@@ -245,6 +281,7 @@ public class BookStoreMng : MonoBehaviour
             int wordKinds = int.Parse(bookState_[num].kinds);
             getStatusOrWordText_.text = "サブワード『" +
                 Bag_Word.wordState[(InitPopList.WORD)wordKinds][bookState_[num].number].name + "』";
+            Debug.Log(Bag_Word.wordState[(InitPopList.WORD)wordKinds][bookState_[num].number].name+"を選択してます");
         }
 
         buyBtn_.interactable = true;
@@ -254,7 +291,7 @@ public class BookStoreMng : MonoBehaviour
 
     private void MoneyCheck()
     {
-        int maxSelectPrice = SceneMng.GetHaveMoney() - totalPrice_;
+        int maxSelectPrice = haveMoney_ - totalPrice_;// SceneMng.GetHaveMoney() - totalPrice_;
         for (int i = 0; i < maxCnt_; i++)
         {
             //Debug.Log(bookState_[i].name);
@@ -302,7 +339,7 @@ public class BookStoreMng : MonoBehaviour
     public void OnClickBuyBtn()
     {
         // お金の減少処理
-        SceneMng.SetHaveMoney(SceneMng.GetHaveMoney() - totalPrice_);
+        SceneMng.SetHaveMoney(haveMoney_ - totalPrice_);// SceneMng.GetHaveMoney() - totalPrice_);
         //haveMoney_ -= totalPrice_;
         haveMoneyText_.text = SceneMng.GetHaveMoney().ToString();
 
@@ -326,6 +363,7 @@ public class BookStoreMng : MonoBehaviour
                         bagWord_.WordGetCheck((InitPopList.WORD)wordKinds,
                                                 bookState_[i].number,
                                                 bookState_[i].wordDataNum);
+
                     }
                     else
                     {
