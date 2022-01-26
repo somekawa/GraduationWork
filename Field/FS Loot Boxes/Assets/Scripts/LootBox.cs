@@ -85,6 +85,8 @@ public class LootBox : MonoBehaviour
     /// </summary>
     public event Action <GameObject[]> OnBoxOpen;
 
+    private Bag_Word bagWord_;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -93,6 +95,8 @@ public class LootBox : MonoBehaviour
 
         // set the animation to bounce or not
         BounceBox(bouncingBox);
+
+        bagWord_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Word>();
     }
 
     /// <summary>
@@ -145,6 +149,50 @@ public class LootBox : MonoBehaviour
                 (string, bool) content = (name, true);
                 tmp[i] = content;
             }
+        }
+
+        // ワードの取得処理
+        switch(SceneMng.nowScene)
+        {
+            case SceneMng.SCENE.FIELD0:
+                if (arr[0] == "1" && arr[1] == "1")
+                {
+                    Debug.Log("ワード取得---単体・炎・小");
+                    bagWord_.WordGetCheck(InitPopList.WORD.HEAD, 0, 0);//単体
+                    bagWord_.WordGetCheck(InitPopList.WORD.ELEMENT_ATTACK, 0, 5);// 炎
+                    bagWord_.WordGetCheck(InitPopList.WORD.TAIL, 0, 9);// 小
+                }
+                break;
+            case SceneMng.SCENE.FIELD1:
+                if (arr[0] == "200" && arr[1] == "1")
+                {
+                    Debug.Log("ワード取得---回復");
+                    bagWord_.WordGetCheck(InitPopList.WORD.ELEMENT_HEAL, 0, 3);// 回復
+                }
+                break;
+            case SceneMng.SCENE.FIELD2:
+                if (arr[0] == "200" && arr[1] == "2")
+                {
+                    Debug.Log("ワード取得---中");
+                    bagWord_.WordGetCheck(InitPopList.WORD.TAIL, 1, 10);// 中
+                }
+                break;
+            case SceneMng.SCENE.FIELD3:
+                if (arr[0] == "200" && arr[1] == "3")
+                {
+                    Debug.Log("ワード取得---大");
+                    bagWord_.WordGetCheck(InitPopList.WORD.TAIL, 2, 11);// 大
+                }
+                break;
+            case SceneMng.SCENE.FIELD4:
+                if (arr[0] == "200" && arr[1] == "4")
+                {
+                    Debug.Log("ワード取得---極大");
+                    bagWord_.WordGetCheck(InitPopList.WORD.TAIL, 3, 12);// 極大
+                }
+                break;
+            default:
+                break;
         }
 
         // play the open animation
