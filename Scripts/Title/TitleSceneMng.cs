@@ -5,6 +5,10 @@ using UnityEngine.SceneManagement;
 
 public class TitleSceneMng : MonoBehaviour
 {
+    [SerializeField]
+    private GameObject LoadPrefab;  // 各リストを呼び出す
+    private GameObject loadPrefab_;
+
     // 見栄えをよくするため（ゲーム起動後は非表示
     private Image panel_;
 
@@ -13,11 +17,13 @@ public class TitleSceneMng : MonoBehaviour
     private bool fadeFlag_=false;
 
     // 縦（Z）移動カメラ
+    private AudioListener zCameraListener_;
     private Camera zMoveCamera_;
     private Vector3 zC_StartPos_ = new Vector3(2.0f, 31.5f, 8.5f);// スタート座標
     private Vector3 zC_MaxPos_ = new Vector3(2.0f, 31.5f, 120.0f);// マックス座標
 
     // 横（X)移動カメラ
+    private AudioListener xCameraListener_;
     private Camera xMoveCamera_;
     private Vector3 xC_StartPos_ = new Vector3(-55.0f, 6.5f, 90.0f);// スタート座標
     private Vector3 xC_MaxPos_ = new Vector3(40.0f, 6.5f, 90.0f);// マックス座標
@@ -25,18 +31,25 @@ public class TitleSceneMng : MonoBehaviour
     // シーン遷移先の名前
     private string sceneName_ = "";
 
-    private MenuActive menuActive_;
     void Start()
     {
+        // 親は必要ないためnull
+        loadPrefab_ = Instantiate(LoadPrefab,
+                               new Vector2(0, 0), Quaternion.identity, null);
+        loadPrefab_.name = "LoadPrefab";
+
         panel_ = GameObject.Find("Canvas/Panel").GetComponent<Image>();
         fade_ = GameObject.Find("FadeCanvas").GetComponent<Fade>();
-        menuActive_= gameObject.GetComponent<MenuActive>();
 
         zMoveCamera_ = GameObject.Find("MainCamera").GetComponent<Camera>();
+        zCameraListener_ = zMoveCamera_.gameObject.GetComponent < AudioListener >();
+        zCameraListener_.enabled = true;
         zMoveCamera_.transform.position = zC_StartPos_;
         zMoveCamera_.depth = 1;
 
         xMoveCamera_ = GameObject.Find("SubCamera").GetComponent<Camera>();
+        xCameraListener_ = xMoveCamera_.gameObject.GetComponent<AudioListener>();
+        xCameraListener_.enabled = false;
         xMoveCamera_.transform.position = xC_StartPos_;
         xMoveCamera_.depth = -1;
 
@@ -63,6 +76,8 @@ public class TitleSceneMng : MonoBehaviour
             {
                 zMoveCamera_.depth = -1;// 動かない
                 xMoveCamera_.depth = 1;// 動く
+                zCameraListener_.enabled = false;
+                xCameraListener_.enabled = true;
                 // 初期位置に戻す
                 zMoveCamera_.transform.position = zC_StartPos_;
             }
@@ -70,6 +85,8 @@ public class TitleSceneMng : MonoBehaviour
             {
                 zMoveCamera_.depth = 1;// 動く
                 xMoveCamera_.depth = -1;// 動かない
+                zCameraListener_.enabled = true;
+                xCameraListener_.enabled = false;
                 // 初期位置に戻す
                 xMoveCamera_.transform.position = xC_StartPos_;
             }
@@ -80,14 +97,10 @@ public class TitleSceneMng : MonoBehaviour
                 // シーン遷移するタイミングで入る
                 // カメラの動きを止める
                 StopCoroutine(MoveCamera());
-                if(sceneName_ == "Town")
-                {
-                    menuActive_.DataLoad();
-                }
                 SceneManager.LoadScene(sceneName_);// 指定のシーンに移動
-            }
-            
+            }            
         }
+
         fadeFlag_ = false;
         yield break; // ループを抜ける
     }
