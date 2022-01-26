@@ -5,6 +5,7 @@ public class OnceLoad : MonoBehaviour
     public static OnceLoad singleton;
     private static GameObject mInstance;
     private static bool loadFlag = false;
+    private static bool newGameFlag = false;
 
     public static GameObject Instance
     {
@@ -38,6 +39,18 @@ public class OnceLoad : MonoBehaviour
             Debug.Log(this+"プレハブを破壊します");
             Destroy(gameObject);
         }
+    }
+
+    public void SetNewGameFlag(bool flag)
+    {
+        newGameFlag = flag;
+        if (newGameFlag == true)
+        {
+            // ゲーム最初のLoadがされたらプレハブを破壊する
+            Debug.Log(this + "プレハブを破壊します");
+            Destroy(gameObject);
+        }
+
     }
 }
 

@@ -60,6 +60,29 @@ public class Bag_Word : MonoBehaviour
     public static int targetWordNum;            // 必中用の番号
     public static bool getFlagCheck = false;    // 中身を魔法作成の時に渡したら使われる
 
+    public void NewGameInit()
+    {
+        // タイトルでNewGameボタンを押したときに呼ばれるInit
+        popWordList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
+        saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<Word_SaveCSV>();
+        data = new WordData[29];
+        int dataNum = 0;
+        for (int k = 0; k < (int)InitPopList.WORD.INFO; k++)
+        {
+            maxCnt_[k] = InitPopList.maxWordKindsCnt[k];
+            //wordState[(InitPopList.WORD)k] = InitWordState((InitPopList.WORD)k, maxCnt_[k]);
+            for (int i = 0; i < maxCnt_[k]; i++)
+            {
+                data[dataNum].number = dataNum;
+                data[dataNum].name = InitPopList.name[k, i];
+                data[dataNum].getFlag = 0;
+                dataNum++;
+            }
+        }
+        DataSave();
+        DataLoad();
+    }
+
     public void Init()
     {
         eventSystem_ = GameObject.Find("EventSystem").GetComponent<EventSystem>();
@@ -120,22 +143,10 @@ public class Bag_Word : MonoBehaviour
             // もしHead以外が選択されていた場合そのボタンを押下可能にする
             kindsBtn_.interactable = true;
         }
-        else
-        {
-            // デバッグ用
-            WordGetCheck(InitPopList.WORD.HEAD, 0, 0);//単体
-            WordGetCheck(InitPopList.WORD.ELEMENT_ATTACK, 0, 5);// 炎
-            WordGetCheck(InitPopList.WORD.ELEMENT_HEAL, 0, 3);// 回復
-            WordGetCheck(InitPopList.WORD.TAIL, 0, 9);// 小
-            WordGetCheck(InitPopList.WORD.TAIL, 1, 10);// 中
-            WordGetCheck(InitPopList.WORD.TAIL, 2, 11);// 大
-            WordGetCheck(InitPopList.WORD.TAIL, 3, 12);// 極大
 
-        }
         kindsBtn_ = headBtn;
         kindsBtn_.interactable = false;
     }
-
 
     private WordData[] InitWordState(InitPopList.WORD kind, int maxCnt)
     {

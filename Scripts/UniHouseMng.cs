@@ -14,6 +14,8 @@ public class UniHouseMng : MonoBehaviour
     [SerializeField]
     private Canvas uniHouseCanvas;
 
+    private GameObject loadPrefab_;// タイトルシーンからの遷移かどうか
+    private OnceLoad onceLoad_;// LoadPrefabにアタッチされてるScript
     void Start()
     {
         // 現在のシーンをUNIHOUSEとする
@@ -35,13 +37,16 @@ public class UniHouseMng : MonoBehaviour
         // WarpField.csの初期化関数を先に呼ぶ
         GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
 
-
-        //////////// *デバッグ用
-        //////////GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
-        //////////GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
-        //////////GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
-        //////////GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
-
+        // オブジェクトがある＝タイトルシーンから遷移してきた
+        loadPrefab_ = GameObject.Find("LoadPrefab");
+        if (loadPrefab_ != null)
+        {
+            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>().NewGameInit();
+            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>().NewGameInit();
+            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Word>().NewGameInit();
+            onceLoad_ = GameObject.Find("LoadPrefab").GetComponent<OnceLoad>();
+            onceLoad_.SetNewGameFlag(true);
+        }
         // メインカメラを最初にアクティブにする
         var cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
         cameraMng_.SetChangeCamera(false);

@@ -42,6 +42,23 @@ public class Bag_Materia : MonoBehaviour
     private Text info_; // クリックしたアイテムを説明する欄
     private Button throwAwayBtn_;
 
+    public void NewGameInit()
+    {
+        popMateriaList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
+        saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_Materia>();
+        // タイトルでNewGameボタンを押したときに呼ばれるInit
+        maxCnt_ = popMateriaList_.SetMaxMateriaCount();
+        data = new MateriaData[maxCnt_];
+        for (int i = 0; i < maxCnt_; i++)
+        {
+            data[i].number = i;
+            data[i].name = InitPopList.materiaData[i].name;
+            data[i].haveCnt = 0;
+        }
+        DataSave();
+        DataLoad();
+    }
+
     public void Init()
     {
         popMateriaList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();

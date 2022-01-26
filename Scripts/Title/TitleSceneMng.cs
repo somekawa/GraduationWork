@@ -142,7 +142,8 @@ public class TitleSceneMng : MonoBehaviour
 
     public void OnClickNewGame()
     {
-        sceneName_ = "conversationdata";
+       // sceneName_ = "conversationdata";
+        sceneName_ = "InHouseAndUniHouse";//デバッグ用
         StartCoroutine(FadeOutAndIn());
     }
 

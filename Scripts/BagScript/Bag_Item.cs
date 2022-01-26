@@ -46,8 +46,24 @@ public class Bag_Item : MonoBehaviour
 
     private bool checkFlag_ = false;
 
+    public void NewGameInit()
+    {
+        // タイトルでNewGameボタンを押したときに呼ばれるInit
+        popItemList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
+        saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_HaveItem>();
+        maxCnt_ = popItemList_.SetMaxItemCount();
+        data = new ItemData[maxCnt_];
+        for (int i = 0; i < maxCnt_; i++)
+        {
+            data[i].number = i;
+            data[i].name = InitPopList.itemData[i].name;
+            data[i].haveCnt = 0;
+        }
+        DataSave();
+        DataLoad();
+    }
+
     public void Init()
-    // void Start()
     {
         if (checkFlag_ == false)
         {
