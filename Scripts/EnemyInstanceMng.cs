@@ -308,6 +308,7 @@ public class EnemyInstanceMng : MonoBehaviour
         // ButtleResult用の変数
         int cnt = 0;
         int[] saveNum = new int[mapNum_];
+        bool bossFlag = false;
 
         int num = 1;
         // 指定されたマップのリストを取り出して、foreach文で回す
@@ -342,6 +343,12 @@ public class EnemyInstanceMng : MonoBehaviour
             }
             else
             {
+                if (SceneMng.SCENE.FIELD0 < SceneMng.nowScene)
+                {
+                    // フォレストField以外のボス戦だったら
+                    bossFlag = true;
+                }
+                
                 // イベント用の敵を出す
                 enemy = Instantiate(eventEnemy_.Item1, pos, Quaternion.identity) as GameObject;
                 // イベント用の敵の番号部分をenemyNumとして適用する(エクセル番号も合わせる必要がある)
@@ -407,7 +414,7 @@ public class EnemyInstanceMng : MonoBehaviour
         }
 
         // 敵番号を渡す
-        buttleMng_.SetEnemyNum(saveNum);
+        buttleMng_.SetEnemyNum(saveNum, bossFlag);
 
         // 1度読み込んだらeventEnemy_をnullにする
         if (eventEnemy_.Item1)

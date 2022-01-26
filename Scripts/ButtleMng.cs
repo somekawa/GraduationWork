@@ -35,7 +35,8 @@ public class ButtleMng : MonoBehaviour
 
     private ButtleResult buttleResult_;// 戦闘リザルト用
     private int[] saveEnemyNum_ = new int[5];
-
+    private bool bossFlag_ = false;
+    private bool flag_ = false;
     void Start()
     {
         characterMng_ = GameObject.Find("CharacterMng").GetComponent<CharacterMng>();
@@ -140,21 +141,26 @@ public class ButtleMng : MonoBehaviour
 
                     CallDeleteEnemy();
 
-                    // リザルト処理： エネミーの数、エネミーの番号（配列）
-                    buttleResult_.DropCheck(EneSelObj_.childCount, saveEnemyNum_);
+                    if (flag_ == true)
+                    {
+                        // リザルト処理： エネミーの数、エネミーの番号（配列）
+                        buttleResult_.DropCheck(EneSelObj_.childCount, saveEnemyNum_, bossFlag_);
+                        flag_ = false;
+                    }
 
-                    //for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
-                    //{
-                    //    // バトルで死亡したまま終了していたときは、HP1の状態で立ち上がらせる
-                    //    if (SceneMng.charasList_[i].GetDeathFlg())
-                    //    {
-                    //        SceneMng.charasList_[i].SetDeathFlg(false);
-                    //        SceneMng.charasList_[i].SetHP(1);
-                    //    }
-                    //    SceneMng.charasList_[i].ButtleInit();
-                    //}
+                    for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+                    {
+                        // バトルで死亡したまま終了していたときは、HP1の状態で立ち上がらせる
+                        if (SceneMng.charasList_[i].GetDeathFlg())
+                        {
+                            SceneMng.charasList_[i].SetDeathFlg(false);
+                            SceneMng.charasList_[i].SetHP(1);
+                        }
+                        SceneMng.charasList_[i].ButtleInit();
+                    }
 
                     characterMng_.SetCharaFieldPos();
+
                 }
             }
         }
@@ -249,22 +255,12 @@ public class ButtleMng : MonoBehaviour
         if (EneSelObj_ == null)
         {
             EneSelObj_ = GameObject.Find("ButtleUICanvas/EnemySelectObj").transform;
+            flag_ = true;
         }
         // EnemySelectObjからその戦闘でつかった敵のHPバーとかを削除する
         for (int i = 0; i < EneSelObj_.childCount; ++i)
         {
             Destroy(EneSelObj_.GetChild(i).gameObject);
-        }
-
-        for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
-        {
-            // バトルで死亡したまま終了していたときは、HP1の状態で立ち上がらせる
-            if (SceneMng.charasList_[i].GetDeathFlg())
-            {
-                SceneMng.charasList_[i].SetDeathFlg(false);
-                SceneMng.charasList_[i].SetHP(1);
-            }
-            SceneMng.charasList_[i].ButtleInit();
         }
     }
 
@@ -280,9 +276,10 @@ public class ButtleMng : MonoBehaviour
         return keepPos_;
     }
 
-    public void SetEnemyNum(int[] num)
+    public void SetEnemyNum(int[] num,bool flag)
     {
         saveEnemyNum_ = num;
+        bossFlag_ = flag;
     }
 
     public void SetFieldPos(Vector3 pos)

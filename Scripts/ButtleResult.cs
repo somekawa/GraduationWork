@@ -103,7 +103,7 @@ public class ButtleResult : MonoBehaviour
         bagMateria_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>();
     }
 
-    public void DropCheck(int enemyCnt, int[] num)
+    public void DropCheck(int enemyCnt, int[] num,bool bossFlag)
     {
         Debug.Log("リザルトを表示します");
         enemyCnt_ = enemyCnt;
@@ -125,7 +125,7 @@ public class ButtleResult : MonoBehaviour
             // Drop物の番号を確認する
             materiaNum[i] = int.Parse(Regex.Replace(enemyList_[i].DropMateria(), @"[^0-9]", ""));
             saveSumExp_ += enemyList_[i].GetExp();
-            saveSumMaxExp_[i] = 10;
+            //saveSumMaxExp_[i] = 10;
         }
 
         resultCanvas.gameObject.SetActive(true);
@@ -139,18 +139,36 @@ public class ButtleResult : MonoBehaviour
 
         for (int i = 0; i < enemyCnt; i++)
         {
-            // 各アイテムのドロップ数を1～5のランダムで取得
-            dropCnt_[i] = Random.Range(1, 5);
+            if (bossFlag == true)
+            {
+                // ボスだった場合Dropがワードになるため取得ワードと番号を得る
+                var nameCheck = enemyList_[i].DropMateria().Split('_');
+                string wordName= nameCheck[0];// どのワードか
+                materiaNum[i]= int.Parse(nameCheck[1]);// 画像番号（エレメント）
 
-            // ドロップ物を表示するためにプレハブを生成
-            dropObj_[i] = Instantiate(dropPrefab,
-                new Vector2(0, 0), Quaternion.identity, dropParent);
-            dropCntText_[i] = dropObj_[i].transform.Find("DropCnt").GetComponent<Text>();
-            dropImage_[i] = dropObj_[i].transform.Find("DropImage").GetComponent<Image>();
+                dropObj_[i] = Instantiate(dropPrefab,
+                    new Vector2(0, 0), Quaternion.identity, dropParent);
+                dropCntText_[i] = dropObj_[i].transform.Find("DropCnt").GetComponent<Text>();
+                dropImage_[i] = dropObj_[i].transform.Find("DropImage").GetComponent<Image>();
 
-            dropCntText_[i].text = "×" + dropCnt_[i];
-            dropImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][materiaNum[i]];
-            bagMateria_.MateriaGetCheck(materiaNum[i], dropCnt_[i]);
+                dropCntText_[i].text = wordName;
+                dropImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][materiaNum[i]];
+            }
+            else
+            {
+                // 各アイテムのドロップ数を1～5のランダムで取得
+                dropCnt_[i] = Random.Range(1, 5);
+
+                // ドロップ物を表示するためにプレハブを生成
+                dropObj_[i] = Instantiate(dropPrefab,
+                    new Vector2(0, 0), Quaternion.identity, dropParent);
+                dropCntText_[i] = dropObj_[i].transform.Find("DropCnt").GetComponent<Text>();
+                dropImage_[i] = dropObj_[i].transform.Find("DropImage").GetComponent<Image>();
+
+                dropCntText_[i].text = "×" + dropCnt_[i];
+                dropImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][materiaNum[i]];
+                bagMateria_.MateriaGetCheck(materiaNum[i], dropCnt_[i]);
+            }
         }
 
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
