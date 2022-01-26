@@ -1,0 +1,23 @@
+TitleMngオブジェクトにTitleSceneMng.csのみアタッチ
+Start関数でタウンシーンに持ち越されるゲーム開始時限定のLoadプレハブを生成
+
+タウンシーンに遷移後TownMng.csでオブジェクトがあったら
+データをロード。
+プレハブにアタッチしているScriptを探してフラグを変更したらオブジェクトを破壊しています。
+
+LoadPrefabにはResourcesフォルダにある【LoadPrefab】をアタッチしてください
+
+シーン遷移はボタン処理
+Canvas
+　ーNewGameBtn　OnClick()にTitleSceneMng.csのOnClickNewGame
+		Image:someButton
+　ーLoadGameBtn　OnClick()にTitleSceneMng.csのOnClickLoadGame
+		Image:someButton
+
+
+カメラの切り替えがあるためAudioListenerのenabledで切り替えて1つしかアクティブにしないようにする
+
+
+ーーーーーーーーーー
+OnceLoad.cs
+LoadPrefabにアタッチ。タウンシーンに遷移したらオブジェクト事ちぬ

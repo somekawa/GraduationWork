@@ -16,7 +16,9 @@ public class TownMng : MonoBehaviour
                                              new Vector3(23.0f, 0.0f, 96.0f),
                                              new Vector3(17.0f, 0.0f, 52.0f) };
     private Dictionary<string, Vector3> uniPosMap_ = new Dictionary<string, Vector3>();    // キー:英語建物名,値:ユニちゃん表示座標
-
+   
+    private GameObject loadPrefab_;// タイトルシーンからの遷移かどうか
+    private OnceLoad onceLoad_;// LoadPrefabにアタッチされてるScript
     void Start()
     {
         // 現在のシーンをTOWNとする
@@ -48,13 +50,17 @@ public class TownMng : MonoBehaviour
         GameObject.Find("WarpInTown").GetComponent<WarpTown>().Init();
         // WarpField.csの初期化関数を先に呼ぶ
         GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
-        //////////// バッグ関連
-        //////////GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
-        //////////GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
-        //////////GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
-        //////////GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
-        ////////////GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad();
 
+        // オブジェクトがある＝タイトルシーンから遷移してきた
+        loadPrefab_ = GameObject.Find("LoadPrefab");
+        if (loadPrefab_ != null)
+        {
+            onceLoad_ = GameObject.Find("LoadPrefab").GetComponent<OnceLoad>();
+            onceLoad_.SetLoadFlag(true);
+            // ゲーム開始時だけ呼び出す
+            GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad();
+        }
+        
         var cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
 
         if (str != "Mob")
