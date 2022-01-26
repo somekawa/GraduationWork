@@ -16,6 +16,12 @@ public class FieldMng : MonoBehaviour
     [SerializeField]
     private GameObject fieldUICanvasPopUp_; // FieldUICanvasの中にあるPopUpという空のオブジェクトを外部アタッチする
 
+    public AudioClip BGM_search;
+    public AudioClip BGM_normalButtle;
+    public AudioClip BGM_bossButtle;
+
+    private AudioSource audios;
+
     // 画面状態一覧
     public enum MODE
     {
@@ -54,10 +60,9 @@ public class FieldMng : MonoBehaviour
     {
         // 現在のシーンをFIELDとする
         SceneMng.SetNowScene((SceneMng.SCENE)UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
-
-        //GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad();
-
         GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>().Init();
+
+        audios = GetComponent<AudioSource>();
 
         // イベントが発生するか確認する
         if (EventMng.GetChapterNum() == 8 && SceneMng.nowScene == SceneMng.SCENE.FIELD0)
@@ -93,6 +98,8 @@ public class FieldMng : MonoBehaviour
         else
         {
             nowMode = MODE.SEARCH;
+            audios.clip = BGM_search;
+            audios.Play();
         }
 
         // DesertFieldかつ「オアシスを甦らせて」のクエストを達成後なら
@@ -314,12 +321,17 @@ public class FieldMng : MonoBehaviour
             case MODE.SEARCH:
                 cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
                 SceneMng.MenuSetActive(true);
-
+                audios.Stop();
+                audios.clip = BGM_search;//流すクリップを切り替える
+                audios.Play();
                 break;
 
             case MODE.BUTTLE:
                 cameraMng_.SetChangeCamera(true);    // サブカメラアクティブ
                 SceneMng.MenuSetActive(false);
+                audios.Stop();
+                audios.clip = BGM_normalButtle;//流すクリップを切り替える
+                audios.Play();
                 break;
 
             case MODE.MENU:
@@ -328,6 +340,9 @@ public class FieldMng : MonoBehaviour
             case MODE.FORCEDBUTTLE:
                 cameraMng_.SetChangeCamera(true);    // サブカメラアクティブ
                 SceneMng.MenuSetActive(false);
+                audios.Stop();
+                audios.clip = BGM_bossButtle;//流すクリップを切り替える
+                audios.Play();
                 break;
 
             default:

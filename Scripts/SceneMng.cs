@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SceneMng : MonoBehaviour
 {
@@ -268,6 +269,7 @@ public class SceneMng : MonoBehaviour
         if(timeGrar_ == finStatusUpTime_.Item1)
         {
             finStatusUpTime_.Item2 = false;
+            GameObject.Find("DontDestroyCanvas/TimeGear/CookPowerIcon").GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
             Debug.Log("—¿—Œø‰Ê‚ªØ‚ê‚Ü‚µ‚½");
         }
     }

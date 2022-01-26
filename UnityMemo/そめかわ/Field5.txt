@@ -270,6 +270,10 @@ Field3->ドウー岩石地帯(ドウー=硬い)
 Field4->不浄の洞窟
 Field5->竜の谷
 
+DontDestroyCanvasのLocationSelMngにあるTextの
+文字サイズを小さめに変更(36)して、
+WarpFieldのSceneNameを各ステージ名にかえる
+
 -------------------------------------------------
 
 <フィールドから戻ってきたときに、メニューが
@@ -371,19 +375,224 @@ magicUseMPText_.text = " MP -" + useMagic_.MPdecrease(magicNum).ToString();
 
 -------------------------------------------------
 
+<レベルが上がり続けるバグについて>-----------------
+
+(原因)
+ButtleMng.cs
+何回もリザルト処理に入るから
+
+(解決方法)
+一度処理を行ったらtrueになるフラグを用意する。
+→戦闘開始時に設定される項目で最初にfalseにする。
+
+それでも値がおかしい
+
+-------------------------------------------------
+
+<会話中には鞄を消す>------------------------------
+TextMng.csのStart関数に
+
+SceneMng.SetNowScene(SceneMng.SCENE.CONVERSATION);
+を記述する
+→呼び出された関数の中でメニューをfalseにする
+　処理が書かれている
+
+-------------------------------------------------
+
+<BGMの追加>--------------------------------------
+
+利用サイトについては「制作メモ」のほうに記述
+
+[Title]
+Audioという空のゲームオブジェクトを作成
+それにAudioSorceをアタッチする。
+AudioClipにTitleBGMをいれて
+
+PlayOnAwake
+Loop
+にチェックをいれる
+
+Volumeを[0.5]にして
+Pitchを[0.8]にする
+
+[Town][UniHouse]
+Audioという空のゲームオブジェクトを作成
+それにAudioSorceをアタッチする。
+AudioClipにTitleBGMをいれて
+
+PlayOnAwake
+Loop
+にチェックをいれる
+
+Volumeを[0.2]にして
+Pitchを[0.8]にする
+
+[conversationdata]
+TownBGMをつかう
+
+PlayOnAwake
+Loop
+にチェックをいれる
+
+Volumeを[0.1]にして
+Pitchを[0.5]にする
+
+[EndScene]
+TitleBGMをつかう
+
+PlayOnAwake
+Loop
+にチェックをいれる
+
+Volumeを[0.5]にして
+Pitchを[0.5]にする
+
+[各フィールド]
+フィールドでは、
+・探索中
+・雑魚戦闘
+・ぼす戦闘
+で3曲必要になる。
+
+切替の目印としてFieldMngのnowModeをみる
+
+わかりやすそうだから[FieldMng]オブジェクトに
+AudioSorceをアタッチする。
+
+PlayOnAwakeのチェックは外す
+Loopにチェックをいれる
+
+Volumeを[0.2]にして
+Pitchを[1]にする
+※Field5だけPitchを[0.8]にする
+
+一番重要なのは、ButtleCameraにもAudioListenerを
+アタッチすること！！
+[FieldMng.cs]
+    public AudioClip BGM_search;
+    public AudioClip BGM_normalButtle;
+    public AudioClip BGM_bossButtle;
+と用意する。
+
+ChangeMode関数に、
+audios.Stop();
+audios.clip = BGM_search;
+audios.Play();
+とする。
+
+[CameraMng.cs]
+AudioListenerがmainにもsubにもついているので
+mainCamera.GetComponent<AudioListener>().
+enabled = !flag;
+
+subCamera.GetComponent<AudioListener>().
+enabled = flag;
+としてAudioListenerを切り替えるようにする
+
+-------------------------------------------------
+
+<各シーンのButtleWallの色調整>--------------------
+
+うっすら見えたほうがいいかも。
+半透明な赤い壁にする。
+
+Assets/Field/Mapの中に新規マテリアルを作成
+[ButtleWallMat]とする。
+
+RenderingModeを[Fade]にし、
+MetaricとSmoothnessを[1]にする。
+Albedoを赤でalpha値を0.5にしておく
+これを各ButtleWallのオブジェクトにアタッチする
+
+-------------------------------------------------
+
+<Tagに[Drop]を追加する>--------------------------
+
+いままではユニの前のボックスがなににぶつかっても
+テキストを表示していたけどそれをなおす
+
+DropというタグをMaterialPointsの子と
+宝箱につける
+
+OtherCollider.csはさきちゃんが更新してくれる
+
+-------------------------------------------------
+
+<ボスを倒したときに入手できるワードについての
+ 処理をする>-------------------------------------
+
+[KnockDownEnemy.cs]
+OnDisable関数の中に
+GetWordの処理をいれる
+
+WordGetCheck
+(InitPopList.WORD.ELEMENT_ATTACK, 1, 6);// 水
+            
+WordGetCheck(InitPopList.WORD.ELEMENT_ATTACK, 2, 7);// 土
+            
+WordGetCheck(InitPopList.WORD.ELEMENT_ATTACK, 3, 8);// 風
+
+あとはデバッグする
+→ボスを倒したあとのDropCheck関数でエラーがでてる
+　さきちゃんに報告したから修正待ち
+
+-------------------------------------------------
+
+<進行度に合わせていけるフィールドをふやす>---------
+
+[WarpField.cs]
+activeField_変数を配列で作成し、
+タイトルから順に進行度解放番号をいれていく。
+
+ボタンの表示・非表示処理の中に
+chapterNumとactiveField_を比べるif文を追加して
+終了
+
+
+private int[] activeField =
+new int[(int)SceneMng.SCENE.MAX] 
+{ -1, -1,-1,-1,8,13,16,19,22,-1,-1 };
+
+-------------------------------------------------
+
+<レストランメニューを大量生産する>----------------
+
+そもそも注文時にエラーがでた
+→hp,mp,expの上昇処理がないから
+
+配列の項目に3つを追加する
+
+素材が不要なメニューをとりあえず10個ぐらい作成する
+→そのぶん値段で差をだす
+
+<料理効果中というのがわかるようにする>
+DontDestroyCanvasにTimeGearの近くに
+お料理マークをだすようにする
+(TimeGearの子とする)
+
+イラストACでもってきたアイコンをアタッチして
+透過/非透過で制御する。
+
+[SceneMng.cs]
+SetTimeGearで透過
+
+[RestauranMng.cs]
+料理を購入時に非透過
+
+-------------------------------------------------
+
 <次やる事>
+・ボスを倒したときに入手できるワードについての
+　処理をする
+→バグをさきちゃんへ報告中
 
-・タイトル画面追加
+・ストーリー進行でもらえるアイテム処理は終わった
+　のかさきちゃんにきく
 
-・BGMの追加
+・魔法のつけはずしがバグぽい
 
 ・ゲームの遊び方説明
 →パワポで作成する
-
-・ワードを取得したときにメニューに反映されないバグ
-　をさきちゃんに聞いてる途中
-
-・レストランメニューを大量生産する
 
 ・セーブ内容に
 　「時間」

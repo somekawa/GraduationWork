@@ -23,8 +23,8 @@ public class RestaurantMng : MonoBehaviour
     private TMPro.TextMeshProUGUI moneyText_;  // 必要なお金のテキスト
     private TMPro.TextMeshProUGUI haveMoneyText_;  // 所持金のテキスト
 
-    private (string, int)[] statusUp_ = new (string, int)[5];    // アップステータスの名前とアップ値をペアにした変数
-    private readonly string[] statusUpStr_ = { "Attack", "MagicAttack", "Defence", "Speed", "Luck" };   // ステータス順に並べた文字列
+    private (string, int)[] statusUp_ = new (string, int)[8];    // アップステータスの名前とアップ値をペアにした変数
+    private readonly string[] statusUpStr_ = { "Attack", "MagicAttack", "Defence", "Speed", "Luck" ,"HP", "MP","EXP"};   // ステータス順に並べた文字列
 
     private int num_ = -1;
 
@@ -138,12 +138,13 @@ public class RestaurantMng : MonoBehaviour
             // お金の減少処理
             SceneMng.SetHaveMoney(SceneMng.GetHaveMoney() - tmppop.needMoney);
 
-            // キャラのステータスアップ処理
-            int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2, statusUp_[4].Item2 };
-            for(int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+            // キャラのステータスアップ処理(7番目はexpだから料理では0にする)
+            int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2, statusUp_[4].Item2, statusUp_[5].Item2, statusUp_[6].Item2, 0 };
+            for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
             {
                 SceneMng.charasList_[i].SetStatusUpByCook(tmp,true);
             }
+            GameObject.Find("DontDestroyCanvas/TimeGear/CookPowerIcon").GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
         }
         else
         {
@@ -157,8 +158,8 @@ public class RestaurantMng : MonoBehaviour
                 // お金の減少処理
                 SceneMng.SetHaveMoney(SceneMng.GetHaveMoney() - tmppop.needMoney);
 
-                // キャラのステータスアップ処理
-                int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2, statusUp_[4].Item2 };
+                // キャラのステータスアップ処理(7番目はexpだから料理では0にする)
+                int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2, statusUp_[4].Item2, statusUp_[5].Item2, statusUp_[6].Item2,0 };
                 for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
                 {
                     SceneMng.charasList_[i].SetStatusUpByCook(tmp,true);
@@ -166,6 +167,7 @@ public class RestaurantMng : MonoBehaviour
 
                 // 素材を減らす
                 Bag_Materia.materiaState[tmppop.needFood].haveCnt -= tmppop.needNum;
+                GameObject.Find("DontDestroyCanvas/TimeGear/CookPowerIcon").GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
             }
             else
             {

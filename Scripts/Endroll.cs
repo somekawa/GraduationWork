@@ -8,7 +8,7 @@ public class Endroll : MonoBehaviour
     public RectTransform scrollTextTrans;
 
     private Vector3 scrollTextPos_;
-    private const float endPosY = 1200.0f;      // スクロール終了座標
+    private const float endPosY = 850.0f;       // スクロール終了座標
     private float scrollMove_ = 0.0f;           // どれぐらいスクロールが動いたか
     private bool scrollFinFlg_ = false;         // スクロール処理が終了したかどうか
     private GameObject buttons_;
@@ -42,7 +42,10 @@ public class Endroll : MonoBehaviour
 
         saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>();
 
-        GameObject.Find("DontDestroyCanvas/TimeGear").gameObject.SetActive(false);
+        if(GameObject.Find("DontDestroyCanvas/TimeGear"))
+        {
+            GameObject.Find("DontDestroyCanvas/TimeGear").gameObject.SetActive(false);
+        }
     }
 
     void Update()
@@ -74,7 +77,7 @@ public class Endroll : MonoBehaviour
             // マイナス値とプラス値で補正をいれながらscrollMove_に値を入れる
             if (scrollTextTrans.anchoredPosition.y < 0.0f)
             {
-                scrollMove_ = endPosY - Mathf.Abs(scrollTextTrans.anchoredPosition.y) - 300;
+                scrollMove_ = endPosY - Mathf.Abs(scrollTextTrans.anchoredPosition.y) + 50;
             }
             else
             {

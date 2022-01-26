@@ -11,8 +11,11 @@ public class WarpField : MonoBehaviour
     private RectTransform btnParent_;       // ボタンの親にあたるオブジェクト
 
     private string[] sceneName = new string[(int)SceneMng.SCENE.MAX] {
-   "Title", "","town","house","field0","field1","field2","field3","field4","","cancel" };
-    private int storyProgress_ = (int)SceneMng.SCENE.FIELD2;// どの章まで進んでいるか
+   "タイトルへ", "","街へ","ユニの家へ","豊作の森","ヴェステ砂漠","ドウー岩石地帯","不浄の洞窟","竜の谷","","cancel" };
+
+    // フィールドの解放条件が満たされるチャプター番号
+    private int[] activeField = new int[(int)SceneMng.SCENE.MAX] {
+   -1, -1,-1,-1,8,13,16,19,22,-1,-1 };
 
     private bool fieldEndHit = false;   // ワープオブジェクトに接触したかどうか
     private bool nowTownFlag_ = false;  // 町ワープからのフィールドワープか
@@ -58,21 +61,35 @@ public class WarpField : MonoBehaviour
         GameObject game = DontDestroyMng.Instance;
         locationSelMng_ = dontDestroyCanvas_.transform.Find("LocationSelMng").GetComponent<RectTransform>();
        
-       btnParent_ = locationSelMng_.transform.Find("Viewport/Content").GetComponent<RectTransform>();
+        btnParent_ = locationSelMng_.transform.Find("Viewport/Content").GetComponent<RectTransform>();
+
+        var chapterNum = EventMng.GetChapterNum();
+        Debug.Log("現在のチャプター" + chapterNum);
+
         for (int i = (int)SceneMng.SCENE.TITLE; i < (int)SceneMng.SCENE.MAX ; i++)
         {
             btnMng_[i] = btnParent_.transform.GetChild(i).GetComponent<Image>();
             sceneText_[i] = btnMng_[i].transform.GetChild(0).GetComponent<Text>();
             sceneText_[i].text = sceneName[i];
             btnMng_[i].name = sceneName[i];
-            // 現在ストーリ以降のフィールドと現在いるシーンは非表示
-            if (((int)SceneMng.nowScene == i))// || (storyProgress_ < i))
+            // 現在いるシーンは非表示
+            if ((int)SceneMng.nowScene == i)
             {
                 btnMng_[i].gameObject.SetActive(false);
             }
             else
             {
-                btnMng_[i].gameObject.SetActive(true);
+                // 別のシーンだけど、現在進行度より先のフィールドは非表示にする
+                if(chapterNum >= activeField[i])
+                {
+                    Debug.Log("フィールド" + i + "は、"+ chapterNum + ">=" + activeField[i] + "で、true");
+                    btnMng_[i].gameObject.SetActive(true);
+                }
+                else
+                {
+                    Debug.Log("フィールド" + i + "は、" + chapterNum + "<" + activeField[i] + "で、false");
+                    btnMng_[i].gameObject.SetActive(false);
+                }
             }
 
             if(sceneName[i]=="")
@@ -94,6 +111,8 @@ public class WarpField : MonoBehaviour
         }
         // フィールド選択キャンバスを非表示
         locationSelMng_.gameObject.SetActive(false);
+
+        SetWarpNowFlag(false);
     }
 
     private void UniPushBack()

@@ -305,14 +305,13 @@ public class EnemyInstanceMng : MonoBehaviour
         enemyList_.Clear(); 
         enemyMap_.Clear();
 
-        int num = 1;
-
-        // 生成した敵の番号保存用
+        // ButtleResult用の変数
         int cnt = 0;
         int[] saveNum = new int[mapNum_];
 
+        int num = 1;
         // 指定されたマップのリストを取り出して、foreach文で回す
-        foreach (Vector3 pos in enemyPosSetMap_[mapNum_])
+        foreach(Vector3 pos in enemyPosSetMap_[mapNum_])
         {
             // 敵プレハブをインスタンス
             GameObject enemy = null;
@@ -358,7 +357,7 @@ public class EnemyInstanceMng : MonoBehaviour
                 }
             }
 
-            // 生成したエネミーの番号を保存
+            // 敵番号を一時保存
             saveNum[cnt] = enemyNum;
             cnt++;
 
@@ -407,9 +406,9 @@ public class EnemyInstanceMng : MonoBehaviour
             num++;
         }
 
-        // 番号を渡す
+        // 敵番号を渡す
         buttleMng_.SetEnemyNum(saveNum);
-        
+
         // 1度読み込んだらeventEnemy_をnullにする
         if (eventEnemy_.Item1)
         {
@@ -820,7 +819,7 @@ public class EnemyInstanceMng : MonoBehaviour
 
     public bool AllAnimationFin()
     {
-        Debug.Log("AllAnimationFin処理");
+        //Debug.Log("AllAnimationFin処理");
         for (int i = 0; i < enemyMap_.Count; i++)
         {
             // まだ1体でも死亡アニメーション中ならfalseで返す

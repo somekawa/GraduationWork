@@ -22,7 +22,10 @@ public class CameraMng : MonoBehaviour
     // 外部からカメラ状態の切替を行えるようにする
     public void SetChangeCamera(bool flag)
     {
+        mainCamera.GetComponent<AudioListener>().enabled = !flag;
         mainCamera.SetActive(!flag);
+
+        subCamera.GetComponent<AudioListener>().enabled = flag;
         subCamera.SetActive(flag);
 
         // ユニハウスのSceneでは呼ばれないようにする
