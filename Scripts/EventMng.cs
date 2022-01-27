@@ -1,15 +1,22 @@
+using UnityEngine;
 
 public static class EventMng
 {
     // 自由に店に出入りしたいときは99とかいれとくといいかも。本来は0
-    private static int chapterNum = 0;   // 現在のチャプター進行度(0からスタート)
+    private static int chapterNum = 3;   // 現在のチャプター進行度(0からスタート)
     private static int oldNum = 0;
 
     // チャプター進行度の更新
     // 読み返し機能を作成するときには引数部分に該当するチャプター番号を入れるようにする
     public static void SetChapterNum(int num ,SceneMng.SCENE scene,bool loadFlg = false)
     {
-        if(!loadFlg)
+        if(num == 9)
+        {
+            // チャプター9へ移動するさいに回復ポーション(小)を3つ受け取る
+            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>().ItemGetCheck(MovePoint.JUDGE.NORMAL,0,3);
+        }
+
+        if (!loadFlg)
         {
             // 現在のシーンをCONVERSATIONとする
             SceneMng.SetNowScene(SceneMng.SCENE.CONVERSATION);

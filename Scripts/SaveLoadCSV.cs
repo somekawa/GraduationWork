@@ -15,11 +15,14 @@ public class SaveLoadCSV : MonoBehaviour
     {
         CHARACTER,
         OTHER,
+        BOOK,
         MAX
     }
 
     private const string saveDataFilePath_ = @"Assets/Resources/data.csv";
     private const string otherSaveDataFilePath_ = @"Assets/Resources/otherData.csv";
+    private const string bookFilePath_ = @"Assets/Resources/Save/bookData.csv";
+
     private StreamWriter sw;
     List<string[]> csvDatas = new List<string[]>(); // CSVの中身を入れるリスト;
 
@@ -69,6 +72,29 @@ public class SaveLoadCSV : MonoBehaviour
                 sw = new StreamWriter(otherSaveDataFilePath_, true, Encoding.UTF8);
                 Debug.Log("古いデータを削除してファイル書き込み");
             }
+        }
+        else if(saveData == SAVEDATA.BOOK)
+        {
+            TextAsset saveFile = Resources.Load("Save/bookData") as TextAsset;
+
+            if (saveFile == null)
+            {
+                // Resourcesフォルダ内へ新規で作成する
+                sw = new StreamWriter(bookFilePath_, true, Encoding.UTF8);
+                Debug.Log("新規ファイルへ書き込み");
+            }
+            else
+            {
+                // 古いデータを削除
+                File.Delete(bookFilePath_);
+                sw = new StreamWriter(bookFilePath_, true, Encoding.UTF8);
+                Debug.Log("古いデータを削除してファイル書き込み");
+            }
+
+            // ステータスの項目見出し
+            string[] s1 = { "Name", "ReadCheck" };
+            string s2 = string.Join(",", s1);
+            sw.WriteLine(s2);
         }
         else
         {
@@ -169,6 +195,46 @@ public class SaveLoadCSV : MonoBehaviour
         {
             sw.WriteLine(string.Join("\n", pair.Item1.ToString() + "," + pair.Item2.ToString()));
         }
+    }
+
+    // NewGameの際にbookData.csvの初期化をする
+    public void NewGameInit()
+    {
+        var DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+
+        List<string> bookname_ = new List<string>();
+        int cnt = 0;
+
+        for(int i = 0; i < 5; i++)  // .xlsのページ数分まわす
+        {
+            var tmp = DataPopPrefab_.GetComponent<PopList>().GetData<BookList>(PopList.ListData.BOOK_STORE, i);
+            for (int b = 0; b < tmp.param.Count; b++)   // 列分まわす
+            {
+                bookname_.Add(tmp.param[b].BookName);
+                cnt++;
+            }
+        }
+
+        // まだ本データが存在しないとき、名前とフラグだけいれる
+        if (BookStoreMng.bookState_ == null)
+        {
+            BookStoreMng.bookState_ = new BookStoreMng.BookData[bookname_.Count];
+
+            for (int i = 0; i < bookname_.Count; i++)
+            {
+                BookStoreMng.bookState_[i].name = bookname_[i];
+                BookStoreMng.bookState_[i].readFlag = 0;
+            }
+        }
+
+        //SaveStart(SAVEDATA.BOOK);
+        //for (int i = 0; i < bookname_.Count; i++)
+        //{
+        //    string[] data = { bookname_[i], 0.ToString() };
+        //    string write = string.Join(",", data);
+        //    sw.WriteLine(write);
+        //}
+        //SaveEnd();
     }
 
     // ファイルを閉じるときに呼ぶ

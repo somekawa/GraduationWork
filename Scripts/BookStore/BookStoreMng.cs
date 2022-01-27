@@ -150,24 +150,44 @@ public class BookStoreMng : MonoBehaviour
         for (int i = 0; i < maxCnt_; i++)
         {
             Debug.Log(i + "番目");
-            bookState_[i] = new BookData
+
+            if(bookState_ == null)
             {
-                name = csvDatas_[i + 1][0],
-            obj = PopListInTown.bookObj[i],
-                wordDataNum = PopListInTown.bookWordNum[i],
-                statusMng = PopListInTown.statusUp[i],
-                price = PopListInTown.bookPrice[i],
-                info = PopListInTown.bookInfo[i],
-                imageNum = PopListInTown.bookImageNum[i],
-            };
-            if (EventMng.GetChapterNum()<1)
-            {
-                bookState_[i].readFlag = 0;
+                bookState_[i] = new BookData
+                {
+                    name = csvDatas_[i + 1][0],
+                    obj = PopListInTown.bookObj[i],
+                    wordDataNum = PopListInTown.bookWordNum[i],
+                    statusMng = PopListInTown.statusUp[i],
+                    price = PopListInTown.bookPrice[i],
+                    info = PopListInTown.bookInfo[i],
+                    imageNum = PopListInTown.bookImageNum[i],
+                };
+                if (EventMng.GetChapterNum() < 1)
+                {
+                    bookState_[i].readFlag = 0;
+                }
+                else
+                {
+                    bookState_[i].readFlag = int.Parse(csvDatas_[i + 1][1]);
+                }
             }
             else
             {
-                bookState_[i].readFlag = int.Parse(csvDatas_[i + 1][1]);
+                // NewGameから始めて本屋にきたとき
+                bookState_[i] = new BookData
+                {
+                    name = bookState_[i].name,
+                    readFlag = 0,
+                    obj = PopListInTown.bookObj[i],
+                    wordDataNum = PopListInTown.bookWordNum[i],
+                    statusMng = PopListInTown.statusUp[i],
+                    price = PopListInTown.bookPrice[i],
+                    info = PopListInTown.bookInfo[i],
+                    imageNum = PopListInTown.bookImageNum[i],
+                };
             }
+
 
             var underbarSplit = bookState_[i].statusMng.Split('_');
             //アンダーバーで区切ったものを、別々のリストへ入れる
@@ -278,10 +298,9 @@ public class BookStoreMng : MonoBehaviour
         }
         else
         {
-            int wordKinds = int.Parse(bookState_[num].kinds);
             getStatusOrWordText_.text = "サブワード『" +
-                Bag_Word.wordState[(InitPopList.WORD)wordKinds][bookState_[num].number].name + "』";
-            Debug.Log(Bag_Word.wordState[(InitPopList.WORD)wordKinds][bookState_[num].number].name+"を選択してます");
+                Bag_Word.data[bookState_[num].wordDataNum].name + "』";
+            Debug.Log(Bag_Word.data[bookState_[num].wordDataNum].name + "を選択してます");
         }
 
         buyBtn_.interactable = true;
@@ -396,7 +415,6 @@ public class BookStoreMng : MonoBehaviour
         totalPrice_ = 0;
         selectCnt_ = 0;
         bookInfoData_.gameObject.SetActive(false);
-        // DataSave();
     }
 
     public void DataLoad()

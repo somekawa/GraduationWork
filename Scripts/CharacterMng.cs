@@ -67,7 +67,7 @@ public class CharacterMng : MonoBehaviour
     private IEnumerator rest_;
     private bool myTurnOnceFlg_;                       // 自分のターンになった最初に1回だけ呼ばれるようにするフラグ
 
-    private readonly int deathBstNoEffectItemNum_ = 17; // 即死肩代わりアイテムの番号
+    private readonly (int,int) deathBstNoEffectItemNum_ = (17,36); // 即死肩代わりアイテムの番号
 
     public struct EachCharaData
     {
@@ -1200,11 +1200,21 @@ public class CharacterMng : MonoBehaviour
         if (bst == (CONDITION.DEATH, true))   // 即死処理
         {
             // 身代わりアイテムを持っているか調べる
-            if(Bag_Item.itemState[deathBstNoEffectItemNum_].haveCnt > 0)
+            if(Bag_Item.itemState[deathBstNoEffectItemNum_.Item1].haveCnt > 0)
             {
-                Bag_Item.itemState[deathBstNoEffectItemNum_].haveCnt--;
+                Bag_Item.itemState[deathBstNoEffectItemNum_.Item1].haveCnt--;
                 Debug.Log("アイテムが即死を肩代わりしてくれた");
                 return;
+            }
+            else
+            {
+                // 大成功の身代わりアイテムを持っているかしらべる
+                if (Bag_Item.itemState[deathBstNoEffectItemNum_.Item2].haveCnt > 0)
+                {
+                    Bag_Item.itemState[deathBstNoEffectItemNum_.Item2].haveCnt--;
+                    Debug.Log("大成功アイテムが即死を肩代わりしてくれた");
+                    return;
+                }
             }
 
             StartCoroutine(eachCharaData_[num].charaHPMPMap.Item1.MoveSlideBar(charasList_[num].HP() - 999, charasList_[num].HP()));

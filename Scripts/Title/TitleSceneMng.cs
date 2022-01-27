@@ -33,6 +33,14 @@ public class TitleSceneMng : MonoBehaviour
 
     void Start()
     {
+        // セーブデータがあるか調べて、ないときはボタンのinteractableをfalseにする
+        TextAsset saveFile = Resources.Load("data") as TextAsset;
+
+        if (saveFile == null)
+        {
+            GameObject.Find("Canvas/LoadGameBtn").GetComponent<Button>().interactable = false;
+        }
+
         // 親は必要ないためnull
         loadPrefab_ = Instantiate(LoadPrefab,
                                new Vector2(0, 0), Quaternion.identity, null);
@@ -142,7 +150,7 @@ public class TitleSceneMng : MonoBehaviour
 
     public void OnClickNewGame()
     {
-       // sceneName_ = "conversationdata";
+        // sceneName_ = "conversationdata";
         sceneName_ = "InHouseAndUniHouse";//デバッグ用
         StartCoroutine(FadeOutAndIn());
     }

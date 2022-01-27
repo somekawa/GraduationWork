@@ -23,20 +23,21 @@ public class ButtleMng : MonoBehaviour
     private int speedNum_ = 0;              // 命中判定用の値
     private int luckNum_ = 0;               // 幸運値の値
     private int element_ = 0;               // エレメント情報
-    private (int, int) badStatusNum_;        // 状態異常の数字
+    private (int, int) badStatusNum_;       // 状態異常の数字
     private int refNum_ = -1;               // 攻撃反射対象の番号を保存する変数
     private bool autoHitFlg_ = false;       // 命中効果のフラグ
     private Vector3 keepPos_;
-    private bool isAttackMagicFlg_ = false;        // 敵の攻撃が物理か魔法かを判定する(近距離は物理:false,遠距離は魔法:true)
+    private bool isAttackMagicFlg_ = false; // 敵の攻撃が物理か魔法かを判定する(近距離は物理:false,遠距離は魔法:true)
 
     private bool lastEnemyFlg_;
 
     public static string forcedButtleWallName;
 
-    private ButtleResult buttleResult_;// 戦闘リザルト用
+    private ButtleResult buttleResult_;     // 戦闘リザルト用
+    private bool resultFlg_ = false;        // リザルト処理に1度入ったらtrueにする
     private int[] saveEnemyNum_ = new int[5];
     private bool bossFlag_ = false;
-    private bool flag_ = false;
+
     void Start()
     {
         characterMng_ = GameObject.Find("CharacterMng").GetComponent<CharacterMng>();
@@ -63,6 +64,7 @@ public class ButtleMng : MonoBehaviour
         // 戦闘開始時に設定される項目
         if (!setCallOnce_)
         {
+            resultFlg_ = false;
             lastEnemyFlg_ = false;
             setCallOnce_ = true;
             buttleUICanvas.gameObject.SetActive(true);
@@ -121,7 +123,7 @@ public class ButtleMng : MonoBehaviour
             // キャラクターの攻撃対象が最後の敵だった時
             if (lastEnemyFlg_)
             {
-                if (enemyInstanceMng_.AllAnimationFin())
+                if (enemyInstanceMng_.AllAnimationFin() && !resultFlg_)
                 {
                     // 現在が強制戦闘中だった時
                     if (FieldMng.nowMode == FieldMng.MODE.FORCEDBUTTLE)
@@ -141,26 +143,10 @@ public class ButtleMng : MonoBehaviour
 
                     CallDeleteEnemy();
 
-                    if (flag_ == true)
-                    {
-                        // リザルト処理： エネミーの数、エネミーの番号（配列）
-                        buttleResult_.DropCheck(EneSelObj_.childCount, saveEnemyNum_, bossFlag_);
-                        flag_ = false;
-                    }
-
-                    for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
-                    {
-                        // バトルで死亡したまま終了していたときは、HP1の状態で立ち上がらせる
-                        if (SceneMng.charasList_[i].GetDeathFlg())
-                        {
-                            SceneMng.charasList_[i].SetDeathFlg(false);
-                            SceneMng.charasList_[i].SetHP(1);
-                        }
-                        SceneMng.charasList_[i].ButtleInit();
-                    }
-
+                    // リザルト処理： エネミーの数、エネミーの番号（配列）
+                    buttleResult_.DropCheck(EneSelObj_.childCount, saveEnemyNum_, bossFlag_);
+                    resultFlg_ = true;
                     characterMng_.SetCharaFieldPos();
-
                 }
             }
         }
@@ -255,12 +241,22 @@ public class ButtleMng : MonoBehaviour
         if (EneSelObj_ == null)
         {
             EneSelObj_ = GameObject.Find("ButtleUICanvas/EnemySelectObj").transform;
-            flag_ = true;
         }
         // EnemySelectObjからその戦闘でつかった敵のHPバーとかを削除する
         for (int i = 0; i < EneSelObj_.childCount; ++i)
         {
             Destroy(EneSelObj_.GetChild(i).gameObject);
+        }
+
+        for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+        {
+            // バトルで死亡したまま終了していたときは、HP1の状態で立ち上がらせる
+            if (SceneMng.charasList_[i].GetDeathFlg())
+            {
+                SceneMng.charasList_[i].SetDeathFlg(false);
+                SceneMng.charasList_[i].SetHP(1);
+            }
+            SceneMng.charasList_[i].ButtleInit();
         }
     }
 
@@ -276,7 +272,7 @@ public class ButtleMng : MonoBehaviour
         return keepPos_;
     }
 
-    public void SetEnemyNum(int[] num,bool flag)
+    public void SetEnemyNum(int[] num, bool flag)
     {
         saveEnemyNum_ = num;
         bossFlag_ = flag;

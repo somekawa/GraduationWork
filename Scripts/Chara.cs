@@ -13,7 +13,7 @@ public class Chara : CharaBase,InterfaceButtle
     private int barrierNum_ = 0;                    // 防御時に値が入る
     private bool deathFlg_ = false;                 // 死亡状態か確認する変数
 
-    private int[] statusUp = new int[5];            // 一時アップの数値を保存する用
+    private int[] statusUp = new int[8];            // 一時アップの数値を保存する用
     private readonly int[] statusMap_ = new int[4];
     private Dictionary<int, (int, int)> buffMap_
         = new Dictionary<int, (int, int)>();        // バフ後の値とターン数を管理する<ワード順,(効果値,バフターン数)>
@@ -354,6 +354,11 @@ public class Chara : CharaBase,InterfaceButtle
         set_.Defence -= statusUp[2];
         set_.Speed -= statusUp[3];
         set_.Luck -= statusUp[4];
+        set_.maxHP -= statusUp[5];
+        set_.maxMP -= statusUp[6];
+        set_.Exp -= statusUp[7];
+        set_.HP -= statusUp[5];
+        set_.MP -= statusUp[6];
 
         // 一時アップの数字を初期化する
         for (int i = 0; i < statusUp.Length; i++)

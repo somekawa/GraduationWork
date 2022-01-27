@@ -133,13 +133,26 @@ public class MenuActive : MonoBehaviour
         if (SceneMng.nowScene != SceneMng.SCENE.TOWN && SceneMng.nowScene != SceneMng.SCENE.UNIHOUSE)
         {
             //設定した色をstage_buttonを押した時の色へ設定
-            ButtonStateColorChange(false);
+            ButtonStateColorChange("Save",false);
         }
         else
         {
             //設定した色をstage_buttonを押した時の色へ設定
-            ButtonStateColorChange(true);
+            ButtonStateColorChange("Save",true);
         }
+
+        // そもそもロードするデータがないときは押せないようにする
+        //TextAsset saveFile = Resources.Load("data") as TextAsset;
+
+        //if (saveFile == null)
+        //{
+        //    ButtonStateColorChange("Load", false);
+        //}
+        //else
+        //{
+        //    ButtonStateColorChange("Load", true);
+        //}
+
 
         while (true)
         {
@@ -346,9 +359,9 @@ public class MenuActive : MonoBehaviour
     }
 
     // セーブボタンの状態切替
-    private void ButtonStateColorChange(bool flag)
+    private void ButtonStateColorChange(string str,bool flag)
     {
-        var tmp = parentMenuBtn_.Find("Save").GetComponent<Button>();
+        var tmp = parentMenuBtn_.Find(str).GetComponent<Button>();
         ColorBlock colorblock = tmp.colors;
         tmp.interactable = flag;
         if (flag)

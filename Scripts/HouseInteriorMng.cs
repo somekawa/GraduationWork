@@ -15,7 +15,7 @@ public class HouseInteriorMng : MonoBehaviour
     private GameObject iconImage_;          // [はい][いいえ]の現在選択中の方に矢印アイコンを出す
     private TMPro.TextMeshProUGUI text_;    // 建物名を入れる
 
-    private GameObject inHouseCanvas_;      // 室内の選択肢
+    //private GameObject inHouseCanvas_;      // 室内の選択肢
 
     private bool inHouseFlg_ = true;        // 入室するか(true:入る , false:入らない)
 
@@ -41,7 +41,7 @@ public class HouseInteriorMng : MonoBehaviour
         iconImage_ = inHouseInfoCanvas_.transform.Find("Icon").gameObject;
         text_ = inHouseInfoCanvas_.transform.Find("HouseInfo/Text").GetComponent<TMPro.TextMeshProUGUI>();
 
-        inHouseCanvas_ = this.transform.Find("InHouseCanvas").gameObject;
+        //inHouseCanvas_ = this.transform.Find("InHouseCanvas").gameObject;
 
         // 英語建物名と日本語建物名を組み合わせる
         for (int i = 0; i < buildNameEng_.Length; i++)
@@ -165,10 +165,10 @@ public class HouseInteriorMng : MonoBehaviour
                 cameraMng_.SetChangeCamera(true);
 
                 // 室内キャンバスの表示
-                inHouseCanvas_.SetActive(true);
+                //inHouseCanvas_.SetActive(true);
 
                 // 室内用キャンバスの表示/非表示切り替え
-                ChangeObjectActive(inHouseCanvas_.gameObject.transform.childCount, inHouseCanvas_.transform, name);
+                //ChangeObjectActive(inHouseCanvas_.gameObject.transform.childCount, inHouseCanvas_.transform, name);
             }
         }
     }
@@ -237,7 +237,7 @@ public class HouseInteriorMng : MonoBehaviour
         ChangeObjectActive(this.gameObject.transform.childCount, this.transform, "");
 
         // 室内用キャンバスの非表示
-        inHouseCanvas_.SetActive(false);
+        //inHouseCanvas_.SetActive(false);
 
         // ワープ先キャンバスの表示
         warpCanvas.gameObject.SetActive(true);

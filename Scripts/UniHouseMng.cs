@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UniHouseMng : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class UniHouseMng : MonoBehaviour
 
     private GameObject loadPrefab_;// タイトルシーンからの遷移かどうか
     private OnceLoad onceLoad_;// LoadPrefabにアタッチされてるScript
+
     void Start()
     {
         // 現在のシーンをUNIHOUSEとする
@@ -41,12 +43,18 @@ public class UniHouseMng : MonoBehaviour
         loadPrefab_ = GameObject.Find("LoadPrefab");
         if (loadPrefab_ != null)
         {
-            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>().NewGameInit();
-            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>().NewGameInit();
-            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Word>().NewGameInit();
+            var tmp = GameObject.Find("DontDestroyCanvas/Managers");
+            tmp.GetComponent<Bag_Item>().NewGameInit();
+            tmp.GetComponent<Bag_Materia>().NewGameInit();
+            tmp.GetComponent<Bag_Word>().NewGameInit();
+            tmp.GetComponent<Bag_Magic>().NewGameInit();
+
+            GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>().NewGameInit();
+
             onceLoad_ = GameObject.Find("LoadPrefab").GetComponent<OnceLoad>();
             onceLoad_.SetNewGameFlag(true);
         }
+
         // メインカメラを最初にアクティブにする
         var cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
         cameraMng_.SetChangeCamera(false);
@@ -63,6 +71,19 @@ public class UniHouseMng : MonoBehaviour
                 SceneMng.charasList_[i].DeleteStatusUpByCook();
             }
         }
+
+        // ボタンの状態がわかりやすいようにする
+        var sleepBtn_ = uniHouseCanvas.transform.Find("SleepButton").GetComponent<Button>();
+        if (EventMng.GetChapterNum() < 7)    // 進行度が0～6のとき
+        {
+            sleepBtn_.interactable = false;
+        }
+        else
+        {
+            sleepBtn_.interactable = true;
+        }
+
+        SceneMng.MenuSetActive(true);
     }
 
     public void ClickSleepButton()
@@ -74,7 +95,17 @@ public class UniHouseMng : MonoBehaviour
         }
 
         SceneMng.SetTimeGear(SceneMng.TIMEGEAR.MORNING);   // 時間経過
-        Debug.Log("休むボタンが押下されました");
+        Debug.Log("休むボタンが押下されました 料理効果がきれて体力回復します");
+
+        // 強制的に料理の効果を消す
+        GameObject.Find("DontDestroyCanvas/TimeGear/CookPowerIcon").GetComponent<Image>().color =
+            new Color(1.0f, 1.0f, 1.0f, 0.0f);
+        for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+        {
+            SceneMng.charasList_[i].DeleteStatusUpByCook();
+            SceneMng.charasList_[i].SetHP(SceneMng.charasList_[i].MaxHP());
+            SceneMng.charasList_[i].SetMP(SceneMng.charasList_[i].MaxMP());
+        }
     }
 
     public void ClickAlchemyButton()

@@ -72,7 +72,7 @@ private GameObject[] itemPointChildren_;
     {
         // nowSceneに値が入る前に呼ばれることがあるためFieldMng.csでここのInitを呼ぶ
 
-        fieldNumber_ = (int)SceneMng.nowScene - (int)SceneMng.SCENE.FIELD0;
+        fieldNumber_ = (int)SceneMng.nowScene/* - (int)SceneMng.SCENE.FIELD0*/;
         Debug.Log(fieldNumber_+"番のフィールドです");
         for (int i = 0; i < 3; i++)
         {

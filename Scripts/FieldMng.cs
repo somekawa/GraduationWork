@@ -21,6 +21,7 @@ public class FieldMng : MonoBehaviour
     public AudioClip BGM_bossButtle;
 
     private AudioSource audios;
+    private GameObject jackObj_;
 
     // 画面状態一覧
     public enum MODE
@@ -171,6 +172,9 @@ public class FieldMng : MonoBehaviour
         }
 
         GameObject.Find("FieldMap/MateriaPoints").GetComponent<DropFieldMateria>().Init();
+
+        jackObj_ = GameObject.Find("Jack").gameObject;
+        jackObj_.SetActive(false);
     }
 
     // クエストの受注状況に合わせて、壁や宝箱のアクティブ状態を判別する
@@ -319,6 +323,7 @@ public class FieldMng : MonoBehaviour
                 break;
 
             case MODE.SEARCH:
+                jackObj_.SetActive(false);
                 cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
                 SceneMng.MenuSetActive(true);
                 audios.Stop();
@@ -327,6 +332,7 @@ public class FieldMng : MonoBehaviour
                 break;
 
             case MODE.BUTTLE:
+                jackObj_.SetActive(true);
                 cameraMng_.SetChangeCamera(true);    // サブカメラアクティブ
                 SceneMng.MenuSetActive(false);
                 audios.Stop();
@@ -338,6 +344,7 @@ public class FieldMng : MonoBehaviour
                 break;
 
             case MODE.FORCEDBUTTLE:
+                jackObj_.SetActive(true);
                 cameraMng_.SetChangeCamera(true);    // サブカメラアクティブ
                 SceneMng.MenuSetActive(false);
                 audios.Stop();

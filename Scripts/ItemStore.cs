@@ -25,6 +25,8 @@ public class ItemStore : HouseBase
 
             if(!tmpFlg)
             {
+                // Chapter3の挨拶クエストのときに、空のマテリアを5個もらう
+                GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>().MateriaGetCheck(34,5);
                 EventMng.SetChapterNum(3, SceneMng.SCENE.CONVERSATION);
                 return true;
             }
