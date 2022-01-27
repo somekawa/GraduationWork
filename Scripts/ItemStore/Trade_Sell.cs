@@ -10,61 +10,111 @@ public class Trade_Sell : MonoBehaviour
     [SerializeField]
     private RectTransform sellParent;  // 表示位置の親
 
-    private GameObject[] activeObj_;    //プレハブ生成時に使用
-    private Text[] activePrice_;        // 表示する値段
-    private Text[] activeText_;         // 表示する素材の名前
-
-    private int maxCnt_ = 0;            // すべての素材数
-
-    private void Start()
+    public struct StoreSell
     {
-        popItemsList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
-       
-        maxCnt_ = popItemsList_.SetMaxMateriaCount();
-        activeObj_ = new GameObject[maxCnt_];//プレハブ生成時に使用
-        activePrice_ = new Text[maxCnt_];
-        activeText_ = new Text[maxCnt_];
+        public GameObject obj;
+        public Button btn;
+        public TMPro.TextMeshProUGUI priceText;        // 表示する値段
+        public TMPro.TextMeshProUGUI nameText;         // 表示する素材の名前
+        public int price;
+        public int haveCnt;
+        public string name;
+    }
+    public static Dictionary<ItemStoreMng.KIND, StoreSell[]> sellData = new Dictionary<ItemStoreMng.KIND, StoreSell[]>();
+    private int[] maxCnt_;            // すべての素材数
 
-        for (int i = 0; i < maxCnt_; i++)
+    public void Init(int seleKind, int kind)
+   // void Start()
+    {
+
+        if (popItemsList_ == null)
         {
-            activeObj_[i] = PopListInTown.materiaPleate[i];
-            //  Debug.Log("バッグの中身" + PopMateriaList.activeObj_[i].name);
-            // 表示する名前を変更する
-            activeText_[i] = activeObj_[i].transform.Find("Name").GetComponent<Text>();
-            activeText_[i].text = activeObj_[i].name;
+            popItemsList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
 
-            // 料金を表示するText
-            activePrice_[i] = activeObj_[i].transform.Find("Price").GetComponent<Text>();
-            activeObj_[i].SetActive(false);
+            maxCnt_ = new int[(int)ItemStoreMng.KIND.MAX];
+            maxCnt_[(int)ItemStoreMng.KIND.MATERIA] = popItemsList_.SetMaxMateriaCount();
+            maxCnt_[(int)ItemStoreMng.KIND.ITEM] = popItemsList_.SetMaxItemCount()*2;// 大成功アイテムがあるため2倍する
+            sellData[ItemStoreMng.KIND.ITEM] = InitSellData(ItemStoreMng.KIND.ITEM, maxCnt_[(int)ItemStoreMng.KIND.ITEM]);
+            sellData[ItemStoreMng.KIND.MATERIA] = InitSellData(ItemStoreMng.KIND.MATERIA, maxCnt_[(int)ItemStoreMng.KIND.MATERIA]);
+
         }
+        SetActiveSell(seleKind, maxCnt_[seleKind]);// 表示する
+        InactiveSell( kind, maxCnt_[kind]);
     }
 
-    public void SetActiveSell()
+    private StoreSell[] InitSellData(ItemStoreMng.KIND kind, int maxCnt)
     {
-        // Debug.Log(objParent_.transform.childCount);
-        for (int i = 0; i < maxCnt_; i++)
+        var data = new StoreSell[maxCnt];
+        //Debug.Log(maxCnt);
+
+        for (int i = 0; i < maxCnt; i++)
         {
-            // 親位置を変える
-            activeObj_[i].transform.SetParent(sellParent.transform);
-
-            // 表示する料金を売値に変更
-            activePrice_[i].text = InitPopList.materiaData[i].sellPrice.ToString() + "ビット";
-
-            // 所持数が0以上でバッグの中身と同じものがあれば表示
-            if (0 < Bag_Materia.materiaState[i].haveCnt)
+            if (kind == ItemStoreMng.KIND.ITEM &&(( maxCnt-1) / 2 < i))
             {
-                activeObj_[i].SetActive(true);
+                data[i].price = InitPopList.materiaData[i-(maxCnt / 2) ].sellPrice * 2;
             }
             else
             {
-                activeObj_[i].SetActive(false);
+                data[i].price = kind == ItemStoreMng.KIND.ITEM ? InitPopList.itemData[i].sellPrice : InitPopList.materiaData[i].sellPrice;
+            }
+            data[i].haveCnt = kind == ItemStoreMng.KIND.ITEM ? Bag_Item.itemState[i].haveCnt : Bag_Materia.materiaState[i].haveCnt;
+            data[i].name = kind == ItemStoreMng.KIND.ITEM ? Bag_Item.itemState[i].name: Bag_Materia.materiaState[i].name ;
+            data[i].obj = kind == ItemStoreMng.KIND.ITEM ?  PopListInTown.itemPleate[i]: PopListInTown.materiaPleate[i];
+            data[i].obj.name = data[i].name + i;
+            data[i].btn = data[i].obj.GetComponent<Button>();
+            // Debug.Log("店で買えるもの" + activeObj_[i]);
+
+            // 表示する名前を変更する
+            data[i].nameText = data[i].obj.transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>();
+            data[i].nameText.text = data[i].name;
+
+            // 料金を表示するText
+            data[i].priceText = data[i].obj.transform.Find("Price").GetComponent<TMPro.TextMeshProUGUI>();
+            data[i].priceText.text = data[i].price.ToString();
+            data[i].obj.transform.SetParent(sellParent.transform);
+            data[i].obj.SetActive(true);
+        }
+        return data;
+    }
+
+
+    public void SetActiveSell(int kindNum, int maxCnt)
+    {
+        for (int i = 0; i < maxCnt; i++)
+        {
+            if (sellData[(ItemStoreMng.KIND)kindNum][i].obj.transform.parent != sellParent.transform)
+            {
+                // 親位置を変える
+                sellData[(ItemStoreMng.KIND)kindNum][i].obj.transform.SetParent(sellParent.transform);
+            }
+            sellData[(ItemStoreMng.KIND)kindNum][i].obj.name = sellData[(ItemStoreMng.KIND)kindNum][i].name + i;
+            sellData[(ItemStoreMng.KIND)kindNum][i].nameText.text = sellData[(ItemStoreMng.KIND)kindNum][i].name;
+
+            // 表示する料金を買い値に変更
+            sellData[(ItemStoreMng.KIND)kindNum][i].priceText.text = sellData[(ItemStoreMng.KIND)kindNum][i].price.ToString();
+           
+            // すべて表示させておいて
+            sellData[(ItemStoreMng.KIND)kindNum][i].obj.SetActive(true);
+            if (Bag_Materia.materiaState[i].haveCnt<=0)
+            {
+                // 持っていないアイテム、素材は非表示にする
+                sellData[(ItemStoreMng.KIND)kindNum][i].obj.SetActive(false);
             }
         }
     }
 
-    public void SetHaveCntCheck(int materiaNum)
+    public void InactiveSell(int kindNum, int maxCnt)
+    {
+        // 非アクティブにしたいとき
+        for (int i = 0; i < maxCnt; i++)
+        {
+            sellData[(ItemStoreMng.KIND)kindNum][i].obj.SetActive(false);
+        }
+    }
+
+    public void SetHaveCntCheck(int kindNum,int materiaNum)
     {
         // 指定素材の所持数が0個になったら呼び出される
-       activeObj_[materiaNum].SetActive(false);
+        sellData[(ItemStoreMng.KIND)kindNum][materiaNum].obj.SetActive(false);
     }
 }
