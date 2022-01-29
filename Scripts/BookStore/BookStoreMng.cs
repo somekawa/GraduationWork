@@ -27,7 +27,7 @@ public class BookStoreMng : MonoBehaviour
 
     public struct BookData
     {
-        public string name;     // 本の名前
+        public string bookName;     // 本の名前
         public int readFlag;    // 0がfalseで読んでない。1がtrueで読んだ
         // 生成しておいたオブジェクト全体
         public GameObject obj;  // 生成しておいたプレハブを代入
@@ -143,19 +143,15 @@ public class BookStoreMng : MonoBehaviour
         {
             maxCnt_ = boolActiveTiming_[0];
         }
-        bookState_ = new BookData[maxCnt_];
 
-
-        Debug.Log("イベント進行度チェック："+EventMng.GetChapterNum());
-        for (int i = 0; i < maxCnt_; i++)
+        if (bookState_ == null)
         {
-            Debug.Log(i + "番目");
-
-            if(bookState_ == null)
+            bookState_ = new BookData[maxCnt_];
+            for (int i = 0; i < maxCnt_; i++)
             {
                 bookState_[i] = new BookData
                 {
-                    name = csvDatas_[i + 1][0],
+                    bookName = PopListInTown.bookObj[i].name,
                     obj = PopListInTown.bookObj[i],
                     wordDataNum = PopListInTown.bookWordNum[i],
                     statusMng = PopListInTown.statusUp[i],
@@ -171,13 +167,44 @@ public class BookStoreMng : MonoBehaviour
                 {
                     bookState_[i].readFlag = int.Parse(csvDatas_[i + 1][1]);
                 }
+
+                var underbarSplit = bookState_[i].statusMng.Split('_');
+                //アンダーバーで区切ったものを、別々のリストへ入れる
+                bookState_[i].kinds = underbarSplit[0];
+                ////  Debug.Log("上昇ステータス" + bookState_[i].statusKinds);
+                //bookState_[i].kindsNum = int.Parse(underbarSplit[0]);
+                bookState_[i].number = int.Parse(underbarSplit[1]);
+
+                // 事前に生成しておいたオブジェクトを代入する
+                bookState_[i].btn = bookState_[i].obj.transform.Find("BookButton").GetComponent<Button>();
+                bookState_[i].btn.name = bookState_[i].bookName + i;// ボタンの名前を変えないとクリック時に本を探せない
+                bookState_[i].obj.name = bookState_[i].bookName + i;
+                // 表示する名前
+                bookState_[i].nameText = bookState_[i].btn.transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>();
+                bookState_[i].nameText.text = bookState_[i].bookName;
+                // 表示する料金
+                bookState_[i].priceText = bookState_[i].btn.transform.Find("Price").GetComponent<TMPro.TextMeshProUGUI>();
+                bookState_[i].priceText.text = bookState_[i].price.ToString();
+
+                // チェックボックス
+                bookState_[i].checkBox = bookState_[i].obj.transform.Find("CheckBox").GetComponent<Image>();
+                bookState_[i].checkMark = bookState_[i].checkBox.transform.Find("CheckMark").GetComponent<Image>();
+                bookState_[i].checkMark.gameObject.SetActive(false);
+
+                // 読んだことがない本だけを表示
+                bool flag = bookState_[i].readFlag == 0 ? true : false;
+                bookState_[i].obj.gameObject.SetActive(flag);
+                bookStoreUI.SetActive(false);
             }
-            else
+        }
+        else
+        {
+            for (int i = 0; i < maxCnt_; i++)
             {
                 // NewGameから始めて本屋にきたとき
                 bookState_[i] = new BookData
                 {
-                    name = bookState_[i].name,
+                    bookName = PopListInTown.bookObj[i].name,
                     readFlag = 0,
                     obj = PopListInTown.bookObj[i],
                     wordDataNum = PopListInTown.bookWordNum[i],
@@ -186,42 +213,42 @@ public class BookStoreMng : MonoBehaviour
                     info = PopListInTown.bookInfo[i],
                     imageNum = PopListInTown.bookImageNum[i],
                 };
+                var underbarSplit = bookState_[i].statusMng.Split('_');
+                //アンダーバーで区切ったものを、別々のリストへ入れる
+                bookState_[i].kinds = underbarSplit[0];
+                ////  Debug.Log("上昇ステータス" + bookState_[i].statusKinds);
+                //bookState_[i].kindsNum = int.Parse(underbarSplit[0]);
+                bookState_[i].number = int.Parse(underbarSplit[1]);
+
+                // 事前に生成しておいたオブジェクトを代入する
+                bookState_[i].btn = bookState_[i].obj.transform.Find("BookButton").GetComponent<Button>();
+                bookState_[i].btn.name = bookState_[i].bookName + i;// ボタンの名前を変えないとクリック時に本を探せない
+                bookState_[i].obj.name = bookState_[i].bookName + i;
+                // 表示する名前
+                bookState_[i].nameText = bookState_[i].btn.transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>();
+                bookState_[i].nameText.text = bookState_[i].bookName;
+                // 表示する料金
+                bookState_[i].priceText = bookState_[i].btn.transform.Find("Price").GetComponent<TMPro.TextMeshProUGUI>();
+                bookState_[i].priceText.text = bookState_[i].price.ToString();
+
+                // チェックボックス
+                bookState_[i].checkBox = bookState_[i].obj.transform.Find("CheckBox").GetComponent<Image>();
+                bookState_[i].checkMark = bookState_[i].checkBox.transform.Find("CheckMark").GetComponent<Image>();
+                bookState_[i].checkMark.gameObject.SetActive(false);
+
+                // 読んだことがない本だけを表示
+                bool flag = bookState_[i].readFlag == 0 ? true : false;
+                bookState_[i].obj.gameObject.SetActive(flag);
+                bookStoreUI.SetActive(false);
             }
-
-
-            var underbarSplit = bookState_[i].statusMng.Split('_');
-            //アンダーバーで区切ったものを、別々のリストへ入れる
-            bookState_[i].kinds = underbarSplit[0];
-            ////  Debug.Log("上昇ステータス" + bookState_[i].statusKinds);
-            //bookState_[i].kindsNum = int.Parse(underbarSplit[0]);
-            bookState_[i].number = int.Parse(underbarSplit[1]);
-
-            // 事前に生成しておいたオブジェクトを代入する
-            bookState_[i].btn = bookState_[i].obj.transform.Find("BookButton").GetComponent<Button>();
-            bookState_[i].btn.name = bookState_[i].name + i;// ボタンの名前を変えないとクリック時に本を探せない
-            bookState_[i].obj.name = bookState_[i].name + i;
-            // 表示する名前
-            bookState_[i].nameText = bookState_[i].btn.transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>();
-            bookState_[i].nameText.text = bookState_[i].name;
-            // 表示する料金
-            bookState_[i].priceText = bookState_[i].btn.transform.Find("Price").GetComponent<TMPro.TextMeshProUGUI>();
-            bookState_[i].priceText.text = bookState_[i].price.ToString();
-
-            // チェックボックス
-            bookState_[i].checkBox = bookState_[i].obj.transform.Find("CheckBox").GetComponent<Image>();
-            bookState_[i].checkMark = bookState_[i].checkBox.transform.Find("CheckMark").GetComponent<Image>();
-            bookState_[i].checkMark.gameObject.SetActive(false);
-
-            // 読んだことがない本だけを表示
-            bool flag = bookState_[i].readFlag == 0 ? true : false;
-            bookState_[i].obj.gameObject.SetActive(flag);
-            bookStoreUI.SetActive(false);
         }
 
-        //MoneyCheck();
-        //// 説明エリアを非表示にする
-        //bookInfoData_.gameObject.SetActive(false);
+        Debug.Log("イベント進行度チェック："+EventMng.GetChapterNum());
     }
+
+    //MoneyCheck();
+    //// 説明エリアを非表示にする
+    //bookInfoData_.gameObject.SetActive(false);
 
 
     public void OnClickBookCheckButton()
@@ -287,7 +314,7 @@ public class BookStoreMng : MonoBehaviour
 
         // 本の画像
         infoImage_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BOOK][bookState_[num].imageNum];
-        bookNameText_.text = bookState_[num].name;
+        bookNameText_.text = bookState_[num].bookName;
         // 本の説明一覧
         infoText_.text = bookState_[num].info;
         // ワードが取得できるときはGetWord　ステータスアップの場合はStatusUp
