@@ -21,6 +21,7 @@ public class MagicIconClick : MonoBehaviour
             bagMagic_ = GameObject.Find("Managers").GetComponent<Bag_Magic>();
         }
         clickbtn_ = eventSystem_.currentSelectedGameObject;
+
         // ボタン名から数字のみを取り出す
         int number = int.Parse(Regex.Replace(clickbtn_.name, @"[^0-9]", ""));
         info_.text = Bag_Magic.data[number].name + "  " + Bag_Magic.data[number].power;
@@ -38,11 +39,12 @@ public class MagicIconClick : MonoBehaviour
         }
         // このCSがついているボタンの名前
         clickbtn_ = eventSystem_.currentSelectedGameObject;
-        Button btn = clickbtn_.GetComponent<Button>();
+     //   Button btn = clickbtn_.GetComponent<Button>();
         // ボタン名から数字のみを取り出す
         int number = int.Parse(Regex.Replace(clickbtn_.name, @"[^0-9]", ""));
         var pos = transform.localPosition;
-        rectItemBagMng_.GetComponent<ItemBagMng>().InfoCheck(btn, pos, number);
+        rectItemBagMng_.GetComponent<ItemBagMng>().SetMagicCheck( number,true);
+        //Debug.Log(btn.name + "        " + number);
     }
 
     public void OnClickRemoveMagic()

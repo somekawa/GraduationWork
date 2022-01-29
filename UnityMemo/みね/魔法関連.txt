@@ -1,3 +1,36 @@
+2022/01/29更新
+・StatusMagicMng.cs
+StatusMngオブジェクトにアタッチ
+
+・StatusMngはDontDestroyCanvasに新しくアタッチしてください
+ーStatusMng　StatusMagicMngをアタッチ
+　ーMagicSetBack	SouceImage：white	Color：（0.7f，0.4f，0.2f，0.6f）
+　　ーInfo　Color：（0.9f，0.6f，0.6f，1.0f）
+　ーMagicCheckMask	SouceImage：white
+　　ーMagicCheck	SouceImage：Background	Color：（0.0f，0.0f，0.0f，0.9f）
+　　　ーViewport　SouceImage：UIMask
+　　　　ーStatusMagicParent
+　　　　　ーRemoveMagicBox	SouceImage：SingleBox2	Color：（1.0f，0.7f，0.9f，1.0f）
+	　ーMagicIcon	SouceImage：RemoveImage
+	　ーText　TextMechPro「はずす」
+
+・StatusMagicBoxプレハブ
+StatusMagicBoxにMagicIconClickをアタッチ
+OnCkickに自信をアタッチしてOnClickStatusMagicIcon()を選択
+
+・ItemBagMng.cs
+StatusMngObjにStatusMngをアタッチ
+
+・Bag_Magic.cs
+StatusMagicUIにStatusMagicBoxプレハブをアタッチ
+StatusMagicUIParentにStatusMagicParentをアタッチ
+
+・RemoveImage
+Pictureフォルダに入れてる。
+MaxSizeは64
+
+//ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+
 2021/11/17更新
 
 

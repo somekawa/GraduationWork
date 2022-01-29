@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 public class Bag_Magic : MonoBehaviour
 {
@@ -63,7 +64,7 @@ public class Bag_Magic : MonoBehaviour
     public static GameObject[] statusMagicObject = new GameObject[20];
     private Image[] statusMagicImage_ = new Image[20];
     private Button[] statusMagicBtn_ = new Button[20];
-
+    private Text[] statusMagicSetText_ = new Text[20];
     // 共通
     public static int number_ = 1;
     private int minNumber_ = 2;
@@ -74,17 +75,29 @@ public class Bag_Magic : MonoBehaviour
     private Text info_; // クリックしたアイテムを説明する欄
 
     private List<Chara> charasList_ = new List<Chara>();
+
+    public void NewGameInit()
+    {
+        //// タイトルでNewGameボタンを押したときに呼ばれるInit
+        DataLoad();
+        int indexToRemove = 0;
+        data = data.Where((source, index) => index == indexToRemove).ToArray();
+        Debug.Log(data);
+        number_ = 1;
+        DataSave();
+    }
+
     public void Init()
     {
         if (magicObject[1] == null)
         {
             saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_Magic>();
             charasList_ = SceneMng.charasList_;
-            // データの個数が最低値より大きかったらデータを呼ばない
-            if (number_ < minNumber_)
-            {
-                return;
-            }
+            //// データの個数が最低値より大きかったらデータを呼ばない
+            //if (number_ < minNumber_)
+            //{
+            //    return;
+            //}
             // Debug.Log(number_);
             for (int i = 0; i < number_; i++)
             {
@@ -123,6 +136,8 @@ public class Bag_Magic : MonoBehaviour
                 statusMagicObject[i].name = "Magic" + data[i].number;
                 statusMagicImage_[i] = statusMagicObject[i].transform.Find("MagicIcon").GetComponent<Image>();
                 statusMagicBtn_[i] = statusMagicObject[i].GetComponent<Button>();
+                statusMagicSetText_[i] = statusMagicBtn_[i].transform.Find("SetCharaName").GetComponent<Text>();
+                statusMagicSetText_[i].text = "";
                 // Debug.Log(statusMagicBtn_[i].name);
                 statusMagicImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[i].element];
                 //Debug.Log(data[i].name + "           " + data[i].number);
@@ -190,7 +205,7 @@ public class Bag_Magic : MonoBehaviour
 
     }
 
-    public void SetStatusMagicCheck(int num, bool flag)
+    public void SetStatusMagicCheck(SceneMng.CHARACTERNUM chara, int num, bool flag)
     {
         if (num < 1 || number_ < num)
         {
@@ -199,10 +214,20 @@ public class Bag_Magic : MonoBehaviour
         }
         //Debug.Log(flag + "        既に選択されている魔法の番号：" + num);
         //Debug.Log(statusMagicBtn_[num].name + "      " + statusMagicBtn_[num].interactable);
-
-
+        
         // flagがtrueならinteractableをfalseにする
         statusMagicBtn_[num].interactable = flag == true ? false : true;
+
+        if (flag==false)
+        {
+            statusMagicSetText_[num].text = "";
+            Debug.Log("魔法を外したので名前を消します");
+        }
+        else
+        {
+            // どのキャラに魔法がセットされているか。セットされているキャラの名前を表示する
+            statusMagicSetText_[num].text = chara == SceneMng.CHARACTERNUM.UNI ? "Uni" : "Jack";
+        }
     }
 
 
@@ -323,4 +348,25 @@ public class Bag_Magic : MonoBehaviour
         number_ = dataNumber;
 
     }
+
+
+
+    //void Main(string[] args)
+    //{
+
+    //    int[] dataNumber = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
+    //    Console.WriteLine("Array before deletion");
+    //    //foreach (int value in dataNumber)
+    //    //{
+    //    //    Console.WriteLine(value);
+    //    //}
+    //    //int indexToRemove = 3;
+    //    dataNumber = dataNumber.Where(number => number > 1).ToArray();
+    //    Console.WriteLine("Array after deletion");
+
+    //    foreach (int value in dataNumber)
+    //    {
+    //        Console.WriteLine(value);
+    //    }
+    //}
 }

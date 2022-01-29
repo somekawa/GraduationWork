@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -35,7 +36,7 @@ public class ItemBagMng : MonoBehaviour
     private string[] topicString_ = new string[(int)TOPIC.MAX] {
     "アイテム","マテリア","ワード","マジック"};
     private Text info_; // クリックしたアイテムを説明する欄
-    private Button[] throwAwayBtn_=new Button[(int)TOPIC.MAGIC];
+    private Button[] throwAwayBtn_ = new Button[(int)TOPIC.MAGIC];
 
     // ステータス表示にでてくるトピック名
     private Text charaNameTopicText_;
@@ -46,14 +47,19 @@ public class ItemBagMng : MonoBehaviour
     "ユニ","ジャック"};
 
     private Bag_Magic bagMagic_;
+    // ステータス関連 魔法
+    private StatusMagicMng magicMng_;
     private RectTransform statusMagicCheck_;// ステータス画面で魔法を表示するための親
-    private Button[] equipBtn_ = new Button[4];// 保存先の魔法のボタン
-    private Image[] equipMagic_ = new Image[4];// 保存される魔法の画像
-    private int[,] setImageNum_ = new int[(int)SceneMng.CHARACTERNUM.MAX, 4];
-    private Button seleMagicBtn_;
-    private Image infoBack_;
-    private int saveClickNum_ = -1;
-    //private Text magicName_;
+    // 魔法セット先
+    private Button[] equipBtn_ = new Button[4];// セット先のボタン
+    private Image[] equipMagic_ = new Image[4];// セットされている魔法の画像
+    private Color equipBtnSelColor_ = new Color(0.1f,0.5f, 0.7f,  1.0f);// セット先の選択中の色
+    private Color equipNormalColor_ = new Color(1.0f, 1.0f, 1.0f, 1.0f);// 何も選んでない状態の色
+    private Color equipResetColor_ = new Color(1.0f, 1.0f, 1.0f, 0.0f);// 選択できない状態の色
+    // 所持魔法一覧
+    private int[,] setImageNum_ = new int[(int)SceneMng.CHARACTERNUM.MAX, 4];// 保存される魔法の画像
+
+    private Button removeEquipBtn_;// 魔法をはずすボタン
 
     private int setNullNum_ = 0;// 魔法が装備されてないときの番号
     // どの魔法を保存しているか読み込む
@@ -63,7 +69,7 @@ public class ItemBagMng : MonoBehaviour
     private RectTransform[] mngs_ = new RectTransform[(int)TOPIC.MAX];
 
     // 現在のページ状態がどこかを取得する(矢印に使用する)
-    private MenuActive menuActive_; 
+    private MenuActive menuActive_;
 
     // Chara.csをキャラ毎にリスト化する
     private List<Chara> charasList_ = new List<Chara>();
@@ -106,32 +112,40 @@ public class ItemBagMng : MonoBehaviour
 
     public void StatusInit()
     {
+        charaStringNum_ = (int)SceneMng.CHARACTERNUM.UNI;
         if (menuActive_ == null)
         {
             saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>();
             menuActive_ = GameObject.Find("SceneMng").GetComponent<MenuActive>();
         }
 
-        //  RectTransform topicParent_ = GameObject.Find("StatusMng").GetComponent<RectTransform>();
-        if (charaNameTopicText_ == null)
-        {
-            charaNameTopicText_ = statusMngObj.transform.Find("Topics/TopicName").GetComponent<Text>();
-            charaNameTopicText_.text = charaTopicString_[(int)SceneMng.CHARACTERNUM.UNI];
-            statusMagicCheck_ = statusMngObj.Find("MagicCheck").GetComponent<RectTransform>();
-            infoBack_ = statusMagicCheck_.Find("Info").GetComponent<Image>();
-            info_ = infoBack_.transform.Find("MagicText").GetComponent<Text>();
-        }
-
         if (charaImg_ == null)
         {
             charaImgRect_ = statusMngObj.transform.Find("CharaImage").GetComponent<RectTransform>();
             charaImg_ = statusMngObj.transform.Find("CharaImage").GetComponent<Image>();
-            MagicInit();
+            statusMagicCheck_ = statusMngObj.transform.Find("MagicCheckMask/MagicCheck").GetComponent<RectTransform>();
+            removeEquipBtn_ = statusMagicCheck_.transform.Find("Viewport/StatusMagicParent/RemoveMagicBox").GetComponent<Button>();
+            info_ = statusMngObj.transform.Find("MagicSetBack/Info/MagicText").GetComponent<Text>();
         }
+        MagicInit();
+
+        if (magicMng_ == null)
+        {
+            magicMng_ = statusMngObj.GetComponent<StatusMagicMng>();
+        }
+        magicMng_.Init();
+
         //サイズが変更して画像を切り替える
         charaImgRect_.sizeDelta = new Vector2(CharaImage[charaStringNum_].rect.width, CharaImage[charaStringNum_].rect.height);
         charaImg_.sprite = CharaImage[charaStringNum_];
 
+        //  RectTransform topicParent_ = GameObject.Find("StatusMng").GetComponent<RectTransform>();
+        if (charaNameTopicText_ == null)
+        {
+            charaNameTopicText_ = statusMngObj.transform.Find("Topics/TopicName").GetComponent<Text>();
+        }
+        charaNameTopicText_.text = charaTopicString_[(int)SceneMng.CHARACTERNUM.UNI];
+        info_.text = "魔法を選択してください";
         menuActive_.ViewStatus(charaStringNum_);
         statusMagicCheck_.gameObject.SetActive(false);
         useMagic_ = new CharaUseMagic();
@@ -142,6 +156,12 @@ public class ItemBagMng : MonoBehaviour
         charasList_ = SceneMng.charasList_;
         bagMagic_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Magic>();
 
+        if (magicMng_ == null)
+        {
+            magicMng_ = statusMngObj.GetComponent<StatusMagicMng>();
+        }
+        magicMng_.Init();
+
         for (int c = 0; c < (int)SceneMng.CHARACTERNUM.MAX; c++)
         {
             var data = SceneMng.GetCharasSettings(c);
@@ -149,9 +169,9 @@ public class ItemBagMng : MonoBehaviour
             {
                 dataCheck_[c, i] = data.Magic[i];
 
-                bagMagic_.SetStatusMagicCheck(dataCheck_[c, i], true);
+                bagMagic_.SetStatusMagicCheck((SceneMng.CHARACTERNUM)charaStringNum_,dataCheck_[c, i], true);
 
-                setImageNum_[c, i] = Bag_Magic.data[data.Magic[i]].element;
+                setImageNum_[c, i] = Bag_Magic.data[dataCheck_[c, i]].element;
                 //Debug.Log((SceneMng.CHARACTERNUM)c + "の" + i + "番目:" + data.Magic[i] + "番の魔法/名前：" +
                 //    Bag_Magic.data[data.Magic[i]].name +
                 //    "/エレメント番号" + Bag_Magic.data[data.Magic[i]].element);
@@ -168,40 +188,43 @@ public class ItemBagMng : MonoBehaviour
 
         if (statusMngObj.gameObject.activeSelf == true)
         {
-            Debug.Log("選択中のキャラクター："+ charaStringNum_);
-            for (int i = 0; i < 4; i++)
-            {
+            // 魔法セット先を選択していないため外すボタンは押せないようにする
+            removeEquipBtn_.interactable = false;
 
-                // セットしている魔法があるかチェック
-                if (dataCheck_[charaStringNum_, i] == setNullNum_)
-                {
-                    equipMagic_[i].sprite = null;
-                    equipMagic_[i].color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
-                }
-                else
-                {
-                    // 魔法をセットしていたらその画像をステータス画面に出す
-                    equipMagic_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][setImageNum_[charaStringNum_, i]];
-                    equipMagic_[i].color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-                    equipBtn_[i].interactable = true;
-                    Debug.Log(i+"番目に魔法がセットされています");
-                    if (i < 3)
-                    {
-                        // 選択済みの次の魔法にセットできるように
-                        equipBtn_[i + 1].interactable = true;
-                    }
-                }
-            }
+            Debug.Log("選択中のキャラクター：" + charaStringNum_);
+            MagicBtnCheck();
+            //int addCnt_ = -1;
+            //for (int i = 0; i < 4; i++)
+            //{
+            //    if (dataCheck_[charaStringNum_, i] == setNullNum_)
+            //    {
+            //        equipMagic_[i].sprite = null;
+            //        equipMagic_[i].color = equipResetColor_;
+            //        // セット先が選択された状態でキャラ替えしてる可能性があるため通常状態に戻す
+            //        equipBtn_[i].image.color = equipNormalColor_;
+            //        if (addCnt_ != i)
+            //        {
+            //            // addCnt_と違う値なら非アクティブで良い
+            //            equipBtn_[i].interactable = false;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        // 魔法をセットしていたらその画像をステータス画面に出す
+            //        equipMagic_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][setImageNum_[charaStringNum_, i]];
+            //        equipMagic_[i].color = equipNormalColor_;
+            //        equipBtn_[i].interactable = true;
+            //        Debug.Log(i + "番目に魔法がセットされています");
+            //        if (i < 3)
+            //        {
+            //            // 選択済みの次の魔法にセットできるように
+            //            equipBtn_[i + 1].interactable = true;
+            //        }
+            //    }
+            //}
 
-            // もし何もセットしていない場合
-            if (dataCheck_[charaStringNum_, 1] == setNullNum_)
-            {
-                // 1つだけ魔法をセットできるようにする
-                equipBtn_[0].interactable = true;
-                equipBtn_[1].interactable = false;
-                equipBtn_[2].interactable = false;
-                equipBtn_[3].interactable = false;
-            }
+            // 魔法がセットされてる関係なく一番左は押下可能
+            equipBtn_[0].interactable = true;
         }
     }
 
@@ -214,7 +237,7 @@ public class ItemBagMng : MonoBehaviour
                 stringNum_ = (int)TOPIC.ITEM;
             }
             topicText_.text = topicString_[stringNum_];
-          //  Debug.Log("右矢印をクリック" + stringNum_);
+            //  Debug.Log("右矢印をクリック" + stringNum_);
         }
         else if (menuActive_.GetNowMenuCanvas() == MenuActive.CANVAS.STATUS)
         {
@@ -229,7 +252,7 @@ public class ItemBagMng : MonoBehaviour
                 charaStringNum_ = (int)SceneMng.CHARACTERNUM.UNI;
             }
             ArrowCommon();
-        //    Debug.Log("右矢印をクリック" + charaStringNum_);
+            //    Debug.Log("右矢印をクリック" + charaStringNum_);
         }
         else
         {
@@ -251,7 +274,7 @@ public class ItemBagMng : MonoBehaviour
                 stringNum_ = (int)TOPIC.MAGIC;
             }
             topicText_.text = topicString_[stringNum_];
-          //  Debug.Log("左矢印をクリック" + stringNum_);
+            //  Debug.Log("左矢印をクリック" + stringNum_);
         }
         else if (menuActive_.GetNowMenuCanvas() == MenuActive.CANVAS.STATUS)
         {
@@ -266,7 +289,7 @@ public class ItemBagMng : MonoBehaviour
                 charaStringNum_ = (int)SceneMng.CHARACTERNUM.JACK;
             }
             ArrowCommon();
-           // Debug.Log("左矢印をクリック" + charaStringNum_);
+            // Debug.Log("左矢印をクリック" + charaStringNum_);
         }
         else
         {
@@ -290,68 +313,69 @@ public class ItemBagMng : MonoBehaviour
         charaImg_.sprite = CharaImage[charaStringNum_];
 
         statusMagicCheck_.gameObject.SetActive(false);     // 持っている魔法一覧を表示
-       
+
+        Debug.Log("選択中のセット先" + btnNumber_);
+
+        MagicBtnCheck();
+        
+
+        // 魔法がセットされてる関係なく一番左は押下可能
+        equipBtn_[0].interactable = true;
+
+        // 魔法一覧の表示を消す
+        magicMng_.SetCloseFlag();
+
+        btnNumber_ = -1;// 魔法セット先の番号をリセット
+    }
+
+    private void MagicBtnCheck()
+    {
+        int addCnt_ = -1;
         for (int i = 0; i < 4; i++)
         {
-            if (dataCheck_[charaStringNum_, i] != setNullNum_)
+            equipBtn_[i].image.color = equipNormalColor_;
+            // セットしている魔法があるかチェック
+            if (dataCheck_[charaStringNum_, i] == setNullNum_)
             {
-                equipMagic_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][setImageNum_[charaStringNum_, i]];
-                equipMagic_[i].color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-                equipBtn_[i].interactable = false;
+                equipMagic_[i].sprite = null;
+                equipMagic_[i].color = equipResetColor_;
+                // セット先が選択された状態でキャラ替えしてる可能性があるため通常状態に戻す
+                if (addCnt_ != i)
+                {
+                    // addCnt_と違う値なら非アクティブで良い
+                    equipBtn_[i].interactable = false;
+                }
             }
             else
             {
-                equipMagic_[i].sprite = null;
-                equipMagic_[i].color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+                // 魔法をセットしていたらその画像をステータス画面に出す
+                equipMagic_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][setImageNum_[charaStringNum_, i]];
+                equipMagic_[i].color = equipNormalColor_;
                 equipBtn_[i].interactable = true;
-
+                Debug.Log(i + "番目に魔法がセットされています");
                 if (i < 3)
                 {
-                    equipBtn_[i + 1].interactable = true;
+                    addCnt_ = i + 1;
+                    // 選択済みの次の魔法にセットできるように
+                    equipBtn_[addCnt_].interactable = true;
                 }
             }
-        }
-
-        // もし何もセットしていない場合
-        if (dataCheck_[charaStringNum_, 1] == setNullNum_)
-        {
-            // 1つだけ魔法をセットできるようにする
-            equipBtn_[0].interactable = true;
-            equipBtn_[1].interactable = false;
-            equipBtn_[2].interactable = false;
-            equipBtn_[3].interactable = false;
-        }
-        // もし何もセットしていない場合
-        if (dataCheck_[charaStringNum_, 2] == setNullNum_)
-        {
-            // 1つだけ魔法をセットできるようにする
-            equipBtn_[0].interactable = true;
-            equipBtn_[1].interactable = true;
-            equipBtn_[2].interactable = false;
-            equipBtn_[3].interactable = false;
-        }
-        if (dataCheck_[charaStringNum_, 3] == setNullNum_)
-        {
-            // 1つだけ魔法をセットできるようにする
-            equipBtn_[0].interactable = true;
-            equipBtn_[1].interactable = true;
-            equipBtn_[2].interactable = true;
-            equipBtn_[3].interactable = false;
+            Debug.Log((SceneMng.CHARACTERNUM)charaStringNum_ + "の" + i + "番目にセット中の魔法の画像番号：" + setImageNum_[charaStringNum_, i]);
         }
     }
 
     public void ActiveRectTransform()
     {
-      //   Debug.Log(mngs_[stringNum_].gameObject.name + "を表示します               " + stringNum_);
+        //   Debug.Log(mngs_[stringNum_].gameObject.name + "を表示します               " + stringNum_);
         info_.text = "";// 説明欄の表示をリセット
-      
+
         for (int i = 0; i < (int)TOPIC.MAX; i++)
         {
             if (stringNum_ == i)
             {
                 // 選択のものを表示
                 mngs_[i].gameObject.SetActive(true);
-               // Debug.Log(mngs_[i].gameObject.name + "を表示しています");
+                // Debug.Log(mngs_[i].gameObject.name + "を表示しています");
             }
             else
             {
@@ -391,7 +415,7 @@ public class ItemBagMng : MonoBehaviour
 
     public void OnClickSetMagicButton()
     {
-        if(eventSystem_ == null)
+        if (eventSystem_ == null)
         {
             eventSystem_ = GameObject.Find("EventSystem").GetComponent<EventSystem>();
         }
@@ -400,111 +424,79 @@ public class ItemBagMng : MonoBehaviour
         //// 0番目の位置に
         btnNumber_ = int.Parse(Regex.Replace(clickbtn_.name, @"[^0-9]", ""));
         statusMagicCheck_.gameObject.SetActive(true);     // 持っている魔法一覧を表示
-    }
 
-    public void OnClickCloseMagicButton()
-    {
-        //data[num].battleSet0 = flag;
-        statusMagicCheck_.gameObject.SetActive(false);     // 持っている魔法一覧を表示
-    }
-
-    public void InfoCheck(Button btn,Vector2 pos,int number)
-    {
-        if (seleMagicBtn_==null)
+        // 選択中の色
+        equipBtn_[btnNumber_].image.color = equipBtnSelColor_;
+        for (int i = 0; i < 4; i++)
         {
-            // 最初だけ入る
-            seleMagicBtn_ = btn;
-          //  infoBack_.gameObject.SetActive(true);
-            Debug.Log(seleMagicBtn_ + "       " + btn);
-        }
-
-        // 以降はseleMagicBtn_に1つ前のボタン情報があるためここから
-        if (seleMagicBtn_ != btn)
-        {
-            Debug.Log(seleMagicBtn_+"       "+btn);
-            // 既に選択しているものがあった場合色を元に戻す
-            seleMagicBtn_.image.color = Color.white;
-            // 説明欄の座標をずらす
-            infoBack_.transform.localPosition = pos;
-
-            // サブの文字があるかで表示が違う
-            //var tmp = (int)magicButtleCommandRotate_.GetNowCommand() - 1;
-            info_.text = Bag_Magic.data[number].sub == "non" ? info_.text = Bag_Magic.data[number].main : Bag_Magic.data[number].main + "\n" + Bag_Magic.data[number].sub;
-            info_.text = useMagic_.MagicInfoMake(charasList_[charaStringNum_].GetMagicNum(number));
-        }
-        else
-        {
-            Debug.Log("選択中のボタンがあります");
-
-            if (seleMagicBtn_.image.color != Color.green)
+            if (i != btnNumber_)
             {
-                // どのボタンを選択したか代入
-                seleMagicBtn_ = btn;
-                // 選択したボタンの色を変更
-                seleMagicBtn_.image.color = Color.green;
-                // サブの文字があるかで表示が違う
-                info_.text = Bag_Magic.data[number].sub == "non" ? info_.text = Bag_Magic.data[number].main : Bag_Magic.data[number].main + "\n" + Bag_Magic.data[number].sub;
-                return;
+                // ほかのボタンが押されたため選択状態を解除する
+                equipBtn_[i].image.color = equipNormalColor_;
             }
-            // 同じもの＝2回目のクリックだったら魔法をセット
-            SetMagicCheck(number, true);
-            // 説明欄リセットして非表示に
-            info_.text = "";
-          //  infoBack_.gameObject.SetActive(false);
-            // interactable=false時の色がおかしくなるため元に戻す
-            seleMagicBtn_.image.color = Color.white;
-            // 魔法一覧を閉じる
-            statusMagicCheck_.gameObject.SetActive(false);
-            // 中身を空にする
-            seleMagicBtn_ = null;
         }
+
+        // 魔法セット先に魔法がセットされていたらはずすボタンを押せるようにする
+        removeEquipBtn_.interactable = dataCheck_[charaStringNum_, btnNumber_] != setNullNum_ ? true : false;
+        magicMng_.SetCoroutineFlag();
     }
 
-    public void SetMagicCheck(int num,bool flag)
+    public void SetMagicCheck(int num, bool flag)
     {
-        // 魔法をセットしたらセーブする
-        Debug.Log("セット先の魔法の番号"+btnNumber_+"     クリックしたボタンの番号：" + num);
-       // infoBack_.gameObject.SetActive(false) ;
+        Debug.Log("セット先の魔法の番号" + btnNumber_ + "     クリックしたボタンの番号：" + num);
 
+        // flag：falseの時が外す。trueの時が魔法セット
         if (flag == false)
         {
-            //// 外すボタンが押されたら
-            bagMagic_.SetStatusMagicCheck(dataCheck_[charaStringNum_, btnNumber_], false);
-
             int setMaxNum_ = -1;
-            if (0 == btnNumber_)
+            Debug.Log(btnNumber_ + "番目の魔法を外しました");
+
+            for (int i = 0; i < 4; i++)
             {
-                Debug.Log(btnNumber_+"番目の魔法を外しました");
-
-                for (int i = 0; i < 4; i++)
+                // どこまでセットされているかを確認する
+                if (dataCheck_[charaStringNum_, i] != setNullNum_)
                 {
-                    // どこまでセットされているかを確認する
-                    if (dataCheck_[charaStringNum_, i] != setNullNum_)
-                    {
-                        setMaxNum_ = i;
-                        Debug.Log(setMaxNum_);
-                    }
+                    setMaxNum_ = i;
                 }
-                equipBtn_[setMaxNum_ + 1].interactable = false;
-
-                // 複数魔法セット状態で下位の魔法を外す場合,選択中のセット場所+1の魔法を入れる
-                equipMagic_[btnNumber_].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][setImageNum_[charaStringNum_, btnNumber_ + 1]];
-              
-                // 1つ先のセット場所を、セットしてない状態にする
-                equipMagic_[btnNumber_+1].sprite = null;
-                equipMagic_[btnNumber_ + 1].color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
-                dataCheck_[charaStringNum_, btnNumber_] = dataCheck_[charaStringNum_, btnNumber_ + 1];
-                dataCheck_[charaStringNum_, btnNumber_ + 1] = setNullNum_;
             }
+            Debug.Log(setMaxNum_ + "個の魔法をセットしています");
+                // 最大までセットされた場合
+                equipMagic_[setMaxNum_].sprite = null;
+                equipMagic_[setMaxNum_].color = equipResetColor_;
+            if (setMaxNum_ < 3)
+            {
+                equipBtn_[setMaxNum_ + 1].interactable = false;
+            }
+
+            // 外すボタンが押されたら　指定の魔法をまた押下できる状態にする
+            bagMagic_.SetStatusMagicCheck((SceneMng.CHARACTERNUM)charaStringNum_, dataCheck_[charaStringNum_, btnNumber_], false);
+
+            // 1つ先のセット場所を、セットしてない状態にする
+            for (int i = btnNumber_; i < setMaxNum_; i++)
+            {
+                // 複数魔法セット状態で下位の魔法を外す場合,選択中のセット場所+1の魔法を入れる
+                dataCheck_[charaStringNum_, i] = dataCheck_[charaStringNum_, i + 1];
+                equipMagic_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][setImageNum_[charaStringNum_, i + 1]];
+                setImageNum_[charaStringNum_, i] = Bag_Magic.data[dataCheck_[charaStringNum_, i + 1]].element;
+                charasList_[charaStringNum_].SetMagicNum(i, dataCheck_[charaStringNum_, i + 1]);
+                Debug.Log("セット中の魔法の画像番号：" + setImageNum_[charaStringNum_, i]);
+            }
+            dataCheck_[charaStringNum_, setMaxNum_] = setNullNum_;
+
+            // 魔法を外した際に魔法が下位のセット先にずれた場合は外すボタンを押せるようにする
+            removeEquipBtn_.interactable = dataCheck_[charaStringNum_, btnNumber_] != setNullNum_ ? true : false;
+
         }
         else
         {
+            info_.text = useMagic_.MagicInfoMake(Bag_Magic.data[num]);
             for (int i = 0; i < 4; i++)
             {
                 // 今からセットしたい魔法がすでにセットされているか
                 if (dataCheck_[charaStringNum_, i] == num)
                 {
                     Debug.Log("別ですでにセットされている魔法です");
+                    btnNumber_ = -1;// 魔法セット先の番号をリセット
                     return;
                 }
             }
@@ -512,8 +504,8 @@ public class ItemBagMng : MonoBehaviour
             charasList_[charaStringNum_].SetMagicNum(btnNumber_, num);
 
             // 選択されていたボタンを解除する
-            bagMagic_.SetStatusMagicCheck(dataCheck_[charaStringNum_, btnNumber_], false);
-             // 選択中のボタンを更新する
+            bagMagic_.SetStatusMagicCheck((SceneMng.CHARACTERNUM)charaStringNum_,dataCheck_[charaStringNum_, btnNumber_], false);
+            // 選択中のボタンを更新する
             dataCheck_[charaStringNum_, btnNumber_] = num;
 
             // SetMagic3以外の魔法をセット時
@@ -528,30 +520,23 @@ public class ItemBagMng : MonoBehaviour
 
             // 画像番号を入れ替える
             setImageNum_[charaStringNum_, btnNumber_] = Bag_Magic.data[num].element;
+            // Debug.Log((SceneMng.CHARACTERNUM)charaStringNum_ + "の魔法の画像番号：" + setImageNum_[charaStringNum_, i]);
             equipMagic_[btnNumber_].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][setImageNum_[charaStringNum_, btnNumber_]];
-            equipMagic_[btnNumber_].color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+            equipMagic_[btnNumber_].color = equipNormalColor_;
 
             // 選択された魔法を押下できないようにする
-            bagMagic_.SetStatusMagicCheck(num,true);
+            bagMagic_.SetStatusMagicCheck((SceneMng.CHARACTERNUM)charaStringNum_,num, true);
         }
 
-        //// 魔法のセット状態をセーブ
-        //saveCsvSc_.SaveStart(SaveLoadCSV.SAVEDATA.CHARACTER);
-        //// キャラクター数分のfor文を回す
-        //for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
-        //{
-        //    saveCsvSc_.SaveData(SceneMng.GetCharasSettings(i));
-        //}
-        //saveCsvSc_.SaveEnd();
+        equipBtn_[btnNumber_].image.color = equipNormalColor_;
+        btnNumber_ = -1;// 魔法セット先の番号をリセット
     }
 
-    public int GetClickButtonNum()
+    public void OnClickCloseMagicButton()
     {
-        return btnNumber_;
-    }
+        magicMng_.SetCloseFlag();
+        statusMagicCheck_.gameObject.SetActive(false);     // 持っている魔法一覧を表示
 
-    public Sprite GetImageTest(int num)
-    {
-        return equipMagic_[num].sprite;
+        equipBtn_[btnNumber_].image.color = equipNormalColor_;
     }
 }
