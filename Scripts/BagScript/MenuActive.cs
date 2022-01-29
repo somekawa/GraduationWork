@@ -228,7 +228,7 @@ public class MenuActive : MonoBehaviour
         saveCsvSc_.SaveEnd();
     }
 
-    public void DataLoad()
+    public void DataLoad(bool isWarp = true)
     {
         MenuClose();
 
@@ -246,8 +246,12 @@ public class MenuActive : MonoBehaviour
 
         parentRectTrans_[(int)CANVAS.BAG].GetComponent<ItemBagMng>().MagicInit();
 
-        // 強制的にゲームスタート先をTOWNにする
-        SceneMng.SceneLoad((int)SceneMng.SCENE.TOWN);
+        // ワープでの強制移動かどうか
+        if(isWarp)
+        {
+            // 強制的にゲームスタート先をTOWNにする
+            SceneMng.SceneLoad((int)SceneMng.SCENE.TOWN);
+        }
     }
 
     public bool GetActiveFlag()

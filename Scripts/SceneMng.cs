@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class SceneMng : MonoBehaviour
 {
@@ -239,7 +240,12 @@ public class SceneMng : MonoBehaviour
         CharaData.SetCharaData(1,charasList_[1].GetCharaSetting());
 
         // int番号は、ビルド設定の数値
-        SceneManager.LoadScene(load);
+        //SceneManager.LoadScene(load);
+        if(GameObject.Find("CameraController"))
+        {
+            GameObject.Find("CameraController").GetComponent<CameraMng>().SetChangeCamera(true, true);
+        }
+        GameObject.Find("DontDestroyCanvas/LoadingCamera").GetComponent<Loading>().NextScene(load);
     }
 
     // Excelから読み込んだ建物名を保存しておく

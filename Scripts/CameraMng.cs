@@ -20,16 +20,27 @@ public class CameraMng : MonoBehaviour
     }
 
     // 外部からカメラ状態の切替を行えるようにする
-    public void SetChangeCamera(bool flag)
+    public void SetChangeCamera(bool flag, bool allfalseFlag = false)
     {
-        mainCamera.GetComponent<AudioListener>().enabled = !flag;
-        mainCamera.SetActive(!flag);
+        if(allfalseFlag)
+        {
+            mainCamera.GetComponent<AudioListener>().enabled = false;
+            mainCamera.SetActive(false);
 
-        subCamera.GetComponent<AudioListener>().enabled = flag;
-        subCamera.SetActive(flag);
+            subCamera.GetComponent<AudioListener>().enabled = false;
+            subCamera.SetActive(false);
+        }
+        else
+        {
+            mainCamera.GetComponent<AudioListener>().enabled = !flag;
+            mainCamera.SetActive(!flag);
+
+            subCamera.GetComponent<AudioListener>().enabled = flag;
+            subCamera.SetActive(flag);
+        }
 
         // ユニハウスのSceneでは呼ばれないようにする
-        if(mainCamera.activeSelf && SceneMng.nowScene != SceneMng.SCENE.UNIHOUSE)
+        if (mainCamera.activeSelf && SceneMng.nowScene != SceneMng.SCENE.UNIHOUSE)
         {
             mainCamera.GetComponent<CameraSample>().Init();
         }

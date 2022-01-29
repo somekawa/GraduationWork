@@ -58,7 +58,7 @@ public class TownMng : MonoBehaviour
             onceLoad_ = GameObject.Find("LoadPrefab").GetComponent<OnceLoad>();
             onceLoad_.SetLoadFlag(true);
             // ゲーム開始時だけ呼び出す
-            GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad();
+            GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad(false);
         }
         
         var cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();

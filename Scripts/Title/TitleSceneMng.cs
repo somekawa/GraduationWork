@@ -28,9 +28,6 @@ public class TitleSceneMng : MonoBehaviour
     private Vector3 xC_StartPos_ = new Vector3(-55.0f, 6.5f, 90.0f);// スタート座標
     private Vector3 xC_MaxPos_ = new Vector3(40.0f, 6.5f, 90.0f);// マックス座標
 
-    // シーン遷移先の名前
-    private string sceneName_ = "";
-
     void Start()
     {
         // セーブデータがあるか調べて、ないときはボタンのinteractableをfalseにする
@@ -98,15 +95,6 @@ public class TitleSceneMng : MonoBehaviour
                 // 初期位置に戻す
                 xMoveCamera_.transform.position = xC_StartPos_;
             }
-
-            if (sceneName_ != "")
-            {
-                Debug.Log("シーン移動します");
-                // シーン遷移するタイミングで入る
-                // カメラの動きを止める
-                StopCoroutine(MoveCamera());
-                SceneManager.LoadScene(sceneName_);// 指定のシーンに移動
-            }            
         }
 
         fadeFlag_ = false;
@@ -148,16 +136,10 @@ public class TitleSceneMng : MonoBehaviour
         }
     }
 
-    public void OnClickNewGame()
+    public void OnClickGameStart()
     {
-        // sceneName_ = "conversationdata";
-        sceneName_ = "InHouseAndUniHouse";//デバッグ用
-        StartCoroutine(FadeOutAndIn());
-    }
-
-    public void OnClickLoadGame()
-    {
-        sceneName_ = "Town";
-        StartCoroutine(FadeOutAndIn());
+        zMoveCamera_.gameObject.SetActive(false);
+        xMoveCamera_.gameObject.SetActive(false);
+        StopCoroutine(MoveCamera());
     }
 }

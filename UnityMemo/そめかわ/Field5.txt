@@ -561,6 +561,7 @@ new int[(int)SceneMng.SCENE.MAX]
 →hp,mp,expの上昇処理がないから
 
 配列の項目に3つを追加する
+(Chara.csとRestaurantMng.cs)
 
 素材が不要なメニューをとりあえず10個ぐらい作成する
 →そのぶん値段で差をだす
@@ -581,21 +582,378 @@ SetTimeGearで透過
 
 -------------------------------------------------
 
+<ボスを倒したあとのワード取得でエラーがでる>-------
+
+(原因)
+KnockDownEnemy.csのOnDisable関数でFind関数を使っていたから。
+→非表示になったときの処理でfindはよくないみたい
+
+(解決方法)
+Start関数を用意し、
+bagWordを予めfindしておくことにした
+
+-------------------------------------------------
+
+<家で寝たら料理バフを解除にする>------------------
+
+[UniHouseMng.cs]
+ClickSleepButton関数
+DontDestroyCanvas/TimeGear/CookPowerIconをfindして
+colorでα値を透過する。
+その際DeleteStatusUpByCook関数も呼び出す
+
+-------------------------------------------------
+
+<家で寝たら体力回復する>--------------------------
+
+[UniHouseMng.cs]
+ClickSleepButton関数内で、
+DeleteStatusUpByCook関数を呼び出したときに
+SetHPとSetMPも呼び出してMaxの値を設定する。
+
+-------------------------------------------------
+
+<進行度7までは寝るボタンが押せない雰囲気を出す>----
+
+[UniHouseMng.cs]
+Start関数内で現在の進行度を調べて、
+7未満だったらSleepButtonの
+interactableをfalseにする
+→これで半透明になるからわかりやすくなる
+
+-------------------------------------------------
+
+<ジャックをフィールドに表示させない>--------------
+
+[FieldMng.cs]
+private GameObject jackObj_;
+を用意して
+Start関数でJackをfindしておく
+
+ChangeMode関数でSEARCHのときはSetActiveをfalse
+BUTTLEとFORCEBUTTLEのときはtrueにする
+
+-------------------------------------------------
+
+<最初の会話の後、ユニの操作ができないバグ>---------
+
+左シフトキーを押した後にうごけなくなるので
+メニューを開いているときにうごけないことがわかった
+
+ただメニューのアイコンが最初から表示されていない
+ので、そっちのバグだと思われる。
+
+→[UniHouseMng.cs]に        　SceneMng.MenuSetActive(true);を追加する
+
+また、メニューボタンの反応がないのは
+conversationdataのシーンのdontdestroycanvasに
+onclickの設定がぬけてるから。
+→設定しなおしたら動くようになった
+
+-------------------------------------------------
+
+<セーブデータがないときはLoadボタンが
+ 押せないようにする>------------------------------
+
+[MenuActive.cs]
+ButtonStateColorChange関数をLoadでも使えるように
+引数を増やしておく。
+
+data.csvがResourceファイルにないときは
+ロードが押せないようにしておく。
+
+よく考えたらゲームを止めるまでデータが保存されない
+からいつまでも押せないままになる
+→仕様です・・・
+戻りたかったら一度ゲームを閉じてもらうしかない
+っていうのを操作方法に書いといたほうがいいかも((
+
+-------------------------------------------------
+
+<アイテムの大成功処理をつくる>--------------------
+
+その前に、HaveItemList.csvとUseItem.csの順番が
+一部ずれていたのでそれを修正した
+→HaveItemList.csvに合わせた
+
+[UseItem.cs]
+大成功の処理についてかく
+
+[CharacterMng.cs]
+即死身代わりアイテムの番号をpairにしてあげて
+身代わりアイテム消費の処理で
+普通->大成功アイテムの順に所持しているか調べる。
+
+-------------------------------------------------
+
+<ストーリー中でもらえるアイテム/素材類>-----------
+
+Chapter3->空のマテリア*5
+[ItemStore.cs]
+CheckEvent関数でtmpFlgがfalseのときに
+ GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>().MateriaGetCheck(34,5);
+を呼び出すようにする
+
+Chapter4->アイテム合成レシピ(初級)
+※さきちゃんに任せてる
+
+[EventMng.cs]
+SetChapterNumに記述する
+注意点として、eventNumで判断するから
+Chapter8のeventNumは9であるというところ。
+Chapter8->回復ポーション(小)*3
+
+-------------------------------------------------
+
+<DropFieldMateria.csのバグ>----------------------
+
+素材のドロップが範囲外になる
+fieldNumber_ = (int)SceneMng.nowScene - (int)SceneMng.SCENE.FIELD0;
+というのを、
+
+fieldNumber_ = (int)SceneMng.nowScene
+に変更した
+
+-------------------------------------------------
+
+<newGameのときに、本の情報だけ初期化できない>-----
+
+data.csvやotherData.csvと同じSaveLoadCSV.csに
+初期化処理を記述するようにした。
+
+[SaveLoadCSV.cs]
+NewGameInit関数を作成してExcelから本の名前をとりだし、読んだかどうかのintのほうは固定で「０」にする。
+
+よく考えたらセーブしてるだけで、bookState_自体の
+初期化ができてなかったわ
+
+[BookStoreMng.cs]
+bookState_変数がnullかどうかで判断してあげる
+→newかloadかの区別をつけられる
+
+-------------------------------------------------
+
+<敵のランダム数出現>------------------------------
+
+[ButtleMng.cs]
+public にしているdebugEnemyNumをコメントアウトし、
+
+// 敵のインスタンス(1～4)
+var debugEnemyNum = Random.Range(0, 5);
+// イベント戦闘の場合、敵の数が異なる場合があるので返り値で正しい値を受け取るようにする
+var correctEnemyNum = enemyInstanceMng_.EnemyInstance(debugEnemyNum, buttleUICanvas);
+
+とする。
+-------------------------------------------------
+
+<ローディング画面を作成する>----------------------
+
+参考にしたサイト↓
+https://gametukurikata.com/program/nowloading
+
+loadingscene
+->ボタンを押すと記述したシーンに飛ぶ
+
+titlescene(今)
+・newgame ->conversationdata
+・loadgame->town
+
+各シーンにローディング機能を持たせたほうが早いかな
+
+MainCamera系にLoading.csをアタッチして
+Canvas-Backgroundを持っていけばいい
+
+LoadSceneの関数を変える必要がある
+LoadSceneAsyncにする
+
+[Title->次のシーンにロードをはさむ]
+
+<TitleSceneに追加したもの>
+・LoadingCamera
+   -Loading.csをアタッチ
+      -BackGroundにLoadingCanvasのBackground
+      -SliderにLoadingCanvasのSlider
+   -AudioListener(チェックを外しておく)
+   -Depthを「-2」にする
+
+・LoadingCanvas
+   -CanvasのSortOrderを「50」とする
+　　(そのシーン内で一番値を大きくする)
+
+・NewGameBtnとLoadGameBtnのOnClickを2つにする
+   -TitleMng.csのOnClickGameStart
+   -Loading.csのNextScene
+    (Newは「１」,Loadは「２」という数値をいれる)
+　　(数字の意味は、ビルド番号)
+
+<TitleSceneMng.cs>
+今までOnClickNew/Loadで分けていたものを
+OnClickGameStartに統一する
+中の処理ではMainCamera/SubCameraの
+ゲームオブジェクトを非表示にし、
+MoveCameraのコルーチンを止めるようにしている
+
+<Loading.cs>
+NextScene関数では
+LoadDataのコルーチンを呼ぶ処理をしている
+(ここの引数がLoadDataにビルド番号を渡すもの)
+
+LoadData関数ではbackGroundの表示と
+AudioListenerのenableをtrueにする処理と
+シーンの読み込みと
+読み込み速度に合わせたスライダーの増加処理をしてる
+
+[Title以外->次のシーンにロードをはさむ]
+LoadingCameraだけDontDestroyCanvasの子にする。
+LoadingCanvasは各シーン配置
+→プレハブにする
+
+<CameraMng.cs>
+SetChangeCamera関数の引数にallfalseFlagを追加。
+通常は=でfalseにしておく
+
+<SceneMng.cs>
+SceneLoad関数で
+・CameraControllerにあるCameraMng.csの
+　SetChangeCamera(true,true)と、
+　DontDestroyCanvasにあるLocationCameraにアタッチ　しているLoading.csのNextScene関数を呼び出す処理を　書く
+
+-------------------------------------------------
+
+<ロードが2回走るバグ>-----------------------------
+
+(原因)
+タイトルからのロードで、
+LoadGameをクリックして1回と
+MenuActive.csのDataLoad関数を呼び出したときに
+街に強制的にロードされる処理で1回
+
+(解決方法)
+[MenuActive.cs]
+DataLoad関数の引数に(bool isWarp = true)
+と書いておき、TownMng.csで呼び出しているほうに
+falseとしておく
+
+あとはisWarpがtrueのときは
+// 強制的にゲームスタート先をTOWNにする
+SceneMng.SceneLoad((int)SceneMng.SCENE.TOWN);
+が発生するようにしておく
+
+※AudioLisnerをfalseにしても遷移したらtrueになる
+　バグも、これを直したら修正できた
+
+[Loading.cs]に、
+void OnEnable()
+{
+   gameObject.GetComponent<AudioListener>().
+                                 enabled = false;
+}
+を書いておく
+
+-------------------------------------------------
+
+<ローディング中に、ユニちゃんが走るようにする>-----
+
+「ユニティちゃん 2Dデータ」
+をダウンロードしてくる。
+(Vol.2は、ユニが意外と大きくてちょっと
+　かわいくなかった)
+
+2Dのためパッケージを開くには新規のプロジェクトで
+開かないといけない。
+
+このなかにあったUnityChan.pngをデスクトップに取り出して保存し、走るモーションだけに切り取る。
+その後StreamingAssetsフォルダにいれる。
+
+<ItemImageMng.cs>
+IMAGE.LOADING_UNIを追加して、
+spriteMap[IMAGE.LOADING_UNI] =
+　　　　　　　　 ImageMng(1, 8, "/sprite_uni");
+とする。
+
+[TitleSceneへの追加]
+・TitleMngにItemImageMng.csを追加する
+・LoadingCanvas-Backgroundの子にImageをつける
+
+[そもそものロード処理を大幅変更]
+<Loading.cs>
+用意した変数
+private Image uniImage_;        // ユニの2D画像
+private int uniAnimNum_ = 0;    // ユニの画像番号
+private int nowTimeCnt_ = 0;    // 現在の時間
+private int buildNum_;          // ビルド番号
+private bool onceFlg_;		// シーン読み込み
+
+OnEnable関数
+・AudioListenerのenabledをfalse
+・buildNum_ = -1;
+・uniAnimNum_ = 0;
+
+NextScene関数
+・AudioListenerのenabledをtrue
+・backGroundのSetActiveをtrue
+・buildNum_ = buildNum;
+
+
+Update関数
+・backGroundのactiveSelfがfalseならreturnする
+・uniImage_にfind処理
+・LoadSceneAsync処理(onceFlg_をつかう)
+・nowTimeCnt_を%20で割って0のときには
+　uniAnimNum_を++する(画像上限のときは0に戻す)
+　そしてuniImage_.spriteを更新
+・nowTimeCnt++
+・ロード状態がわかるバーのスライダーを増加
+
+(結論)
+いままでコルーチンでやっていた処理をupdate関数で
+やるようにした。
+
+(理由)
+コルーチンやwhile文では、うまく画像の更新と
+スライダーの増加ができなかったから。
+
+[最終的な状態]
+(さらに変更した点)
+・外部アタッチでBackgroundとSliderを取得するのを
+　やめた
+　→Findするようにした
+・OnEnable関数の使用をやめた
+　→うまく機能していなかった
+・ロードの終わりかけで数秒待つ処理を追加した
+　→ロード時間の均一化
+・Update関数でbackGroundがnullだったらfindするよう
+　にした
+・backGroundが非表示のときはAudioListenerのenable
+  をfalseにするようにした
+　→ここ以外でfalseにする処理ができるところがない
+
+-------------------------------------------------
+
+<newGame->conversationdataでエラー>--------------
+
+(修正点)
+[TextMng.cs]
+textStateNum_変数を追加した。
+→最初は0
+  現在0のとき、会話終了で1
+  現在1のとき、画面遷移で2
+　こうすることで何度もシーン遷移を呼ばなくなる
+
+またAudioListenerのenable処理が必要になるので
+Main Cameraをfindして処理を足しておく
+
+-------------------------------------------------
+
 <次やる事>
-・ボスを倒したときに入手できるワードについての
-　処理をする
-→バグをさきちゃんへ報告中
-
-・ストーリー進行でもらえるアイテム処理は終わった
-　のかさきちゃんにきく
-
-・魔法のつけはずしがバグぽい
-
-・ゲームの遊び方説明
-→パワポで作成する
+・逃走成功/不成功をつくる
 
 ・セーブ内容に
 　「時間」
 　「一時パワーアップ中のデータ」
 　「そのパワーアップがいつまでか」
 　の保存をする
+
+
+置き換えましたの連絡をする！！！！
+

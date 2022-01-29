@@ -63,8 +63,15 @@ public class TextMng : MonoBehaviour
     private SceneMng.SCENE sceneLoadNum_;   // Excelから読み込んだ次の切替予定シーンを保存する変数
     private bool clickLock_ = false;        // マウスの押下を許可するか(true:マウスクリック不可,false:マウスクリック可)
 
+    private int textStateNum_ = 0;          // テキスト状態の管理
+
     void Start()
     {
+        SceneMng.SetNowScene(SceneMng.SCENE.CONVERSATION);
+
+        textStateNum_ = 0;
+        GameObject.Find("Main Camera").GetComponent<AudioListener>().enabled = true;
+
         // CharacterListの子供を順番に取得していき、charFacesMap_に登録する
         Transform tmpt = CharacterList.gameObject.transform;
         // 子の数で配列初期化
@@ -146,16 +153,25 @@ public class TextMng : MonoBehaviour
                     }
                     else
                     {
-                        // 越えたら話の終了の合図として使える
-                        Debug.Log("会話終了です");
-
-                        // そのチャプターで使った画像をまとめて破棄する
-                        DestroyTexture2D();
-                        // 一時保存してた番号でシーン遷移する
-                        SceneMng.SceneLoad((int)sceneLoadNum_);
+                        if(textStateNum_ == 0)
+                        {
+                            // 越えたら話の終了の合図として使える
+                            Debug.Log("会話終了です");
+                            textStateNum_ = 1;
+                        }
                     }
                 }
             }
+        }
+
+        if(textStateNum_ == 1)
+        {
+            GameObject.Find("Main Camera").GetComponent<AudioListener>().enabled = false;
+            textStateNum_ = 2;
+            // そのチャプターで使った画像をまとめて破棄する
+            DestroyTexture2D();
+            // 一時保存してた番号でシーン遷移する
+            SceneMng.SceneLoad((int)sceneLoadNum_);
         }
     }
 

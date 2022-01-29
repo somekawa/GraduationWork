@@ -15,6 +15,7 @@ public class ItemImageMng : MonoBehaviour
         RESTAURANT,
         BADSTATUSICON,
         BUFFICON,
+        LOADING_UNI,
         MAX
     }
     public static Dictionary<IMAGE, Sprite[]> spriteMap = new Dictionary<IMAGE, Sprite[]>();
@@ -29,15 +30,19 @@ public class ItemImageMng : MonoBehaviour
         }
 
         spriteMap[IMAGE.ITEM] = ImageMng(3, 7, "/Item/Items_");
-        spriteMap[IMAGE.MAGIC] = ImageMng(1, 7, "/MagicImage");
-        spriteMap[IMAGE.BOOK] = ImageMng(1, 6, "/BookImage");
+        spriteMap[IMAGE.MAGIC] = ImageMng(0, 7, "/MagicImage");
+        spriteMap[IMAGE.BOOK] = ImageMng(0, 6, "/BookImage");
         // 状態異常中のアイコン
-        spriteMap[IMAGE.BADSTATUSICON] = ImageMng(1, 3, "/BadStatusIcon");
+        spriteMap[IMAGE.BADSTATUSICON] = ImageMng(0, 3, "/BadStatusIcon");
         // 戦闘中のバフアイコン
-        spriteMap[IMAGE.BUFFICON] = ImageMng(1, 6, "/BuffIcon");
+        spriteMap[IMAGE.BUFFICON] = ImageMng(0, 6, "/BuffIcon");
 
         // 読み込みたいシート数、シート枚の大きさ、読み込みたい画像
         spriteMap[IMAGE.MATERIA] = ImageMng(5, 8, "/Materia/Materia_");
+
+        // ユニの2D画像(ロード中に呼ぶ)
+        spriteMap[IMAGE.LOADING_UNI] = ImageMng(0, 8, "/sprite_uni");
+
         onceFlag_ = true;
     }
 
