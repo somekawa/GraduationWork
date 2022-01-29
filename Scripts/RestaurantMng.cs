@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -33,6 +34,7 @@ public class RestaurantMng : MonoBehaviour
     private GameObject orderButton_;                // 注文を確定するボタン
 
     private Restaurant restaurant_;
+    IEnumerator ienumerator_;
 
     // Excelからのデータ読み込み
     private GameObject DataPopPrefab_;
@@ -97,9 +99,54 @@ public class RestaurantMng : MonoBehaviour
         restaurant_ = new Restaurant();
     }
 
+    // キャラクターモーションの変更タイミング管理
+    private IEnumerator Motion()
+    {
+        restaurant_.ChangeMotion(false);
+
+        bool flag = false;
+        bool changeFlag = false;
+        float time = 0.0f;
+
+        while (!flag)
+        {
+            if(!changeFlag)
+            {
+                if (time >= 10.0f)
+                {
+                    restaurant_.ChangeMotion(true);
+                    changeFlag = true;
+                }
+                else
+                {
+                    time += Time.deltaTime;
+                }
+            }
+            else
+            {
+                if (time < 0.0f)
+                {
+                    restaurant_.ChangeMotion(false);
+                    changeFlag = false;
+                }
+                else
+                {
+                    time -= Time.deltaTime * 2.0f;
+                }
+            }
+
+            yield return null;
+        }
+    }
+
+
     // 「料理を注文する」のボタン処理
     public void OnClickOrderButton()
     {
+        ienumerator_ = null;
+        ienumerator_ = Motion();
+        StartCoroutine(ienumerator_);
+
         Debug.Log("料理を注文するボタンを押下しました");
         restaurantCanvas_.SetActive(false);
         restaurantMenuUI.SetActive(true);

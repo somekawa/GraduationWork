@@ -5,6 +5,8 @@ using UnityEngine;
 public class Restaurant : HouseBase
 {
     private UnityChan.FaceUpdate npcController_;
+    private Animator animator_;
+    private int key_Move = Animator.StringToHash("Move");
 
     public override bool CheckEvent()
     {
@@ -44,4 +46,13 @@ public class Restaurant : HouseBase
         npcController_.OnCallChangeFace(faceStr);
     }
 
+    public void ChangeMotion(bool flag)
+    {
+        if (animator_ == null)
+        {
+            animator_ = GameObject.Find("HouseInterior/Restaurant/Toko").GetComponent<Animator>();
+        }
+
+        animator_.SetBool(key_Move,flag);
+    }
 }

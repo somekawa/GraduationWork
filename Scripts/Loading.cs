@@ -4,11 +4,13 @@ using UnityEngine.SceneManagement;
 
 public class Loading : MonoBehaviour
 {
-    //　非同期動作で使用するAsyncOperation
+    // 非同期動作で使用するAsyncOperation
     private AsyncOperation async;
-    //　シーンロード中に表示するUI画面
+    // シーンロード中に表示するUI画面
     private GameObject backGround;
-    //　読み込み率を表示するスライダー
+    // 背景画像
+    private GameObject backImage_;
+    // 読み込み率を表示するスライダー
     private Slider slider;
 
     private Image uniImage_;        // ユニの2D画像
@@ -23,6 +25,7 @@ public class Loading : MonoBehaviour
     {
         uniAnimNum_ = 0;
         gameObject.GetComponent<AudioListener>().enabled = true;
+        backImage_.SetActive(true);
         backGround.SetActive(true);
         buildNum_ = buildNum;
         sceneTimeFlg_ = false;
@@ -37,10 +40,13 @@ public class Loading : MonoBehaviour
     {
         if (backGround == null)
         {
-            backGround = GameObject.Find("LoadingCanvas/Background").gameObject;
+            var tmp = GameObject.Find("LoadingCanvas").transform;
+            backImage_ = tmp.Find("BackImage").gameObject;
+            backGround = tmp.Find("Background").gameObject;
             slider = backGround.transform.Find("Slider").GetComponent<Slider>();
             uniImage_ = backGround.transform.Find("Image").GetComponent<Image>();
             uniImage_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.LOADING_UNI][0];
+            backImage_.SetActive(false);
             backGround.SetActive(false);
         }
 

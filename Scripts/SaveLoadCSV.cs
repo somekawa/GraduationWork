@@ -200,6 +200,21 @@ public class SaveLoadCSV : MonoBehaviour
     // NewGameの際にbookData.csvの初期化をする
     public void NewGameInit()
     {
+        // キャラステータス
+        SaveStart(SAVEDATA.CHARACTER);
+        // キャラクター数分のfor文を回す
+        for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+        {
+            SaveData(SceneMng.GetCharasSettings(i));
+        }
+        SaveEnd();
+
+        // その他データのセーブ
+        SaveStart(SAVEDATA.OTHER);
+        OtherSaveData();
+        SaveEnd();
+
+        // Book
         var DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
 
         List<string> bookname_ = new List<string>();
@@ -222,19 +237,10 @@ public class SaveLoadCSV : MonoBehaviour
 
             for (int i = 0; i < bookname_.Count; i++)
             {
-                BookStoreMng.bookState_[i].name = bookname_[i];
+                BookStoreMng.bookState_[i].bookName = bookname_[i];
                 BookStoreMng.bookState_[i].readFlag = 0;
             }
         }
-
-        //SaveStart(SAVEDATA.BOOK);
-        //for (int i = 0; i < bookname_.Count; i++)
-        //{
-        //    string[] data = { bookname_[i], 0.ToString() };
-        //    string write = string.Join(",", data);
-        //    sw.WriteLine(write);
-        //}
-        //SaveEnd();
     }
 
     // ファイルを閉じるときに呼ぶ
