@@ -27,14 +27,10 @@ public class Loading : MonoBehaviour
         buildNum_ = buildNum;
         sceneTimeFlg_ = false;
 
-        // 次の読み込みがTownではないとき
-        if(buildNum_ != 2)
-        {
-            // シーン読み込み
-            async = SceneManager.LoadSceneAsync(buildNum_);
-            // 読み込みが終了しても、すぐに遷移しないようにfalse
-            async.allowSceneActivation = false;
-        }
+        // シーン読み込み
+        async = SceneManager.LoadSceneAsync(buildNum_);
+        // 読み込みが終了しても、すぐに遷移しないようにfalse
+        async.allowSceneActivation = false;
     }
 
     void Update()
@@ -46,15 +42,6 @@ public class Loading : MonoBehaviour
             uniImage_ = backGround.transform.Find("Image").GetComponent<Image>();
             uniImage_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.LOADING_UNI][0];
             backGround.SetActive(false);
-
-            // Townの読み込みが重いので、現在がTownでないときは裏でロードしておく
-            if(SceneManager.GetActiveScene().buildIndex != 2)
-            {
-                // シーン読み込み
-                async = SceneManager.LoadSceneAsync(2);
-                // 読み込みが終了しても、すぐに遷移しないようにfalse
-                async.allowSceneActivation = false;
-            }
         }
 
         if (!backGround.activeSelf)
