@@ -38,7 +38,7 @@ public class SaveCSV_Book : MonoBehaviour
     public void SaveBookData(BookStoreMng.BookData set)
     {
         // 実際のステータス値
-        string[] data = { set.name, set.readFlag.ToString() };
+        string[] data = { set.bookName, set.readFlag.ToString() };
 
         // set.sprite.ToString() 
         string write = string.Join(",", data);
