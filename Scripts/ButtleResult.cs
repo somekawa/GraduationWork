@@ -29,9 +29,12 @@ public class ButtleResult : MonoBehaviour
     private static int[] allExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 今まで獲得した合計Exp
     private int[] oldLevel_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// レベルアップする前のレベル
     private int[] getExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 獲得EXP
-    private int saveSumExp_ = 0;// 獲得EXPの合計
+                                                                    //   private int saveSumExp_ = 0;// 獲得EXPの合計
+    private int[] saveSumExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 獲得EXPの合計
     private int[] saveSumMaxExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];
 
+    // 敵のレベル
+    private int[] enemyLv_;//
     // ドロップ関連
     private GameObject[] dropObj_;  // プレハブ生成時に使用
     private Image[] dropImage_;     // どの素材を拾ったか
@@ -79,7 +82,7 @@ public class ButtleResult : MonoBehaviour
             // レベル関連
             oldLevel_[i] = level_[i];
             levelText_[i] = expSlider_[i].transform.Find("LvText").GetComponent<TMPro.TextMeshProUGUI>();
-            levelText_[i].text = level_[i].ToString();
+            levelText_[i].text = "Lv " + level_[i].ToString();
 
             // 経験値関連
             allExp_[i] = sumExp_[i];
@@ -114,7 +117,8 @@ public class ButtleResult : MonoBehaviour
             enemyData_ = DataPopPrefab_.GetComponent<PopList>().GetData<EnemyList>(PopList.ListData.ENEMY, (int)SceneMng.nowScene - (int)SceneMng.SCENE.FIELD0, name);
         }
 
-        int[] materiaNum = new int[enemyCnt];
+        int[] materiaNum = new int[enemyCnt_];
+        enemyLv_ = new int[enemyCnt_];
         Debug.Log(enemyCnt_);
         for (int i = 0; i < enemyCnt_; i++)
         {
@@ -124,8 +128,12 @@ public class ButtleResult : MonoBehaviour
             Debug.Log(i + "番目：" + enemyList_[i].DropMateria());
             // Drop物の番号を確認する
             materiaNum[i] = int.Parse(Regex.Replace(enemyList_[i].DropMateria(), @"[^0-9]", ""));
-            saveSumExp_ += enemyList_[i].GetExp();
-            //saveSumMaxExp_[i] = 10;
+            enemyLv_[i] = enemyList_[i].Level();  //saveSumMaxExp_[i] = 10;
+            for (int c = 0; c < (int)SceneMng.CHARACTERNUM.MAX; c++)
+            {
+                // レベル差による経験値量チェック
+                saveSumExp_[c] += ExpCheck(c, i);
+            }
         }
 
         resultCanvas.gameObject.SetActive(true);
@@ -174,8 +182,30 @@ public class ButtleResult : MonoBehaviour
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
         {
             // 経験値のスライダーを動かす
-            StartCoroutine(ActiveExpSlider(i, charasList_[i].GetDeathFlg(), saveSumExp_));
+            StartCoroutine(ActiveExpSlider(i, charasList_[i].GetDeathFlg(), saveSumExp_[i]));
         }
+    }
+
+    private int ExpCheck(int charaNum, int enemyNum)
+    {
+        int getExp = 0;
+        int LvCheck = level_[charaNum] - enemyLv_[enemyNum];
+        Debug.Log("レベル差" + LvCheck);
+        if ( LvCheck<=0)
+        {
+            // キャラのレベルのほうが低い場合 そのままの経験値を渡す
+            getExp = enemyList_[enemyNum].GetExp();
+        }
+        else
+        {
+            getExp = enemyList_[enemyNum].GetExp() - (LvCheck * 5);
+            if (getExp < 5)
+            {
+                // 取得Expが5以下の時は5にする
+                getExp = 5;
+            }
+        }
+        return getExp;
     }
 
     private IEnumerator ActiveExpSlider(int charaNum, bool deathFlag, int sumExp)
@@ -276,9 +306,10 @@ public class ButtleResult : MonoBehaviour
         {
             Debug.Log(i + "番目のキャラのレベル遷移：" + oldLevel_[i] + "→" + level_[i]);
             levelUpFlag[i] = oldLevel_[i] < level_[i] ? true : false;
+            saveSumExp_[i] = 0;
         }
 
-        saveSumExp_ = 0;
+        //  saveSumExp_ = 0;
         // 誰のレベルも上がってなかったら何もしない
         if (levelUpFlag[(int)SceneMng.CHARACTERNUM.UNI] == false
          && levelUpFlag[(int)SceneMng.CHARACTERNUM.JACK] == false)
