@@ -234,7 +234,7 @@ public class BookStoreMng : MonoBehaviour
                 bookState_[i] = new BookData
                 {
                     bookName = PopListInTown.bookObj[i].name,
-                    readFlag = 0,
+                    readFlag = bookState_[i].readFlag,
                     obj = PopListInTown.bookObj[i],
                     wordDataNum = PopListInTown.bookWordNum[i],
                     statusMng = PopListInTown.statusUp[i],
