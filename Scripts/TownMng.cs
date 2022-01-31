@@ -19,6 +19,8 @@ public class TownMng : MonoBehaviour
    
     private GameObject loadPrefab_;// タイトルシーンからの遷移かどうか
     private OnceLoad onceLoad_;// LoadPrefabにアタッチされてるScript
+
+    private static bool onceflag_=true;
     void Start()
     {
         // 現在のシーンをTOWNとする
@@ -105,5 +107,16 @@ public class TownMng : MonoBehaviour
                 SceneMng.charasList_[i].DeleteStatusUpByCook();
             }
         }
+
+        if(onceflag_==true)
+        {
+            onceflag_ = false;
+            GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
+            GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
+            GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
+            GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
+
+        }
+        GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>().MateriaGetCheck(34, 5);
     }
 }
