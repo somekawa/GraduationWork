@@ -28,7 +28,7 @@ public class ButtleResult : MonoBehaviour
     private static int[] sumExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 今まで獲得した合計Exp
     private static int[] allExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 今まで獲得した合計Exp
     private int[] oldLevel_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// レベルアップする前のレベル
-    private int[] getExp_= new int[(int)SceneMng.CHARACTERNUM.MAX];// 獲得EXP
+    private int[] getExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 獲得EXP
     private int saveSumExp_ = 0;// 獲得EXPの合計
     private int[] saveSumMaxExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];
 
@@ -41,7 +41,7 @@ public class ButtleResult : MonoBehaviour
 
     // Chara.csをキャラ毎にリスト化する
     private List<Chara> charasList_ = new List<Chara>();
-    public static bool onceFlag_=false;// ロードしてからの1回しか入らなくていい箇所
+    public static bool onceFlag_ = false;// ロードしてからの1回しか入らなくていい箇所
 
     // レベルアップ時のステータス表示関連
     private RectTransform levelMng;    // レベルアップ時に使用するMng
@@ -66,14 +66,14 @@ public class ButtleResult : MonoBehaviour
         charasList_ = SceneMng.charasList_;
 
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
-        {            
+        {
             if (onceFlag_ == false)
             {
                 level_[i] = charasList_[i].Level();
-                Debug.Log("レベル"+charasList_[i].Level());
+                Debug.Log("レベル" + charasList_[i].Level());
                 sumExp_[i] = charasList_[i].CharacterSumExp();
                 maxExp_[i] = charasList_[i].CharacterMaxExp();
-                nowExp_[i]= charasList_[i].CharacterExp();
+                nowExp_[i] = charasList_[i].CharacterExp();
             }
 
             // レベル関連
@@ -103,7 +103,7 @@ public class ButtleResult : MonoBehaviour
         bagMateria_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>();
     }
 
-    public void DropCheck(int enemyCnt, int[] num,bool bossFlag)
+    public void DropCheck(int enemyCnt, int[] num, bool bossFlag)
     {
         Debug.Log("リザルトを表示します");
         enemyCnt_ = enemyCnt;
@@ -118,7 +118,7 @@ public class ButtleResult : MonoBehaviour
         Debug.Log(enemyCnt_);
         for (int i = 0; i < enemyCnt_; i++)
         {
-            Debug.Log(enemyCnt + "体中 " + num[i]+"体目" );
+            Debug.Log(enemyCnt + "体中 " + num[i] + "体目");
             enemyList_.Add(new Enemy(num[i].ToString(), 1, null, enemyData_.param[num[i]]));
             Debug.Log(i + "番目：" + enemyList_[i].GetExp());
             Debug.Log(i + "番目：" + enemyList_[i].DropMateria());
@@ -143,8 +143,8 @@ public class ButtleResult : MonoBehaviour
             {
                 // ボスだった場合Dropがワードになるため取得ワードと番号を得る
                 var nameCheck = enemyList_[i].DropMateria().Split('_');
-                string wordName= nameCheck[0];// どのワードか
-                materiaNum[i]= int.Parse(nameCheck[1]);// 画像番号（エレメント）
+                string wordName = nameCheck[0];// どのワードか
+                materiaNum[i] = int.Parse(nameCheck[1]);// 画像番号（エレメント）
 
                 dropObj_[i] = Instantiate(dropPrefab,
                     new Vector2(0, 0), Quaternion.identity, dropParent);
@@ -178,7 +178,7 @@ public class ButtleResult : MonoBehaviour
         }
     }
 
-    private IEnumerator ActiveExpSlider(int charaNum, bool deathFlag,  int sumExp)
+    private IEnumerator ActiveExpSlider(int charaNum, bool deathFlag, int sumExp)
     {
         float saveValue = 0;
         // バトルで死亡したまま終了していたときは,獲得経験値を半分に
@@ -193,7 +193,7 @@ public class ButtleResult : MonoBehaviour
         while (true)
         {
             yield return null;
-            if (sumExp_[charaNum]<= saveValue )
+            if (sumExp_[charaNum] <= saveValue)
             {
                 if (onceFlag == true)
                 {
@@ -242,13 +242,13 @@ public class ButtleResult : MonoBehaviour
             }
             else
             {
-                if (  expSlider_[charaNum].maxValue<= expSlider_[charaNum].value)
+                if (expSlider_[charaNum].maxValue <= expSlider_[charaNum].value)
                 {
                     // 該当キャラのレベルを上げる
                     level_[charaNum]++;
                     levelText_[charaNum].text = "Lv " + level_[charaNum].ToString();
                     nowExp -= (int)expSlider_[charaNum].maxValue;
-                    sumMaxExp+= (int)expSlider_[charaNum].maxValue;
+                    sumMaxExp += (int)expSlider_[charaNum].maxValue;
                     // 上限を変更
                     expSlider_[charaNum].maxValue = (int)(expSlider_[charaNum].maxValue * 1.1f);
                     Debug.Log(charaNum + "    " + level_[charaNum] + "  上限" + expSlider_[charaNum].maxValue);
@@ -261,7 +261,7 @@ public class ButtleResult : MonoBehaviour
                     // 上限に来るまで加算する
                     saveValue += 1;//
                     expSlider_[charaNum].value += 1;
-                   // Debug.Log(expSlider_[charaNum].value + "  上限");
+                    // Debug.Log(expSlider_[charaNum].value + "  上限");
                 }
             }
         }
@@ -271,7 +271,7 @@ public class ButtleResult : MonoBehaviour
     {
         // ジャックの経験値スライダーまで終わったら処理をする
         // 0 Uni    1 Jack
-        bool[] levelUpFlag =new bool[(int)SceneMng.CHARACTERNUM.MAX] { false, false };
+        bool[] levelUpFlag = new bool[(int)SceneMng.CHARACTERNUM.MAX] { false, false };
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
         {
             Debug.Log(i + "番目のキャラのレベル遷移：" + oldLevel_[i] + "→" + level_[i]);
@@ -317,7 +317,7 @@ public class ButtleResult : MonoBehaviour
             {
                 if (oldLevel_[(int)SceneMng.CHARACTERNUM.UNI] != level_[(int)SceneMng.CHARACTERNUM.UNI])
                 {
-                    LevelRelation(new Vector2(-350.0f, -105.0f),SceneMng.CHARACTERNUM.UNI,
+                    LevelRelation(new Vector2(-350.0f, -105.0f), SceneMng.CHARACTERNUM.UNI,
                     oldLevel_[(int)SceneMng.CHARACTERNUM.UNI],
                     level_[(int)SceneMng.CHARACTERNUM.UNI],
                     nextExp_[(int)SceneMng.CHARACTERNUM.UNI],
@@ -364,7 +364,7 @@ public class ButtleResult : MonoBehaviour
         // ユニ、ジャック共通部分
         if ((nowLevel % 3 == 0) || (3 <= differenceLv))
         {
-            tmp[3] = 1;            // 3レベル毎にスピードを上げる
+            tmp[3] = 2;            // 3レベル毎にスピードを上げる
         }
         if ((nowLevel % 5 == 0) || (5 <= differenceLv))
         {
@@ -374,19 +374,20 @@ public class ButtleResult : MonoBehaviour
         // 複数レベル上がった場合
         for (int i = oldLevel; i < nowLevel; i++)
         {
+            // 初期値差があるためレベルアップで上がる値は同じにする
             if (i % 2 == 1)
             {
-                tmp[2] += chara == SceneMng.CHARACTERNUM.UNI ? 2 : 3;
+                tmp[2] += 2;// 2Defence
             }
             else
             {
-                tmp[0] += chara == SceneMng.CHARACTERNUM.UNI ? 2 : 3;
-                tmp[1] += chara == SceneMng.CHARACTERNUM.UNI ? 3 : 2;
+                tmp[0] += 2;// 0Attack 
+                tmp[1] += 2;// 1MagicAttack
             }
         }
-        // 1レベル上昇するたびに10加算
-        tmp[5] = differenceLv * 10;
-        tmp[6] = differenceLv * 10;
+        // 1レベル上昇するたびに加算
+        tmp[5] = differenceLv * 5;//  6MP
+        tmp[6] = differenceLv * 3;// 5HP
 
         charaRect_.sizeDelta = new Vector2(CharaImage[(int)chara].rect.width, CharaImage[(int)chara].rect.height);
         charaImage_.sprite = CharaImage[(int)chara];
@@ -404,7 +405,6 @@ public class ButtleResult : MonoBehaviour
                             "\n+" + tmp[4].ToString();
 
         tmp[7] = exp;
-     //   SceneMng.charasList_[(int)chara].SetStatusUpByCook(tmp, false);
 
         oldLevel_[(int)chara] = level_[(int)chara];
     }

@@ -48,6 +48,7 @@ public class ItemBagMng : MonoBehaviour
 
     private Bag_Magic bagMagic_;
     // ステータス関連 魔法
+    private int magicCnt_ = -1;// 所持している魔法の数
     private StatusMagicMng magicMng_;
     private RectTransform statusMagicCheck_;// ステータス画面で魔法を表示するための親
     // 魔法セット先
@@ -94,10 +95,12 @@ public class ItemBagMng : MonoBehaviour
 
         if (topicText_ == null)
         {
-            info_ = GameObject.Find("ItemBagMng/InfoBack/InfoText").GetComponent<Text>();
-            throwAwayBtn_[0] = GameObject.Find("ItemBagMng/InfoBack/ItemDelete").GetComponent<Button>();
-            throwAwayBtn_[1] = GameObject.Find("ItemBagMng/InfoBack/MateriaDelete").GetComponent<Button>();
-            throwAwayBtn_[2] = GameObject.Find("ItemBagMng/InfoBack/MagicDelete").GetComponent<Button>();
+            var itemBagMng= GameObject.Find("ItemBagMng").GetComponent<RectTransform>();
+            info_ = itemBagMng.Find("InfoBack/InfoText").GetComponent<Text>();
+            var infoBack = itemBagMng.Find("InfoBack").GetComponent<RectTransform>();
+            throwAwayBtn_[0] = infoBack.Find("ItemDelete").GetComponent<Button>();
+            throwAwayBtn_[1] = infoBack.Find("MateriaDelete").GetComponent<Button>();
+            throwAwayBtn_[2] = infoBack.Find("MagicDelete").GetComponent<Button>();
             topicText_ = transform.Find("Topics/TopicName").GetComponent<Text>();
             topicText_.text = topicString_[(int)TOPIC.ITEM];
         }
@@ -145,7 +148,9 @@ public class ItemBagMng : MonoBehaviour
             charaNameTopicText_ = statusMngObj.transform.Find("Topics/TopicName").GetComponent<Text>();
         }
         charaNameTopicText_.text = charaTopicString_[(int)SceneMng.CHARACTERNUM.UNI];
-        info_.text = "魔法を選択してください";
+
+        info_.text = (magicCnt_ < 2)? "装備できる魔法がありません" : info_.text = "魔法を選択してください";
+
         menuActive_.ViewStatus(charaStringNum_);
         statusMagicCheck_.gameObject.SetActive(false);
         useMagic_ = new CharaUseMagic();
@@ -153,14 +158,18 @@ public class ItemBagMng : MonoBehaviour
 
     public void MagicInit()
     {
+
         charasList_ = SceneMng.charasList_;
-        bagMagic_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Magic>();
 
         if (magicMng_ == null)
         {
+           //デバッグ用
+          //  GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
+            bagMagic_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Magic>();
             magicMng_ = statusMngObj.GetComponent<StatusMagicMng>();
         }
         magicMng_.Init();
+        magicCnt_ = bagMagic_.MagicNumber();
 
         for (int c = 0; c < (int)SceneMng.CHARACTERNUM.MAX; c++)
         {
@@ -188,40 +197,22 @@ public class ItemBagMng : MonoBehaviour
 
         if (statusMngObj.gameObject.activeSelf == true)
         {
+            Debug.Log("魔法所持数：" + magicCnt_);
+            if (magicCnt_ < 2)
+            {
+                // 0番（1つ目）の魔法がエラーのため2つ以上あるかを比べる
+                equipBtn_[0].interactable = false;
+                equipBtn_[1].interactable = false;
+                equipBtn_[2].interactable = false;
+                equipBtn_[3].interactable = false;
+                return;
+            }
+
             // 魔法セット先を選択していないため外すボタンは押せないようにする
             removeEquipBtn_.interactable = false;
 
             Debug.Log("選択中のキャラクター：" + charaStringNum_);
             MagicBtnCheck();
-            //int addCnt_ = -1;
-            //for (int i = 0; i < 4; i++)
-            //{
-            //    if (dataCheck_[charaStringNum_, i] == setNullNum_)
-            //    {
-            //        equipMagic_[i].sprite = null;
-            //        equipMagic_[i].color = equipResetColor_;
-            //        // セット先が選択された状態でキャラ替えしてる可能性があるため通常状態に戻す
-            //        equipBtn_[i].image.color = equipNormalColor_;
-            //        if (addCnt_ != i)
-            //        {
-            //            // addCnt_と違う値なら非アクティブで良い
-            //            equipBtn_[i].interactable = false;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        // 魔法をセットしていたらその画像をステータス画面に出す
-            //        equipMagic_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][setImageNum_[charaStringNum_, i]];
-            //        equipMagic_[i].color = equipNormalColor_;
-            //        equipBtn_[i].interactable = true;
-            //        Debug.Log(i + "番目に魔法がセットされています");
-            //        if (i < 3)
-            //        {
-            //            // 選択済みの次の魔法にセットできるように
-            //            equipBtn_[i + 1].interactable = true;
-            //        }
-            //    }
-            //}
 
             // 魔法がセットされてる関係なく一番左は押下可能
             equipBtn_[0].interactable = true;
@@ -311,6 +302,17 @@ public class ItemBagMng : MonoBehaviour
         //サイズが変更して画像を切り替える
         charaImgRect_.sizeDelta = new Vector2(CharaImage[charaStringNum_].rect.width, CharaImage[charaStringNum_].rect.height);
         charaImg_.sprite = CharaImage[charaStringNum_];
+
+        if (magicCnt_ < 2)
+        {
+            // 0番（1つ目）の魔法がエラーのため2つ以上あるかを比べる
+            equipBtn_[0].interactable = false;
+            equipBtn_[1].interactable = false;
+            equipBtn_[2].interactable = false;
+            equipBtn_[3].interactable = false;
+            return;
+        }
+
 
         statusMagicCheck_.gameObject.SetActive(false);     // 持っている魔法一覧を表示
 
@@ -500,7 +502,7 @@ public class ItemBagMng : MonoBehaviour
                     return;
                 }
             }
-
+            bagMagic_.MagicNumber();
             charasList_[charaStringNum_].SetMagicNum(btnNumber_, num);
 
             // 選択されていたボタンを解除する
@@ -537,6 +539,9 @@ public class ItemBagMng : MonoBehaviour
         magicMng_.SetCloseFlag();
         statusMagicCheck_.gameObject.SetActive(false);     // 持っている魔法一覧を表示
 
-        equipBtn_[btnNumber_].image.color = equipNormalColor_;
+        if (btnNumber_ != -1)
+        {
+            equipBtn_[btnNumber_].image.color = equipNormalColor_;
+        }
     }
 }

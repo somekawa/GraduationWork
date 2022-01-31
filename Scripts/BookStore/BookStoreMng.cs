@@ -48,6 +48,7 @@ public class BookStoreMng : MonoBehaviour
         public int imageNum;// 画像番号
     }
     public static BookData[] bookState_;
+    public static BookData bookData_;
     public static int[] recipeNum_ = new int[4];
 
     private Image soldOutImage_;// すべて買われた場合の画像
@@ -79,7 +80,7 @@ public class BookStoreMng : MonoBehaviour
     // アップステータスの名前とアップ値をペアにした変数 どれを選択したかを保存する
     private (string, int)[] statusUp_ = new (string, int)[8];
 
-    private int[] boolActiveTiming_ = new int[5] { 5, 10, 16,22,28 };
+    private int[] boolActiveTiming_ = new int[5] { 6, 12, 19,26,32 };
     void Start()
     {
         // 初期化
@@ -233,6 +234,7 @@ public class BookStoreMng : MonoBehaviour
                 // NewGameから始めて本屋にきたとき
                 bookState_[i] = new BookData
                 {
+                    number = bookState_[i].number,
                     bookName = PopListInTown.bookObj[i].name,
                     readFlag = bookState_[i].readFlag,
                     obj = PopListInTown.bookObj[i],
@@ -382,6 +384,7 @@ public class BookStoreMng : MonoBehaviour
         {
             if (bookState_[num].kinds == "Recipe")
             {
+                statusOrWordText_.text = "";
                 getStatusOrWordText_.text ="";
             }
             else
@@ -547,12 +550,13 @@ public class BookStoreMng : MonoBehaviour
             csvDatas_.Add(texts[i].Split(','));
         }
         Debug.Log("レシピ関連");
-        bookState_ = new BookData[32];
-        for(int i = 0;i < maxCnt_;i++)
-            {
-            bookState_[i].readFlag = int.Parse(csvDatas_[i+1][1]);
-        }
+        //bookState_ = new BookData[32];
+        //for(int i = 0;i < maxCnt_;i++)
+        //    {
+        //    bookState_[i].readFlag = int.Parse(csvDatas_[i+1][1]);
+        //}
         //
+        // NewGameから始めて本屋にきたとき
     }
 
     private void DataSave()
@@ -565,4 +569,13 @@ public class BookStoreMng : MonoBehaviour
         }
         saveCsvSc_.SaveEnd();
     }
+
+    public void SetBookSetting(BookData set)
+    {
+        bookData_.bookNumber = set.bookNumber;
+        bookData_.bookName = set.bookName;
+        bookData_.readFlag = set.readFlag;
+    }
+
+
 }
