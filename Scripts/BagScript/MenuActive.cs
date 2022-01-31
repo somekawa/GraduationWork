@@ -238,6 +238,7 @@ public class MenuActive : MonoBehaviour
         bagMagic_.DataLoad();
         saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.CHARACTER);
         saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.OTHER);
+        saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.BOOK);
 
         GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
         GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();

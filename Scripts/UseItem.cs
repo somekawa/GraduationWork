@@ -9,43 +9,43 @@ public class UseItem : MonoBehaviour
     private byte[] item_ = new byte[38]{
             2,//0:HPポーション(小)
             1,//1:毒消し
-            1,//2:攻撃アイテム(小全体)
-            0,//3:カエレール
-            1,//4:防御力アップ(単体)
+            0,//2:カエレール
+            1,//3:防御力アップ(単体)
+            1,//4:攻撃アイテム(小全体)
             1,//5:物理/魔法攻撃力アップ(単体)
-            1,//6:速度アップ(単体)
-            1,//7:ニゲレール
-            2,//8:HPポーション(中)
-            2,//9:MPポーション(小)
-            1,//10:暗闇消し
-            1,//11:麻痺消し
-            1,//12:攻撃アイテム(中全体)
-            0,//13:エンカウント率(低下)
+            1,//6:ニゲレール
+            1,//7:暗闇消し
+            2,//8:MPポーション(小)
+            2,//9:HPポーション(中)
+            1,//10:麻痺消し
+            0,//11:エンカウント率(低下)
+            1,//12:速度アップ(単体)
+            1,//13:即死身代わり
             1,//14:蘇生(HP小状態で)
             2,//15:HPポーション(大)
             2,//16:MPポーション(中)
-            1,//17:即死身代わり
+            1,//17:攻撃アイテム(中全体)
             1,//18:蘇生(HP全快)
             // ここから下は大成功処理---------------
             2,//19:HPポーション(小)
             1,//20:毒消し
-            1,//21:攻撃アイテム(小全体)
-            0,//22:カエレール
-            1,//23:防御力アップ(単体)
+            0,//21:カエレール
+            1,//22:防御力アップ(単体)
+            1,//23:攻撃アイテム(小全体)
             1,//24:物理/魔法攻撃力アップ(単体)
-            1,//25:速度アップ(単体)
-            1,//26:ニゲレール
-            2,//27:HPポーション(中)
-            2,//28:MPポーション(小)
-            1,//29:暗闇消し
-            1,//30:麻痺消し
-            1,//31:攻撃アイテム(中全体)
-            0,//32:エンカウント率(低下)
+            1,//25:ニゲレール
+            1,//26:暗闇消し
+            2,//27:MPポーション(小)
+            2,//28:HPポーション(中)
+            1,//29:麻痺消し
+            0,//30:エンカウント率(低下)
+            1,//31:速度アップ(単体)
+            1,//32:即死身代わり
             1,//33:蘇生(HP小状態で)
             2,//34:HPポーション(大)
             2,//35:MPポーション(中)
-            1,//36:即死身代わり
-            1 //37:蘇生(HP全快)
+            1,//36:攻撃アイテム(中全体)
+            1,//37:蘇生(HP全快)
     };
 
     private (int, int) hpmpNum_ = (0,0);
@@ -104,30 +104,25 @@ public class UseItem : MonoBehaviour
                 condition_ = CharaBase.CONDITION.POISON;
                 tmpFlg = true;
                 break;
-            case 2:    // 全体小ダメージ
-                GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(15);
-                break;
-            case 3:    // カエレール(フィールドからユニハウスへ)
+            case 2:    // カエレール(フィールドからユニハウスへ)
                 FieldMng.nowMode = FieldMng.MODE.SEARCH;
                 FieldMng.oldMode = FieldMng.MODE.NON;
                 SceneMng.SceneLoad((int)SceneMng.SCENE.UNIHOUSE);
                 break;
-            case 4:    // 防御力アップ(単体)
+            case 3:    // 防御力アップ(単体)
                 buffExItemFlg_ = false;
                 tmpFlg = true;
                 buff_ = (3, -1);
+                break;
+            case 4:    // 全体小ダメージ
+                GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(15);
                 break;
             case 5:    // 物理/魔法攻撃力アップ(単体)
                 buffExItemFlg_ = false;
                 tmpFlg = true;
                 buff_ = (1, 2);
                 break;
-            case 6:    // 速度アップ(単体)
-                buffExItemFlg_ = false;
-                tmpFlg = true;
-                buff_ = (4, -1);
-                break;
-            case 7:    // ニゲレール(強制戦闘でない場合は使用可能とする)
+            case 6:    // ニゲレール(強制戦闘でない場合は使用可能とする)
                 if (FieldMng.nowMode != FieldMng.MODE.FORCEDBUTTLE)
                 {
                     var tmp = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
@@ -143,28 +138,33 @@ public class UseItem : MonoBehaviour
                     return (false, tmpFlg);
                 }
                 break;
-            case 8:    // HPポーション(中)
-                hpmpNum_ = (40, 0);
-                tmpFlg = true;
-                break;
-            case 9:    // MPポーション(小)
-                hpmpNum_ = (0, 10);
-                tmpFlg = true;
-                break;
-            case 10:    // 暗闇消し
+            case 7:    // 暗闇消し
                 condition_ = CharaBase.CONDITION.DARK;
                 tmpFlg = true;
                 break;
-            case 11:    // 麻痺消し
+            case 8:    // MPポーション(小)
+                hpmpNum_ = (0, 10);
+                tmpFlg = true;
+                break;
+            case 9:    // HPポーション(中)
+                hpmpNum_ = (40, 0);
+                tmpFlg = true;
+                break;
+            case 10:    // 麻痺消し
                 condition_ = CharaBase.CONDITION.PARALYSIS;
                 tmpFlg = true;
                 break;
-            case 12:    // 全体中ダメージ
-                GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(30);
-                break;
-            case 13:    // エンカウント率低下
-                //@ 現在のエンカウント色のまま、一定時間エンカウントしなくなるようにする
+            case 11:    // エンカウント率低下
+                // 現在のエンカウント色のまま、一定時間エンカウントしなくなるようにする
                 FieldMng.stopEncountTimeFlg = true;
+                break;
+            case 12:    // 速度アップ(単体)
+                buffExItemFlg_ = false;
+                tmpFlg = true;
+                buff_ = (4, -1);
+                break;
+            case 13:    // 即死身代わり
+                // 持っているだけで効果がでるから、ここに処理は書かない
                 break;
             case 14:    // 蘇生(最大HPの半分)
                 alive = "half";
@@ -178,8 +178,8 @@ public class UseItem : MonoBehaviour
                 hpmpNum_ = (0, 50);
                 tmpFlg = true;
                 break;
-            case 17:    // 即死身代わり
-                // 持っているだけで効果がでるから、ここに処理は書かない
+            case 17:    // 全体中ダメージ
+                GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(30);
                 break;
             case 18:    // 蘇生(HP全快)
                 alive = "all";
@@ -194,30 +194,25 @@ public class UseItem : MonoBehaviour
                 condition_ = CharaBase.CONDITION.POISON;
                 tmpFlg = true;
                 break;
-            case 21:    // 全体小ダメージ
-                GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(20);
-                break;
-            case 22:    // カエレール(フィールドからユニハウスへ)
+            case 21:    // カエレール(フィールドからユニハウスへ)
                 FieldMng.nowMode = FieldMng.MODE.SEARCH;
                 FieldMng.oldMode = FieldMng.MODE.NON;
                 SceneMng.SceneLoad((int)SceneMng.SCENE.UNIHOUSE);
                 break;
-            case 23:    // 防御力アップ(単体)
+            case 22:    // 防御力アップ(単体)
                 buffExItemFlg_ = true;
                 tmpFlg = true;
                 buff_ = (3, -1);
+                break;
+            case 23:    // 全体小ダメージ
+                GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(20);
                 break;
             case 24:    // 物理/魔法攻撃力アップ(単体)
                 buffExItemFlg_ = true;
                 tmpFlg = true;
                 buff_ = (1, 2);
                 break;
-            case 25:    // 速度アップ(単体)
-                buffExItemFlg_ = true;
-                tmpFlg = true;
-                buff_ = (4, -1);
-                break;
-            case 26:    // ニゲレール(強制戦闘でない場合は使用可能とする)
+            case 25:    // ニゲレール(強制戦闘でない場合は使用可能とする)
                 if (FieldMng.nowMode != FieldMng.MODE.FORCEDBUTTLE)
                 {
                     var tmp = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
@@ -233,28 +228,34 @@ public class UseItem : MonoBehaviour
                     return (false, tmpFlg);
                 }
                 break;
-            case 27:    // HPポーション(中)
-                hpmpNum_ = (65, 0);
-                tmpFlg = true;
-                break;
-            case 28:    // MPポーション(小)
-                hpmpNum_ = (0, 35);
-                tmpFlg = true;
-                break;
-            case 29:    // 暗闇消し
+            case 26:    // 暗闇消し
                 condition_ = CharaBase.CONDITION.DARK;
                 tmpFlg = true;
                 break;
-            case 30:    // 麻痺消し
+            case 27:    // MPポーション(小)
+                hpmpNum_ = (0, 35);
+                tmpFlg = true;
+                break;
+            case 28:    // HPポーション(中)
+                hpmpNum_ = (65, 0);
+                tmpFlg = true;
+                break;
+            case 29:    // 麻痺消し
                 condition_ = CharaBase.CONDITION.PARALYSIS;
                 tmpFlg = true;
                 break;
-            case 31:    // 全体中ダメージ
-                GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(45);
-                break;
-            case 32:    // エンカウント率低下
-                //@ 現在のエンカウント色のまま、一定時間エンカウントしなくなるようにする
+            case 30:    // エンカウント率低下
+                // 現在のエンカウント色のまま、一定時間エンカウントしなくなるようにする
+                //@ こっちのほうが効果を長くしたい
                 FieldMng.stopEncountTimeFlg = true;
+                break;
+            case 31:    // 速度アップ(単体)
+                buffExItemFlg_ = true;
+                tmpFlg = true;
+                buff_ = (4, -1);
+                break;
+            case 32:    // 即死身代わり
+                // 持っているだけで効果がでるから、ここに処理は書かない
                 break;
             case 33:    // 蘇生(最大HPの半分)
                 alive = "half";
@@ -268,8 +269,8 @@ public class UseItem : MonoBehaviour
                 hpmpNum_ = (0, 65);
                 tmpFlg = true;
                 break;
-            case 36:    // 即死身代わり
-                // 持っているだけで効果がでるから、ここに処理は書かない
+            case 36:    // 全体中ダメージ
+                GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(45);
                 break;
             case 37:    // 蘇生(HP全快)
                 alive = "all";

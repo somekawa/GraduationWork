@@ -25,6 +25,7 @@ public class SaveLoadCSV : MonoBehaviour
 
     private StreamWriter sw;
     List<string[]> csvDatas = new List<string[]>(); // CSVの中身を入れるリスト;
+    List<string[]> bookCsvDatas_ = new List<string[]>(); // CSVの中身を入れるリスト;
 
     // 書き込み始めに呼ぶ
     public void SaveStart(SAVEDATA saveData)
@@ -386,7 +387,51 @@ public class SaveLoadCSV : MonoBehaviour
         }
         else
         {
-            // 何も処理を行わない
+            bookCsvDatas_.Clear();
+
+            // 行分けだけにとどめる
+            string[] texts = File.ReadAllText(bookFilePath_).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < texts.Length; i++)
+            {
+                // カンマ区切りでリストへ登録していく(2次元配列状態になる[行番号][カンマ区切り])
+                bookCsvDatas_.Add(texts[i].Split(','));
+            }
+            Debug.Log("レシピ関連");
+
+            if (BookStoreMng.bookState_ == null)
+            {
+                BookStoreMng.bookState_ = new BookStoreMng.BookData[texts.Length - 1];  // 項目の行を-1する
+            }
+
+            int maxCnt = 0;
+            int[] boolActiveTiming_ = new int[5] { 5, 10, 16, 22, 28 };
+
+            if (19 < EventMng.GetChapterNum())
+            {
+                maxCnt = boolActiveTiming_[4];
+            }
+            else if (16 < EventMng.GetChapterNum())
+            {
+                maxCnt = boolActiveTiming_[3];
+            }
+            else if (13 < EventMng.GetChapterNum())
+            {
+                maxCnt = boolActiveTiming_[2];
+            }
+            else if (8 < EventMng.GetChapterNum())
+            {
+                maxCnt = boolActiveTiming_[1];
+            }
+            else if (0 < EventMng.GetChapterNum())
+            {
+                maxCnt = boolActiveTiming_[0];
+            }
+
+            for (int i = 0; i < maxCnt; i++)
+            {
+                BookStoreMng.bookState_[i].readFlag = int.Parse(bookCsvDatas_[i + 1][2]);
+            }
         }
     }
 

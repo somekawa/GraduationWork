@@ -164,11 +164,11 @@ public class EnemyInstanceMng : MonoBehaviour
         enemyPos_ = enemyPosSetMap_[mapNum_][num];
 
         // ランダムなキャラを取得する(ただし、死亡したキャラは除外する)
-        //do
-        //{
-        //    attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
-        //} while (SceneMng.charasList_[attackTarget_].HP() <= 0);
-        attackTarget_ = (int)SceneMng.CHARACTERNUM.JACK;
+        do
+        {
+            attackTarget_ = Random.Range((int)SceneMng.CHARACTERNUM.UNI, (int)SceneMng.CHARACTERNUM.MAX);    // ユニ以上MAX未満で選択
+        } while (SceneMng.charasList_[attackTarget_].HP() <= 0);
+        //attackTarget_ = (int)SceneMng.CHARACTERNUM.JACK;
 
         // 行動前に発動するバッドステータスの処理
         var bst = badStatusMng_.BadStateMoveBefore(enemyList_[num].Item1.GetBS(), enemyList_[num].Item1, enemyList_[num].Item2, false);

@@ -67,7 +67,7 @@ public class CharacterMng : MonoBehaviour
     private IEnumerator rest_;
     private bool myTurnOnceFlg_;                       // 自分のターンになった最初に1回だけ呼ばれるようにするフラグ
 
-    private readonly (int,int) deathBstNoEffectItemNum_ = (17,36); // 即死肩代わりアイテムの番号
+    private readonly (int,int) deathBstNoEffectItemNum_ = (13,32); // 即死肩代わりアイテムの番号
 
     public struct EachCharaData
     {
