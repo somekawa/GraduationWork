@@ -33,7 +33,7 @@ public class Bag_Item : MonoBehaviour
         public int haveCnt;     // 指定アイテムの所持数
     }
     public static ItemData[] itemState;// xlsデータから読み込んだものを保存
-    public static ItemData[] data;// csvデータから読み込んだものを保存
+   // public static ItemData[] data;// csvデータから読み込んだものを保存
     public static bool itemUseFlg = false;  // アイテムを使用したらtrue
 
     private int clickItemNum_ = -1;
@@ -52,15 +52,18 @@ public class Bag_Item : MonoBehaviour
         popItemList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
         saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_HaveItem>();
         maxCnt_ = popItemList_.SetMaxItemCount();
-        data = new ItemData[maxCnt_];
+        //data 
+            itemState = new ItemData[maxCnt_];
         for (int i = 0; i < maxCnt_; i++)
         {
-            data[i].number = i;
-            data[i].name = InitPopList.itemData[i].name;
-            data[i].haveCnt = 0;
+            itemState[i].number = i;
+            itemState[i].name = InitPopList.itemData[i].name;
+            itemState[i].haveCnt = 0;
+            //data[i].number = i;
+            //data[i].name = InitPopList.itemData[i].name;
+            //data[i].haveCnt = 0;
         }
         DataSave();
-        DataLoad();
     }
 
     public void Init()
@@ -71,7 +74,7 @@ public class Bag_Item : MonoBehaviour
 
             maxCnt_ = popItemList_.SetMaxItemCount();
             itemState = new ItemData[maxCnt_];
-            data = new ItemData[maxCnt_];
+          //  data = new ItemData[maxCnt_];
             saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_HaveItem>();
             for (int i = 0; i < maxCnt_; i++)
             {
@@ -86,6 +89,7 @@ public class Bag_Item : MonoBehaviour
               //  Debug.Log(i+"アイテムの名前："+itemState[i].name);
                 // アイテムの所持数を確認
                 itemState[i].haveCnt = int.Parse(csvDatas_[i + 1][2]);
+             //   Debug.Log(itemState[i].name+"アイテム個数" + itemState[i].haveCnt);
                 // 親の位置を変更
                 itemState[i].box.transform.SetParent(itemParent.transform);
 
@@ -141,7 +145,7 @@ public class Bag_Item : MonoBehaviour
         }
         Debug.Log("加算されるアイテム"+itemState[itemNum].name);
         itemState[itemNum].haveCnt = itemState[itemNum].haveCnt + createCnt;
-        data[itemNum].haveCnt = itemState[itemNum].haveCnt;
+      //  data[itemNum].haveCnt = itemState[itemNum].haveCnt;
     }
 
     public void SetItemCntText(int itemNum)
@@ -173,7 +177,7 @@ public class Bag_Item : MonoBehaviour
         // アイテムの個数分回す
         for (int i = 0; i < maxCnt_; i++)
         {
-            saveCsvSc_.SaveItemData(data[i]);
+            saveCsvSc_.SaveItemData(itemState[i]);
         }
         saveCsvSc_.SaveEnd();
     }

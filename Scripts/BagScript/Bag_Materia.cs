@@ -28,7 +28,7 @@ public class Bag_Materia : MonoBehaviour
         public bool getFlag;    // 1つ以上持っているか
     }
     public static MateriaData[] materiaState;
-    public static MateriaData[] data;
+    //public static MateriaData[] data;
 
     // 他Scriptで指定するワードは番号を取得しておく
     public static int emptyMateriaNum;// 空のマテリアの番号
@@ -50,15 +50,20 @@ public class Bag_Materia : MonoBehaviour
         // タイトルでNewGameボタンを押したときに呼ばれるInit
         newGameFlag_ = true;
         maxCnt_ = popMateriaList_.SetMaxMateriaCount();
-        data = new MateriaData[maxCnt_];
+        //data
+            materiaState = new MateriaData[maxCnt_];
         for (int i = 0; i < maxCnt_; i++)
         {
-            data[i].number = i;
-            data[i].name = InitPopList.materiaData[i].name;
-            data[i].haveCnt = 0;
+            //data[i].number = i;
+            //data[i].name = InitPopList.materiaData[i].name;
+            //data[i].haveCnt = 0;
+            //Debug.Log(i + "" + data[i].name)
+            materiaState[i].number = i;
+            materiaState[i].name = InitPopList.materiaData[i].name;
+            materiaState[i].haveCnt = 0;
+            Debug.Log(i + "" + materiaState[i].name);
         }
         DataSave();
-        DataLoad();
     }
 
     public void Init()
@@ -70,9 +75,9 @@ public class Bag_Materia : MonoBehaviour
         {
             maxCnt_ = popMateriaList_.SetMaxMateriaCount();
             materiaState = new MateriaData[maxCnt_];
-            data = new MateriaData[maxCnt_];
+         //   data = new MateriaData[maxCnt_];
             newGameFlag_ = false;
-            Debug.Log(maxCnt_+"      "+materiaParent.transform);
+         //   Debug.Log(maxCnt_+"      "+materiaParent.transform);
             for (int i = 0; i < maxCnt_; i++)
             {
                 materiaState[i] = new MateriaData
@@ -155,8 +160,9 @@ public class Bag_Materia : MonoBehaviour
             materiaState[materiaNum].box.SetActive(true);
         }
         materiaState[materiaNum].cntText.text = materiaState[materiaNum].haveCnt.ToString();
+        Debug.Log(materiaState[materiaNum].name+"       "+materiaState[materiaNum].haveCnt);
 
-        data[materiaNum].haveCnt = materiaState[materiaNum].haveCnt;
+       // data[materiaNum].haveCnt = materiaState[materiaNum].haveCnt;
     }
 
     public int GetMaxHaveMateriaCnt()
@@ -197,7 +203,7 @@ public class Bag_Materia : MonoBehaviour
             throwAwayBtn_.gameObject.SetActive(false);
             info_.text = "";
         }
-        data[clickMateriaNum_].haveCnt = materiaState[clickMateriaNum_].haveCnt;
+        //data[clickMateriaNum_].haveCnt = materiaState[clickMateriaNum_].haveCnt;
     }
 
     public void DataLoad()
@@ -226,7 +232,7 @@ public class Bag_Materia : MonoBehaviour
         // 魔法の個数分回す
         for (int i = 0; i < maxCnt_; i++)
         {
-            saveCsvSc_.SaveMateriaData(data[i]);
+            saveCsvSc_.SaveMateriaData(materiaState[i]);
         }
         saveCsvSc_.SaveEnd();
     }
