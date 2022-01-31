@@ -14,8 +14,8 @@ public class Cook0 : ScriptableObject
 		public string name;
 		public string info;
 		public string statusUp;
-		public int needFood;
-        public int needNum;
+		public string needFood;
+		public string needNum;
 		public int needMoney;
 		public int eventNum;
 	}

@@ -320,7 +320,7 @@ public class EnemyInstanceMng : MonoBehaviour
 
             // 番号でどの敵をインスタンスするか決める
             int enemyNum = Random.Range(0, enemyTest.transform.childCount);
-            enemyNum = 3;   // ハチ固定
+            //enemyNum = 3;   // ハチ固定
 
             if (eventEnemy_.Item1 == null)
             {
@@ -606,7 +606,7 @@ public class EnemyInstanceMng : MonoBehaviour
         else
         {
             // クリティカルの計算をする(基礎値と幸運値で上限を狭める)
-            int criticalRand = Random.Range(0, 100 - (10 + buttleMng_.GetLuckNum()));
+            int criticalRand = Random.Range(0, 100 - (5 + buttleMng_.GetLuckNum()));
             if (criticalRand <= 10 + buttleMng_.GetLuckNum())
             {
                 // クリティカル発生(必中+ダメージ2倍)10はクリティカルの基礎値
@@ -622,11 +622,19 @@ public class EnemyInstanceMng : MonoBehaviour
                 // クリティカルじゃないとき
                 Debug.Log(criticalRand + ">" + (10 + buttleMng_.GetLuckNum()) + "なので、キャラの攻撃はクリティカルではない");
 
+                // 敵とのレベル差で命中率を下げる処理をいれる
+                var level = enemyList_[num].Item1.Level() - SceneMng.charasList_[(int)SceneMng.CHARACTERNUM.UNI].Level();
+                if(level > 0)   // ユニの方が、敵より低いとき
+                {
+                    level *= 10;
+                    Debug.Log("レベル差があるので、命中率に補正が入ります");
+                }
+
                 // 命中計算をする
                 // ①攻撃する側のSpeed / 攻撃される側のSpeed * 100 = ％の出力
                 var hitProbability = (int)((float)buttleMng_.GetSpeedNum() / (float)enemyList_[num].Item1.Speed() * 100.0f);
                 // ②キャラも敵も+10％の補正値を入れてキャラ側だけに(自分のLuck * 5)％をプラスする。
-                hitProbabilityOffset = hitProbability + 10 + (buttleMng_.GetLuckNum() * 5);
+                hitProbabilityOffset = hitProbability + 10 + (buttleMng_.GetLuckNum() * 5) - level;
                 // ③hitProbabilityOffsetが100以上なら自動命中で、それ以下ならランダム値を取る。
                 if (hitProbabilityOffset < 100)
                 {

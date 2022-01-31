@@ -8,7 +8,7 @@ public class ButtleMng : MonoBehaviour
     public Canvas buttleUICanvas;           // 表示/非表示をこのクラスで管理される
     public Canvas fieldUICanvas;            // 表示/非表示をこのクラスで管理される
 
-    public int debugEnemyNum = 1;           // インスペクターから敵の生成数を変えれるように 
+    private int instanceEnemyNum_;          // 敵の出現数調整(フィールド毎にStart関数で調整する)
 
     private bool setCallOnce_ = false;      // 戦闘モードに切り替わった最初のタイミングだけ切り替わる
 
@@ -42,10 +42,7 @@ public class ButtleMng : MonoBehaviour
     {
         characterMng_ = GameObject.Find("CharacterMng").GetComponent<CharacterMng>();
         enemyInstanceMng_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>();
-
-        //buttleCommandUI_ = buttleUICanvas.transform.Find("Command");
         buttleUICanvas.gameObject.SetActive(false);
-
         buttleResult_ = gameObject.GetComponent<ButtleResult>();
     }
 
@@ -78,7 +75,21 @@ public class ButtleMng : MonoBehaviour
 
             // 敵のインスタンス(1～4)
             // イベント戦闘の場合、敵の数が異なる場合があるので返り値で正しい値を受け取るようにする
-            var correctEnemyNum = enemyInstanceMng_.EnemyInstance(debugEnemyNum, buttleUICanvas);
+
+            // 敵数の上限を設定する(Start関数では完全にシーンが移動しきれていないので値が正しくならない)
+            if (SceneMng.nowScene == SceneMng.SCENE.FIELD0)
+            {
+                instanceEnemyNum_ = 3;  // 3未満(=2体まで)
+            }
+            else if (SceneMng.nowScene == SceneMng.SCENE.FIELD1)
+            {
+                instanceEnemyNum_ = 4;  // 4未満(=3体まで)
+            }
+            else
+            {
+                instanceEnemyNum_ = 5;  // 5未満(=4体まで)
+            }
+            var correctEnemyNum = enemyInstanceMng_.EnemyInstance(Random.Range(1, instanceEnemyNum_), buttleUICanvas);
 
             // 敵の名前と行動速度を受け取ってリストに入れる
             for (int i = 0; i < correctEnemyNum; i++)

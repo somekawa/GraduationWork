@@ -473,4 +473,9 @@ public class Enemy : CharaBase, InterfaceButtle
     {
         return Debuffmap_;
     }
+
+    public override int Level()
+    {
+        return set_.Level;
+    }
 }

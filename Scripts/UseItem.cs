@@ -144,7 +144,7 @@ public class UseItem : MonoBehaviour
                 }
                 break;
             case 8:    // HPポーション(中)
-                hpmpNum_ = (50, 0);
+                hpmpNum_ = (40, 0);
                 tmpFlg = true;
                 break;
             case 9:    // MPポーション(小)
@@ -234,7 +234,7 @@ public class UseItem : MonoBehaviour
                 }
                 break;
             case 27:    // HPポーション(中)
-                hpmpNum_ = (70, 0);
+                hpmpNum_ = (65, 0);
                 tmpFlg = true;
                 break;
             case 28:    // MPポーション(小)
@@ -283,92 +283,98 @@ public class UseItem : MonoBehaviour
 
     public void OnClickCharaButton(int num)
     {
-        // HPMP回復
-        SceneMng.charasList_[num].SetHP(SceneMng.charasList_[num].HP() + hpmpNum_.Item1);
-        SceneMng.charasList_[num].SetMP(SceneMng.charasList_[num].MP() + hpmpNum_.Item2);
-
-        // 状態異常回復(-1したときに0より大きいときは状態異常回復する)
-        if((int)condition_ - 1 > 0)
+        if(!SceneMng.charasList_[num].GetDeathFlg())
         {
-            SceneMng.charasList_[num].ConditionReset(false, (int)condition_ - 1);
-            condition_ = CharaBase.CONDITION.NON;
-        }
+            // HPMP回復
+            SceneMng.charasList_[num].SetHP(SceneMng.charasList_[num].HP() + hpmpNum_.Item1);
+            SceneMng.charasList_[num].SetMP(SceneMng.charasList_[num].MP() + hpmpNum_.Item2);
 
-        // バフ処理(固定で中威力)
-        // バフのアイコン処理
-        System.Action<int, int,int> action = (int charaNum, int buffnum,int whatBuff) => {
-            var bufftra = GameObject.Find("ButtleUICanvas/" + SceneMng.charasList_[charaNum].Name() + "CharaData/BuffImages").transform;
-            for (int i = 0; i < bufftra.childCount; i++)
+            // 状態異常回復(-1したときに0より大きいときは状態異常回復する)
+            if ((int)condition_ - 1 > 0)
             {
-                if (bufftra.GetChild(i).GetComponent<Image>().sprite == null)
-                {
-                    // アイコンをいれる
-                    bufftra.GetChild(i).GetComponent<Image>().sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BUFFICON][whatBuff - 1];
-                    // 矢印でアップ倍率をいれる
-                    // ▲*1 = バフが1% ~30%,▲*2 = バフが31% ~70%,▲*3 = バフが71%~100%
-                    for (int m = 0; m < bufftra.GetChild(i).childCount; m++)
-                    {
-                        if (m <= buffnum)    // buffnumの数字以下ならtrueにして良い
-                        {
-                            bufftra.GetChild(i).GetChild(m).gameObject.SetActive(true);
-                        }
-                        else
-                        {
-                            bufftra.GetChild(i).GetChild(m).gameObject.SetActive(false);
-                        }
-                    }
+                SceneMng.charasList_[num].ConditionReset(false, (int)condition_ - 1);
+                condition_ = CharaBase.CONDITION.NON;
+            }
 
-                    break;
+            // バフ処理(固定で中威力)
+            // バフのアイコン処理
+            System.Action<int, int, int> action = (int charaNum, int buffnum, int whatBuff) => {
+                var bufftra = GameObject.Find("ButtleUICanvas/" + SceneMng.charasList_[charaNum].Name() + "CharaData/BuffImages").transform;
+                for (int i = 0; i < bufftra.childCount; i++)
+                {
+                    if (bufftra.GetChild(i).GetComponent<Image>().sprite == null)
+                    {
+                        // アイコンをいれる
+                        bufftra.GetChild(i).GetComponent<Image>().sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BUFFICON][whatBuff - 1];
+                        // 矢印でアップ倍率をいれる
+                        // ▲*1 = バフが1% ~30%,▲*2 = バフが31% ~70%,▲*3 = バフが71%~100%
+                        for (int m = 0; m < bufftra.GetChild(i).childCount; m++)
+                        {
+                            if (m <= buffnum)    // buffnumの数字以下ならtrueにして良い
+                            {
+                                bufftra.GetChild(i).GetChild(m).gameObject.SetActive(true);
+                            }
+                            else
+                            {
+                                bufftra.GetChild(i).GetChild(m).gameObject.SetActive(false);
+                            }
+                        }
+
+                        break;
+                    }
+                }
+            };
+
+            // 物理攻撃と魔法攻撃の威力が同時に上がる事を考えて、pairにしている
+            if (buff_.Item1 > 0)
+            {
+                if (buffExItemFlg_)
+                {
+                    // 大成功アイテム使用で効果量増加
+                    var tmp = SceneMng.charasList_[num].SetBuff(2, buff_.Item1);
+                    action(num, tmp.Item1, buff_.Item1);
+                }
+                else
+                {
+                    var tmp = SceneMng.charasList_[num].SetBuff(1, buff_.Item1);
+                    action(num, tmp.Item1, buff_.Item1);
                 }
             }
-        };
+            if (buff_.Item2 > 0)
+            {
+                if (buffExItemFlg_)
+                {
+                    var tmp = SceneMng.charasList_[num].SetBuff(2, buff_.Item2);
+                    action(num, tmp.Item1, buff_.Item2);
+                }
+                else
+                {
+                    var tmp = SceneMng.charasList_[num].SetBuff(1, buff_.Item2);
+                    action(num, tmp.Item1, buff_.Item2);
+                }
+            }
+        }
+        else
+        {
+            // 蘇生処理
+            if (alive != "")
+            {
+                if (alive == "half")
+                {
+                    // 半回復状態で立ち上がらせる
+                    SceneMng.charasList_[num].SetHP(SceneMng.charasList_[num].HP() + (SceneMng.charasList_[num].MaxHP() / 2));
+                    SceneMng.charasList_[num].SetDeathFlg(false);   // 死亡状態を解除
+                }
+                else
+                {
+                    // 全回復状態で立ち上がらせる
+                    SceneMng.charasList_[num].SetHP(SceneMng.charasList_[num].HP() + SceneMng.charasList_[num].MaxHP());
+                    SceneMng.charasList_[num].SetDeathFlg(false);   // 死亡状態を解除
+                }
+            }
+        }
 
-        // 物理攻撃と魔法攻撃の威力が同時に上がる事を考えて、pairにしている
-        if (buff_.Item1 > 0)
-        {
-            if (buffExItemFlg_)
-            {
-                // 大成功アイテム使用で効果量増加
-                var tmp = SceneMng.charasList_[num].SetBuff(2, buff_.Item1);
-                action(num, tmp.Item1, buff_.Item1);
-            }
-            else
-            {
-                var tmp = SceneMng.charasList_[num].SetBuff(1, buff_.Item1);
-                action(num, tmp.Item1, buff_.Item1);
-            }
-        }
-        if (buff_.Item2 > 0)
-        {
-            if(buffExItemFlg_)
-            {
-                var tmp = SceneMng.charasList_[num].SetBuff(2, buff_.Item2);
-                action(num, tmp.Item1, buff_.Item2);
-            }
-            else
-            {
-                var tmp = SceneMng.charasList_[num].SetBuff(1, buff_.Item2);
-                action(num, tmp.Item1, buff_.Item2);
-            }
-        }
-
-        // 蘇生処理
-        if(alive != "")
-        {
-            if(alive == "half")
-            {
-                // 半回復状態で立ち上がらせる
-                SceneMng.charasList_[num].SetHP(SceneMng.charasList_[num].HP() + (SceneMng.charasList_[num].MaxHP() / 2));
-                SceneMng.charasList_[num].SetDeathFlg(false);   // 死亡状態を解除
-            }
-            else
-            {
-                // 全回復状態で立ち上がらせる
-                SceneMng.charasList_[num].SetHP(SceneMng.charasList_[num].HP() + SceneMng.charasList_[num].MaxHP());
-                SceneMng.charasList_[num].SetDeathFlg(false);   // 死亡状態を解除
-            }
-            alive = ""; // 文字列初期化
-        }
+        alive = ""; // 文字列初期化
 
         if (charasText_ == null)
         {
@@ -381,8 +387,6 @@ public class UseItem : MonoBehaviour
             text[i] = charasText_.transform.GetChild(i).GetChild(0).GetComponent<Text>();
         }
         TextInit(text);
-
-        //hpmpNum_ = (0, 0);  // 初期化
 
         Bag_Item.itemState[itemNum_].haveCnt--;
         Bag_Item.itemUseFlg = true;

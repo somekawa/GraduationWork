@@ -1023,7 +1023,7 @@ public class CharacterMng : MonoBehaviour
         bool criticallFlg = false;      // クリティカル判断用のフラグ
 
         // クリティカルの計算をする(基礎値と幸運値で上限を狭める)
-        int criticalRand = Random.Range(0, 100 - (10 + buttleMng_.GetLuckNum()));
+        int criticalRand = Random.Range(0, 100 - (5 + buttleMng_.GetLuckNum()));
         if(criticalRand <= 10 + buttleMng_.GetLuckNum())
         {
             // クリティカル発生(必中+ダメージ2倍)10はクリティカルの基礎値
@@ -1348,18 +1348,25 @@ public class CharacterMng : MonoBehaviour
                     // enePosとtargetNumは入れなくてよい(charaPos_に発動相手の座標を入れるようにする)
                     useMagic_.InstanceMagicInfo(charasList_[(int)selectChara].GetButtlePos(), new Vector3(-1, -1, -1), -1, 0);
 
-                    if(whatHeal == 0)   // HP回復
+                    if(charasList_[(int)selectChara].GetDeathFlg())
                     {
-                        // キャラのHPを増やす(スライドバー変更)
-                        StartCoroutine(eachCharaData_[(int)selectChara].charaHPMPMap.Item1.MoveSlideBar(charasList_[(int)selectChara].HP() + useMagic_.GetHealPower(), charasList_[(int)selectChara].HP()));
-                        // 内部数値の変更を行う
-                        charasList_[(int)selectChara].SetHP(charasList_[(int)selectChara].HP() + useMagic_.GetHealPower());
+                        Debug.Log("死亡中のため効果なし");
                     }
                     else
                     {
-                        // 毒・暗闇・麻痺回復
-                        charasList_[(int)selectChara].ConditionReset(false,whatHeal);
-                        badStatusMng_.SetBstIconImage((int)selectChara, -1, charaBstIconImage_, charasList_[(int)selectChara].GetBS(), true);
+                        if (whatHeal == 0)   // HP回復
+                        {
+                            // キャラのHPを増やす(スライドバー変更)
+                            StartCoroutine(eachCharaData_[(int)selectChara].charaHPMPMap.Item1.MoveSlideBar(charasList_[(int)selectChara].HP() + useMagic_.GetHealPower(), charasList_[(int)selectChara].HP()));
+                            // 内部数値の変更を行う
+                            charasList_[(int)selectChara].SetHP(charasList_[(int)selectChara].HP() + useMagic_.GetHealPower());
+                        }
+                        else
+                        {
+                            // 毒・暗闇・麻痺回復
+                            charasList_[(int)selectChara].ConditionReset(false, whatHeal);
+                            badStatusMng_.SetBstIconImage((int)selectChara, -1, charaBstIconImage_, charasList_[(int)selectChara].GetBS(), true);
+                        }
                     }
                 }
                 else
@@ -1374,6 +1381,12 @@ public class CharacterMng : MonoBehaviour
 
                         // enePosとtargetNumは入れなくてよい(charaPos_に発動相手の座標を入れるようにする)
                         useMagic_.InstanceMagicInfo(charasList_[array[i]].GetButtlePos(), new Vector3(-1, -1, -1), -1, i);
+
+                        if (charasList_[array[i]].GetDeathFlg())
+                        {
+                            Debug.Log("死亡中のため効果なし");
+                            continue;
+                        }
 
                         if (whatHeal == 0)
                         {
@@ -1484,29 +1497,36 @@ public class CharacterMng : MonoBehaviour
                     // enePosとtargetNumは入れなくてよい(charaPos_に発動相手の座標を入れるようにする)
                     useMagic_.InstanceMagicInfo(charasList_[(int)selectChara].GetButtlePos(), new Vector3(-1, -1, -1), -1, 0);
 
-                    if(sub3Num == 0)
+                    if (charasList_[(int)selectChara].GetDeathFlg())
                     {
-                        // 上昇
-                        var buffnum = charasList_[(int)selectChara].SetBuff(useMagic_.GetTailNum(), whatBuff);
-                        if(!buffnum.Item2)
-                        {
-                            action((int)selectChara, buffnum.Item1);
-                        }
+                        Debug.Log("死亡中のため効果なし");
                     }
                     else
                     {
-                        // 反射か吸収
-                        charasList_[(int)selectChara].SetReflectionOrAbsorption(whatBuff-1, sub3Num);
-                        eachCharaData_[(int)selectChara].specialBuff.GetComponent<Image>().sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BUFFICON][whatBuff + 3];
-                        eachCharaData_[(int)selectChara].specialBuff.GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-
-                        if (sub3Num == 2)
+                        if (sub3Num == 0)
                         {
-                            eachCharaData_[(int)selectChara].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "反";
+                            // 上昇
+                            var buffnum = charasList_[(int)selectChara].SetBuff(useMagic_.GetTailNum(), whatBuff);
+                            if (!buffnum.Item2)
+                            {
+                                action((int)selectChara, buffnum.Item1);
+                            }
                         }
                         else
                         {
-                            eachCharaData_[(int)selectChara].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "吸";
+                            // 反射か吸収
+                            charasList_[(int)selectChara].SetReflectionOrAbsorption(whatBuff - 1, sub3Num);
+                            eachCharaData_[(int)selectChara].specialBuff.GetComponent<Image>().sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BUFFICON][whatBuff + 3];
+                            eachCharaData_[(int)selectChara].specialBuff.GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+
+                            if (sub3Num == 2)
+                            {
+                                eachCharaData_[(int)selectChara].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "反";
+                            }
+                            else
+                            {
+                                eachCharaData_[(int)selectChara].specialBuff.transform.GetChild(0).GetComponent<TMPro.TextMeshProUGUI>().text = "吸";
+                            }
                         }
                     }
                 }
@@ -1522,6 +1542,12 @@ public class CharacterMng : MonoBehaviour
 
                         // enePosとtargetNumは入れなくてよい(charaPos_に発動相手の座標を入れるようにする)
                         useMagic_.InstanceMagicInfo(charasList_[array[i]].GetButtlePos(), new Vector3(-1, -1, -1), -1, i);
+
+                        if (charasList_[array[i]].GetDeathFlg())
+                        {
+                            Debug.Log("死亡中のため効果なし");
+                            continue;
+                        }
 
                         if (sub3Num == 0)
                         {

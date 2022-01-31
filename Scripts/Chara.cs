@@ -154,11 +154,6 @@ public class Chara : CharaBase,InterfaceButtle
         set_.MP = mp;
     }
 
-    public int Level()
-    {
-        return set_.Level;
-    }
-
     public int CharacterSumExp()
     {
         return set_.CharacterSumExp;
@@ -428,16 +423,8 @@ public class Chara : CharaBase,InterfaceButtle
 
     public void SetDeathFlg(bool flag)
     {
-        if(flag)
-        {
-            // 死亡アニメーションに切り替える
-            set_.animator.SetBool(key_isDeath, true);
-        }
-        else
-        {
-            // 立つアニメーションに切り替える
-            set_.animator.SetBool(key_isDeath, false);
-        }
+        // アニメーション切り替え
+        set_.animator.SetBool(key_isDeath, flag);
         deathFlg_ = flag;
     }
 
@@ -624,5 +611,10 @@ public class Chara : CharaBase,InterfaceButtle
     public override Dictionary<int, (int, int)> GetBuff()
     {
         return buffMap_;
+    }
+
+    public override int Level()
+    {
+        return set_.Level;
     }
 }

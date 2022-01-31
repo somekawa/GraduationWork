@@ -159,6 +159,7 @@ public abstract class CharaBase : object
     public abstract (int,bool) SetBuff(int tail,int buff);
     public abstract System.Collections.Generic.Dictionary<int, (int, int)> GetBuff();
     public abstract bool CheckBuffTurn();
+    public abstract int Level();
 
     //// overrideo—ˆ‚éŠÖ”
     //public virtual void Talk(string talk)

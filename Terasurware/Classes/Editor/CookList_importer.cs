@@ -57,15 +57,15 @@ public class CookList_importer : AssetPostprocessor
                         ICell cell = null;
                         
                         var p = new Cook0.Param();
-			
-					cell = row.GetCell(0); p.num = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(1); p.name = (cell == null ? "" : cell.StringCellValue);
-					cell = row.GetCell(2); p.info = (cell == null ? "" : cell.StringCellValue);
-					cell = row.GetCell(3); p.statusUp = (cell == null ? "" : cell.StringCellValue);
-					cell = row.GetCell(4); p.needFood = (int)(cell == null ? 0 : cell.NumericCellValue);
-                    cell = row.GetCell(5); p.needNum = (int)(cell == null ? 0 : cell.NumericCellValue);
-                    cell = row.GetCell(6); p.needMoney = (int)(cell == null ? 0 : cell.NumericCellValue);
-					cell = row.GetCell(7); p.eventNum = (int)(cell == null ? 0 : cell.NumericCellValue);
+
+                        cell = row.GetCell(0); p.num = (int)(cell == null ? 0 : cell.NumericCellValue);
+					    cell = row.GetCell(1); p.name = (cell == null ? "" : cell.StringCellValue);
+					    cell = row.GetCell(2); p.info = (cell == null ? "" : cell.StringCellValue);
+					    cell = row.GetCell(3); p.statusUp = (cell == null ? "" : cell.StringCellValue);
+					    cell = row.GetCell(4); p.needFood = (cell == null ? "" : cell.StringCellValue);
+					    cell = row.GetCell(5); p.needNum = (cell == null ? "" : cell.StringCellValue);
+					    cell = row.GetCell(6); p.needMoney = (int)(cell == null ? 0 : cell.NumericCellValue);
+					    cell = row.GetCell(7); p.eventNum = (int)(cell == null ? 0 : cell.NumericCellValue);
 
                         data.param.Add(p);
                     }

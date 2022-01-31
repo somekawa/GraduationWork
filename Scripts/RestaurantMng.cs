@@ -178,7 +178,7 @@ public class RestaurantMng : MonoBehaviour
         }
 
         // 素材が要求される料理かどうかで処理を分ける
-        if (tmppop.needFood <= -1)
+        if (tmppop.needFood == "str")
         {
             // 必要素材がないとき
 
@@ -189,7 +189,7 @@ public class RestaurantMng : MonoBehaviour
             int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2, statusUp_[4].Item2, statusUp_[5].Item2, statusUp_[6].Item2, 0 };
             for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
             {
-                SceneMng.charasList_[i].SetStatusUpByCook(tmp,true);
+                SceneMng.charasList_[i].SetStatusUpByCook(tmp, true);
             }
             GameObject.Find("DontDestroyCanvas/TimeGear/CookPowerIcon").GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
         }
@@ -197,7 +197,33 @@ public class RestaurantMng : MonoBehaviour
         {
             // 必要素材があるとき
             // 素材が足りているか確認する
-            if(Bag_Materia.materiaState[tmppop.needFood].haveCnt >= tmppop.needNum)
+            string[] haveCnt;
+            List<int> haveCntListNum = new List<int>();
+            string[] needNum;
+            List<int> needNumListNum = new List<int>();
+            haveCnt = tmppop.needFood.Split(',');
+            needNum = tmppop.needNum.Split(',');
+            bool isCanEatFlg = true;
+
+            // カンマ区切りになったものをさらにアンダーバーで区切る
+            for (int i = 0; i < haveCnt.Length; i++)
+            {
+                var underbarSplit = haveCnt[i].Split('_');
+                // アンダーバーで区切ったものを、別々のリストへ入れる
+                haveCntListNum.Add(int.Parse(underbarSplit[1]));
+
+                underbarSplit = needNum[i].Split('_');
+                // アンダーバーで区切ったものを、別々のリストへ入れる
+                needNumListNum.Add(int.Parse(underbarSplit[1]));
+
+                if (Bag_Materia.materiaState[int.Parse(haveCntListNum[i].ToString())].haveCnt < int.Parse(needNumListNum[i].ToString()))
+                {
+                    isCanEatFlg = false;
+                    Debug.Log(Bag_Materia.materiaState[int.Parse(haveCntListNum[i].ToString())].name + "の素材が" + (int.Parse(needNumListNum[i].ToString()) - Bag_Materia.materiaState[int.Parse(haveCntListNum[i].ToString())].haveCnt) + "個足りません");
+                }
+            }
+
+            if (isCanEatFlg)
             {
                 // 素材が足りる
                 Debug.Log("素材が足りる");
@@ -206,14 +232,19 @@ public class RestaurantMng : MonoBehaviour
                 SceneMng.SetHaveMoney(SceneMng.GetHaveMoney() - tmppop.needMoney);
 
                 // キャラのステータスアップ処理(7番目はexpだから料理では0にする)
-                int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2, statusUp_[4].Item2, statusUp_[5].Item2, statusUp_[6].Item2,0 };
+                int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2, statusUp_[4].Item2, statusUp_[5].Item2, statusUp_[6].Item2, 0 };
                 for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
                 {
-                    SceneMng.charasList_[i].SetStatusUpByCook(tmp,true);
+                    SceneMng.charasList_[i].SetStatusUpByCook(tmp, true);
                 }
 
                 // 素材を減らす
-                Bag_Materia.materiaState[tmppop.needFood].haveCnt -= tmppop.needNum;
+                // カンマ区切りになったものをさらにアンダーバーで区切る
+                for (int i = 0; i < haveCnt.Length; i++)
+                {
+                    Bag_Materia.materiaState[int.Parse(haveCntListNum[i].ToString())].haveCnt -= int.Parse(needNumListNum[i].ToString());
+                }
+
                 GameObject.Find("DontDestroyCanvas/TimeGear/CookPowerIcon").GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
             }
             else
@@ -286,7 +317,7 @@ public class RestaurantMng : MonoBehaviour
         }
 
         // 必要素材の名称を出す(数字から素材名を取る)
-        if(tmppop.needFood <= -1)
+        if (tmppop.needFood == "str")
         {
             // needFoodの値が-1のときは必要素材が無しだから、表示はなしにする
             needFoodText_.text += "\nなし";
@@ -294,10 +325,8 @@ public class RestaurantMng : MonoBehaviour
         }
         else
         {
-            // 必要素材と数について表示する
-            needFoodText_.text += "\n" + Bag_Materia.materiaState[tmppop.needFood].name;
-            // 所持数 / 必要数
-            haveFoodText_.text += "\n" + Bag_Materia.materiaState[tmppop.needFood].haveCnt + "/" + tmppop.needNum;
+            needFoodText_.text = TextSetting(tmppop, "needFood");
+            haveFoodText_.text = TextSetting(tmppop, "needNum");
         }
 
         // 必要なお金を出す
@@ -305,6 +334,64 @@ public class RestaurantMng : MonoBehaviour
 
         // 選択中のメニューを保存する
         num_ = num;
+    }
+
+    private string TextSetting(Cook0.Param tmppop, string text)
+    {
+        string str = "";
+        string[] tmp;
+        List<int> tmpListNum = new List<int>();
+
+        // カンマ区切り
+        if(text == "needFood")
+        {
+            tmp = tmppop.needFood.Split(',');
+        }
+        else if(text == "needNum")
+        {
+            tmp = tmppop.needNum.Split(',');
+        }
+        else
+        {
+            return str;
+        }
+
+        tmpListNum.Clear();
+        // カンマ区切りになったものをさらにアンダーバーで区切る
+        for (int i = 0; i < tmp.Length; i++)
+        {
+            var underbarSplit = tmp[i].Split('_');
+            // アンダーバーで区切ったものを、別々のリストへ入れる
+            tmpListNum.Add(int.Parse(underbarSplit[1]));
+        }
+
+        if (text == "needFood")
+        {
+            for (int i = 0; i < tmpListNum.Count; i++)
+            {
+                str += "\n" + Bag_Materia.materiaState[int.Parse(tmpListNum[i].ToString())].name;
+            }
+        }
+        else
+        {
+            var pop = tmppop.needFood.Split(',');
+            List<int> popListNum = new List<int>();
+            // カンマ区切りになったものをさらにアンダーバーで区切る
+            for (int k = 0; k < pop.Length; k++)
+            {
+                var underbarSplit = pop[k].Split('_');
+                // アンダーバーで区切ったものを、別々のリストへ入れる
+                popListNum.Add(int.Parse(underbarSplit[1]));
+            }
+
+            for (int i = 0; i < tmpListNum.Count; i++)
+            {
+                // 所持数 / 必要数
+                str += "\n" + Bag_Materia.materiaState[int.Parse(popListNum[i].ToString())].haveCnt + "/" + int.Parse(tmpListNum[i].ToString());
+            }
+        }
+
+        return str;
     }
 
     public void OnClickBackButton()
