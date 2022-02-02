@@ -9,7 +9,7 @@ public class Bag_Magic : MonoBehaviour
 {
     // データ系
     private SaveCSV_Magic saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
-    private const string saveDataFilePath_ = @"Assets/Resources/Save/magicData.csv";
+    private string saveDataFilePath_;
     List<string[]> csvDatas = new List<string[]>(); // CSVの中身を入れるリスト;
     string[] texts;
 
@@ -239,6 +239,7 @@ public class Bag_Magic : MonoBehaviour
     public void DataLoad()
     {
         csvDatas.Clear();
+        saveDataFilePath_ = Application.streamingAssetsPath + "/Save/magicData.csv";
 
         // 行分けだけにとどめる
         texts = File.ReadAllText(saveDataFilePath_).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
@@ -257,6 +258,7 @@ public class Bag_Magic : MonoBehaviour
     public void DataSave()
     {
         Debug.Log("魔法が生成されました。セーブします");
+        saveDataFilePath_ = Application.streamingAssetsPath + "/Save/magicData.csv";
 
         saveCsvSc_.SaveStart();
         // 魔法の個数分回す

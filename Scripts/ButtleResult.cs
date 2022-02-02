@@ -61,7 +61,16 @@ public class ButtleResult : MonoBehaviour
     void Start()
     {
         resultCanvas.gameObject.SetActive(false);
-        DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        //DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        // StreamingAssetsからAssetBundleをロードする
+        var assetBundle = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/AssetBundles/StandaloneWindows/datapop");
+        Debug.Log("assetBundle開く");
+        // AssetBundle内のアセットにはビルド時のアセットのパス、またはファイル名、ファイル名＋拡張子でアクセスできる
+        DataPopPrefab_ = assetBundle.LoadAsset<GameObject>("DataPop.prefab");
+        // 不要になったAssetBundleのメタ情報をアンロードする
+        assetBundle.Unload(false);
+        Debug.Log("破棄");
+
         Debug.Log("resultCanvas" + resultCanvas.transform.Find("UniIconFrame/EXPSlider").GetComponent<Slider>());
         expSlider_[(int)SceneMng.CHARACTERNUM.UNI] = resultCanvas.transform.Find("UniIconFrame/EXPSlider").GetComponent<Slider>();
         expSlider_[(int)SceneMng.CHARACTERNUM.JACK] = resultCanvas.transform.Find("JackIconFrame/EXPSlider").GetComponent<Slider>();

@@ -8,7 +8,7 @@ public class Bag_Materia : MonoBehaviour
 {
     // データ系
     private SaveCSV_Materia saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
-    private const string saveDataFilePath_ = @"Assets/Resources/materiaData.csv";
+    private string saveDataFilePath_;
     List<string[]> csvDatas_ = new List<string[]>(); // CSVの中身を入れるリスト;
 
     private InitPopList popMateriaList_;
@@ -209,6 +209,7 @@ public class Bag_Materia : MonoBehaviour
     public void DataLoad()
     {
         // Debug.Log("ロードします");
+        saveDataFilePath_ = Application.streamingAssetsPath + "/materiaData.csv";
 
         csvDatas_.Clear();
 

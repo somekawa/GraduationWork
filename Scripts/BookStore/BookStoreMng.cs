@@ -559,23 +559,23 @@ public class BookStoreMng : MonoBehaviour
         // NewGameから始めて本屋にきたとき
     }
 
-    private void DataSave()
-    {
-        Debug.Log("本を読みました");
-        saveCsvSc_.SaveStart();
-        for (int i = 0; i < maxCnt_; i++)
-        {
-            saveCsvSc_.SaveBookData(bookState_[i]);
-        }
-        saveCsvSc_.SaveEnd();
-    }
+    //private void DataSave()
+    //{
+    //    Debug.Log("本を読みました");
+    //    saveCsvSc_.SaveStart();
+    //    for (int i = 0; i < maxCnt_; i++)
+    //    {
+    //        saveCsvSc_.SaveBookData(bookState_[i]);
+    //    }
+    //    saveCsvSc_.SaveEnd();
+    //}
 
-    public void SetBookSetting(BookData set)
-    {
-        bookData_.bookNumber = set.bookNumber;
-        bookData_.bookName = set.bookName;
-        bookData_.readFlag = set.readFlag;
-    }
+    //public void SetBookSetting(BookData set)
+    //{
+    //    bookData_.bookNumber = set.bookNumber;
+    //    bookData_.bookName = set.bookName;
+    //    bookData_.readFlag = set.readFlag;
+    //}
 
 
 }

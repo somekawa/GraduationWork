@@ -68,6 +68,7 @@ public class CharacterMng : MonoBehaviour
     private bool myTurnOnceFlg_;                       // 自分のターンになった最初に1回だけ呼ばれるようにするフラグ
 
     private readonly (int,int) deathBstNoEffectItemNum_ = (13,32); // 即死肩代わりアイテムの番号
+    private bool allDeathFlg_ = false;
 
     public struct EachCharaData
     {
@@ -302,23 +303,28 @@ public class CharacterMng : MonoBehaviour
                 anim_ = ANIMATION.IDLE;
                 oldAnim_ = ANIMATION.NON;
 
-                // 全滅したか確認する処理
-                bool allDeathFlg = true;
-                for (int i = 0; i < (int)CHARACTERNUM.MAX; i++)
+                if(!allDeathFlg_)
                 {
-                    if (!charasList_[i].GetDeathFlg())
+                    // 全滅したか確認する処理
+                    bool tmpFlg = true;
+                    for (int i = 0; i < (int)CHARACTERNUM.MAX; i++)
                     {
-                        // 1人でも生存状態だと分かればbreakして抜ける
-                        allDeathFlg = false;
-                        break;
+                        if (!charasList_[i].GetDeathFlg())
+                        {
+                            // 1人でも生存状態だと分かればbreakして抜ける
+                            tmpFlg = false;
+                            break;
+                        }
                     }
-                }
-                // 全滅時は町長の家へ飛ばす
-                if (allDeathFlg)
-                {
-                    // 強制戦闘用の壁の名前を保存している所を初期化
-                    ButtleMng.forcedButtleWallName = "";
-                    EventMng.SetChapterNum(100, SCENE.CONVERSATION);
+                    // 全滅時は町長の家へ飛ばす
+                    if (tmpFlg)
+                    {
+                        FieldMng.nowMode = FieldMng.MODE.NON;
+                        allDeathFlg_ = true;
+                        // 強制戦闘用の壁の名前を保存している所を初期化
+                        ButtleMng.forcedButtleWallName = "";
+                        EventMng.SetChapterNum(100, SCENE.CONVERSATION,true);
+                    }
                 }
             }
         }
@@ -1045,6 +1051,14 @@ public class CharacterMng : MonoBehaviour
             // ②キャラも敵も+10％の補正値を入れる。
             hitProbabilityOffset = hitProbability + 10;
             // ③hitProbabilityOffsetが100以上なら自動命中で、それ以下ならランダム値を取る。
+
+            // マイナス値になったら30%固定とする
+            if (hitProbabilityOffset <= 0)
+            {
+                Debug.Log("マイナス値になったので固定30%");
+                hitProbabilityOffset = 30;
+            }
+
             if (hitProbabilityOffset < 100)
             {
                 int rand = Random.Range(0, 100);

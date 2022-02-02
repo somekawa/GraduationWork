@@ -17,6 +17,7 @@ public class UniHouseMng : MonoBehaviour
 
     private GameObject loadPrefab_;// タイトルシーンからの遷移かどうか
     private OnceLoad onceLoad_;// LoadPrefabにアタッチされてるScript
+    public static bool onceflag_ = true;
 
     void Start()
     {
@@ -40,7 +41,7 @@ public class UniHouseMng : MonoBehaviour
         GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
 
         // オブジェクトがある＝タイトルシーンから遷移してきた
-        loadPrefab_ = GameObject.Find("LoadPrefab");
+       loadPrefab_ = GameObject.Find("LoadPrefab");
         if (loadPrefab_ != null)
         {
             var tmp = GameObject.Find("DontDestroyCanvas/Managers");
@@ -84,6 +85,15 @@ public class UniHouseMng : MonoBehaviour
         }
 
         SceneMng.MenuSetActive(true);
+
+        if (onceflag_ == true)
+        {
+            onceflag_ = false;
+            GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
+            GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
+            GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
+            GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
+        }
     }
 
     public void ClickSleepButton()

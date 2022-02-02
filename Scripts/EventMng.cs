@@ -10,7 +10,7 @@ public static class EventMng
     // 読み返し機能を作成するときには引数部分に該当するチャプター番号を入れるようにする
     public static void SetChapterNum(int num ,SceneMng.SCENE scene,bool loadFlg = false)
     {
-        if(num == 9)
+        if(chapterNum == 8 && num == 9)
         {
             // チャプター9へ移動するさいに回復ポーション(小)を3つ受け取る
             GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>().ItemGetCheck(MovePoint.JUDGE.NORMAL,0,3);
@@ -22,10 +22,23 @@ public static class EventMng
             SceneMng.SetNowScene(SceneMng.SCENE.CONVERSATION);
         }
 
+        bool tmpFlg = false;
         if (num == 100)
         {
             // 全滅時の特殊会話時には、全滅前のチャプター番号を保存しておく
             oldNum = chapterNum;
+            tmpFlg = true;
+
+            for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+            {
+                // バトルで死亡したまま終了していたときは、HP1の状態で立ち上がらせる
+                if (SceneMng.charasList_[i].GetDeathFlg())
+                {
+                    SceneMng.charasList_[i].SetDeathFlg(false);
+                    SceneMng.charasList_[i].SetHP(1);
+                }
+                SceneMng.charasList_[i].ButtleInit();
+            }
         }
 
         if (oldNum != 100 && num == 101)
@@ -39,7 +52,7 @@ public static class EventMng
             chapterNum = num;
         }
 
-        SceneMng.SceneLoad((int)scene);
+        SceneMng.SceneLoad((int)scene, tmpFlg);
     }
 
     public static int GetChapterNum()

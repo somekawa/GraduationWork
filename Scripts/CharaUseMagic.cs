@@ -28,11 +28,23 @@ public class CharaUseMagic : MonoBehaviour
     private EnemySelect enemySelect_;
     private CharacterMng characterMng_;
 
+    AssetBundle assetBundle_;
+
     public void Init()
     {
         buttleMng_ = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
         enemySelect_ = GameObject.Find("ButtleUICanvas/EnemySelectObj").GetComponent<EnemySelect>();
         characterMng_ = GameObject.Find("CharacterMng").GetComponent<CharacterMng>();
+
+        // 他のバンドル名に変える
+        // StreamingAssetsからAssetBundleをロードする
+        if(assetBundle_ == null)
+        {
+            assetBundle_ = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/AssetBundles/StandaloneWindows/magic");
+        }
+        //// 不要になったAssetBundleのメタ情報をアンロードする
+        //assetBundle_.Unload(false);
+        //Debug.Log("破棄");
     }
 
     public void CheckUseMagic(Bag_Magic.MagicData magicData, int charaMagicPower)
@@ -303,18 +315,21 @@ public class CharaUseMagic : MonoBehaviour
                 if (split[3] == 2.ToString())
                 {
                     // 反射魔法の時(同じエフェクトを使うから固定番号)
-                    obj = Resources.Load("MagicPrefabs/0-0-1-2") as GameObject;
+                    obj = assetBundle_.LoadAsset<GameObject>("0-0-1-2");
+                    //obj = Resources.Load("MagicPrefabs/0-0-1-2") as GameObject;
                 }
                 else
                 {
                     // 吸収魔法の時(同じエフェクトを使うから固定番号)
-                    obj = Resources.Load("MagicPrefabs/0-0-1-3") as GameObject;
+                    obj = assetBundle_.LoadAsset<GameObject>("0-0-1-3");
+                    //obj = Resources.Load("MagicPrefabs/0-0-1-3") as GameObject;
                 }
             }
             else
             {
                 // 魔法プレハブをインスタンス化
-                obj = Resources.Load("MagicPrefabs/" + magicPrefabNum_) as GameObject;
+                obj = assetBundle_.LoadAsset<GameObject>(magicPrefabNum_);
+                //obj = Resources.Load("MagicPrefabs/" + magicPrefabNum_) as GameObject;
             }
 
             // プレハブの高さも含めた位置に生成する
@@ -332,11 +347,13 @@ public class CharaUseMagic : MonoBehaviour
             if (split[1] == 1.ToString() && split.Length == 4)
             {
                 // 敵へのデバフ魔法の時(同じエフェクトを使うから固定番号)
-                obj = Resources.Load("MagicPrefabs/0-1-1-1") as GameObject;
+                obj = assetBundle_.LoadAsset<GameObject>("0-1-1-1");
+                //obj = Resources.Load("MagicPrefabs/0-1-1-1") as GameObject;
             }
             else
             {
-                obj = Resources.Load("MagicPrefabs/" + magicPrefabNum_) as GameObject;
+                obj = assetBundle_.LoadAsset<GameObject>(magicPrefabNum_);
+                //obj = Resources.Load("MagicPrefabs/" + magicPrefabNum_) as GameObject;
             }
 
             // プレハブの高さも含めた位置に生成する

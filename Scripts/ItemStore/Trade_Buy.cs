@@ -33,27 +33,27 @@ public class Trade_Buy : MonoBehaviour
         if (19 < EventMng.GetChapterNum())
         {
             maxCnt_[(int)ItemStoreMng.KIND.MATERIA] = materiaMaxCnt_[4];
-            maxCnt_[(int)ItemStoreMng.KIND.MATERIA] = itemMaxCnt_[3];
+            maxCnt_[(int)ItemStoreMng.KIND.ITEM] = itemMaxCnt_[3];
         }
         else if (16 < EventMng.GetChapterNum())
         {
             maxCnt_[(int)ItemStoreMng.KIND.MATERIA] = materiaMaxCnt_[3];
-            maxCnt_[(int)ItemStoreMng.KIND.MATERIA] = itemMaxCnt_[3];
+            maxCnt_[(int)ItemStoreMng.KIND.ITEM] = itemMaxCnt_[3];
         }
         else if (13 < EventMng.GetChapterNum())
         {
             maxCnt_[(int)ItemStoreMng.KIND.MATERIA] = materiaMaxCnt_[2];
-            maxCnt_[(int)ItemStoreMng.KIND.MATERIA] = itemMaxCnt_[2];
+            maxCnt_[(int)ItemStoreMng.KIND.ITEM] = itemMaxCnt_[2];
         }
         else if (8 < EventMng.GetChapterNum())
         {
             maxCnt_[(int)ItemStoreMng.KIND.MATERIA] = materiaMaxCnt_[1];
-            maxCnt_[(int)ItemStoreMng.KIND.MATERIA] = itemMaxCnt_[1];
+            maxCnt_[(int)ItemStoreMng.KIND.ITEM] = itemMaxCnt_[1];
         }
         else if (0 < EventMng.GetChapterNum())
         {
             maxCnt_[(int)ItemStoreMng.KIND.MATERIA] = materiaMaxCnt_[0];
-            maxCnt_[(int)ItemStoreMng.KIND.MATERIA] = itemMaxCnt_[0];
+            maxCnt_[(int)ItemStoreMng.KIND.ITEM] = itemMaxCnt_[0];
         }
         buyData[ItemStoreMng.KIND.ITEM] = InitBuyData(ItemStoreMng.KIND.ITEM, maxCnt_[(int)ItemStoreMng.KIND.ITEM]);
         buyData[ItemStoreMng.KIND.MATERIA] = InitBuyData(ItemStoreMng.KIND.MATERIA, maxCnt_[(int)ItemStoreMng.KIND.MATERIA]);

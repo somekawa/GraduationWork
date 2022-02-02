@@ -46,6 +46,10 @@ public class OtherCollision : MonoBehaviour
                 }
             }
         }
+        else if (other.CompareTag("Chest"))
+        {
+            Debug.Log("•ó” ‚ÆÚG‚µ‚Ü‚µ‚½");
+        }
     }
 
     private void OnTriggerEnter(Collider other)

@@ -39,7 +39,7 @@ public class FieldMng : MonoBehaviour
 
     public static bool stopEncountTimeFlg = false; // アイテムの効果で一時的にエンカウントを止める
     private bool stopEncountTimeFlgOld_ = false;   // 1フレーム前と比較する
-    private float toButtleTime_ = 1.0f;            // 30秒経過でバトルへ遷移する
+    private float toButtleTime_ = 6.0f;           // 6秒経過でバトルへ遷移する
     private float time_ = 0.0f;                    // 現在の経過時間
     private float keepTime_ = 0.0f;                // 現在のエンカウントまでの時間を一時保存しておく
 
@@ -154,8 +154,17 @@ public class FieldMng : MonoBehaviour
         CheckWallAndChestActive("Chests", treasureList);
 
         // Chest.xlsから宝箱内容の取得を行う
-        DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
-        popChestList_  = DataPopPrefab_.GetComponent<PopList>().GetData<ChestList>(PopList.ListData.CHEST);
+        //DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        // StreamingAssetsからAssetBundleをロードする
+        var assetBundle = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/AssetBundles/StandaloneWindows/datapop");
+        Debug.Log("assetBundle開く");
+        // AssetBundle内のアセットにはビルド時のアセットのパス、またはファイル名、ファイル名＋拡張子でアクセスできる
+        DataPopPrefab_ = assetBundle.LoadAsset<GameObject>("DataPop.prefab");
+        // 不要になったAssetBundleのメタ情報をアンロードする
+        assetBundle.Unload(false);
+        Debug.Log("破棄");
+
+        popChestList_ = DataPopPrefab_.GetComponent<PopList>().GetData<ChestList>(PopList.ListData.CHEST);
 
         // 内容のタイトル
         titleInfo_ = fieldUICanvasPopUp_.transform.Find("TitleInfo").GetComponent<TMPro.TextMeshProUGUI>();

@@ -92,7 +92,12 @@ public class EnemyInstanceMng : MonoBehaviour
         }
 
 
-        DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        //DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        // StreamingAssetsからAssetBundleをロードする
+        var assetBundle = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/AssetBundles/StandaloneWindows/datapop");
+        Debug.Log("assetBundle開く");
+        // AssetBundle内のアセットにはビルド時のアセットのパス、またはファイル名、ファイル名＋拡張子でアクセスできる
+        DataPopPrefab_ = assetBundle.LoadAsset<GameObject>("DataPop.prefab");
 
         // 敵データ
         // 数字がフィールドによって変更されるように、(現在シーン - FIELD0の番号)とする
@@ -100,6 +105,10 @@ public class EnemyInstanceMng : MonoBehaviour
         {
             enemyData_ = DataPopPrefab_.GetComponent<PopList>().GetData<EnemyList>(PopList.ListData.ENEMY, (int)SceneMng.nowScene - (int)SceneMng.SCENE.FIELD0, name);
         }
+
+        // 不要になったAssetBundleのメタ情報をアンロードする
+        assetBundle.Unload(false);
+        Debug.Log("破棄");
 
         var buttlemng = GameObject.Find("ButtleMng");
         buttleMng_ = buttlemng.GetComponent<ButtleMng>();
@@ -636,6 +645,14 @@ public class EnemyInstanceMng : MonoBehaviour
                 // ②キャラも敵も+10％の補正値を入れてキャラ側だけに(自分のLuck * 5)％をプラスする。
                 hitProbabilityOffset = hitProbability + 10 + (buttleMng_.GetLuckNum() * 5) - level;
                 // ③hitProbabilityOffsetが100以上なら自動命中で、それ以下ならランダム値を取る。
+
+                // マイナス値になったら30%固定とする
+                if(hitProbabilityOffset <= 0)
+                {
+                    Debug.Log("マイナス値になったので固定30%");
+                    hitProbabilityOffset = 30;
+                }
+
                 if (hitProbabilityOffset < 100)
                 {
                     int rand = Random.Range(0, 100);

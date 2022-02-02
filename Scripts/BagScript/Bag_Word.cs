@@ -9,7 +9,7 @@ public class Bag_Word : MonoBehaviour
 {
     // データ系
     private Word_SaveCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
-    private const string saveDataFilePath_ = @"Assets/Resources/Save/wordData.csv";
+    private string saveDataFilePath_;
     List<string[]> csvDatas_ = new List<string[]>(); // CSVの中身を入れるリスト;
 
 
@@ -80,7 +80,7 @@ public class Bag_Word : MonoBehaviour
             }
         }
         DataSave();
-        DataLoad();
+        //DataLoad();
     }
 
     public void Init()
@@ -287,6 +287,7 @@ public class Bag_Word : MonoBehaviour
     public void DataLoad()
     {
         // Debug.Log("ロードします");
+        saveDataFilePath_ = Application.streamingAssetsPath + "/Save/wordData.csv";
 
         csvDatas_.Clear();
 

@@ -4,29 +4,20 @@ using UnityEngine;
 
 public class SaveCSV_Magic : MonoBehaviour
 {
-    private const string magicSaveDataFilePath_ = @"Assets/Resources/magicData.csv";
+    private string magicSaveDataFilePath_;
     private StreamWriter sw_;
 
     // 書き込み始めに呼ぶ
     public void SaveStart()
     {
-        TextAsset saveFile = Resources.Load("magicData") as TextAsset;
+        magicSaveDataFilePath_ = Application.streamingAssetsPath + "/Save/magicData.csv";
 
-        if (saveFile == null)
-        {
-            // Resourcesフォルダ内のSavaDataフォルダへ新規で作成する
-            sw_ = new StreamWriter(magicSaveDataFilePath_, true, Encoding.UTF8);
-            Debug.Log("新規ファイルへ書き込み");
-        }
-        else
-        {
-            // 古いデータを削除
-            File.Delete(magicSaveDataFilePath_);
-            sw_ = new StreamWriter(magicSaveDataFilePath_, true, Encoding.UTF8);
-            Debug.Log("古いデータを削除してファイル書き込み");
-            // すでに存在する場合は、上書き保存する(第二引数をfalseにすることで、上書きに切り替えられる)
-            //sw = new StreamWriter(saveDataFilePath_, false, Encoding.GetEncoding("Shift_JIS"));
-        }
+        // 古いデータを削除
+        File.Delete(magicSaveDataFilePath_);
+        sw_ = new StreamWriter(magicSaveDataFilePath_, true, Encoding.UTF8);
+        Debug.Log("magicData,古いデータを削除してファイル書き込み");
+        // すでに存在する場合は、上書き保存する(第二引数をfalseにすることで、上書きに切り替えられる)
+        //sw = new StreamWriter(saveDataFilePath_, false, Encoding.GetEncoding("Shift_JIS"));
 
         // ステータスの項目見出し
         string[] s1 = { "Number","Name","EnglishMain","SubMain", "Power", "Rate",

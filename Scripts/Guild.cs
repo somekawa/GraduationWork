@@ -40,7 +40,7 @@ public class Guild : HouseBase
                     if (questNum == 0)
                     {
                         // シーン遷移無しで進行度を3にする。
-                        EventMng.SetChapterNum(3, SceneMng.SCENE.NON);
+                        EventMng.SetChapterNum(3, SceneMng.SCENE.NON,true);
                     }
                     break;
                 case 12:// 現在の進行度が12で、クエスト4番を受注したら

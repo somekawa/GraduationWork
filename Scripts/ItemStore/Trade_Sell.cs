@@ -33,7 +33,7 @@ public class Trade_Sell : MonoBehaviour
 
             maxCnt_ = new int[(int)ItemStoreMng.KIND.MAX];
             maxCnt_[(int)ItemStoreMng.KIND.MATERIA] = popItemsList_.SetMaxMateriaCount();
-            maxCnt_[(int)ItemStoreMng.KIND.ITEM] = popItemsList_.SetMaxItemCount()*2;// 大成功アイテムがあるため2倍する
+            maxCnt_[(int)ItemStoreMng.KIND.ITEM] = popItemsList_.SetMaxItemCount();
             sellData[ItemStoreMng.KIND.ITEM] = InitSellData(ItemStoreMng.KIND.ITEM, maxCnt_[(int)ItemStoreMng.KIND.ITEM]);
             sellData[ItemStoreMng.KIND.MATERIA] = InitSellData(ItemStoreMng.KIND.MATERIA, maxCnt_[(int)ItemStoreMng.KIND.MATERIA]);
 
@@ -95,10 +95,22 @@ public class Trade_Sell : MonoBehaviour
            
             // すべて表示させておいて
             sellData[(ItemStoreMng.KIND)kindNum][i].obj.SetActive(true);
-            if (Bag_Materia.materiaState[i].haveCnt<=0)
+
+            if (kindNum == (int)ItemStoreMng.KIND.MATERIA)
             {
-                // 持っていないアイテム、素材は非表示にする
-                sellData[(ItemStoreMng.KIND)kindNum][i].obj.SetActive(false);
+                if (Bag_Materia.materiaState[i].haveCnt < 1)
+                {
+                    // 持っていないアイテム、素材は非表示にする
+                    sellData[(ItemStoreMng.KIND)kindNum][i].obj.SetActive(false);
+                }
+            }
+            else
+            {
+                if (Bag_Item.itemState[i].haveCnt < 1)
+                {
+                    // 持っていないアイテム、素材は非表示にする
+                    sellData[(ItemStoreMng.KIND)kindNum][i].obj.SetActive(false);
+                }
             }
         }
     }

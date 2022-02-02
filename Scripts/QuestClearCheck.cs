@@ -186,7 +186,7 @@ public class QuestClearCheck : MonoBehaviour
             if(QuestClear(0))
             {
                 // イベント進行度を6にする
-                EventMng.SetChapterNum(6, SceneMng.SCENE.NON);
+                EventMng.SetChapterNum(6, SceneMng.SCENE.NON,true);
                 // クリア条件処理は終了したので、リストを削除して使えないようにしておく
                 buildList.Clear();
                 buildList = null;

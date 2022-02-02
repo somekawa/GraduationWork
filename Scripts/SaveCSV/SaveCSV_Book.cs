@@ -13,6 +13,7 @@ public class SaveCSV_Book : MonoBehaviour
     // 書き込み始めに呼ぶ
     public void SaveStart()
     {
+        //@ このスクリプトじたい使われていない
         TextAsset saveFile = Resources.Load("Save/bookData") as TextAsset;
 
         if (saveFile == null)

@@ -1,0 +1,79 @@
+ManifestFileVersion: 0
+CRC: 2713385036
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 9177b810b9e0f9a05d73d6cb4cff045f
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: e3436741d7c4988b24e3d5aabf90a19c
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 54
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 108
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: cec7088ff00f3a8448f8baecd978ff00, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 2a5f1792d5873ec4c9ff35dcb8b3b82f, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 198
+  Script: {instanceID: 0}
+- Class: 199
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Resources/MagicPrefabs/5-2.prefab
+- Assets/Resources/MagicPrefabs/0-1-9.prefab
+- Assets/Resources/MagicPrefabs/1-0-1-0.prefab
+- Assets/Resources/MagicPrefabs/1-0-3-0.prefab
+- Assets/Resources/MagicPrefabs/2-2.prefab
+- Assets/Resources/MagicPrefabs/1-0-4-0.prefab
+- Assets/Resources/MagicPrefabs/2-0-1-0.prefab
+- Assets/Resources/MagicPrefabs/2-0-3-0.prefab
+- Assets/Resources/MagicPrefabs/0-0-3-0.prefab
+- Assets/Resources/MagicPrefabs/0-2-0.prefab
+- Assets/Resources/MagicPrefabs/3-0.prefab
+- Assets/Resources/MagicPrefabs/5-3.prefab
+- Assets/Resources/MagicPrefabs/0-1-1-1.prefab
+- Assets/Resources/MagicPrefabs/0-0-1-0.prefab
+- Assets/Resources/MagicPrefabs/2-1.prefab
+- Assets/Resources/MagicPrefabs/3-1.prefab
+- Assets/Resources/MagicPrefabs/0-2-9.prefab
+- Assets/Resources/MagicPrefabs/4-3.prefab
+- Assets/Resources/MagicPrefabs/0-0-9.prefab
+- Assets/Resources/MagicPrefabs/3-3.prefab
+- Assets/Resources/MagicPrefabs/2-0.prefab
+- Assets/Resources/MagicPrefabs/0-0-0.prefab
+- Assets/Resources/MagicPrefabs/2-0-2-0.prefab
+- Assets/Resources/MagicPrefabs/0-0-1-3.prefab
+- Assets/Resources/MagicPrefabs/0-0-4-0.prefab
+- Assets/Resources/MagicPrefabs/4-2.prefab
+- Assets/Resources/MagicPrefabs/4-1.prefab
+- Assets/Resources/MagicPrefabs/0-0-2-0.prefab
+- Assets/Resources/MagicPrefabs/5-0.prefab
+- Assets/Resources/MagicPrefabs/0-0-1-2.prefab
+- Assets/Resources/MagicPrefabs/2-0-4-0.prefab
+- Assets/Resources/MagicPrefabs/4-0.prefab
+- Assets/Resources/MagicPrefabs/2-3.prefab
+- Assets/Resources/MagicPrefabs/0-1-0.prefab
+- Assets/Resources/MagicPrefabs/1-0-2-0.prefab
+- Assets/Resources/MagicPrefabs/3-2.prefab
+- Assets/Resources/MagicPrefabs/5-1.prefab
+Dependencies: []

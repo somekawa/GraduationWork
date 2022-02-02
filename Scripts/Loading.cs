@@ -23,6 +23,18 @@ public class Loading : MonoBehaviour
 
     public void NextScene(int buildNum)
     {
+        if (backGround == null)
+        {
+            var tmp = GameObject.Find("LoadingCanvas").transform;
+            backImage_ = tmp.Find("BackImage").gameObject;
+            backGround = tmp.Find("Background").gameObject;
+            slider = backGround.transform.Find("Slider").GetComponent<Slider>();
+            uniImage_ = backGround.transform.Find("Image").GetComponent<Image>();
+            uniImage_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.LOADING_UNI][0];
+            backImage_.SetActive(false);
+            backGround.SetActive(false);
+        }
+
         uniAnimNum_ = 0;
         gameObject.GetComponent<AudioListener>().enabled = true;
         backImage_.SetActive(true);

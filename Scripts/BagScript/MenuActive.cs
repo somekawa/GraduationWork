@@ -226,6 +226,18 @@ public class MenuActive : MonoBehaviour
         saveCsvSc_.SaveStart(SaveLoadCSV.SAVEDATA.OTHER);
         saveCsvSc_.OtherSaveData();
         saveCsvSc_.SaveEnd();
+
+        saveCsvSc_.SaveStart(SaveLoadCSV.SAVEDATA.BOOK);
+        for (int i = 0; i < 32; i++)
+        {
+            saveCsvSc_.SaveBookData(BookStoreMng.bookState_[i]);
+        }
+        saveCsvSc_.SaveEnd();
+
+        GameObject.Find("Managers").GetComponent<Bag_Word>().DataSave();
+        GameObject.Find("Managers").GetComponent<Bag_Magic>().DataSave();
+        GameObject.Find("Managers").GetComponent<Bag_Item>().DataSave();
+        GameObject.Find("Managers").GetComponent<Bag_Materia>().DataSave();
     }
 
     public void DataLoad(bool isWarp = true)

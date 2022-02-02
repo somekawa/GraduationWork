@@ -227,7 +227,7 @@ public class SceneMng : MonoBehaviour
     }
 
     // シーンのロード
-    public static void SceneLoad(int load)
+    public static void SceneLoad(int load,bool allDeath = false)
     {
         // NONが入っていたらreturnする
         if(load == -1)
@@ -245,7 +245,16 @@ public class SceneMng : MonoBehaviour
         {
             GameObject.Find("CameraController").GetComponent<CameraMng>().SetChangeCamera(true, true);
         }
-        GameObject.Find("DontDestroyCanvas/LoadingCamera").GetComponent<Loading>().NextScene(load);
+
+        // 全滅時はロード処理に入らない(入るとゲームが固まる)
+        if(allDeath)
+        {
+            SceneManager.LoadScene(load);
+        }
+        else
+        {
+            GameObject.Find("DontDestroyCanvas/LoadingCamera").GetComponent<Loading>().NextScene(load);
+        }
     }
 
     // Excelから読み込んだ建物名を保存しておく

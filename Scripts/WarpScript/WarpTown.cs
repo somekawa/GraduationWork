@@ -163,6 +163,7 @@ public class WarpTown : MonoBehaviour
                 {
                     // ワープ準備
                     warpFieldScript_.SetWarpNowFlag(true);
+                    Debug.Log("trueにしました");
                     StartCoroutine(NeedleCheck(true));            // ワープ先選択処理
                 }
             }
@@ -247,6 +248,7 @@ public class WarpTown : MonoBehaviour
                     }
                 }
                 warpFieldScript_.SetWarpNowFlag(false);
+                Debug.Log("falseにしました");
                 StartCoroutine(WarpCansel());            // ワープ処理リセット
                 yield break;
             }

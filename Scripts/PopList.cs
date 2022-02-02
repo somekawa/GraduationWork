@@ -21,9 +21,23 @@ public class PopList : MonoBehaviour
     {
         T list = (T)(object)Resources.Load(dataName);
 
+        //// StreamingAssetsからAssetBundleをロードする
+        //var assetBundle = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/AssetBundles/StandaloneWindows/datapop");
+        //// AssetBundle内のアセットにはビルド時のアセットのパス、またはファイル名、ファイル名＋拡張子でアクセスできる
+        //// フォルダ名を入れる必要はない。例えば、testフォルダにobjobjプレハブが入っていても、LoadAssetにはobjobjだけ記載する
+        ////var a = assetBundle.LoadAsset<GameObject>("objobj");
+        //T a = (T)(object)assetBundle.LoadAsset<GameObject>("Quest0");
+        //// 不要になったAssetBundleのメタ情報をアンロードする
+        //assetBundle.Unload(false);
+
+
         if (list == null)
         {
             Debug.Log(dataName + "PopMob.csのlist情報がnullです");
+        }
+        else
+        {
+            Debug.Log(dataName + "の読み込み完了");
         }
 
         return list;
@@ -57,7 +71,7 @@ public class PopList : MonoBehaviour
                 return (T)(object)GetList<ChestList>(tmpStr);
 
             case ListData.MATERIA:
-                tmpStr = "MateriaList/M_Field"+num;
+                tmpStr = "MateriaList/M_Field" + num;
                 return (T)(object)GetList<MateriaList>(tmpStr);
 
             case ListData.ITEM:

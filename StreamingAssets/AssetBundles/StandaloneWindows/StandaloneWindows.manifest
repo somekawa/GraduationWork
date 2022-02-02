@@ -1,0 +1,10 @@
+ManifestFileVersion: 0
+CRC: 3438390209
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: datapop
+      Dependencies: {}
+    Info_1:
+      Name: magic
+      Dependencies: {}

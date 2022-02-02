@@ -20,7 +20,6 @@ public class TownMng : MonoBehaviour
     private GameObject loadPrefab_;// タイトルシーンからの遷移かどうか
     private OnceLoad onceLoad_;// LoadPrefabにアタッチされてるScript
 
-    private static bool onceflag_=true;
     void Start()
     {
         // 現在のシーンをTOWNとする
@@ -48,11 +47,6 @@ public class TownMng : MonoBehaviour
         // SceneMngから飛ばす建物名を受けとる(飛ばさなくていいときは処理しないように注意)
         string str = SceneMng.GetHouseName();
 
-        // WarpTown.csの初期化関数を先に呼ぶ
-        GameObject.Find("WarpInTown").GetComponent<WarpTown>().Init();
-        // WarpField.csの初期化関数を先に呼ぶ
-        GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
-
         // オブジェクトがある＝タイトルシーンから遷移してきた
         loadPrefab_ = GameObject.Find("LoadPrefab");
         if (loadPrefab_ != null)
@@ -62,7 +56,12 @@ public class TownMng : MonoBehaviour
             // ゲーム開始時だけ呼び出す
             GameObject.Find("SceneMng").GetComponent<MenuActive>().DataLoad(false);
         }
-        
+
+        // WarpTown.csの初期化関数を先に呼ぶ
+        GameObject.Find("WarpInTown").GetComponent<WarpTown>().Init();
+        // WarpField.csの初期化関数を先に呼ぶ
+        GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
+
         var cameraMng_ = GameObject.Find("CameraController").GetComponent<CameraMng>();
 
         if (str != "Mob")
@@ -107,16 +106,5 @@ public class TownMng : MonoBehaviour
                 SceneMng.charasList_[i].DeleteStatusUpByCook();
             }
         }
-
-        if(onceflag_==true)
-        {
-            onceflag_ = false;
-            GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
-            GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
-            GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
-            GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
-
-        }
-        GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>().MateriaGetCheck(34, 5);
     }
 }

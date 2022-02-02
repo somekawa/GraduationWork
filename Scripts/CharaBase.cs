@@ -66,9 +66,17 @@ public abstract class CharaBase : object
 
     public CharaBase(string name,int objNum, Animator animator,EnemyList.Param param)
     {
-        DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        //DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        // StreamingAssetsからAssetBundleをロードする
+        var assetBundle = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/AssetBundles/StandaloneWindows/datapop");
+        Debug.Log("assetBundle開く");
+        // AssetBundle内のアセットにはビルド時のアセットのパス、またはファイル名、ファイル名＋拡張子でアクセスできる
+        DataPopPrefab_ = assetBundle.LoadAsset<GameObject>("DataPop.prefab");
+        // 不要になったAssetBundleのメタ情報をアンロードする
+        assetBundle.Unload(false);
+        Debug.Log("破棄");
 
-        if(objNum == 0)
+        if (objNum == 0)
         {
             // キャラクター
             var popCharacter = DataPopPrefab_.GetComponent<PopList>().GetData<CharacterList>(PopList.ListData.CHARACTER, 0, name);

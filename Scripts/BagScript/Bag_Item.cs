@@ -13,7 +13,7 @@ public class Bag_Item : MonoBehaviour
 
     // データ系
     private SaveCSV_HaveItem saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
-    private const string saveDataFilePath_ = @"Assets/Resources/HaveItemList.csv";
+    private string saveDataFilePath_;
     List<string[]> csvDatas_ = new List<string[]>(); // CSVの中身を入れるリスト;
                                           
     // すべてのアイテム数
@@ -155,7 +155,8 @@ public class Bag_Item : MonoBehaviour
 
     public void DataLoad()
     {
-       // Debug.Log("ロードします");
+        // Debug.Log("ロードします");
+        saveDataFilePath_ = Application.streamingAssetsPath + "/HaveItemList.csv";
 
         csvDatas_.Clear();
 

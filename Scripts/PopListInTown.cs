@@ -70,7 +70,15 @@ public class PopListInTown : MonoBehaviour
 
     void Awake()
     {
-        DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        //DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        // StreamingAssetsからAssetBundleをロードする
+        var assetBundle = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/AssetBundles/StandaloneWindows/datapop");
+        Debug.Log("assetBundle開く");
+        // AssetBundle内のアセットにはビルド時のアセットのパス、またはファイル名、ファイル名＋拡張子でアクセスできる
+        DataPopPrefab_ = assetBundle.LoadAsset<GameObject>("DataPop.prefab");
+        // 不要になったAssetBundleのメタ情報をアンロードする
+        assetBundle.Unload(false);
+        Debug.Log("破棄");
 
         for (int b = 0; b < (int)BOOK.MAX; b++)
         {

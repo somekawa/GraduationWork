@@ -49,6 +49,10 @@ public class CameraMng : MonoBehaviour
     // FieldMng.csの現在シーン確定後に呼び出すもの
     public void MainCameraPosInit()
     {
+        if(!mainCamera.activeSelf)
+        {
+            mainCamera.SetActive(true);
+        }
         // 設定を呼び出す
         mainCamera.GetComponent<CameraSample>().Init();
     }

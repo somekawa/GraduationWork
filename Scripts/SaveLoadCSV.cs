@@ -19,9 +19,9 @@ public class SaveLoadCSV : MonoBehaviour
         MAX
     }
 
-    private const string saveDataFilePath_ = @"Assets/Resources/data.csv";
-    private const string otherSaveDataFilePath_ = @"Assets/Resources/otherData.csv";
-    private const string bookFilePath_ = @"Assets/Resources/Save/bookData.csv";
+    private string saveDataFilePath_;
+    private string otherSaveDataFilePath_;
+    private string bookFilePath_;
 
     private StreamWriter sw;
     List<string[]> csvDatas = new List<string[]>(); // CSVの中身を入れるリスト;
@@ -30,25 +30,15 @@ public class SaveLoadCSV : MonoBehaviour
     // 書き込み始めに呼ぶ
     public void SaveStart(SAVEDATA saveData)
     {
-        if(saveData == SAVEDATA.CHARACTER)
-        {
-            TextAsset saveFile = Resources.Load("data") as TextAsset;
+        saveDataFilePath_ = Application.streamingAssetsPath + "/data.csv";
+        otherSaveDataFilePath_ = Application.streamingAssetsPath + "/otherData.csv";
+        bookFilePath_ = Application.streamingAssetsPath + "/Save/bookData.csv";
 
-            if (saveFile == null)
-            {
-                // Resourcesフォルダ内へ新規で作成する
-                sw = new StreamWriter(saveDataFilePath_, true, Encoding.UTF8);
-                Debug.Log("新規ファイルへ書き込み");
-            }
-            else
-            {
-                // 古いデータを削除
-                File.Delete(saveDataFilePath_);
-                sw = new StreamWriter(saveDataFilePath_, true, Encoding.UTF8);
-                Debug.Log("古いデータを削除してファイル書き込み");
-                // すでに存在する場合は、上書き保存する(第二引数をfalseにすることで、上書きに切り替えられる)
-                //sw = new StreamWriter(saveDataFilePath_, false, Encoding.GetEncoding("Shift_JIS"));
-            }
+        if (saveData == SAVEDATA.CHARACTER)
+        {
+            File.Delete(saveDataFilePath_);
+            sw = new StreamWriter(saveDataFilePath_, true, Encoding.UTF8);
+            Debug.Log("CharacterData,古いデータを削除してファイル書き込み");
 
             // ステータスの項目見出し
             string[] s1 = { "Name", "Level", "HP","MaxHP", "MP","MaxMP", "Attack", "MagicAttack",
@@ -58,39 +48,15 @@ public class SaveLoadCSV : MonoBehaviour
         }
         else if(saveData == SAVEDATA.OTHER)
         {
-            TextAsset saveFile = Resources.Load("otherData") as TextAsset;
-
-            if (saveFile == null)
-            {
-                // Resourcesフォルダ内へ新規で作成する
-                sw = new StreamWriter(otherSaveDataFilePath_, true, Encoding.UTF8);
-                Debug.Log("新規ファイルへ書き込み");
-            }
-            else
-            {
-                // 古いデータを削除
-                File.Delete(otherSaveDataFilePath_);
-                sw = new StreamWriter(otherSaveDataFilePath_, true, Encoding.UTF8);
-                Debug.Log("古いデータを削除してファイル書き込み");
-            }
+            File.Delete(otherSaveDataFilePath_);
+            sw = new StreamWriter(otherSaveDataFilePath_, true, Encoding.UTF8);
+            Debug.Log("OtherData,古いデータを削除してファイル書き込み");
         }
         else if(saveData == SAVEDATA.BOOK)
         {
-            TextAsset saveFile = Resources.Load("Save/bookData") as TextAsset;
-
-            if (saveFile == null)
-            {
-                // Resourcesフォルダ内へ新規で作成する
-                sw = new StreamWriter(bookFilePath_, true, Encoding.UTF8);
-                Debug.Log("新規ファイルへ書き込み");
-            }
-            else
-            {
-                // 古いデータを削除
-                File.Delete(bookFilePath_);
-                sw = new StreamWriter(bookFilePath_, true, Encoding.UTF8);
-                Debug.Log("古いデータを削除してファイル書き込み");
-            }
+            File.Delete(bookFilePath_);
+            sw = new StreamWriter(bookFilePath_, true, Encoding.UTF8);
+            Debug.Log("Book,古いデータを削除してファイル書き込み");
 
             // ステータスの項目見出し
             string[] s1 = { "Name", "ReadCheck" };
@@ -113,20 +79,16 @@ public class SaveLoadCSV : MonoBehaviour
                           set.Magic[0].ToString(),set.Magic[1].ToString(),
                           set.Magic[2].ToString(),set.Magic[3].ToString(),
                           set.CharacterExp.ToString(),set.CharacterMaxExp.ToString(),set.CharacterSumExp.ToString()};
-        string write = string.Join(",", data);
+        Debug.Log(set.name + set.Level.ToString() + set.HP.ToString() + set.maxHP.ToString() + set.MP.ToString() + set.maxMP.ToString());        string write = string.Join(",", data);
         sw.WriteLine(write);
     }
 
     // 「進行度,所持金,クエストのクリア状態,宝箱と強制戦闘壁の取得とクリア状態」を保存する
     public void OtherSaveData()
     {
-        // 項目見出し
-        //string[] s1 = { "EventNum", "Money", "Quest", "ForcedButtleAndTreasure" };
-        //string s2 = string.Join("\n", s1);
-        //sw.WriteLine(s2);
-
         // Quest項目名までをとりあえず保存させる
         string[] data = { "EventNum",EventMng.GetChapterNum().ToString(), "Money",SceneMng.GetHaveMoney().ToString(),"Quest"};
+
         string write = string.Join("\n", data);
         sw.WriteLine(write);
 
@@ -216,12 +178,21 @@ public class SaveLoadCSV : MonoBehaviour
         SaveEnd();
 
         // Book
-        var DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        //var DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+
+        // StreamingAssetsからAssetBundleをロードする
+        var assetBundle = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/AssetBundles/StandaloneWindows/datapop");
+        Debug.Log("assetBundle開く");
+        // AssetBundle内のアセットにはビルド時のアセットのパス、またはファイル名、ファイル名＋拡張子でアクセスできる
+        var DataPopPrefab_ = assetBundle.LoadAsset<GameObject>("DataPop.prefab");
+        // 不要になったAssetBundleのメタ情報をアンロードする
+        assetBundle.Unload(false);
+        Debug.Log("破棄");
 
         List<string> bookname_ = new List<string>();
         int cnt = 0;
 
-        for(int i = 0; i < 5; i++)  // .xlsのページ数分まわす
+        for (int i = 0; i < 5; i++)  // .xlsのページ数分まわす
         {
             var tmp = DataPopPrefab_.GetComponent<PopList>().GetData<BookList>(PopList.ListData.BOOK_STORE, i);
             for (int b = 0; b < tmp.param.Count; b++)   // 列分まわす
@@ -253,6 +224,10 @@ public class SaveLoadCSV : MonoBehaviour
 
     public void LoadData(SAVEDATA saveData)
     {
+        saveDataFilePath_ = Application.streamingAssetsPath + "/data.csv";
+        otherSaveDataFilePath_ = Application.streamingAssetsPath + "/otherData.csv";
+        bookFilePath_ = Application.streamingAssetsPath + "/Save/bookData.csv";
+
         csvDatas.Clear();
 
         if (saveData == SAVEDATA.CHARACTER)
@@ -478,5 +453,15 @@ public class SaveLoadCSV : MonoBehaviour
                 list.Add((split[0], flag));
             }
         }
+    }
+
+    public void SaveBookData(BookStoreMng.BookData set)
+    {
+        // 実際のステータス値
+        string[] data = { set.bookNumber.ToString(), set.bookName, set.readFlag.ToString() };
+
+        // set.sprite.ToString() 
+        string write = string.Join(",", data);
+        sw.WriteLine(write);
     }
 }

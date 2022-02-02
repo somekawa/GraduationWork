@@ -444,4 +444,11 @@ public class ItemStoreMng : MonoBehaviour
         kindBtn_[(int)KIND.ITEM].interactable = true;
     }
 
+    public void OnClickBackButton()
+    {
+        Debug.Log("–ß‚éƒ{ƒ^ƒ“‚ð‰Ÿ‰º‚µ‚Ü‚µ‚½");
+        itemStoreCanvas_.gameObject.SetActive(true);
+        itemStoreUI.SetActive(false);
+
+    }
 }

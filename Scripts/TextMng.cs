@@ -83,7 +83,16 @@ public class TextMng : MonoBehaviour
             charFacesMap_.Add(charaName_[i], tmpt.Find(charaName_[i]).GetComponent<UnityChan.FaceUpdate>());    // 登録
         }
 
-        DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
+        // StreamingAssetsからAssetBundleをロードする
+        var assetBundle = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/AssetBundles/StandaloneWindows/datapop");
+        Debug.Log("assetBundle開く");
+        // AssetBundle内のアセットにはビルド時のアセットのパス、またはファイル名、ファイル名＋拡張子でアクセスできる
+        DataPopPrefab_ = assetBundle.LoadAsset<GameObject>("DataPop.prefab");
+        // 不要になったAssetBundleのメタ情報をアンロードする
+        assetBundle.Unload(false);
+        Debug.Log("破棄");
+
+        //DataPopPrefab_ = Resources.Load("DataPop") as GameObject;   // Resourcesファイルから検索する
         popChapter_ = DataPopPrefab_.GetComponent<PopList>().GetData<ChapterList>(PopList.ListData.CHAPTER, EventMng.GetChapterNum());
 
         // Frame_textの子にあるMessageというテキストオブジェクトを探す
@@ -102,6 +111,9 @@ public class TextMng : MonoBehaviour
 
         // トランジション
         fade_ = GameObject.Find("FadeCanvas").GetComponent<Fade>();
+
+        //@デバッグ用
+        //nowText_ = popChapter_.param.Count - 1;
 
         TextAndFaceSetting();
     }

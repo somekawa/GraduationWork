@@ -1,0 +1,90 @@
+ManifestFileVersion: 0
+CRC: 3711156929
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: f1e4cdbc04a0617ffbb4e98a02032b0f
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 2d6f048e84510b0803cb1e45119ab5e3
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: 08a63bdbc6b0a814d9dee0cf0605712e, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 393233fa791abf340acc4ce4847f134c, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: cc22a6017df729f4e8b987aab614d748, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 27b1e88d83f6e7043bceb932d9d8ec4d, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: dc440ea223c3871469540e088a5a1d10, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: e7b7a47419a3c3748a8ff954917978f3, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 44bcd4d38745f0e41b217f6e9a969f89, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 24491878e0bd9cb49a737d99255249b5, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: e6997970aeaf6f24b858ce1ad6c07c66, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: c2104b7ca7fbb94499f84d9e5e8efbe8, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 84640bc71e750fc4b87e4d34027d9b82, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Resources/Chapter/Chapter23.asset
+- Assets/Resources/Chapter/Chapter17.asset
+- Assets/Resources/EnemyData/Field4.asset
+- Assets/Resources/Chapter/Chapter5.asset
+- Assets/Resources/Chapter/Chapter7.asset
+- Assets/Resources/CharaJack.asset
+- Assets/Resources/Cook0.asset
+- Assets/Resources/MateriaList/M_Field4.asset
+- Assets/Resources/EnemyData/Field3.asset
+- Assets/Resources/BookList/BookList2.asset
+- Assets/Resources/EnemyData/Field2.asset
+- Assets/Resources/BookList/BookList4.asset
+- Assets/Resources/Quest0.asset
+- Assets/Resources/Chapter/Chapter8.asset
+- Assets/Resources/MateriaList/M_Field0.asset
+- Assets/Resources/Chapter/Chapter11.asset
+- Assets/Resources/Chapter/Chapter2.asset
+- Assets/Resources/BookList/BookList3.asset
+- Assets/Resources/Chapter/Chapter20.asset
+- Assets/Resources/Chapter/Chapter21.asset
+- Assets/Resources/ItemList/ItemList.asset
+- Assets/Resources/Chapter/Chapter100.asset
+- Assets/Resources/Chapter/Chapter15.asset
+- Assets/Resources/Chapter/Chapter19.asset
+- Assets/Resources/Chapter/Chapter16.asset
+- Assets/Resources/Chapter/Chapter1.asset
+- Assets/Resources/Chapter/Chapter18.asset
+- Assets/Resources/BookList/BookList0.asset
+- Assets/Resources/BookList/BookList1.asset
+- Assets/Resources/Chapter/Chapter22.asset
+- Assets/Resources/Chapter/Chapter0.asset
+- Assets/Resources/Chapter/Chapter4.asset
+- Assets/Resources/EnemyData/Field0.asset
+- Assets/Resources/MateriaList/M_Field3.asset
+- Assets/Resources/MateriaList/M_Field2.asset
+- Assets/Resources/MateriaList/M_Field1.asset
+- Assets/Resources/DataPop.prefab
+- Assets/Resources/Chapter/Chapter10.asset
+- Assets/Resources/CharaUni.asset
+- Assets/Resources/Chapter/Chapter12.asset
+- Assets/Resources/Chest.asset
+- Assets/Resources/Chapter/Chapter9.asset
+- Assets/Resources/Chapter/Chapter6.asset
+- Assets/Resources/EnemyData/Field1.asset
+- Assets/Resources/Chapter/Chapter3.asset
+- Assets/Resources/WordList/WordList0.asset
+- Assets/Resources/Chapter/Chapter13.asset
+- Assets/Resources/Chapter/Chapter14.asset
+Dependencies: []

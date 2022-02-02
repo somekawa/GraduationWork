@@ -31,12 +31,12 @@ public class TitleSceneMng : MonoBehaviour
     void Start()
     {
         // セーブデータがあるか調べて、ないときはボタンのinteractableをfalseにする
-        TextAsset saveFile = Resources.Load("data") as TextAsset;
+        //TextAsset saveFile = Resources.Load("data") as TextAsset;
 
-        if (saveFile == null)
-        {
-            GameObject.Find("Canvas/LoadGameBtn").GetComponent<Button>().interactable = false;
-        }
+        //if (saveFile == null)
+        //{
+        //    GameObject.Find("Canvas/LoadGameBtn").GetComponent<Button>().interactable = false;
+        //}
 
         // 親は必要ないためnull
         loadPrefab_ = Instantiate(LoadPrefab,
