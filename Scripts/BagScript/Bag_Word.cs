@@ -48,8 +48,8 @@ public class Bag_Word : MonoBehaviour
         public TMPro.TextMeshProUGUI nameText;
         public Button btn;
         public InitPopList.WORD kinds;
-        public string english;
         public int power;
+        public int MP;
         public int maxCnt;
     }
     public static Dictionary<InitPopList.WORD, WordData[]> wordState = new Dictionary<InitPopList.WORD, WordData[]>();
@@ -95,11 +95,12 @@ public class Bag_Word : MonoBehaviour
             for (int k = 0; k < (int)InitPopList.WORD.INFO; k++)
             {
                 maxCnt_[k] = InitPopList.maxWordKindsCnt[k];
-                wordState[(InitPopList.WORD)k] = InitWordState((InitPopList.WORD)k, maxCnt_[k]);
+                wordState[(InitPopList.WORD)k] = InitWordState((InitPopList.WORD)k, maxCnt_[k], dataNum);
                 for (int i = 0; i < maxCnt_[k]; i++)
                 {
                     data[dataNum] = wordState[(InitPopList.WORD)k][i];
                     //Debug.Log(dataNum + "番目のワードは" + data[dataNum].name);
+                    data[dataNum].number = dataNum;
                     dataNum++;
                 }
             }
@@ -143,19 +144,29 @@ public class Bag_Word : MonoBehaviour
             // もしHead以外が選択されていた場合そのボタンを押下可能にする
             kindsBtn_.interactable = true;
         }
-
+        //WordGetCheck(InitPopList.WORD.HEAD, 2, 2);// 全体
+        //WordGetCheck(InitPopList.WORD.HEAD, 1, 1);// 複数回
+        //WordGetCheck(InitPopList.WORD.ELEMENT_ASSIST, 0, 4);// 補助
+        //WordGetCheck(InitPopList.WORD.SUB1, 0, 13);// 味方
+        //WordGetCheck(InitPopList.WORD.SUB1_AND_SUB2, 0, 20);// 毒
+        //WordGetCheck(InitPopList.WORD.SUB1_AND_SUB2, 3, 23);// 即死
+        //WordGetCheck(InitPopList.WORD.SUB2, 1, 16);// 物理攻撃力
+        //WordGetCheck(InitPopList.WORD.SUB2, 2, 17);// 魔法攻撃力
+                                                   //WordGetCheck(InitPopList.WORD.SUB2, 4, 19);// 命中/回避
+                                                   //WordGetCheck(InitPopList.WORD.SUB2, 3, 18);// 防御力
+                                                   // WordGetCheck(InitPopList.WORD.ALL_SUB, 1, 28);// 必中
         kindsBtn_ = headBtn;
         kindsBtn_.interactable = false;
     }
 
-    private WordData[] InitWordState(InitPopList.WORD kind, int maxCnt)
+    private WordData[] InitWordState(InitPopList.WORD kind, int maxCnt,int dataNum)
     {
+        int csvNum = dataNum;
         var word = new WordData[maxCnt];
         for (int i = 0; i < maxCnt; i++)
         {
             // ワード名を取得
             word[i].name = InitPopList.name[(int)kind, i];
-            word[i].english = InitPopList.englishName[(int)kind, i];
 
             // オブジェクト情報を取得
             word[i].pleate = InitPopList.pleate[(int)kind, i];
@@ -169,11 +180,14 @@ public class Bag_Word : MonoBehaviour
             word[i].btn = word[i].pleate.GetComponent<Button>();
 
             // 指定のワードを取得しているか
-            word[i].getFlag = int.Parse(csvDatas_[i + 1][2]);
+            Debug.Log(csvNum + i + "番目は" + csvDatas_[csvNum + 1 + i][1]);
+            data[dataNum].number = csvNum + i;
+            word[i].getFlag = int.Parse(csvDatas_[csvNum + 1 + i][2]);
             word[i].kinds = InitPopList.kinds[(int)kind, i];
             word[i].power = InitPopList.power[(int)kind, i];
+            word[i].MP = InitPopList.MP[(int)kind, i];
             word[i].maxCnt = maxCnt;
-            //Debug.Log("BagWord内で " + kind + "の" + i + "番目は" + word[i].name);
+            Debug.Log("BagWord内で " + kind + "の" + i + "番目は" + word[i].name);
         }
         return word;
     }

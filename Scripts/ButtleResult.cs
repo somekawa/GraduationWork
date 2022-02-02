@@ -426,8 +426,8 @@ public class ButtleResult : MonoBehaviour
             }
         }
         // 1ƒŒƒxƒ‹ã¸‚·‚é‚½‚Ñ‚É‰ÁZ
-        tmp[5] = differenceLv * 5;//  6MP
-        tmp[6] = differenceLv * 3;// 5HP
+        tmp[5] = differenceLv * 5;// 5HP
+        tmp[6] = differenceLv * 2;// 6MP
 
         charaRect_.sizeDelta = new Vector2(CharaImage[(int)chara].rect.width, CharaImage[(int)chara].rect.height);
         charaImage_.sprite = CharaImage[(int)chara];

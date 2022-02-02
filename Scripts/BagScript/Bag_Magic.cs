@@ -31,8 +31,9 @@ public class Bag_Magic : MonoBehaviour
     {
         public int number;
         public string name;
-        public string main;
-        public string sub;
+        public int mp;
+        //public string main;
+        //public string sub;
         public int power;
         public int rate;
         public int head;
@@ -63,6 +64,7 @@ public class Bag_Magic : MonoBehaviour
 
     public static GameObject[] statusMagicObject = new GameObject[20];
     private Image[] statusMagicImage_ = new Image[20];
+    private Image[] statusMagicImageEx_ = new Image[20];
     private Button[] statusMagicBtn_ = new Button[20];
     private Text[] statusMagicSetText_ = new Text[20];
     // ã§í 
@@ -103,16 +105,17 @@ public class Bag_Magic : MonoBehaviour
             {
                 data[i].number = int.Parse(csvDatas[i + 1][0]);
                 data[i].name = csvDatas[i + 1][1];
-                data[i].main = csvDatas[i + 1][2];
-                data[i].sub = csvDatas[i + 1][3];
-                data[i].power = int.Parse(csvDatas[i + 1][4]);
-                data[i].rate = int.Parse(csvDatas[i + 1][5]);
-                data[i].head = int.Parse(csvDatas[i + 1][6]);
-                data[i].element = int.Parse(csvDatas[i + 1][7]);
-                data[i].tail = int.Parse(csvDatas[i + 1][8]);
-                data[i].sub1 = int.Parse(csvDatas[i + 1][9]);
-                data[i].sub2 = int.Parse(csvDatas[i + 1][10]);
-                data[i].sub3 = int.Parse(csvDatas[i + 1][11]);
+                //data[i].main = csvDatas[i + 1][2];
+                //data[i].sub = csvDatas[i + 1][3];
+                data[i].rate = int.Parse(csvDatas[i + 1][2]);
+                data[i].power = int.Parse(csvDatas[i + 1][3]);
+                data[i].mp = int.Parse(csvDatas[i + 1][4]);
+                data[i].head = int.Parse(csvDatas[i + 1][5]);
+                data[i].element = int.Parse(csvDatas[i + 1][6]);
+                data[i].tail = int.Parse(csvDatas[i + 1][7]);
+                data[i].sub1 = int.Parse(csvDatas[i + 1][8]);
+                data[i].sub2 = int.Parse(csvDatas[i + 1][9]);
+                data[i].sub3 = int.Parse(csvDatas[i + 1][10]);
 
               //  Debug.Log(i + "î‘ñ⁄ÅF" + data[i].name + "           " + data[i].element);
                 if (i == 0)
@@ -135,23 +138,34 @@ public class Bag_Magic : MonoBehaviour
                                                 Quaternion.identity, statusMagicParent.transform);
                 statusMagicObject[i].name = "Magic" + data[i].number;
                 statusMagicImage_[i] = statusMagicObject[i].transform.Find("MagicIcon").GetComponent<Image>();
+                statusMagicImageEx_[i] = statusMagicObject[i].transform.Find("ExImage").GetComponent<Image>();
                 statusMagicBtn_[i] = statusMagicObject[i].GetComponent<Button>();
                 statusMagicSetText_[i] = statusMagicBtn_[i].transform.Find("SetCharaName").GetComponent<Text>();
                 statusMagicSetText_[i].text = "";
                 // Debug.Log(statusMagicBtn_[i].name);
                 statusMagicImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[i].element];
                 //Debug.Log(data[i].name + "           " + data[i].number);
+
+                if(data[number_].rate==2)
+                {
+                    statusMagicImageEx_[i].gameObject.SetActive(true);
+                }
+                else
+                {
+                    statusMagicImageEx_[i].gameObject.SetActive(false);
+                }
             }
         }
     }
 
-    public void MagicCreateCheck(string magicName, string mainWords, string subWords, int pow, int rateNum,
+    public void MagicCreateCheck(string magicName, int pow, int mp, int rateNum,
                                   int head, int element, int tail, int sub1, int sub2, int sub3)
     {
         data[number_].number = number_;
         data[number_].name = magicName;
-        data[number_].main = mainWords;
-        data[number_].sub = subWords;
+        data[number_].mp = mp;
+        //data[number_].main = mainWords;
+        //data[number_].sub = subWords;
         data[number_].power = pow;
         data[number_].rate = rateNum;
         data[number_].head = head;

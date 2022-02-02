@@ -26,7 +26,7 @@ public class MagicCreate : MonoBehaviour
 
     // どれを選択しているかを表示
     private TMPro.TextMeshProUGUI infoText_;
-    private string[] seleEngWord_;
+    //  private string[] seleEngWord_;
     private string[] selectWord_;
     private int targetWordNum_;// 必中ワードの番号を保存
     private int materiaNum_;//空のマテリアの番号を保存
@@ -36,12 +36,14 @@ public class MagicCreate : MonoBehaviour
     //   0.作成開始ボタン　1.魔法合成終了ボタン
     private bool createFlag_ = false;
     private Button createBtn_;
+    private TMPro.TextMeshProUGUI createBtnText_;
+
     private Button cancelBtn_;
     private Bag_Magic bagMagic_;
     private Bag_Word bagWord_;
     private string allName_ = "";
-    private string mainName_ = "";
-    private string subName_ = "";
+    //private string mainName_ = "";
+    //private string subName_ = "";
     private int[] saveNumber_ = new int[(int)Bag_Word.WORD_MNG.MAX]
         { -1,-1,-1,-1,-1,-1};// 選択したワードの番号を保存
     private int[] oldNumber_ = new int[(int)Bag_Word.WORD_MNG.MAX] { -1, -1, -1, -1, -1, -1 };
@@ -59,9 +61,10 @@ public class MagicCreate : MonoBehaviour
     {
         public GameObject pleate;   // インスタンスしたオブジェクトを保存
         public string name;         // ワード名
-        public string englishName;
+                                    //  public string englishName;
         public Button btn;
         public int power;
+        public int MP;
         public bool getFlag;
     }
     public static Dictionary<Bag_Word.WORD_MNG, MagicCreateData[]> mCreateData = new Dictionary<Bag_Word.WORD_MNG, MagicCreateData[]>();
@@ -70,6 +73,9 @@ public class MagicCreate : MonoBehaviour
     // 威力関連
     private TMPro.TextMeshProUGUI powerText_;
     private int magicPower_ = 0;
+
+    private TMPro.TextMeshProUGUI mpText_;
+    private int mpPower_ = 0;
 
 
     private MagicCreateData[] InitCheck(Bag_Word.WORD_MNG kind)
@@ -175,12 +181,14 @@ public class MagicCreate : MonoBehaviour
     private void CommonInitCheck(MagicCreateData[] data, int count, InitPopList.WORD kind, int dataNum)
     {
         data[count].name = Bag_Word.wordState[kind][dataNum].name;
-        data[count].englishName = Bag_Word.wordState[kind][dataNum].english;
+        //   data[count].englishName = Bag_Word.wordState[kind][dataNum].english;
         data[count].pleate = Bag_Word.wordState[kind][dataNum].pleate;
         data[count].btn = Bag_Word.wordState[kind][dataNum].btn;
+        data[count].btn.enabled = true;
         data[count].power = Bag_Word.wordState[kind][dataNum].power;
+        data[count].MP = Bag_Word.wordState[kind][dataNum].MP;
         bool flag = false;
-        if(Bag_Word.wordState[kind][dataNum].getFlag==1)
+        if (Bag_Word.wordState[kind][dataNum].getFlag == 1)
         {
             flag = true;
         }
@@ -189,6 +197,11 @@ public class MagicCreate : MonoBehaviour
 
     public void Init()
     {
+        ////// デバッグ用
+        ////GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
+        ////GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
+
+
         magicCreateParent = transform.Find("ScrollView/Viewport/WordParent").GetComponent<RectTransform>();
         // ワードの最大個数を取得
         for (int i = 0; i < (int)InitPopList.WORD.INFO; i++)
@@ -208,7 +221,8 @@ public class MagicCreate : MonoBehaviour
         // 作成開始ボタン
         createBtn_ = transform.Find("InfoMng/CreateBtn").GetComponent<Button>();
         createBtn_.interactable = false;
-
+        createBtnText_ = createBtn_.transform.Find("Text").GetComponent<TMPro.TextMeshProUGUI>();
+        createBtnText_.text = "確認";
         // 魔法合成終了ボタンを代入
         cancelBtn_ = transform.Find("InfoMng/CancelBtn").GetComponent<Button>();
 
@@ -235,7 +249,7 @@ public class MagicCreate : MonoBehaviour
         // 選んだワードを表示
         infoText_ = infoParent_.transform.Find("SelectWord").GetComponent<TMPro.TextMeshProUGUI>();
         selectWord_ = new string[(int)Bag_Word.WORD_MNG.MAX];
-        seleEngWord_ = new string[(int)Bag_Word.WORD_MNG.MAX];
+        //    seleEngWord_ = new string[(int)Bag_Word.WORD_MNG.MAX];
         targetWordNum_ = Bag_Word.targetWordNum;
         materiaNum_ = Bag_Materia.emptyMateriaNum;
 
@@ -249,8 +263,11 @@ public class MagicCreate : MonoBehaviour
         }
 
         // 威力を表示
-        powerText_ = infoParent_.transform.Find("PowerArea/PowerText").GetComponent<TMPro.TextMeshProUGUI>();
+        //   powerText_ = infoParent_.transform.Find("PowerArea/PowerText").GetComponent<TMPro.TextMeshProUGUI>();
+        powerText_ = transform.Find("InfoMng/CheckBack/PowerArea/PowerText").GetComponent<TMPro.TextMeshProUGUI>();
         powerText_.text = "";
+        mpText_ = transform.Find("InfoMng/CheckBack/MPArea/MPText").GetComponent<TMPro.TextMeshProUGUI>();
+        mpText_.text = "";
 
         ResetCommon();
 
@@ -641,9 +658,6 @@ public class MagicCreate : MonoBehaviour
             magicPower_ -= mCreateData[(Bag_Word.WORD_MNG)kindNum_][oldNumber_[kindNum_]].power;
         }
 
-        // 威力を加算する
-        magicPower_ += mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].power;
-        powerText_.text = magicPower_.ToString();
 
         // 選択したワードの色を緑にして選択できないようにする
         mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].btn.image.color = Color.green;
@@ -651,7 +665,7 @@ public class MagicCreate : MonoBehaviour
 
         //// トピックからどの種類の時に選ばれたワードなのかを見る
         selectWord_[kindNum_] = mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].name;
-        seleEngWord_[kindNum_] = mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].englishName;
+        //  seleEngWord_[kindNum_] = mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].englishName;
         infoText_.text = selectWord_[(int)Bag_Word.WORD_MNG.HEAD] +
                   "\n" + selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] +
                   "\n" + selectWord_[(int)Bag_Word.WORD_MNG.TAIL] +
@@ -666,14 +680,6 @@ public class MagicCreate : MonoBehaviour
                    selectWord_[(int)Bag_Word.WORD_MNG.SUB1] +
                   selectWord_[(int)Bag_Word.WORD_MNG.SUB2] +
                    selectWord_[(int)Bag_Word.WORD_MNG.SUB3];
-
-        mainName_ = seleEngWord_[(int)Bag_Word.WORD_MNG.HEAD] +
-                  seleEngWord_[(int)Bag_Word.WORD_MNG.ELEMENT] +
-                 seleEngWord_[(int)Bag_Word.WORD_MNG.TAIL];
-
-        subName_ = seleEngWord_[(int)Bag_Word.WORD_MNG.SUB1] +
-                  seleEngWord_[(int)Bag_Word.WORD_MNG.SUB2] +
-                  seleEngWord_[(int)Bag_Word.WORD_MNG.SUB3];
 
 
         // ーーーーー●ワード選択処理ここまで
@@ -729,6 +735,7 @@ public class MagicCreate : MonoBehaviour
                 createFlag_ = true;
             }
         }
+        powerText_.text = "計算中";
 
 
         createBtn_.interactable = createFlag_;
@@ -737,34 +744,65 @@ public class MagicCreate : MonoBehaviour
 
     public void OnClickMagicCreate()
     {
-        // 空のマテリアが1つ以上持ってるかチェック
-        if (Bag_Materia.materiaState[materiaNum_].haveCnt < 1)
+        if (createBtnText_.text == "作成")
         {
-            return;
-        }
-
-        for (int i = 0; i < bagMagic_.MagicNumber(); i++)
-        {
-            if (allName_ == Bag_Magic.data[0].name)
+            // 空のマテリアが1つ以上持ってるかチェック
+            if (Bag_Materia.materiaState[materiaNum_].haveCnt < 1)
             {
-                Debug.Log(allName_ + "はすでに生成されています");
                 return;
             }
+
+            // 空のマテリアの所持数を減らす
+            Bag_Materia.materiaState[materiaNum_].haveCnt--;
+            materiaCntText_.text = Bag_Materia.materiaState[materiaNum_].haveCnt.ToString();
+
+            StartCoroutine(movePoint_.CountDown());
+            StartCoroutine(ResultMagicCreate());
+            miniGameMng.gameObject.SetActive(true);
+
+            // ゲームが始まるため押下できないようにする
+            createBtn_.interactable = false;
+            cancelBtn_.interactable = false;
+            arrowBtn_[0].interactable = false;
+            arrowBtn_[1].interactable = false;
         }
+        else
+        {
+            int maxWordMng_ = -1;
+            if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] == "")
+            {
+                maxWordMng_ = (int)Bag_Word.WORD_MNG.TAIL;
+            }
+            else if (selectWord_[(int)Bag_Word.WORD_MNG.SUB2] == "")
+            {
+                maxWordMng_ = (int)Bag_Word.WORD_MNG.SUB1;
+            }
+            else
+            {
+                maxWordMng_ = (int)Bag_Word.WORD_MNG.SUB3;
+            }
 
-        // 空のマテリアの所持数を減らす
-        Bag_Materia.materiaState[materiaNum_].haveCnt--;
-        materiaCntText_.text = Bag_Materia.materiaState[materiaNum_].haveCnt.ToString();
+            for (int i = (int)Bag_Word.WORD_MNG.HEAD; i < maxWordMng_; i++)
+            {
+                if (i == (int)Bag_Word.WORD_MNG.TAIL)
+                {
+                    mpPower_ += mCreateData[(Bag_Word.WORD_MNG)i][saveNumber_[kindNum_]].MP;
+                    continue;
+                }
+                // 威力は足した分にTailをかけるためTailの時は入らないようにする
+                magicPower_ += mCreateData[(Bag_Word.WORD_MNG)i][saveNumber_[kindNum_]].power;
+            }
+            float tailPower = mCreateData[Bag_Word.WORD_MNG.TAIL][saveNumber_[kindNum_]].power;
+            if (selectWord_[(int)Bag_Word.WORD_MNG.HEAD] == "複数回")
+            {
+                tailPower = mCreateData[Bag_Word.WORD_MNG.TAIL][saveNumber_[kindNum_]].power - 1.8f;
+            }
 
-        StartCoroutine(movePoint_.CountDown());
-        StartCoroutine(ResultMagicCreate());
-        miniGameMng.gameObject.SetActive(true);
-
-        // ゲームが始まるため押下できないようにする
-        createBtn_.interactable = false;
-        cancelBtn_.interactable = false;
-        arrowBtn_[0].interactable = false;
-        arrowBtn_[1].interactable = false;
+            magicPower_ *= (int)tailPower;
+            powerText_.text = magicPower_.ToString();
+            mpText_.text = mpPower_.ToString();
+            createBtnText_.text = "作成";
+        }
     }
 
     public IEnumerator ResultMagicCreate()
@@ -777,29 +815,26 @@ public class MagicCreate : MonoBehaviour
             }
             else
             {
-                ChangeEnglishMagic(seleEngWord_[(int)Bag_Word.WORD_MNG.HEAD],
-                                    seleEngWord_[(int)Bag_Word.WORD_MNG.TAIL],
-                                    kindNum_);
-                int rate = 0;// 成功か大成功か
-                if (movePoint_.GetMiniGameJudge() == MovePoint.JUDGE.NORMAL)
-                {
-                    judgeText_.text = "成功";
-                    rate = 5;
-                }
-                else
+                int rate = (int)MovePoint.JUDGE.NORMAL;// 成功か大成功か
+                int power = magicPower_;
+                int mp = mpPower_;
+                judgeText_.text = "成功";
+                if (movePoint_.GetMiniGameJudge() == MovePoint.JUDGE.GOOD)
                 {
                     judgeText_.text = "大成功";
-                    rate = 10;
+                    rate = (int)MovePoint.JUDGE.GOOD;
+                    power = (int)(magicPower_ * 1.3);// 威力を上げる
+                    mp -= (int)(magicPower_ * 0.3);// 消費MPを下げる
                 }
                 judgeBack_.gameObject.SetActive(true);
 
                 movePoint_.SetMiniGameJudge(MovePoint.JUDGE.NON);// 初期化しておく
 
 
-                if(selectWord_[(int)Bag_Word.WORD_MNG.SUB1]=="")
+                if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] == "")
                 {
                     saveWordNum_[(int)Bag_Word.WORD_MNG.SUB1] = -1;
-                            saveWordNum_[(int)Bag_Word.WORD_MNG.SUB2] = -1;
+                    saveWordNum_[(int)Bag_Word.WORD_MNG.SUB2] = -1;
                     saveWordNum_[(int)Bag_Word.WORD_MNG.SUB3] = -1;
 
                 }
@@ -810,8 +845,8 @@ public class MagicCreate : MonoBehaviour
                 }
 
                 // 出来上がった魔法を保存
-                bagMagic_.MagicCreateCheck(allName_, mainName_, subName_,
-                            magicPower_, rate,
+                bagMagic_.MagicCreateCheck(allName_,
+                            power, mp, rate,
                             saveWordNum_[(int)Bag_Word.WORD_MNG.HEAD],
                             saveWordNum_[(int)Bag_Word.WORD_MNG.ELEMENT],
                             saveWordNum_[(int)Bag_Word.WORD_MNG.TAIL],
@@ -838,51 +873,6 @@ public class MagicCreate : MonoBehaviour
         }
     }
 
-    public void ChangeEnglishMagic(string headWord, string tailWord, int number)
-    {
-        if (headWord == "non" && tailWord == "non")
-        {
-            mainName_ = seleEngWord_[(int)Bag_Word.WORD_MNG.ELEMENT];
-        }
-        else if (headWord == "non")
-        {
-            mainName_ = seleEngWord_[(int)Bag_Word.WORD_MNG.TAIL] +
-                seleEngWord_[(int)Bag_Word.WORD_MNG.ELEMENT];
-
-        }
-        else if (tailWord == "non")
-        {
-            mainName_ = seleEngWord_[(int)Bag_Word.WORD_MNG.HEAD] +
-                seleEngWord_[(int)Bag_Word.WORD_MNG.ELEMENT];
-        }
-        else
-        {
-            mainName_ = seleEngWord_[(int)Bag_Word.WORD_MNG.HEAD] +
-                seleEngWord_[(int)Bag_Word.WORD_MNG.TAIL] +
-                seleEngWord_[(int)Bag_Word.WORD_MNG.ELEMENT];
-        }
-
-        if (number == (int)Bag_Word.WORD_MNG.TAIL)
-        {
-            subName_ = "non";
-        }
-        else if (number == (int)Bag_Word.WORD_MNG.SUB1)
-        {
-            subName_ = "(" + seleEngWord_[(int)Bag_Word.WORD_MNG.SUB1] + ")";
-        }
-        else if (number == (int)Bag_Word.WORD_MNG.SUB2)
-        {
-            subName_ = "(" + seleEngWord_[(int)Bag_Word.WORD_MNG.SUB1] + "/" +
-              seleEngWord_[(int)Bag_Word.WORD_MNG.SUB2] + ")";
-        }
-        else
-        {
-            subName_ = "(" + seleEngWord_[(int)Bag_Word.WORD_MNG.SUB1] + "/" +
-                seleEngWord_[(int)Bag_Word.WORD_MNG.SUB2] + "/" +
-             seleEngWord_[(int)Bag_Word.WORD_MNG.SUB3] + ")";
-        }
-    }
-
     public void OnClickCancelCtn()
     {
         // 魔法の合成をやめる
@@ -900,10 +890,10 @@ public class MagicCreate : MonoBehaviour
 
         infoText_.text = "";
         allName_ = "";
-        mainName_ = "";
-        subName_ = "";
         magicPower_ = 0;
+        mpPower_ = 0;
         powerText_.text = "";
+        mpText_.text = "";
         kindNum_ = (int)Bag_Word.WORD_MNG.HEAD;
         topicText_.text = topicString_[kindNum_];
 
@@ -914,7 +904,7 @@ public class MagicCreate : MonoBehaviour
             {
                 mCreateData[(Bag_Word.WORD_MNG)i][saveNumber_[i]].btn.image.color = Color.white;
                 selectWord_[i] = null;
-                seleEngWord_[i] = null;
+                //  seleEngWord_[i] = null;
                 // 誰にも該当しない番号を入れる
                 saveNumber_[i] = -1;
                 oldNumber_[i] = saveNumber_[i];
@@ -944,5 +934,6 @@ public class MagicCreate : MonoBehaviour
         arrowBtn_[1].interactable = false;
         createFlag_ = false;
         createBtn_.interactable = createFlag_;
+        createBtnText_.text = "確認";
     }
 }

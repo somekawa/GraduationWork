@@ -80,10 +80,10 @@ public class InitPopList : MonoBehaviour
     private int maxWordCnt_ = 0;
     public static GameObject[,] pleate;   // インスタンスしたオブジェクトを保存
     public static string[,] name;         // ワード名
-    public static string[,] englishName;
     public static int[,] activeNum;       // 表示してよいストーリーの番号
     public static WORD[,] kinds;          // ワードの種類
     public static int[,] power;
+    public static int[,] MP;
 
     public static int[] maxWordKindsCnt = new int[(int)WORD.INFO];
     public static string[] materiaInfo_;
@@ -183,10 +183,10 @@ public class InitPopList : MonoBehaviour
             maxWordCnt_ = wordList_.param.Count;
             pleate = new GameObject[(int)WORD.INFO, maxWordCnt_];   // インスタンスしたオブジェクトを保存
             name = new string[(int)WORD.INFO, maxWordCnt_];         // ワード名
-            englishName = new string[(int)WORD.INFO, maxWordCnt_];
             activeNum = new int[(int)WORD.INFO, maxWordCnt_];       // 表示してよいストーリーの番号
             kinds = new WORD[(int)WORD.INFO, maxWordCnt_];          // ワードの種類
             power = new int[(int)WORD.INFO, maxWordCnt_];
+            MP = new int[(int)WORD.INFO, maxWordCnt_];
             for (int k = 0; k < (int)WORD.INFO; k++)
             {
                 for (int i = 0; i < maxWordCnt_; i++)
@@ -209,13 +209,13 @@ public class InitPopList : MonoBehaviour
                                new Vector2(0, 0), Quaternion.identity, this.transform);
 
                         pleate[k, count].name = name[k, count];
-                        englishName[k, count] = wordList_.param[i].EnglishWord;
                         //Debug.Log(num+ "            " + data[num].name);
                         activeNum[k, count] = wordList_.param[i].ListNumber;
                         kinds[k, count] = (WORD)wordList_.param[i].KindsNumber;
                         power[k, count] = wordList_.param[i].Power;
+                        MP[k, count] = wordList_.param[i].MP;
 
-                       //    Debug.Log((WORD)k +"の"+ count + "番"+ name[k, count]);
+                        //  Debug.Log((WORD)k +"の"+ count + "番"+ name[k, count]);
                         count++;
                     }
                 }
