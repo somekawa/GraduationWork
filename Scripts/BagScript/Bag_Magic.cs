@@ -13,29 +13,13 @@ public class Bag_Magic : MonoBehaviour
     List<string[]> csvDatas = new List<string[]>(); // CSVの中身を入れるリスト;
     string[] texts;
 
-    public enum ELEMENT_KIND
-    {
-        NON = -1,
-        HEAL,   // 0 回復
-        ASSIST,  // 1 補助
-        FIRE, // 2 炎
-        WATER, // 3 水
-        EARTH, // 4 土
-        WIND, // 5 風
-        MAX
-    }
-    public static string[] elementString = new string[(int)ELEMENT_KIND.MAX] {
-    "回復","補助","炎","水","土","風"};
-
     public struct MagicData
     {
         public int number;
         public string name;
-        public int mp;
-        //public string main;
-        //public string sub;
-        public int power;
         public int rate;
+        public int power;
+        public int mp;
         public int head;
         public int element;
         public int tail;
@@ -44,7 +28,7 @@ public class Bag_Magic : MonoBehaviour
         public int sub3;
     }
     public static MagicData[] data = new MagicData[20];
-   // public static MagicData[] saveData = new MagicData[20];
+    // public static MagicData[] saveData = new MagicData[20];
     public static Sprite[] magicSpite = new Sprite[20];
 
     // バッグ表示用
@@ -55,6 +39,8 @@ public class Bag_Magic : MonoBehaviour
 
     public static GameObject[] magicObject = new GameObject[20];
     private Image[] magicImage_ = new Image[20];
+    private Image[] magicExImage_ = new Image[20];
+    private CharaUseMagic useMagic_;
 
     // ステータス表示用
     [SerializeField]
@@ -93,6 +79,7 @@ public class Bag_Magic : MonoBehaviour
     {
         if (magicObject[1] == null)
         {
+            useMagic_ = new CharaUseMagic();
             saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_Magic>();
             charasList_ = SceneMng.charasList_;
             //// データの個数が最低値より大きかったらデータを呼ばない
@@ -105,8 +92,6 @@ public class Bag_Magic : MonoBehaviour
             {
                 data[i].number = int.Parse(csvDatas[i + 1][0]);
                 data[i].name = csvDatas[i + 1][1];
-                //data[i].main = csvDatas[i + 1][2];
-                //data[i].sub = csvDatas[i + 1][3];
                 data[i].rate = int.Parse(csvDatas[i + 1][2]);
                 data[i].power = int.Parse(csvDatas[i + 1][3]);
                 data[i].mp = int.Parse(csvDatas[i + 1][4]);
@@ -117,7 +102,7 @@ public class Bag_Magic : MonoBehaviour
                 data[i].sub2 = int.Parse(csvDatas[i + 1][9]);
                 data[i].sub3 = int.Parse(csvDatas[i + 1][10]);
 
-              //  Debug.Log(i + "番目：" + data[i].name + "           " + data[i].element);
+                //  Debug.Log(i + "番目：" + data[i].name + "           " + data[i].element);
                 if (i == 0)
                 {
                     continue;
@@ -132,7 +117,7 @@ public class Bag_Magic : MonoBehaviour
                 magicObject[i].name = "Magic" + data[i].number;
                 magicImage_[i] = magicObject[i].transform.Find("MagicIcon").GetComponent<Image>();
                 magicImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[i].element];
-
+                magicExImage_[i] = magicObject[i].transform.Find("ExImage").GetComponent<Image>();
                 // ステータス用の座標に変更
                 statusMagicObject[i] = Instantiate(statusMagicUI, new Vector2(0, 0),
                                                 Quaternion.identity, statusMagicParent.transform);
@@ -146,14 +131,9 @@ public class Bag_Magic : MonoBehaviour
                 statusMagicImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[i].element];
                 //Debug.Log(data[i].name + "           " + data[i].number);
 
-                if(data[number_].rate==2)
-                {
-                    statusMagicImageEx_[i].gameObject.SetActive(true);
-                }
-                else
-                {
-                    statusMagicImageEx_[i].gameObject.SetActive(false);
-                }
+                bool exFlag = data[i].rate == 2 ? true : false;
+                statusMagicImageEx_[i].gameObject.SetActive(exFlag);
+                magicExImage_[i].gameObject.SetActive(exFlag);
             }
         }
     }
@@ -164,8 +144,6 @@ public class Bag_Magic : MonoBehaviour
         data[number_].number = number_;
         data[number_].name = magicName;
         data[number_].mp = mp;
-        //data[number_].main = mainWords;
-        //data[number_].sub = subWords;
         data[number_].power = pow;
         data[number_].rate = rateNum;
         data[number_].head = head;
@@ -175,7 +153,7 @@ public class Bag_Magic : MonoBehaviour
         data[number_].sub2 = sub2;
         data[number_].sub3 = sub3;
         //Debug.Log("保存した魔法" + data[number_].main + data[number_].sub);
-      //  DataSave();
+        //  DataSave();
 
         // バッグ用
         magicObject[number_] = Instantiate(bagMagicUI, new Vector2(0, 0),
@@ -228,11 +206,11 @@ public class Bag_Magic : MonoBehaviour
         }
         //Debug.Log(flag + "        既に選択されている魔法の番号：" + num);
         //Debug.Log(statusMagicBtn_[num].name + "      " + statusMagicBtn_[num].interactable);
-        
+
         // flagがtrueならinteractableをfalseにする
         statusMagicBtn_[num].interactable = flag == true ? false : true;
 
-        if (flag==false)
+        if (flag == false)
         {
             statusMagicSetText_[num].text = "";
             Debug.Log("魔法を外したので名前を消します");
@@ -262,7 +240,7 @@ public class Bag_Magic : MonoBehaviour
         {
             // カンマ区切りでリストへ登録していく(2次元配列状態になる[行番号][カンマ区切り])
             csvDatas.Add(texts[i].Split(','));
-           // csvMagicDatas.Add(texts[i].Split(','));
+            // csvMagicDatas.Add(texts[i].Split(','));
         }
         Debug.Log("データ数" + csvDatas.Count);
         number_ = csvDatas.Count - 1;
@@ -304,8 +282,8 @@ public class Bag_Magic : MonoBehaviour
         {
             for (int m = 0; m < 3; m++)
             {
-               // Debug.Log("セットされてる魔法番号" + charasList_[i].GetMagicNum(m).number);
-                if (charasList_[i].GetMagicNum(m).number==num)
+                // Debug.Log("セットされてる魔法番号" + charasList_[i].GetMagicNum(m).number);
+                if (charasList_[i].GetMagicNum(m).number == num)
                 {
                     throwAwayBtn_.interactable = false;
                 }
@@ -314,6 +292,8 @@ public class Bag_Magic : MonoBehaviour
 
         // 選択されたアイテムの番号を保存
         clickMagicNum_ = num;
+        info_.text = useMagic_.MagicInfoMake(data[clickMagicNum_])+"\n" +
+            "威力:" + data[clickMagicNum_].power+"消費MP:" + data[clickMagicNum_].mp;
     }
 
     public void OnClickThrowAwayButton()
@@ -324,7 +304,7 @@ public class Bag_Magic : MonoBehaviour
             //throwAwayBtn_.gameObject.SetActive(false);
             return;
         }
-        Debug.Log("指定する魔法番号"+clickMagicNum_);
+        Debug.Log("指定する魔法番号" + clickMagicNum_);
         // 指定の魔法を削除する
         magicObject[clickMagicNum_].SetActive(false);
         statusMagicObject[clickMagicNum_].SetActive(false);
@@ -334,8 +314,8 @@ public class Bag_Magic : MonoBehaviour
         int dataNumber = 0;
         for (int i = 1; i < number_; i++)
         {
-            
-            if(i==clickMagicNum_)
+
+            if (i == clickMagicNum_)
             {
                 Debug.Log("削除する魔法の名前：" + data[i].name);
                 // 選択した魔法は読み込まない
@@ -367,22 +347,4 @@ public class Bag_Magic : MonoBehaviour
 
 
 
-    //void Main(string[] args)
-    //{
-
-    //    int[] dataNumber = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
-    //    Console.WriteLine("Array before deletion");
-    //    //foreach (int value in dataNumber)
-    //    //{
-    //    //    Console.WriteLine(value);
-    //    //}
-    //    //int indexToRemove = 3;
-    //    dataNumber = dataNumber.Where(number => number > 1).ToArray();
-    //    Console.WriteLine("Array after deletion");
-
-    //    foreach (int value in dataNumber)
-    //    {
-    //        Console.WriteLine(value);
-    //    }
-    //}
 }

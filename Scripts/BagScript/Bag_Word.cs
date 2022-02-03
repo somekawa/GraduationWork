@@ -12,8 +12,6 @@ public class Bag_Word : MonoBehaviour
     private string saveDataFilePath_;
     List<string[]> csvDatas_ = new List<string[]>(); // CSVの中身を入れるリスト;
 
-
-    private InitPopList popWordList_;
     private int[] maxCnt_ = new int[(int)InitPopList.WORD.INFO];
     [SerializeField]
     private RectTransform wordParent;    // 素材を拾ったときに生成されるプレハブ
@@ -63,7 +61,6 @@ public class Bag_Word : MonoBehaviour
     public void NewGameInit()
     {
         // タイトルでNewGameボタンを押したときに呼ばれるInit
-        popWordList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
         saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<Word_SaveCSV>();
         data = new WordData[29];
         int dataNum = 0;
@@ -86,7 +83,6 @@ public class Bag_Word : MonoBehaviour
     public void Init()
     {
         eventSystem_ = GameObject.Find("EventSystem").GetComponent<EventSystem>();
-        popWordList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
         saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<Word_SaveCSV>();
 
         if (getFlagCheck == false)
@@ -120,7 +116,7 @@ public class Bag_Word : MonoBehaviour
                     if (wordState[(InitPopList.WORD)k][i].name == "必中")
                     {
                         targetWordNum = i;
-                        //Debug.Log((InitPopList.WORD)k + "の中で必中を保存している番号："+targetWordNum);
+                        Debug.Log((InitPopList.WORD)k + "の中で必中を保存している番号："+targetWordNum);
                     }
                 }
             }
@@ -180,27 +176,27 @@ public class Bag_Word : MonoBehaviour
             word[i].btn = word[i].pleate.GetComponent<Button>();
 
             // 指定のワードを取得しているか
-            Debug.Log(csvNum + i + "番目は" + csvDatas_[csvNum + 1 + i][1]);
+          //  Debug.Log(csvNum + i + "番目は" + csvDatas_[csvNum + 1 + i][1]);
             data[dataNum].number = csvNum + i;
             word[i].getFlag = int.Parse(csvDatas_[csvNum + 1 + i][2]);
             word[i].kinds = InitPopList.kinds[(int)kind, i];
             word[i].power = InitPopList.power[(int)kind, i];
             word[i].MP = InitPopList.MP[(int)kind, i];
             word[i].maxCnt = maxCnt;
-            Debug.Log("BagWord内で " + kind + "の" + i + "番目は" + word[i].name);
+           // Debug.Log("BagWord内で " + kind + "の" + i + "番目は" + word[i].name);
         }
         return word;
     }
 
     public void WordGetCheck(InitPopList.WORD kinds, int wordNum, int dataNum)
     {
-        Debug.Log(kinds + "の" + wordNum + " " + dataNum);
-        Debug.Log(kinds + "の" + wordNum + "番目のワード：" + wordState[kinds][wordNum].name);
-        Debug.Log(data[dataNum].name + "は" + dataNum + "番目です");
+        //Debug.Log(kinds + "の" + wordNum + " " + dataNum);
+        //Debug.Log(kinds + "の" + wordNum + "番目のワード：" + wordState[kinds][wordNum].name);
+        //Debug.Log(data[dataNum].name + "は" + dataNum + "番目です");
         wordState[kinds][wordNum].getFlag = 1;// 取得をしたら1を入れる;
 
         data[dataNum].getFlag = wordState[kinds][wordNum].getFlag;
-        Debug.Log(data[dataNum].name +""+data[dataNum].getFlag);
+      //  Debug.Log(data[dataNum].name +""+data[dataNum].getFlag);
     }
 
     public void OnClickWordKindsBtn()

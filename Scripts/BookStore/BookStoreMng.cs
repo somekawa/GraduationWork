@@ -284,14 +284,13 @@ public class BookStoreMng : MonoBehaviour
                     if (haveMoney_ < bookState_[i].price)
                     {
                         bookState_[i].btn.interactable = false;
-                        bookState_[i].checkBox.gameObject.SetActive(false);
                     }
                     else
                     {
                         bookState_[i].btn.interactable = true;
-                        bookState_[i].checkBox.gameObject.SetActive(true);
                         activeCnt_++;
                     }
+                    bookState_[i].checkBox.gameObject.SetActive(bookState_[i].btn.interactable);
                 }
             }
         }

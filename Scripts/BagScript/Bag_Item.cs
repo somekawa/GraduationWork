@@ -33,7 +33,6 @@ public class Bag_Item : MonoBehaviour
         public int haveCnt;     // 指定アイテムの所持数
     }
     public static ItemData[] itemState;// xlsデータから読み込んだものを保存
-   // public static ItemData[] data;// csvデータから読み込んだものを保存
     public static bool itemUseFlg = false;  // アイテムを使用したらtrue
 
     private int clickItemNum_ = -1;
@@ -59,9 +58,6 @@ public class Bag_Item : MonoBehaviour
             itemState[i].number = i;
             itemState[i].name = InitPopList.itemData[i].name;
             itemState[i].haveCnt = 0;
-            //data[i].number = i;
-            //data[i].name = InitPopList.itemData[i].name;
-            //data[i].haveCnt = 0;
         }
         DataSave();
     }

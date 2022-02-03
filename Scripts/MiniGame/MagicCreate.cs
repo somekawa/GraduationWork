@@ -197,11 +197,6 @@ public class MagicCreate : MonoBehaviour
 
     public void Init()
     {
-        ////// デバッグ用
-        ////GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
-        ////GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
-
-
         magicCreateParent = transform.Find("ScrollView/Viewport/WordParent").GetComponent<RectTransform>();
         // ワードの最大個数を取得
         for (int i = 0; i < (int)InitPopList.WORD.INFO; i++)
@@ -300,7 +295,14 @@ public class MagicCreate : MonoBehaviour
                     kindNum_ = (int)Bag_Word.WORD_MNG.SUB2;
                 }
             }
-            else if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != "補助")
+            else if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] == "補助")
+            {
+                if ((int)Bag_Word.WORD_MNG.SUB3 == kindNum_)
+                {
+                    kindNum_ = (int)Bag_Word.WORD_MNG.SUB3;
+                }
+            }
+            else
             {
                 // 攻撃系Elementを選択時に必中をもっていなかったらSub2でストップ
                 if (Bag_Word.wordState[InitPopList.WORD.SUB3][targetWordNum_].getFlag == 0)
@@ -310,10 +312,13 @@ public class MagicCreate : MonoBehaviour
                         kindNum_ = (int)Bag_Word.WORD_MNG.SUB2;
                     }
                 }
-            }
-            else
-            {
-                // 何もしない
+                else
+                {
+                    if ((int)Bag_Word.WORD_MNG.SUB3== kindNum_)
+                    {
+                        kindNum_ = (int)Bag_Word.WORD_MNG.SUB3;
+                    }
+                }
             }
         }
         // Debug.Log(selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT]);
@@ -373,7 +378,7 @@ public class MagicCreate : MonoBehaviour
             arrowBtn_[0].interactable = true;
             arrowBtn_[1].interactable = false;// 右矢印を押したら必ずfalse
         }
-
+        Debug.Log((Bag_Word.WORD_MNG)kindNum_);
         // ワードのアクティブ状態をチェック
         SelectWordKindCheck((Bag_Word.WORD_MNG)kindNum_);
 
@@ -704,8 +709,12 @@ public class MagicCreate : MonoBehaviour
                 createFlag_ = selectWord_[(int)Bag_Word.WORD_MNG.SUB2] != null ? true : false;
             }
         }
-        else if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] != "補助")
+        else if (selectWord_[(int)Bag_Word.WORD_MNG.ELEMENT] == "補助")
         {
+            createFlag_ = selectWord_[(int)Bag_Word.WORD_MNG.SUB3] != null ? true : false;
+        }
+        else
+        {   
             // 攻撃系のSubはどのタイミングで選んでも作成ができる
             if ((int)Bag_Word.WORD_MNG.TAIL <= kindNum_)
             {
@@ -713,7 +722,7 @@ public class MagicCreate : MonoBehaviour
             }
             // 攻撃系Element選択時に「必中」を持っていない時
             // Sab2の時点で「必中」を選択時
-            if (Bag_Word.wordState[InitPopList.WORD.SUB3][targetWordNum_].getFlag == 1
+            if (Bag_Word.wordState[InitPopList.WORD.SUB3][targetWordNum_].getFlag == 0
              || selectWord_[(int)Bag_Word.WORD_MNG.SUB2] == "必中")
             {
                 if ((int)Bag_Word.WORD_MNG.SUB2 <= kindNum_)
@@ -721,10 +730,6 @@ public class MagicCreate : MonoBehaviour
                     arrowBtn_[1].interactable = false;// 右矢印を押したら必ずfalse
                 }
             }
-        }
-        else
-        {
-            createFlag_ = selectWord_[(int)Bag_Word.WORD_MNG.SUB3] != null ? true : false;
         }
 
         if (kindNum_ == (int)Bag_Word.WORD_MNG.TAIL)
@@ -768,37 +773,47 @@ public class MagicCreate : MonoBehaviour
         }
         else
         {
-            int maxWordMng_ = -1;
-            if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] == "")
+            int maxWordMng_ = (int)Bag_Word.WORD_MNG.MAX;
+            if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] == null)
             {
-                maxWordMng_ = (int)Bag_Word.WORD_MNG.TAIL;
-            }
-            else if (selectWord_[(int)Bag_Word.WORD_MNG.SUB2] == "")
-            {
+                // Sub1をセットされてなかったら敬さんはTailまで
                 maxWordMng_ = (int)Bag_Word.WORD_MNG.SUB1;
+            }
+            else if (selectWord_[(int)Bag_Word.WORD_MNG.SUB2] == null)
+            {
+                // Sub2をセットされてなかったら計算はSUB1まで
+                maxWordMng_ = (int)Bag_Word.WORD_MNG.SUB2;
+            }
+            else if (selectWord_[(int)Bag_Word.WORD_MNG.SUB3] == null)
+            {
+                // SUB3をセットされてなかったら計算はSUB2まで
+                maxWordMng_ = (int)Bag_Word.WORD_MNG.SUB3;
             }
             else
             {
-                maxWordMng_ = (int)Bag_Word.WORD_MNG.SUB3;
+                //// SUB3をセットされてなかったら計算はSUB3まで
+               // 何もしない maxWordMng_ = (int)Bag_Word.WORD_MNG.TAIL;
             }
 
             for (int i = (int)Bag_Word.WORD_MNG.HEAD; i < maxWordMng_; i++)
             {
+                Debug.Log(mCreateData[(Bag_Word.WORD_MNG)i][saveNumber_[i]].name + "      " + mCreateData[(Bag_Word.WORD_MNG)i][saveNumber_[i]].power);
+                mpPower_ += mCreateData[(Bag_Word.WORD_MNG)i][saveNumber_[i]].MP;
                 if (i == (int)Bag_Word.WORD_MNG.TAIL)
                 {
-                    mpPower_ += mCreateData[(Bag_Word.WORD_MNG)i][saveNumber_[kindNum_]].MP;
                     continue;
                 }
                 // 威力は足した分にTailをかけるためTailの時は入らないようにする
-                magicPower_ += mCreateData[(Bag_Word.WORD_MNG)i][saveNumber_[kindNum_]].power;
+                magicPower_ += mCreateData[(Bag_Word.WORD_MNG)i][saveNumber_[i]].power;
             }
-            float tailPower = mCreateData[Bag_Word.WORD_MNG.TAIL][saveNumber_[kindNum_]].power;
+            float tailPower = mCreateData[Bag_Word.WORD_MNG.TAIL][saveNumber_[(int)Bag_Word.WORD_MNG.TAIL]].power;
             if (selectWord_[(int)Bag_Word.WORD_MNG.HEAD] == "複数回")
             {
-                tailPower = mCreateData[Bag_Word.WORD_MNG.TAIL][saveNumber_[kindNum_]].power - 1.8f;
+                tailPower = Mathf.Abs(mCreateData[Bag_Word.WORD_MNG.TAIL][saveNumber_[(int)Bag_Word.WORD_MNG.TAIL]].power -0.2f);
             }
+            Debug.Log(magicPower_ + "*" + tailPower);
 
-            magicPower_ *= (int)tailPower;
+            magicPower_ = (int)(magicPower_*tailPower);
             powerText_.text = magicPower_.ToString();
             mpText_.text = mpPower_.ToString();
             createBtnText_.text = "作成";
@@ -831,19 +846,25 @@ public class MagicCreate : MonoBehaviour
                 movePoint_.SetMiniGameJudge(MovePoint.JUDGE.NON);// 初期化しておく
 
 
-                if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] == "")
+                if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] == null)
                 {
                     saveWordNum_[(int)Bag_Word.WORD_MNG.SUB1] = -1;
                     saveWordNum_[(int)Bag_Word.WORD_MNG.SUB2] = -1;
                     saveWordNum_[(int)Bag_Word.WORD_MNG.SUB3] = -1;
-
                 }
-                else if (selectWord_[(int)Bag_Word.WORD_MNG.SUB2] == "")
+                else if (selectWord_[(int)Bag_Word.WORD_MNG.SUB2] == null)
                 {
                     saveWordNum_[(int)Bag_Word.WORD_MNG.SUB2] = -1;
                     saveWordNum_[(int)Bag_Word.WORD_MNG.SUB3] = -1;
                 }
-
+                else if (selectWord_[(int)Bag_Word.WORD_MNG.SUB3] == null)
+                {
+                    saveWordNum_[(int)Bag_Word.WORD_MNG.SUB3] = -1;
+                }
+                else
+                {
+                    // 何もしない
+                }
                 // 出来上がった魔法を保存
                 bagMagic_.MagicCreateCheck(allName_,
                             power, mp, rate,

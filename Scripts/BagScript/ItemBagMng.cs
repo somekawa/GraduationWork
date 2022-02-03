@@ -7,9 +7,6 @@ using UnityEngine.UI;
 
 public class ItemBagMng : MonoBehaviour
 {
-    // データ系
-    private SaveLoadCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
-
     private EventSystem eventSystem_;// ボタンクリックのためのイベント処理
     private GameObject clickbtn_;    // どのボタンをクリックしたか代入する変数
     private int btnNumber_ = 0;
@@ -54,7 +51,8 @@ public class ItemBagMng : MonoBehaviour
     // 魔法セット先
     private Button[] equipBtn_ = new Button[4];// セット先のボタン
     private Image[] equipMagic_ = new Image[4];// セットされている魔法の画像
-    private Color equipBtnSelColor_ = new Color(0.1f,0.5f, 0.7f,  1.0f);// セット先の選択中の色
+    private Image[] equipExMagic_ = new Image[4];// セットされている魔法の画像
+    private Color equipBtnSelColor_ = new Color(0.1f, 0.5f, 0.7f, 1.0f);// セット先の選択中の色
     private Color equipNormalColor_ = new Color(1.0f, 1.0f, 1.0f, 1.0f);// 何も選んでない状態の色
     private Color equipResetColor_ = new Color(1.0f, 1.0f, 1.0f, 0.0f);// 選択できない状態の色
     // 所持魔法一覧
@@ -95,7 +93,7 @@ public class ItemBagMng : MonoBehaviour
 
         if (topicText_ == null)
         {
-            var itemBagMng= GameObject.Find("ItemBagMng").GetComponent<RectTransform>();
+            var itemBagMng = GameObject.Find("ItemBagMng").GetComponent<RectTransform>();
             info_ = itemBagMng.Find("InfoBack/InfoText").GetComponent<Text>();
             var infoBack = itemBagMng.Find("InfoBack").GetComponent<RectTransform>();
             throwAwayBtn_[0] = infoBack.Find("ItemDelete").GetComponent<Button>();
@@ -118,7 +116,6 @@ public class ItemBagMng : MonoBehaviour
         charaStringNum_ = (int)SceneMng.CHARACTERNUM.UNI;
         if (menuActive_ == null)
         {
-            saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>();
             menuActive_ = GameObject.Find("SceneMng").GetComponent<MenuActive>();
         }
 
@@ -149,7 +146,7 @@ public class ItemBagMng : MonoBehaviour
         }
         charaNameTopicText_.text = charaTopicString_[(int)SceneMng.CHARACTERNUM.UNI];
 
-        info_.text = (magicCnt_ < 2)? "装備できる魔法がありません" : info_.text = "魔法を選択してください";
+        info_.text = (magicCnt_ < 2) ? "装備できる魔法がありません" : info_.text = "魔法を選択してください";
 
         menuActive_.ViewStatus(charaStringNum_);
         statusMagicCheck_.gameObject.SetActive(false);
@@ -163,8 +160,8 @@ public class ItemBagMng : MonoBehaviour
 
         if (magicMng_ == null)
         {
-           //デバッグ用
-          //  GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
+            //デバッグ用
+            //  GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
             bagMagic_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Magic>();
             magicMng_ = statusMngObj.GetComponent<StatusMagicMng>();
         }
@@ -178,7 +175,7 @@ public class ItemBagMng : MonoBehaviour
             {
                 dataCheck_[c, i] = data.Magic[i];
 
-                bagMagic_.SetStatusMagicCheck((SceneMng.CHARACTERNUM)charaStringNum_,dataCheck_[c, i], true);
+                bagMagic_.SetStatusMagicCheck((SceneMng.CHARACTERNUM)charaStringNum_, dataCheck_[c, i], true);
 
                 setImageNum_[c, i] = Bag_Magic.data[dataCheck_[c, i]].element;
                 //Debug.Log((SceneMng.CHARACTERNUM)c + "の" + i + "番目:" + data.Magic[i] + "番の魔法/名前：" +
@@ -190,6 +187,7 @@ public class ItemBagMng : MonoBehaviour
                     // StatusMngがアクティブ状態なら魔法セット先を探す
                     equipBtn_[i] = GameObject.Find("StatusMng/MagicSetMng/MagicSet" + i).GetComponent<Button>();
                     equipMagic_[i] = equipBtn_[i].transform.Find("Icon").GetComponent<Image>();
+                    equipExMagic_[i] = equipBtn_[i].transform.Find("ExIcon").GetComponent<Image>();
                     equipBtn_[i].interactable = false;
                 }
             }
@@ -319,7 +317,7 @@ public class ItemBagMng : MonoBehaviour
         Debug.Log("選択中のセット先" + btnNumber_);
 
         MagicBtnCheck();
-        
+
 
         // 魔法がセットされてる関係なく一番左は押下可能
         equipBtn_[0].interactable = true;
@@ -341,6 +339,7 @@ public class ItemBagMng : MonoBehaviour
             {
                 equipMagic_[i].sprite = null;
                 equipMagic_[i].color = equipResetColor_;
+                equipExMagic_[i].color = equipResetColor_;
                 // セット先が選択された状態でキャラ替えしてる可能性があるため通常状態に戻す
                 if (addCnt_ != i)
                 {
@@ -352,7 +351,11 @@ public class ItemBagMng : MonoBehaviour
             {
                 // 魔法をセットしていたらその画像をステータス画面に出す
                 equipMagic_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][setImageNum_[charaStringNum_, i]];
-                equipMagic_[i].color = equipNormalColor_;
+
+                if (Bag_Magic.data[i].rate == 2)
+                {
+                    equipExMagic_[i].color = new Color(1.0f, 1.0f, 1.0f, 0.4f);
+                }
                 equipBtn_[i].interactable = true;
                 Debug.Log(i + "番目に魔法がセットされています");
                 if (i < 3)
@@ -447,6 +450,12 @@ public class ItemBagMng : MonoBehaviour
     {
         Debug.Log("セット先の魔法の番号" + btnNumber_ + "     クリックしたボタンの番号：" + num);
 
+        if (btnNumber_ == -1)
+        {
+            // セット先を選択せずに魔法を押した場合
+            return;
+        }
+
         // flag：falseの時が外す。trueの時が魔法セット
         if (flag == false)
         {
@@ -462,9 +471,10 @@ public class ItemBagMng : MonoBehaviour
                 }
             }
             Debug.Log(setMaxNum_ + "個の魔法をセットしています");
-                // 最大までセットされた場合
-                equipMagic_[setMaxNum_].sprite = null;
-                equipMagic_[setMaxNum_].color = equipResetColor_;
+            // 最大までセットされた場合
+            equipMagic_[setMaxNum_].sprite = null;
+            equipMagic_[setMaxNum_].color = equipResetColor_;
+            equipExMagic_[setMaxNum_].color = equipResetColor_;
             if (setMaxNum_ < 3)
             {
                 equipBtn_[setMaxNum_ + 1].interactable = false;
@@ -479,6 +489,14 @@ public class ItemBagMng : MonoBehaviour
                 // 複数魔法セット状態で下位の魔法を外す場合,選択中のセット場所+1の魔法を入れる
                 dataCheck_[charaStringNum_, i] = dataCheck_[charaStringNum_, i + 1];
                 equipMagic_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][setImageNum_[charaStringNum_, i + 1]];
+                if (Bag_Magic.data[i].rate == 2)
+                {
+                    equipExMagic_[i].color = new Color(1.0f, 1.0f, 1.0f, 0.4f);
+                }
+                else
+                {
+                    equipExMagic_[i].color = equipResetColor_;
+                }
                 setImageNum_[charaStringNum_, i] = Bag_Magic.data[dataCheck_[charaStringNum_, i + 1]].element;
                 charasList_[charaStringNum_].SetMagicNum(i, dataCheck_[charaStringNum_, i + 1]);
                 Debug.Log("セット中の魔法の画像番号：" + setImageNum_[charaStringNum_, i]);
@@ -506,7 +524,7 @@ public class ItemBagMng : MonoBehaviour
             charasList_[charaStringNum_].SetMagicNum(btnNumber_, num);
 
             // 選択されていたボタンを解除する
-            bagMagic_.SetStatusMagicCheck((SceneMng.CHARACTERNUM)charaStringNum_,dataCheck_[charaStringNum_, btnNumber_], false);
+            bagMagic_.SetStatusMagicCheck((SceneMng.CHARACTERNUM)charaStringNum_, dataCheck_[charaStringNum_, btnNumber_], false);
             // 選択中のボタンを更新する
             dataCheck_[charaStringNum_, btnNumber_] = num;
 
@@ -525,9 +543,14 @@ public class ItemBagMng : MonoBehaviour
             // Debug.Log((SceneMng.CHARACTERNUM)charaStringNum_ + "の魔法の画像番号：" + setImageNum_[charaStringNum_, i]);
             equipMagic_[btnNumber_].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][setImageNum_[charaStringNum_, btnNumber_]];
             equipMagic_[btnNumber_].color = equipNormalColor_;
+            if (Bag_Magic.data[num].rate == 2)
+            {
+                // 大成功の魔法の場合は星マークを表示
+                equipExMagic_[btnNumber_].color = new Color(1.0f, 1.0f, 1.0f, 0.4f);
+            }
 
             // 選択された魔法を押下できないようにする
-            bagMagic_.SetStatusMagicCheck((SceneMng.CHARACTERNUM)charaStringNum_,num, true);
+            bagMagic_.SetStatusMagicCheck((SceneMng.CHARACTERNUM)charaStringNum_, num, true);
         }
 
         equipBtn_[btnNumber_].image.color = equipNormalColor_;

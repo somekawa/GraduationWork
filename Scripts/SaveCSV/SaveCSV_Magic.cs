@@ -20,7 +20,7 @@ public class SaveCSV_Magic : MonoBehaviour
         //sw = new StreamWriter(saveDataFilePath_, false, Encoding.GetEncoding("Shift_JIS"));
 
         // ステータスの項目見出し
-        string[] s1 = { "Number","Name","EnglishMain","SubMain", "Power", "Rate",
+        string[] s1 = { "Number","Name", "Rate", "Power","ResourceMP",
                         "Head", "Element", "Tail", "Sub1", "Sub2", "Sub3" };//,"ImageNum"};
         string s2 = string.Join(",", s1);
         sw_.WriteLine(s2);
@@ -30,8 +30,8 @@ public class SaveCSV_Magic : MonoBehaviour
     public void SaveMagicData(Bag_Magic.MagicData set)
     {
         // 実際のステータス値
-        string[] data = { set.number.ToString(),set.name,set.main, set.sub, 
-                         set.power.ToString(), set.rate.ToString() ,
+        string[] data = { set.number.ToString(),set.name,
+                         set.rate.ToString() ,set.power.ToString(), set.mp.ToString() ,
                          set.head.ToString(),set.element.ToString(),set.tail.ToString(),
                          set.sub1.ToString(),set.sub2.ToString(),set.sub3.ToString()};
         

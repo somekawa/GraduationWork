@@ -379,34 +379,39 @@ public class SaveLoadCSV : MonoBehaviour
                 BookStoreMng.bookState_ = new BookStoreMng.BookData[texts.Length - 1];  // 項目の行を-1する
             }
 
-            int maxCnt = 0;
-            int[] boolActiveTiming_ = new int[5] { 5, 10, 16, 22, 28 };
-
-            if (19 < EventMng.GetChapterNum())
+            //int maxCnt = 0;
+            //// レシピ本があるタイミングで表示する本を進行に合わせて区切る
+            //int[] boolActiveTiming_ = new int[5] { 5, 10, 16, 22, 28 };
+            for (int i = 0; i < 32; i++)
             {
-                maxCnt = boolActiveTiming_[4];
-            }
-            else if (16 < EventMng.GetChapterNum())
-            {
-                maxCnt = boolActiveTiming_[3];
-            }
-            else if (13 < EventMng.GetChapterNum())
-            {
-                maxCnt = boolActiveTiming_[2];
-            }
-            else if (8 < EventMng.GetChapterNum())
-            {
-                maxCnt = boolActiveTiming_[1];
-            }
-            else if (0 < EventMng.GetChapterNum())
-            {
-                maxCnt = boolActiveTiming_[0];
-            }
-
-            for (int i = 0; i < maxCnt; i++)
-            {
+                // イベント進行具合のMaxだと進行途中でロードするときにエラーする可能性があるため
+                // 一旦すべて読み込んでおく
+                BookStoreMng.bookState_[i].number = i;
+                BookStoreMng.bookState_[i].bookName = bookCsvDatas_[i + 1][1];
                 BookStoreMng.bookState_[i].readFlag = int.Parse(bookCsvDatas_[i + 1][2]);
             }
+
+            //if (19 < EventMng.GetChapterNum())
+            //{
+            //    maxCnt = boolActiveTiming_[4];
+            //}
+            //else if (16 < EventMng.GetChapterNum())
+            //{
+            //    maxCnt = boolActiveTiming_[3];
+            //}
+            //else if (13 < EventMng.GetChapterNum())
+            //{
+            //    maxCnt = boolActiveTiming_[2];
+            //}
+            //else if (8 < EventMng.GetChapterNum())
+            //{
+            //    maxCnt = boolActiveTiming_[1];
+            //}
+            //else if (0 < EventMng.GetChapterNum())
+            //{
+            //    maxCnt = boolActiveTiming_[0];
+            //}
+
         }
     }
 

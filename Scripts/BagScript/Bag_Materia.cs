@@ -28,7 +28,6 @@ public class Bag_Materia : MonoBehaviour
         public bool getFlag;    // 1つ以上持っているか
     }
     public static MateriaData[] materiaState;
-    //public static MateriaData[] data;
 
     // 他Scriptで指定するワードは番号を取得しておく
     public static int emptyMateriaNum;// 空のマテリアの番号
@@ -54,9 +53,6 @@ public class Bag_Materia : MonoBehaviour
             materiaState = new MateriaData[maxCnt_];
         for (int i = 0; i < maxCnt_; i++)
         {
-            //data[i].number = i;
-            //data[i].name = InitPopList.materiaData[i].name;
-            //data[i].haveCnt = 0;
             //Debug.Log(i + "" + data[i].name)
             materiaState[i].number = i;
             materiaState[i].name = InitPopList.materiaData[i].name;
@@ -162,7 +158,6 @@ public class Bag_Materia : MonoBehaviour
         materiaState[materiaNum].cntText.text = materiaState[materiaNum].haveCnt.ToString();
         Debug.Log(materiaState[materiaNum].name+"       "+materiaState[materiaNum].haveCnt);
 
-       // data[materiaNum].haveCnt = materiaState[materiaNum].haveCnt;
     }
 
     public int GetMaxHaveMateriaCnt()
@@ -203,7 +198,6 @@ public class Bag_Materia : MonoBehaviour
             throwAwayBtn_.gameObject.SetActive(false);
             info_.text = "";
         }
-        //data[clickMateriaNum_].haveCnt = materiaState[clickMateriaNum_].haveCnt;
     }
 
     public void DataLoad()
