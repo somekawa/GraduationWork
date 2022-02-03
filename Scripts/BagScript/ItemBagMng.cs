@@ -350,7 +350,8 @@ public class ItemBagMng : MonoBehaviour
             else
             {
                 // 魔法をセットしていたらその画像をステータス画面に出す
-                equipMagic_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][setImageNum_[charaStringNum_, i]];
+                equipMagic_[i].color = equipNormalColor_;
+                    equipMagic_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][setImageNum_[charaStringNum_, i]];
 
                 if (Bag_Magic.data[i].rate == 2)
                 {
