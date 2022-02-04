@@ -122,6 +122,7 @@ public class UniHouseMng : MonoBehaviour
     {
         alchemyMng.gameObject.SetActive(true);
         uniHouseCanvas.gameObject.SetActive(false);
+        alchemyMng.GetComponent<ItemCreateMng>().Init();
         Debug.Log("‡¬ƒ{ƒ^ƒ“‚ª‰Ÿ‰º‚³‚ê‚Ü‚µ‚½");
     }
 

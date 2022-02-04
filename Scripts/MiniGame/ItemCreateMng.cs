@@ -6,10 +6,10 @@ using UnityEngine.UI;
 public class ItemCreateMng : MonoBehaviour
 {
     [SerializeField]
-    private Canvas uniHouseCanvas;
+    private GameObject miniGameObj;// ミニゲーム用のオブジェクト
 
     [SerializeField]
-    private RectTransform miniGameMng;    // ミニゲーム表示用
+    private Canvas uniHouseCanvas;
 
     [SerializeField]
     private GameObject itemRecipePleate;    // 素材を拾ったときに生成されるプレハブ
@@ -46,11 +46,9 @@ public class ItemCreateMng : MonoBehaviour
     private RectTransform itemRecipeParent_;
     private Bag_Materia bagMateria_;// 所持素材を確認
 
-    // ミニゲーム関連
-    private MovePoint movePoint_;
-    private MovePoint.JUDGE judge_ = MovePoint.JUDGE.NON;
-    private Image judgeBack_;
-    private TMPro.TextMeshProUGUI judgeText_;
+    //// ミニゲーム関連
+    private CircleMng circleMng_;
+    private int circleNum_ = 6;
 
     private Button createBtn_;  // 作成開始ボタン
     private Button cancelBtn_;  // 合成終了開始ボタン
@@ -61,128 +59,118 @@ public class ItemCreateMng : MonoBehaviour
 
     private int[] maxRecipActiveCnt_ = new int[5] { 0, 5, 10, 15, 19 };
 
-    void Start()
+    // デバッグ用
+//    private SaveLoadCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
+                                   //  void Start()
+    public void Init()
     {
-        itemRecipeParent_ = transform.Find("ScrollView/Viewport/ItemRecipeParent").GetComponent<RectTransform>();
-        bagMateria_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>();
+     // デバッグ用
+        //saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>();
+        //saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.BOOK);
 
-        popItemRecipeList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
-        maxCnt_ = popItemRecipeList_.SetMaxItemCount() / 2;
-        Debug.Log("最大値" + maxCnt_);
-        itemRecipeState = new itemRecipe[maxCnt_];
-        maxMateriaCnt_ = popItemRecipeList_.SetMaxMateriaCount();
+        //GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
+        //GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
+        //GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
+        //GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
 
-        //デバッグ用
-        GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
-        GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
-        haveCnt = new int[maxMateriaCnt_];
-        for (int i = 0; i < maxMateriaCnt_; i++)
+
+        if(circleMng_==null)
         {
-            haveCnt[i] = Bag_Materia.materiaState[i].haveCnt;
+            circleMng_ = miniGameObj.transform.Find("ElementCircle/JudgeCircle").GetComponent<CircleMng>();
+            itemRecipeParent_ = transform.Find("ScrollView/Viewport/ItemRecipeParent").GetComponent<RectTransform>();
+            bagMateria_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>();
+
+            popItemRecipeList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
+            maxCnt_ = popItemRecipeList_.SetMaxItemCount() / 2;
+            Debug.Log("最大値" + maxCnt_);
+            itemRecipeState = new itemRecipe[maxCnt_];
+            maxMateriaCnt_ = popItemRecipeList_.SetMaxMateriaCount();
+
+            haveCnt = new int[maxMateriaCnt_];
+            for (int i = 0; i < maxMateriaCnt_; i++)
+            {
+                haveCnt[i] = Bag_Materia.materiaState[i].haveCnt;
+            }
+
+            Debug.Log(BookStoreMng.bookState_[25].readFlag);
+
+            if (BookStoreMng.bookState_[5].readFlag == 1)
+            {
+                maxCnt_ = maxRecipActiveCnt_[4];
+            }
+            else if (BookStoreMng.bookState_[18].readFlag == 1)
+            {
+                maxCnt_ = maxRecipActiveCnt_[3];
+            }
+            else if (BookStoreMng.bookState_[11].readFlag == 1)
+            {
+                // レシピ初級を読んでいたら
+                maxCnt_ = maxRecipActiveCnt_[2];
+            }
+            else if (BookStoreMng.bookState_[5].readFlag == 1)
+            {
+                // レシピ初級を読んでいたら
+                startCnt_ = maxRecipActiveCnt_[0];
+                maxCnt_ = maxRecipActiveCnt_[1];
+            }
+            Debug.Log("合成可能アイテム数" + maxCnt_);
+
+
+
+            materiaNumber1_ = new int[maxCnt_];
+            materiaNumber2_ = new int[maxCnt_];
+            materiaNumber3_ = new int[maxCnt_];
+            for (int i = startCnt_; i < maxCnt_; i++)
+            {
+                itemRecipeState[i].pleate = Instantiate(itemRecipePleate,
+                new Vector2(0, 0), Quaternion.identity, itemRecipeParent_.transform);
+                itemRecipeState[i].name = InitPopList.itemData[i].name;
+                itemRecipeState[i].pleate.name = itemRecipeState[i].name;
+                itemRecipeState[i].btn = itemRecipeState[i].pleate.GetComponent<Button>();
+
+                // 表示するアイテムの名前
+                itemRecipeState[i].nameText = itemRecipeState[i].pleate.transform.Find("Text").GetComponent<TMPro.TextMeshProUGUI>();
+                itemRecipeState[i].nameText.text = itemRecipeState[i].name;
+                //  Debug.Log(wantMap_[WANT.MATERIA_0][number] );
+
+                var allNameCheck1 = InitPopList.itemData[i].materia1.Split('_');
+                var allNameCheck2 = InitPopList.itemData[i].materia2.Split('_');
+                var allNameCheck3 = InitPopList.itemData[i].materia3.Split('_');
+                itemRecipeState[i].materia1 = allNameCheck1[0];
+                itemRecipeState[i].materia2 = allNameCheck2[0];
+                itemRecipeState[i].materia3 = allNameCheck3[0];
+
+                materiaNumber1_[i] = int.Parse(allNameCheck1[1]);
+                materiaNumber2_[i] = int.Parse(allNameCheck2[1]);
+                materiaNumber3_[i] = int.Parse(allNameCheck3[1]);
+                /////////////// haveCnt[i] = Bag_Materia.data[i].haveCnt;
+              //  Debug.Log(haveCnt[i] + "個");
+            }
+
+            //GameObject.Find("DontDestroyCanvas/ItemBagMng").GetComponent<ItemBagMng>().Init();
+            bagItem_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>();
+
+            cancelBtn_ = transform.Find("CancelBtn").GetComponent<Button>();
+            createBtn_ = transform.Find("CreateBtn").GetComponent<Button>();
+
+            createName_ = transform.Find("InfoBack/CreateItemName").GetComponent<TMPro.TextMeshProUGUI>();
+            wantMateria_ = transform.Find("InfoBack/WantMateriaNames").GetComponent<TMPro.TextMeshProUGUI>();
         }
-
-        Debug.Log(BookStoreMng.bookState_[25].readFlag);
-
-        if (BookStoreMng.bookState_[5].readFlag == 1)
-        {
-            maxCnt_ = maxRecipActiveCnt_[4];
-        }
-        else if (BookStoreMng.bookState_[18].readFlag == 1)
-        {
-            maxCnt_ = maxRecipActiveCnt_[3];
-        }
-        else if (BookStoreMng.bookState_[11].readFlag == 1)
-        {
-            // レシピ初級を読んでいたら
-            maxCnt_ = maxRecipActiveCnt_[2];
-        }
-        else if (BookStoreMng.bookState_[5].readFlag == 1)
-        {
-            // レシピ初級を読んでいたら
-            startCnt_ = maxRecipActiveCnt_[0];
-            maxCnt_ = maxRecipActiveCnt_[1];
-        }
-        Debug.Log("合成可能アイテム数" + maxCnt_);
+        miniGameObj.gameObject.SetActive(false);
+        miniGameObj.transform.localPosition = new Vector3(-0.25f, 0.8f, 0.2f);
 
 
-
-        materiaNumber1_ = new int[maxCnt_];
-        materiaNumber2_ = new int[maxCnt_];
-        materiaNumber3_ = new int[maxCnt_];
-        for (int i = startCnt_; i < maxCnt_; i++)
-        {
-            itemRecipeState[i].pleate = Instantiate(itemRecipePleate,
-            new Vector2(0, 0), Quaternion.identity, itemRecipeParent_.transform);
-            itemRecipeState[i].name = InitPopList.itemData[i].name;
-            itemRecipeState[i].pleate.name = itemRecipeState[i].name;
-            itemRecipeState[i].btn = itemRecipeState[i].pleate.GetComponent<Button>();
-
-            // 表示するアイテムの名前
-            itemRecipeState[i].nameText = itemRecipeState[i].pleate.transform.Find("Text").GetComponent<TMPro.TextMeshProUGUI>();
-            itemRecipeState[i].nameText.text = itemRecipeState[i].name;
-            //  Debug.Log(wantMap_[WANT.MATERIA_0][number] );
-
-            var allNameCheck1 = InitPopList.itemData[i].materia1.Split('_');
-            var allNameCheck2 = InitPopList.itemData[i].materia2.Split('_');
-            var allNameCheck3 = InitPopList.itemData[i].materia3.Split('_');
-            itemRecipeState[i].materia1 = allNameCheck1[0];
-            itemRecipeState[i].materia2 = allNameCheck2[0];
-            itemRecipeState[i].materia3 = allNameCheck3[0];
-
-            materiaNumber1_[i] = int.Parse(allNameCheck1[1]);
-            materiaNumber2_[i] = int.Parse(allNameCheck2[1]);
-            materiaNumber3_[i] = int.Parse(allNameCheck3[1]);
-            /////////////// haveCnt[i] = Bag_Materia.data[i].haveCnt;
-            Debug.Log(haveCnt[i] + "個");
-        }
-
-        //GameObject.Find("DontDestroyCanvas/ItemBagMng").GetComponent<ItemBagMng>().Init();
-        bagItem_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>();
-
-        // ミニゲーム
-        movePoint_ = miniGameMng.transform.GetComponent<MovePoint>();
-        miniGameMng.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
-        judgeBack_ = miniGameMng.transform.Find("JudgeBack").GetComponent<Image>();
-        judgeText_ = judgeBack_.transform.Find("Text").GetComponent<TMPro.TextMeshProUGUI>();
-
-        cancelBtn_ = transform.Find("CancelBtn").GetComponent<Button>();
-        createBtn_ = transform.Find("CreateBtn").GetComponent<Button>();
-
-        createName_ = transform.Find("InfoBack/CreateItemName").GetComponent<TMPro.TextMeshProUGUI>();
-        wantMateria_ = transform.Find("InfoBack/WantMateriaNames").GetComponent<TMPro.TextMeshProUGUI>();
         ResetCommon();
     }
 
-    public IEnumerator AlchemyRecipeSelect()
+    public void AlchemyRecipeSelect()
     {
-        while (true)
-        {
-            if (movePoint_.GetMiniGameJudge() == MovePoint.JUDGE.NON)
-            {
-                yield return null;
-            }
-            else
-            {
-                if (movePoint_.GetMiniGameJudge() == MovePoint.JUDGE.NORMAL)
-                {
-                    judge_ = MovePoint.JUDGE.NORMAL;
-                    judgeText_.text = "成功";
-                }
-                else
-                {
-                    judge_ = MovePoint.JUDGE.GOOD;
-                    judgeText_.text = "大成功";
-                }
-                judgeBack_.gameObject.SetActive(true);
-                bagItem_.ItemGetCheck(judge_, saveItemNum_, 1);
-                saveBtn_.interactable = true;
-                saveBtnName_ = "";
+        int rate = (int)circleMng_.GetMiniGameJudge();
+        bagItem_.ItemGetCheck(rate, saveItemNum_, 1);
+        saveBtn_.interactable = true;
+        saveBtnName_ = "";
 
-                yield return new WaitForSeconds(2.0f);
-                ResetCommon();
-                yield break;
-            }
-        }
+        ResetCommon();
     }
 
     public void SetActiveRecipe(int recipeNum, string name)
@@ -258,9 +246,8 @@ public class ItemCreateMng : MonoBehaviour
             {
                 createBtn_.interactable = false;
                 cancelBtn_.interactable = false;
-                miniGameMng.gameObject.SetActive(true);
-                StartCoroutine(movePoint_.CountDown());
-                StartCoroutine(AlchemyRecipeSelect());
+                miniGameObj.gameObject.SetActive(true);
+                circleMng_.Init(circleNum_, recipeNum%4);
 
                 //Debug.Log("number[0]:" + number[0] + "   number[1]:" + number[1] + "   number[2]:" + number[2]);
                 if (itemRecipeState[recipeNum].materia3 == "non")
@@ -284,7 +271,6 @@ public class ItemCreateMng : MonoBehaviour
 
     public void OnClickCancelCtn()
     {
-        StopCoroutine(AlchemyRecipeSelect());
         gameObject.SetActive(false);
         uniHouseCanvas.gameObject.SetActive(true);
     }
@@ -309,7 +295,7 @@ public class ItemCreateMng : MonoBehaviour
                 saveItemNum_ = i;// 番号を保存
                 //saveName_ = Bag_Item.data[i].name;
                 //Debug.Log("生成されたアイテム" + saveName_);
-                if (miniGameMng.gameObject.activeSelf == false)
+                if (miniGameObj.gameObject.activeSelf == false)
                 {
                     createBtn_.interactable = true;
                 }
@@ -325,10 +311,10 @@ public class ItemCreateMng : MonoBehaviour
         // 判定をリセット
         createName_.text = "";
         wantMateria_.text = "";
-        miniGameMng.gameObject.SetActive(false);
-        judge_ = MovePoint.JUDGE.NON;
-        judgeText_.text = "";
-        movePoint_.SetMiniGameJudge(judge_);
-        judgeBack_.gameObject.SetActive(false);
+      //  miniGameObj.gameObject.SetActive(false);
+        //judge_ = MovePoint.JUDGE.NON;
+        //judgeText_.text = "";
+        //movePoint_.SetMiniGameJudge(judge_);
+        //judgeBack_.gameObject.SetActive(false);
     }
 }

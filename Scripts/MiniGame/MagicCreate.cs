@@ -6,10 +6,10 @@ using UnityEngine.UI;
 public class MagicCreate : MonoBehaviour
 {
     [SerializeField]
-    private Canvas uniHouseCanvas;
+    private GameObject miniGameObj;
 
     [SerializeField]
-    private RectTransform miniGameMng;    // ミニゲーム表示用
+    private Canvas uniHouseCanvas;
 
     // ワードを表示するための親の位置
     private RectTransform magicCreateParent;
@@ -42,8 +42,6 @@ public class MagicCreate : MonoBehaviour
     private Bag_Magic bagMagic_;
     private Bag_Word bagWord_;
     private string allName_ = "";
-    //private string mainName_ = "";
-    //private string subName_ = "";
     private int[] saveNumber_ = new int[(int)Bag_Word.WORD_MNG.MAX]
         { -1,-1,-1,-1,-1,-1};// 選択したワードの番号を保存
     private int[] oldNumber_ = new int[(int)Bag_Word.WORD_MNG.MAX] { -1, -1, -1, -1, -1, -1 };
@@ -52,16 +50,13 @@ public class MagicCreate : MonoBehaviour
     // 矢印ボタン
     private Button[] arrowBtn_ = new Button[2];
 
-    //ミニゲームスタート用
-    private MovePoint movePoint_;
-    private Image judgeBack_;
-    private TMPro.TextMeshProUGUI judgeText_;
+    ////ミニゲームスタート用
+    private CircleMng circleMng_;
 
     public struct MagicCreateData
     {
         public GameObject pleate;   // インスタンスしたオブジェクトを保存
         public string name;         // ワード名
-                                    //  public string englishName;
         public Button btn;
         public int power;
         public int MP;
@@ -76,6 +71,7 @@ public class MagicCreate : MonoBehaviour
 
     private TMPro.TextMeshProUGUI mpText_;
     private int mpPower_ = 0;
+    private int maxMP = 56;
 
 
     private MagicCreateData[] InitCheck(Bag_Word.WORD_MNG kind)
@@ -197,6 +193,17 @@ public class MagicCreate : MonoBehaviour
 
     public void Init()
     {
+
+        // デバッグ用
+        //GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
+        //GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
+        //GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
+        //GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
+
+
+
+
+
         magicCreateParent = transform.Find("ScrollView/Viewport/WordParent").GetComponent<RectTransform>();
         // ワードの最大個数を取得
         for (int i = 0; i < (int)InitPopList.WORD.INFO; i++)
@@ -221,16 +228,13 @@ public class MagicCreate : MonoBehaviour
         // 魔法合成終了ボタンを代入
         cancelBtn_ = transform.Find("InfoMng/CancelBtn").GetComponent<Button>();
 
-        // ミニゲーム処理
-        movePoint_ = miniGameMng.transform.GetComponent<MovePoint>();
-        judgeBack_ = movePoint_.transform.Find("JudgeBack").GetComponent<Image>();
-        judgeText_ = judgeBack_.transform.Find("Text").GetComponent<TMPro.TextMeshProUGUI>();
-        judgeBack_.gameObject.SetActive(false);
-        miniGameMng.gameObject.SetActive(false);
-        judgeText_.text = "";
+        //// ミニゲーム処理
+        circleMng_ = miniGameObj.transform.Find("ElementCircle/JudgeCircle").GetComponent<CircleMng>();
+        miniGameObj.gameObject.SetActive(false);
+        miniGameObj.transform.localPosition = new Vector3(-0.25f, 0.0f, 0.0f);
 
-        // ScrollView/TopicBtnまでの階層
-        RectTransform viewParent_ = transform.Find("ScrollView/TopicBtn").GetComponent<RectTransform>();
+         // ScrollView/TopicBtnまでの階層
+         RectTransform viewParent_ = transform.Find("ScrollView/TopicBtn").GetComponent<RectTransform>();
         RectTransform infoParent_ = transform.Find("InfoMng/InfoBack").GetComponent<RectTransform>();
 
         // 右左の矢印
@@ -314,7 +318,7 @@ public class MagicCreate : MonoBehaviour
                 }
                 else
                 {
-                    if ((int)Bag_Word.WORD_MNG.SUB3== kindNum_)
+                    if ((int)Bag_Word.WORD_MNG.SUB3 == kindNum_)
                     {
                         kindNum_ = (int)Bag_Word.WORD_MNG.SUB3;
                     }
@@ -642,16 +646,6 @@ public class MagicCreate : MonoBehaviour
                 break;
             }
         }
-        //Debug.Log("選択したワード" + mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].name);
-
-        //for (int i = 0; i < mngMaxCnt[kindNum_]; i++)
-        //{
-        //    if (word == mCreateData[(Bag_Word.WORD_MNG)kindNum_][i].name)
-        //    {
-        //        //Debug.Log((Bag_Word.WORD_MNG)kindNum_ + "   "+word+"     " + saveWordNum_[kindNum_]);
-        //    }
-        //}
-
 
         // -1以外は同じワード種別内で複数のボタンが押されたとき
         if (oldNumber_[kindNum_] != -1)
@@ -714,7 +708,7 @@ public class MagicCreate : MonoBehaviour
             createFlag_ = selectWord_[(int)Bag_Word.WORD_MNG.SUB3] != null ? true : false;
         }
         else
-        {   
+        {
             // 攻撃系のSubはどのタイミングで選んでも作成ができる
             if ((int)Bag_Word.WORD_MNG.TAIL <= kindNum_)
             {
@@ -761,9 +755,10 @@ public class MagicCreate : MonoBehaviour
             Bag_Materia.materiaState[materiaNum_].haveCnt--;
             materiaCntText_.text = Bag_Materia.materiaState[materiaNum_].haveCnt.ToString();
 
-            StartCoroutine(movePoint_.CountDown());
-            StartCoroutine(ResultMagicCreate());
-            miniGameMng.gameObject.SetActive(true);
+            miniGameObj.gameObject.SetActive(true);
+            var judgeNum = (mpPower_ / maxMP * 100)/25;
+            circleMng_.Init(saveWordNum_[(int)Bag_Word.WORD_MNG.ELEMENT], judgeNum);
+
 
             // ゲームが始まるため押下できないようにする
             createBtn_.interactable = false;
@@ -792,7 +787,7 @@ public class MagicCreate : MonoBehaviour
             else
             {
                 //// SUB3をセットされてなかったら計算はSUB3まで
-               // 何もしない maxWordMng_ = (int)Bag_Word.WORD_MNG.TAIL;
+                // 何もしない maxWordMng_ = (int)Bag_Word.WORD_MNG.TAIL;
             }
 
             for (int i = (int)Bag_Word.WORD_MNG.HEAD; i < maxWordMng_; i++)
@@ -809,89 +804,74 @@ public class MagicCreate : MonoBehaviour
             float tailPower = mCreateData[Bag_Word.WORD_MNG.TAIL][saveNumber_[(int)Bag_Word.WORD_MNG.TAIL]].power;
             if (selectWord_[(int)Bag_Word.WORD_MNG.HEAD] == "複数回")
             {
-                tailPower = Mathf.Abs(mCreateData[Bag_Word.WORD_MNG.TAIL][saveNumber_[(int)Bag_Word.WORD_MNG.TAIL]].power -0.2f);
+                tailPower = Mathf.Abs(mCreateData[Bag_Word.WORD_MNG.TAIL][saveNumber_[(int)Bag_Word.WORD_MNG.TAIL]].power - 0.2f);
             }
             Debug.Log(magicPower_ + "*" + tailPower);
 
-            magicPower_ = (int)(magicPower_*tailPower);
+            magicPower_ = (int)(magicPower_ * tailPower);
             powerText_.text = magicPower_.ToString();
             mpText_.text = mpPower_.ToString();
             createBtnText_.text = "作成";
         }
     }
 
-    public IEnumerator ResultMagicCreate()
+    public void ResultMagicCreate()
     {
-        while (true)
+        int rate = (int)circleMng_.GetMiniGameJudge();
+        int power = magicPower_;
+        int mp = mpPower_;
+        // 失敗以外の場合は魔法を保存する
+        if (rate != (int)MovePoint.JUDGE.BAD)
         {
-            if (movePoint_.GetMiniGameJudge() == MovePoint.JUDGE.NON)
+            // 大成功の時は威力を上げてMP消費量を減少させる
+            if (rate == (int)CircleMng.JUDGE.GOOD)
             {
-                yield return null;
+                power = (int)(magicPower_ * 1.3);// 威力を上げる
+                mp -= (int)(magicPower_ * 0.3);// 消費MPを下げる
+            }
+
+            // ワードがどこまでセットされているか確認する
+            if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] == null)
+            {
+                saveWordNum_[(int)Bag_Word.WORD_MNG.SUB1] = -1;
+                saveWordNum_[(int)Bag_Word.WORD_MNG.SUB2] = -1;
+                saveWordNum_[(int)Bag_Word.WORD_MNG.SUB3] = -1;
+            }
+            else if (selectWord_[(int)Bag_Word.WORD_MNG.SUB2] == null)
+            {
+                saveWordNum_[(int)Bag_Word.WORD_MNG.SUB2] = -1;
+                saveWordNum_[(int)Bag_Word.WORD_MNG.SUB3] = -1;
+            }
+            else if (selectWord_[(int)Bag_Word.WORD_MNG.SUB3] == null)
+            {
+                saveWordNum_[(int)Bag_Word.WORD_MNG.SUB3] = -1;
             }
             else
             {
-                int rate = (int)MovePoint.JUDGE.NORMAL;// 成功か大成功か
-                int power = magicPower_;
-                int mp = mpPower_;
-                judgeText_.text = "成功";
-                if (movePoint_.GetMiniGameJudge() == MovePoint.JUDGE.GOOD)
-                {
-                    judgeText_.text = "大成功";
-                    rate = (int)MovePoint.JUDGE.GOOD;
-                    power = (int)(magicPower_ * 1.3);// 威力を上げる
-                    mp -= (int)(magicPower_ * 0.3);// 消費MPを下げる
-                }
-                judgeBack_.gameObject.SetActive(true);
-
-                movePoint_.SetMiniGameJudge(MovePoint.JUDGE.NON);// 初期化しておく
-
-
-                if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] == null)
-                {
-                    saveWordNum_[(int)Bag_Word.WORD_MNG.SUB1] = -1;
-                    saveWordNum_[(int)Bag_Word.WORD_MNG.SUB2] = -1;
-                    saveWordNum_[(int)Bag_Word.WORD_MNG.SUB3] = -1;
-                }
-                else if (selectWord_[(int)Bag_Word.WORD_MNG.SUB2] == null)
-                {
-                    saveWordNum_[(int)Bag_Word.WORD_MNG.SUB2] = -1;
-                    saveWordNum_[(int)Bag_Word.WORD_MNG.SUB3] = -1;
-                }
-                else if (selectWord_[(int)Bag_Word.WORD_MNG.SUB3] == null)
-                {
-                    saveWordNum_[(int)Bag_Word.WORD_MNG.SUB3] = -1;
-                }
-                else
-                {
-                    // 何もしない
-                }
-                // 出来上がった魔法を保存
-                bagMagic_.MagicCreateCheck(allName_,
-                            power, mp, rate,
-                            saveWordNum_[(int)Bag_Word.WORD_MNG.HEAD],
-                            saveWordNum_[(int)Bag_Word.WORD_MNG.ELEMENT],
-                            saveWordNum_[(int)Bag_Word.WORD_MNG.TAIL],
-                            saveWordNum_[(int)Bag_Word.WORD_MNG.SUB1],
-                            saveWordNum_[(int)Bag_Word.WORD_MNG.SUB2],
-                            saveWordNum_[(int)Bag_Word.WORD_MNG.SUB3]);
-
-                yield return new WaitForSeconds(2.0f);
-                cancelBtn_.interactable = true;
-                judgeBack_.gameObject.SetActive(false);
-                miniGameMng.gameObject.SetActive(false);
-                judgeText_.text = "";
-
-                if (Bag_Materia.materiaState[materiaNum_].haveCnt < 1)
-                {
-                    Debug.Log("空のマテリアがなくなりました。ワード合成を終了します");
-                    OnClickCancelCtn();
-                    yield break;
-                }
-
-                ResetCommon();
-                yield break;
+                // 何もしない
             }
+
+            // 出来上がった魔法を保存
+            bagMagic_.MagicCreateCheck(allName_,
+                        power, mp, rate,
+                        saveWordNum_[(int)Bag_Word.WORD_MNG.HEAD],
+                        saveWordNum_[(int)Bag_Word.WORD_MNG.ELEMENT],
+                        saveWordNum_[(int)Bag_Word.WORD_MNG.TAIL],
+                        saveWordNum_[(int)Bag_Word.WORD_MNG.SUB1],
+                        saveWordNum_[(int)Bag_Word.WORD_MNG.SUB2],
+                        saveWordNum_[(int)Bag_Word.WORD_MNG.SUB3]);
         }
+
+      //  miniGameObj.gameObject.SetActive(false);
+        cancelBtn_.interactable = true;
+        if (Bag_Materia.materiaState[materiaNum_].haveCnt < 1)
+        {
+            Debug.Log("空のマテリアがなくなりました。ワード合成を終了します");
+            OnClickCancelCtn();
+            return;
+        }
+
+        ResetCommon();
     }
 
     public void OnClickCancelCtn()
@@ -907,7 +887,7 @@ public class MagicCreate : MonoBehaviour
     private void ResetCommon()
     {
         // Init()とワード合成後とワード合成終了時に呼ぶ
-        miniGameMng.localPosition = new Vector3(0.0f, -180.0f, 0.0f);
+        //    miniGameMng.localPosition = new Vector3(0.0f, -180.0f, 0.0f);
 
         infoText_.text = "";
         allName_ = "";

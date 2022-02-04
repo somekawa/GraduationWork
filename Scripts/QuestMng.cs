@@ -495,7 +495,7 @@ public class QuestMng : MonoBehaviour
             var item = popQuestInfo_.param[questNum_].item.Split('_');
             var add = (int)(int.Parse(item[1]) * rewardGradeUp[questNum_]) - int.Parse(item[1]);
             text1 = "・アイテム +" + add;
-            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>().ItemGetCheck(MovePoint.JUDGE.NORMAL, int.Parse(item[0]), int.Parse(item[1]) + add);
+            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>().ItemGetCheck(0, int.Parse(item[0]), int.Parse(item[1]) + add);
         }
 
         // ハンコをアクティブにする

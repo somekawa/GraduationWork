@@ -133,15 +133,15 @@ public class Bag_Item : MonoBehaviour
 
     }
 
-    public void ItemGetCheck(MovePoint.JUDGE judge, int itemNum,int createCnt)
+    public void ItemGetCheck(int rate, int itemNum, int createCnt)
     {
-        if(judge == MovePoint.JUDGE.GOOD)
+        if (rate == 2)
         {
-            itemNum = itemNum*2;
+            itemNum = itemNum * 2;
         }
-        Debug.Log("加算されるアイテム"+itemState[itemNum].name);
+        Debug.Log("加算されるアイテム" + itemState[itemNum].name);
         itemState[itemNum].haveCnt = itemState[itemNum].haveCnt + createCnt;
-      //  data[itemNum].haveCnt = itemState[itemNum].haveCnt;
+        //  data[itemNum].haveCnt = itemState[itemNum].haveCnt;
     }
 
     public void SetItemCntText(int itemNum)

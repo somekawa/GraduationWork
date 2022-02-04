@@ -351,7 +351,7 @@ public class ItemStoreMng : MonoBehaviour
             }
             else
             {
-                bagItem_.ItemGetCheck(MovePoint.JUDGE.NORMAL, saveItemsNum_, itemCnt_);
+                bagItem_.ItemGetCheck(0, saveItemsNum_, itemCnt_);
             }
             // Ç®ã‡ÇÃå∏è≠èàóù
             SceneMng.SetHaveMoney(SceneMng.GetHaveMoney() - totalPrice_);
@@ -366,7 +366,7 @@ public class ItemStoreMng : MonoBehaviour
             }
             else
             {
-                bagItem_.ItemGetCheck(MovePoint.JUDGE.NORMAL, saveItemsNum_, -itemCnt_);
+                bagItem_.ItemGetCheck(0, saveItemsNum_, -itemCnt_);
             }
             // Ç®ã‡ÇÃâ¡éZèàóù
             SceneMng.SetHaveMoney(SceneMng.GetHaveMoney() + totalPrice_);

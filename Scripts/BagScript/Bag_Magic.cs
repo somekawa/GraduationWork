@@ -127,6 +127,9 @@ public class Bag_Magic : MonoBehaviour
                 statusMagicBtn_[i] = statusMagicObject[i].GetComponent<Button>();
                 statusMagicSetText_[i] = statusMagicBtn_[i].transform.Find("SetCharaName").GetComponent<Text>();
                 statusMagicSetText_[i].text = "";
+
+               
+
                 // Debug.Log(statusMagicBtn_[i].name);
                 statusMagicImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[i].element];
                 //Debug.Log(data[i].name + "           " + data[i].number);
@@ -194,7 +197,6 @@ public class Bag_Magic : MonoBehaviour
                 }
             }
         }
-
     }
 
     public void SetStatusMagicCheck(SceneMng.CHARACTERNUM chara, int num, bool flag)

@@ -1,3 +1,78 @@
+2022/02/05更新
+
+●対象Scene　ユニの家のシーン
+●MovePoint.csはRemoveしてください
+HouseInterior
+ーUniHouse
+　ーMiniGameMngCanvas
+　　ーMiniGameMng　の子のBackImageを削除してください（CountとJudgeだけにする）
+
+●Materialsフォルダの中身
+SpriteのTextureTypeはすべてSprite（2D and UI）
+☆Judgeの画像のみAdvancedーRead/Write Enabledにチェックを入れる
+Shaderはすべて【Legacy Chaders/Transparent/Diffuse】
+画像はマテリアル名と同じSpriteをアタッチ
+
+●一時ファイル　　MiniGameObj
+HouseInterior
+ーUniHouse
+　ー【MiniGameObj】　に配置　ポジションはアイテム合成か魔法作成かで変わるため気にしなくて良い
+　　ーRotateCenter　MeshRenderをオフ
+　　　ーNeedleQuad　MeshRenderのMaterialsを1。Element0に【NeedleMateria】をアタッチ
+　　　		　MeshColliderいらないかもしれない……
+　　　　ーNeedleTop　MeshRenderをオフ
+　　ーElementCircle　ここのMeshRenderにスクリプトで変化する指定のMaterialがアタッチされる
+　　　ーJudgeCircle　ここのMeshRenderにスクリプトで変化する指定のMaterialがアタッチされる　
+		【CircleMng.cs】をアタッチ
+　　　ーBackCircle　MeshRenderのMaterialsを1。Element0に【BackCircle】をアタッチ
+
+●CircleMng.cs
+・MiniGameObj
+　HouseInteriorーUniHouseーMiniGameMngCanvasー【MiniGameMng】←をアタッチ
+・MagicCreateMng
+　HouseInteriorーUniHouseーMiniGameMngCanvasー【MagicCreateMng】←をアタッチ
+・AlchemyMng
+　HouseInteriorーUniHouseーMiniGameMngCanvasー【AlchemyMng】←をアタッチ
+
+・ElementMats　配列の大きさは【7】
+マテリアルはすべてMaterialsフォルダーMagicCreateフォルダの中にある
+　Element0　Element0
+　Element1　Element1
+　Element2　Element2
+　Element3　Element3
+　Element4　Element4
+　Element5　Element5
+　Element4　AlchemyCircle
+
+・JudgeMats　配列の大きさは【4】
+マテリアルはすべてMaterialsフォルダーMagicCreateフォルダの中にある
+　Element0　Judge0
+　Element1　Judge1
+　Element2　Judge2
+　Element3　Judge3
+
+ーーーーー画像の取得以外で面倒だったとこ
+MeshRenderのElement0に入れたいMaterialが入らないところ！！！
+MeshRenderのMaterialの配列の大きさが1つであっても配列で取得しないといけない（たぶん）
+そしてmaterialsに変数を代入する
+こんな感じ
+        elementMaterial[0] = elementMats[elementNum];
+        elementRenderer.materials = elementMaterial;
+※elementRenderer.materials[0] = elementMaterial[0] ;で代入できないため注意
+またmaterialsを使用した際は使用後毎にDestroy（）しないととても重くなるらしい。
+そのためミニゲーム終了毎にMaterialが外れる。
+まっピンク表示を回避するためにMeshRenderのアクティブ状態を変化させている
+大成功、成功表示と、カウントダウン表示はMovePoint.csからコピペ
+
+●ItemCreateMng.cs
+AlchemyMngオブジェクトの子のPanelを非アクティブにしてください
+MiniGameObj.csに　HouseInteriorーUniHouseー【MiniGameObj】←をアタッチ
+
+●MagicCreateMng.cs
+MagicCreateMngオブジェクトの子のPanelを非アクティブにしてください
+MiniGameObj.csに　HouseInteriorーUniHouseー【MiniGameObj】←をアタッチ
+
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
 2021/11/17更新
 
 ●変更点

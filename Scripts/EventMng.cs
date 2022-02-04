@@ -13,7 +13,7 @@ public static class EventMng
         if(chapterNum == 8 && num == 9)
         {
             // チャプター9へ移動するさいに回復ポーション(小)を3つ受け取る
-            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>().ItemGetCheck(MovePoint.JUDGE.NORMAL,0,3);
+            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>().ItemGetCheck(0,0,3);
         }
 
         if (!loadFlg)
