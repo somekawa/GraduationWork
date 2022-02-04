@@ -57,7 +57,7 @@ public class ItemBagMng : MonoBehaviour
     private Color equipResetColor_ = new Color(1.0f, 1.0f, 1.0f, 0.0f);// 選択できない状態の色
     // 所持魔法一覧
     private int[,] setImageNum_ = new int[(int)SceneMng.CHARACTERNUM.MAX, 4];// 保存される魔法の画像
-
+    private Button seleMagicBtn_;
     private Button removeEquipBtn_;// 魔法をはずすボタン
 
     private int setNullNum_ = 0;// 魔法が装備されてないときの番号
@@ -366,7 +366,7 @@ public class ItemBagMng : MonoBehaviour
                     equipBtn_[addCnt_].interactable = true;
                 }
             }
-            Debug.Log((SceneMng.CHARACTERNUM)charaStringNum_ + "の" + i + "番目にセット中の魔法の画像番号：" + setImageNum_[charaStringNum_, i]);
+          //  Debug.Log((SceneMng.CHARACTERNUM)charaStringNum_ + "の" + i + "番目にセット中の魔法の画像番号：" + setImageNum_[charaStringNum_, i]);
         }
     }
 
@@ -447,12 +447,58 @@ public class ItemBagMng : MonoBehaviour
         magicMng_.SetCoroutineFlag();
     }
 
+    public void InfoCheck(Button btn, int number)
+    {
+        if (seleMagicBtn_ == null)
+        {
+            // 最初だけ入る
+            seleMagicBtn_ = btn;
+            Debug.Log(seleMagicBtn_ + "       " + btn);
+        }
+
+        info_.text = useMagic_.MagicInfoMake(Bag_Magic.data[number]);
+
+        // 以降はseleMagicBtn_に1つ前のボタン情報があるためここから
+        if (seleMagicBtn_ != btn)
+        {
+            Debug.Log(seleMagicBtn_ + "       " + btn);
+            // 既に選択しているものがあった場合色を元に戻す
+            seleMagicBtn_.image.color = equipNormalColor_;
+
+            // 新しく選択した魔法を代入して選択状態の色にする
+            seleMagicBtn_ = btn;
+            seleMagicBtn_.image.color = equipBtnSelColor_;
+
+        }
+        else
+        {
+            Debug.Log("選択中のボタンがあります");
+
+            if (seleMagicBtn_.image.color != equipBtnSelColor_)
+            {
+                // どのボタンを選択したか代入
+                seleMagicBtn_ = btn;
+                // 選択したボタンの色を変更
+                seleMagicBtn_.image.color = equipBtnSelColor_;
+                return;
+            }
+            // 同じもの＝2回目のクリックだったら魔法をセット
+            SetMagicCheck(number, true);
+            // interactable=false時の色がおかしくなるため元に戻す
+            seleMagicBtn_.image.color = equipNormalColor_;
+            // 中身を空にする
+            seleMagicBtn_ = null;
+        }
+    }
+
+
     public void SetMagicCheck(int num, bool flag)
     {
         Debug.Log("セット先の魔法の番号" + btnNumber_ + "     クリックしたボタンの番号：" + num);
 
         if (btnNumber_ == -1)
         {
+            info_.text = "装備先を選択してください";
             // セット先を選択せずに魔法を押した場合
             return;
         }

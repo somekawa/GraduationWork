@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class MagicIconClick : MonoBehaviour
 {
@@ -31,13 +32,13 @@ public class MagicIconClick : MonoBehaviour
             eventSystem_ = GameObject.Find("EventSystem").GetComponent<EventSystem>();
             menuActive_ = GameObject.Find("SceneMng").GetComponent<MenuActive>();
             rectItemBagMng_ = menuActive_.GetItemBagMng();
-        }
+        }      
         // このCSがついているボタンの名前
         clickbtn_ = eventSystem_.currentSelectedGameObject;
+        Button btn = clickbtn_.GetComponent<Button>();
         // ボタン名から数字のみを取り出す
         int number = int.Parse(Regex.Replace(clickbtn_.name, @"[^0-9]", ""));
-        rectItemBagMng_.GetComponent<ItemBagMng>().SetMagicCheck( number,true);
-        //Debug.Log(btn.name + "        " + number);
+        rectItemBagMng_.GetComponent<ItemBagMng>().InfoCheck(btn, number);
     }
 
     public void OnClickRemoveMagic()
