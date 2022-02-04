@@ -175,7 +175,7 @@ public class ItemBagMng : MonoBehaviour
             {
                 dataCheck_[c, i] = data.Magic[i];
 
-                bagMagic_.SetStatusMagicCheck((SceneMng.CHARACTERNUM)charaStringNum_, dataCheck_[c, i], true);
+                bagMagic_.SetStatusMagicCheck((SceneMng.CHARACTERNUM)c, dataCheck_[c, i], true);
 
                 setImageNum_[c, i] = Bag_Magic.data[dataCheck_[c, i]].element;
                 //Debug.Log((SceneMng.CHARACTERNUM)c + "ÇÃ" + i + "î‘ñ⁄:" + data.Magic[i] + "î‘ÇÃñÇñ@/ñºëOÅF" +
