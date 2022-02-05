@@ -59,7 +59,7 @@ public class SaveLoadCSV : MonoBehaviour
             Debug.Log("Book,古いデータを削除してファイル書き込み");
 
             // ステータスの項目見出し
-            string[] s1 = { "Name", "ReadCheck" };
+            string[] s1 = {"Number", "Name", "ReadCheck" };
             string s2 = string.Join(",", s1);
             sw.WriteLine(s2);
         }
@@ -209,6 +209,7 @@ public class SaveLoadCSV : MonoBehaviour
 
             for (int i = 0; i < bookname_.Count; i++)
             {
+                BookStoreMng.bookState_[i].number = i;
                 BookStoreMng.bookState_[i].bookName = bookname_[i];
                 BookStoreMng.bookState_[i].readFlag = 0;
             }

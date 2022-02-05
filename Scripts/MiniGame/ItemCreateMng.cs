@@ -59,25 +59,36 @@ public class ItemCreateMng : MonoBehaviour
 
     private int[] maxRecipActiveCnt_ = new int[5] { 0, 5, 10, 15, 19 };
 
-    private SaveLoadCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
-                                   //  void Start()
+    //// デバッグ用
+    //private SaveLoadCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
+
     public void Init()
     {
-        saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>();
-        saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.BOOK);
+        //    // デバッグ用
+        //    saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>();
+        //    saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.BOOK);
 
-        GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
-        GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
-        GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
-        GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
+        //    GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
+        //    GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
+        //    GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
+        //    GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
 
 
-        if(circleMng_==null)
+        if (circleMng_==null)
         {
             circleMng_ = miniGameObj.transform.Find("ElementCircle/JudgeCircle").GetComponent<CircleMng>();
             itemRecipeParent_ = transform.Find("ScrollView/Viewport/ItemRecipeParent").GetComponent<RectTransform>();
             bagMateria_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>();
 
+            //GameObject.Find("DontDestroyCanvas/ItemBagMng").GetComponent<ItemBagMng>().Init();
+            bagItem_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>();
+
+            cancelBtn_ = transform.Find("CancelBtn").GetComponent<Button>();
+            createBtn_ = transform.Find("CreateBtn").GetComponent<Button>();
+
+            createName_ = transform.Find("InfoBack/CreateItemName").GetComponent<TMPro.TextMeshProUGUI>();
+            wantMateria_ = transform.Find("InfoBack/WantMateriaNames").GetComponent<TMPro.TextMeshProUGUI>();
+            
             popItemRecipeList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
             maxCnt_ = popItemRecipeList_.SetMaxItemCount() / 2;
             Debug.Log("最大値" + maxCnt_);
@@ -92,17 +103,19 @@ public class ItemCreateMng : MonoBehaviour
 
             Debug.Log(BookStoreMng.bookState_[25].readFlag);
 
-            if (BookStoreMng.bookState_[5].readFlag == 1)
+            if (BookStoreMng.bookState_[25].readFlag == 1)
             {
+                // レシピ極級を読んでいたら
                 maxCnt_ = maxRecipActiveCnt_[4];
             }
             else if (BookStoreMng.bookState_[18].readFlag == 1)
             {
+                // レシピ高級を読んでいたら
                 maxCnt_ = maxRecipActiveCnt_[3];
             }
             else if (BookStoreMng.bookState_[11].readFlag == 1)
             {
-                // レシピ初級を読んでいたら
+                // レシピ中級を読んでいたら
                 maxCnt_ = maxRecipActiveCnt_[2];
             }
             else if (BookStoreMng.bookState_[5].readFlag == 1)
@@ -111,9 +124,20 @@ public class ItemCreateMng : MonoBehaviour
                 startCnt_ = maxRecipActiveCnt_[0];
                 maxCnt_ = maxRecipActiveCnt_[1];
             }
+            else
+            {
+                maxCnt_ = 0;// レシピ本を所持してない
+            }
             Debug.Log("合成可能アイテム数" + maxCnt_);
 
-
+            if (maxCnt_ == 0)
+            {
+                // レシピ本を所持してない場合
+                createName_.text = null;
+                wantMateria_.text = "本屋でレシピを購入しましょう";
+                createBtn_.interactable = false;
+                return;
+            }
 
             materiaNumber1_ = new int[maxCnt_];
             materiaNumber2_ = new int[maxCnt_];
@@ -145,14 +169,6 @@ public class ItemCreateMng : MonoBehaviour
               //  Debug.Log(haveCnt[i] + "個");
             }
 
-            //GameObject.Find("DontDestroyCanvas/ItemBagMng").GetComponent<ItemBagMng>().Init();
-            bagItem_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>();
-
-            cancelBtn_ = transform.Find("CancelBtn").GetComponent<Button>();
-            createBtn_ = transform.Find("CreateBtn").GetComponent<Button>();
-
-            createName_ = transform.Find("InfoBack/CreateItemName").GetComponent<TMPro.TextMeshProUGUI>();
-            wantMateria_ = transform.Find("InfoBack/WantMateriaNames").GetComponent<TMPro.TextMeshProUGUI>();
         }
         miniGameObj.gameObject.SetActive(false);
         miniGameObj.transform.localPosition = new Vector3(-0.25f, 0.8f, 0.2f);
