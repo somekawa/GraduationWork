@@ -1,11 +1,40 @@
 2022/02/05更新
 
 ●対象Scene　ユニの家のシーン
+●MiniGameMngCanvas
+HouseInterior
+ーUniHouse
+　ーMiniGameMngCanvas
+　　ーAlchemyMng
+　　　ーCreateBtn　OnClick()にItemCreateMng.csのOnClickCreate()をアタッチ
+　　　ーCancelBtn　 OnClick()にItemCreateMng.csのOnClickCancelBtn()をアタッチ
+　　　ーScrollView
+　　　ーInfoBack
+　　ーMagicCreateMng
+　　　ーInfoMng
+　　　ーCancelBtn　 OnClick()にMagicCreateMng.csのOnClickCancelBtn()をアタッチ
+　　　ーCreateBtn　OnClick()にMagicCreateMng.csのOnClickMagicCreate()をアタッチ
+　　ーMiniGameMng
+
+●ItemCreateMng.cs
+AlchemyMngオブジェクトの子のPanelを非アクティブにしてください
+MiniGameObj.csに　HouseInteriorーUniHouseー【MiniGameObj】←をアタッチ
+UniHouseCanvasに　HouseInteriorーUniHouseー【UniHouseCanvas】←をアタッチ
+ItemRecipePleateに　PrefabフォルダーStoreフォルダ直下にあるItemCreatePleateプレハブをアタッチ
+
+
+●MagicCreateMng.cs
+MagicCreateMngオブジェクトの子のPanelを非アクティブにしてください
+MiniGameObj.csに　HouseInteriorーUniHouseー【MiniGameObj】←をアタッチ
+UniHouseCanvasに　HouseInteriorーUniHouseー【UniHouseCanvas】←をアタッチ
+
 ●MovePoint.csはRemoveしてください
 HouseInterior
 ーUniHouse
 　ーMiniGameMngCanvas
 　　ーMiniGameMng　の子のBackImageを削除してください（CountとJudgeだけにする）
+
+
 
 ●Materialsフォルダの中身
 SpriteのTextureTypeはすべてSprite（2D and UI）
@@ -64,13 +93,9 @@ MeshRenderのMaterialの配列の大きさが1つであっても配列で取得�
 まっピンク表示を回避するためにMeshRenderのアクティブ状態を変化させている
 大成功、成功表示と、カウントダウン表示はMovePoint.csからコピペ
 
-●ItemCreateMng.cs
-AlchemyMngオブジェクトの子のPanelを非アクティブにしてください
-MiniGameObj.csに　HouseInteriorーUniHouseー【MiniGameObj】←をアタッチ
 
-●MagicCreateMng.cs
-MagicCreateMngオブジェクトの子のPanelを非アクティブにしてください
-MiniGameObj.csに　HouseInteriorーUniHouseー【MiniGameObj】←をアタッチ
+
+
 
 ーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
 2021/11/17更新

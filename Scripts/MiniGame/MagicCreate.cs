@@ -11,6 +11,9 @@ public class MagicCreate : MonoBehaviour
     [SerializeField]
     private Canvas uniHouseCanvas;
 
+    //[SerializeField]
+    //private RectTransform miniGameMng;    // ミニゲーム表示用
+
     // ワードを表示するための親の位置
     private RectTransform magicCreateParent;
 
@@ -194,11 +197,10 @@ public class MagicCreate : MonoBehaviour
     public void Init()
     {
 
-        // デバッグ用
-        //GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
-        //GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
-        //GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
-        //GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
+        GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
+        GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
+        GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
+        GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
 
 
 
@@ -867,14 +869,14 @@ public class MagicCreate : MonoBehaviour
         if (Bag_Materia.materiaState[materiaNum_].haveCnt < 1)
         {
             Debug.Log("空のマテリアがなくなりました。ワード合成を終了します");
-            OnClickCancelCtn();
+            OnClickCancelBtn();
             return;
         }
 
         ResetCommon();
     }
 
-    public void OnClickCancelCtn()
+    public void OnClickCancelBtn()
     {
         // 魔法の合成をやめる
         ResetCommon();
