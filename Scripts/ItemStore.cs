@@ -31,6 +31,29 @@ public class ItemStore : HouseBase
                 return true;
             }
         }
+        else
+        {
+            if (num < 15)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < Bag_Word.data.Length; i++)
+            {
+                if (Bag_Word.data[i].name != "–‚–@UŒ‚")
+                {
+                    continue;
+                }
+                if (Bag_Word.data[i].getFlag == 0)
+                {
+                    // –‚–@UŒ‚—Í
+                    GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Word>().WordGetCheck(InitPopList.WORD.SUB2, 2, 17);
+                    EventMng.SetChapterNum(102, SceneMng.SCENE.CONVERSATION);
+                    return true;
+                }
+            }
+        }
+
 
         return false;
     }

@@ -116,6 +116,7 @@ public class MenuActive : MonoBehaviour
         {
             if (Input.GetKeyUp(KeyCode.Tab))
             {
+                SceneMng.SetSE(0);
                 Debug.Log("メニュー画面を表示します");
                 FieldMng.nowMode = FieldMng.MODE.MENU;  // ユニが歩行できないようにモードを切り替える  activeFlag_ = true;
                 bagImage_.color = new Color(0.5f, 1.0f, 0.5f, 1.0f);
@@ -190,7 +191,6 @@ public class MenuActive : MonoBehaviour
     public void ViewStatus(int charaNum)
     {
         Debug.Log("ステータス確認ボタンが押された");
-        //  buttons_.SetActive(false);
 
         // キャラのステータス値を表示させたい
         var data = SceneMng.GetCharasSettings(charaNum);
@@ -214,17 +214,17 @@ public class MenuActive : MonoBehaviour
     {
         Debug.Log("セーブボタンが押された");
 
+        // その他データのセーブ
+        saveCsvSc_.SaveStart(SaveLoadCSV.SAVEDATA.OTHER);
+        saveCsvSc_.OtherSaveData();
+        saveCsvSc_.SaveEnd();
+
         saveCsvSc_.SaveStart(SaveLoadCSV.SAVEDATA.CHARACTER);
         // キャラクター数分のfor文を回す
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
         {
-            saveCsvSc_.SaveData(SceneMng.GetCharasSettings(i));
+            saveCsvSc_.SaveData(SceneMng.GetCharasSettings(i),i);
         }
-        saveCsvSc_.SaveEnd();
-
-        // その他データのセーブ
-        saveCsvSc_.SaveStart(SaveLoadCSV.SAVEDATA.OTHER);
-        saveCsvSc_.OtherSaveData();
         saveCsvSc_.SaveEnd();
 
         saveCsvSc_.SaveStart(SaveLoadCSV.SAVEDATA.BOOK);
@@ -248,8 +248,8 @@ public class MenuActive : MonoBehaviour
         Debug.Log("ロードキー押下");
 
         bagMagic_.DataLoad();
-        saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.CHARACTER);
         saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.OTHER);
+        saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.CHARACTER);
         saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.BOOK);
 
         GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();

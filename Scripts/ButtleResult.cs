@@ -115,7 +115,7 @@ public class ButtleResult : MonoBehaviour
         bagMateria_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>();
     }
 
-    public void DropCheck(int enemyCnt, int[] num, bool bossFlag)
+    public void DropCheck(int enemyCnt, int[] num, bool bossFlag, List<GameObject> list)
     {
         Debug.Log("リザルトを表示します");
         enemyCnt_ = enemyCnt;
@@ -142,6 +142,19 @@ public class ButtleResult : MonoBehaviour
             {
                 // レベル差による経験値量チェック
                 saveSumExp_[c] += ExpCheck(c, i);
+            }
+
+            // 討伐クエストの討伐数確認
+            for(int k = 0; k < list.Count; k++)
+            {
+                // 名前部分のアンダーバーで分ける
+                var name = enemyList_[i].Name().Split('_');
+
+                // 討伐対象の敵を倒したのか確認する
+                if (list[k].GetComponent<CompleteQuest>().GetEnemyName() == name[0])
+                {
+                    list[k].GetComponent<CompleteQuest>().SetFinSubjugation(1);
+                }
             }
         }
 
@@ -344,6 +357,7 @@ public class ButtleResult : MonoBehaviour
                     // リザルト非表示にDropオブジェクト削除
                     Destroy(dropObj_[i]);
                 }
+                enemyList_.Clear();
                 yield break;
             }
 
@@ -397,6 +411,8 @@ public class ButtleResult : MonoBehaviour
     private void LevelRelation(Vector2 pos, SceneMng.CHARACTERNUM chara,
         int oldLevel, int nowLevel, int nextExp, int exp)
     {
+        SceneMng.SetSE(15);
+
         // 上昇させる分を入れる
         int[] tmp = new int[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
         // 0Attack 1MagicAttack 2Defence 3Speed 4Luck 5HP 6MP 7 EXP

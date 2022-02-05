@@ -3,9 +3,6 @@ using UnityEngine;
 
 public class TownMng : MonoBehaviour
 {
-    //[SerializeField]
-    //private Canvas inHouseCanvas;
-
     [SerializeField]
     private GameObject nightLights; // 街頭
 
@@ -27,16 +24,6 @@ public class TownMng : MonoBehaviour
 
         // メインカメラの初期化関数を呼ぶために、CameraMng.csを経由している
         GameObject.Find("CameraController").GetComponent<CameraMng>().MainCameraPosInit();
-
-        // 今が夜ならばライト点灯、それ以外ならライト消灯
-        if (SceneMng.GetTimeGear() == SceneMng.TIMEGEAR.NIGHT)
-        {
-            nightLights.SetActive(true);
-        }
-        else
-        {
-            nightLights.SetActive(false);
-        }
 
         // 建物と座標を一致させる
         for (int i = 0; i < buildNameEng_.Length; i++)
@@ -99,12 +86,23 @@ public class TownMng : MonoBehaviour
         }
 
         // ステータスアップを消すか判定する
-        if (!SceneMng.GetFinStatusUpTime())
+        if (!SceneMng.GetFinStatusUpTime().Item2)
         {
             for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
             {
                 SceneMng.charasList_[i].DeleteStatusUpByCook();
             }
+        }
+
+        // 今が夜ならばライト点灯、それ以外ならライト消灯
+        // データロードで時間帯を読み込んだ後に設定したいから、一番最後に書く
+        if (SceneMng.GetTimeGear() == SceneMng.TIMEGEAR.NIGHT)
+        {
+            nightLights.SetActive(true);
+        }
+        else
+        {
+            nightLights.SetActive(false);
         }
     }
 }

@@ -172,7 +172,7 @@ public class FieldMng : MonoBehaviour
         getChestsInfo_ = fieldUICanvasPopUp_.transform.Find("GetChestsInfo").GetComponent<TMPro.TextMeshProUGUI>();
 
         // ステータスアップを消すか判定する
-        if(!SceneMng.GetFinStatusUpTime())
+        if(!SceneMng.GetFinStatusUpTime().Item2)
         {
             for(int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
             {
@@ -406,7 +406,7 @@ public class FieldMng : MonoBehaviour
         {
             // 壁(強制戦闘)関連処理
             titleInfo_.text = "Danger!!";
-            getChestsInfo_.text = "モンスターの気配がする…\n先に進みますか？";
+            getChestsInfo_.text = "逃げられない戦いだ…\n先に進みますか？";
 
             // すでにアクティブ状態ならば、非アクティブになるし、
             // 非アクティブならば、アクティブにする(処理順逆にすると選択肢出てこないから注意)

@@ -31,6 +31,29 @@ public class Restaurant : HouseBase
                 return true;
             }
         }
+        else
+        {
+            if (num < 15)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < Bag_Word.data.Length; i++)
+            {
+                if (Bag_Word.data[i].name != "–½’†/‰ñ”ð")
+                {
+                    continue;
+                }
+                if (Bag_Word.data[i].getFlag == 0)
+                {
+                    // –½’†/‰ñ”ð
+                    GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Word>().WordGetCheck(InitPopList.WORD.SUB2, 4, 19);
+                    EventMng.SetChapterNum(103, SceneMng.SCENE.CONVERSATION);
+                    return true;
+                }
+            }
+        }
+
 
         return false;
     }

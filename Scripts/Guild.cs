@@ -9,21 +9,48 @@ public class Guild : HouseBase
 
     public override bool CheckEvent()
     {
+        int num = EventMng.GetChapterNum();
+
         // イベント発生
-        if (EventMng.GetChapterNum() == 1)
+        if (num == 1)
         {
             SceneMng.SetTimeGear(SceneMng.TIMEGEAR.NOON);   // 時間経過
             EventMng.SetChapterNum(2, SceneMng.SCENE.CONVERSATION);
             return true;
         }
-        else if (EventMng.GetChapterNum() == 7 && SceneMng.GetTimeGear() == SceneMng.TIMEGEAR.MORNING)
+        else if (num == 7 && SceneMng.GetTimeGear() == SceneMng.TIMEGEAR.MORNING)
         {
             // 時間帯を条件に入れないと、挨拶クエスト終了直後に発生する可能性が高い
+            //@ 「味方というワードをジャックからもらう」
+            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Word>().WordGetCheck(InitPopList.WORD.SUB1, 0, 13);// 味方
             EventMng.SetChapterNum(7, SceneMng.SCENE.CONVERSATION);
         }
-        else if (EventMng.GetChapterNum() == 10 && SceneMng.GetTimeGear() == SceneMng.TIMEGEAR.MORNING)
+        else if (num == 10 && SceneMng.GetTimeGear() == SceneMng.TIMEGEAR.MORNING)
         {
             EventMng.SetChapterNum(10, SceneMng.SCENE.CONVERSATION);
+        }
+        else
+        {
+            if (num < 15)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < Bag_Word.data.Length; i++)
+            {
+                if (Bag_Word.data[i].name != "防御力")
+                {
+                    continue;
+                }
+                if (Bag_Word.data[i].getFlag == 0)
+                {
+                    // 防御力
+                    GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Word>().WordGetCheck(InitPopList.WORD.SUB2, 3, 18);
+                    EventMng.SetChapterNum(104, SceneMng.SCENE.CONVERSATION);
+                    return true;
+                }
+            }
+
         }
         return false;
     }
@@ -99,6 +126,8 @@ public class Guild : HouseBase
                 case 14:// 現在の進行度が14で、クエスト4番を達成したら
                     if (questNum == 4)
                     {
+                        // 複数回
+                        GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Word>().WordGetCheck(InitPopList.WORD.HEAD, 1, 1);
                         SceneMng.SetTimeGear(SceneMng.TIMEGEAR.NOON);      // 時間経過
                         EventMng.SetChapterNum(14, SceneMng.SCENE.CONVERSATION);
                     }
@@ -106,6 +135,8 @@ public class Guild : HouseBase
                 case 17:// 現在の進行度が17で、クエスト5番を達成したら
                     if (questNum == 5)
                     {
+                        // 全体
+                        GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Word>().WordGetCheck(InitPopList.WORD.HEAD, 2, 2);
                         SceneMng.SetTimeGear(SceneMng.TIMEGEAR.NOON);      // 時間経過
                         EventMng.SetChapterNum(17, SceneMng.SCENE.CONVERSATION);
                     }
@@ -113,6 +144,8 @@ public class Guild : HouseBase
                 case 20:// 現在の進行度が20で、クエスト6番を達成したら
                     if (questNum == 6)
                     {
+                        // 即死
+                        GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Word>().WordGetCheck(InitPopList.WORD.SUB1_AND_SUB2, 3, 23);
                         SceneMng.SetTimeGear(SceneMng.TIMEGEAR.NOON);      // 時間経過
                         EventMng.SetChapterNum(20, SceneMng.SCENE.CONVERSATION);
                     }

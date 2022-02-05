@@ -7,6 +7,7 @@ public class TitleSceneMng : MonoBehaviour
 {
     [SerializeField]
     private GameObject LoadPrefab;  // 各リストを呼び出す
+
     private GameObject loadPrefab_;
 
     // 見栄えをよくするため（ゲーム起動後は非表示
@@ -138,6 +139,8 @@ public class TitleSceneMng : MonoBehaviour
 
     public void OnClickGameStart()
     {
+        GameObject.Find("Audio/SE_Audio").GetComponent<SEAudioMng>().OnceShotSE(0);
+
         zMoveCamera_.gameObject.SetActive(false);
         xMoveCamera_.gameObject.SetActive(false);
         StopCoroutine(MoveCamera());

@@ -97,10 +97,12 @@ public class UseItem : MonoBehaviour
         switch (itemNum)
         {
             case 0:    // HPポーション(小)
+                SceneMng.SetSE(9);
                 hpmpNum_ = (10, 0);
                 tmpFlg = true;
                 break;
             case 1:    // 毒消し
+                SceneMng.SetSE(10);
                 condition_ = CharaBase.CONDITION.POISON;
                 tmpFlg = true;
                 break;
@@ -110,14 +112,17 @@ public class UseItem : MonoBehaviour
                 SceneMng.SceneLoad((int)SceneMng.SCENE.UNIHOUSE);
                 break;
             case 3:    // 防御力アップ(単体)
+                SceneMng.SetSE(2);
                 buffExItemFlg_ = false;
                 tmpFlg = true;
                 buff_ = (3, -1);
                 break;
             case 4:    // 全体小ダメージ
+                SceneMng.SetSE(13);
                 GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(15);
                 break;
             case 5:    // 物理/魔法攻撃力アップ(単体)
+                SceneMng.SetSE(2);
                 buffExItemFlg_ = false;
                 tmpFlg = true;
                 buff_ = (1, 2);
@@ -139,18 +144,22 @@ public class UseItem : MonoBehaviour
                 }
                 break;
             case 7:    // 暗闇消し
+                SceneMng.SetSE(10);
                 condition_ = CharaBase.CONDITION.DARK;
                 tmpFlg = true;
                 break;
             case 8:    // MPポーション(小)
+                SceneMng.SetSE(9);
                 hpmpNum_ = (0, 10);
                 tmpFlg = true;
                 break;
             case 9:    // HPポーション(中)
+                SceneMng.SetSE(9);
                 hpmpNum_ = (40, 0);
                 tmpFlg = true;
                 break;
             case 10:    // 麻痺消し
+                SceneMng.SetSE(10);
                 condition_ = CharaBase.CONDITION.PARALYSIS;
                 tmpFlg = true;
                 break;
@@ -159,6 +168,7 @@ public class UseItem : MonoBehaviour
                 FieldMng.stopEncountTimeFlg = true;
                 break;
             case 12:    // 速度アップ(単体)
+                SceneMng.SetSE(2);
                 buffExItemFlg_ = false;
                 tmpFlg = true;
                 buff_ = (4, -1);
@@ -167,30 +177,37 @@ public class UseItem : MonoBehaviour
                 // 持っているだけで効果がでるから、ここに処理は書かない
                 break;
             case 14:    // 蘇生(最大HPの半分)
+                SceneMng.SetSE(9);
                 alive = "half";
                 tmpFlg = true;
                 break;
             case 15:    // HPポーション(大)
+                SceneMng.SetSE(9);
                 hpmpNum_ = (100, 0);
                 tmpFlg = true;
                 break;
             case 16:    // MPポーション(中)
+                SceneMng.SetSE(9);
                 hpmpNum_ = (0, 50);
                 tmpFlg = true;
                 break;
             case 17:    // 全体中ダメージ
+                SceneMng.SetSE(13);
                 GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(30);
                 break;
             case 18:    // 蘇生(HP全快)
+                SceneMng.SetSE(9);
                 alive = "all";
                 tmpFlg = true;
                 break;
                 // ここから下は大成功処理--------------------------------------------------
             case 19:    // HPポーション(小)
+                SceneMng.SetSE(9);
                 hpmpNum_ = (35, 0);
                 tmpFlg = true;
                 break;
             case 20:    // 毒消し
+                SceneMng.SetSE(10);
                 condition_ = CharaBase.CONDITION.POISON;
                 tmpFlg = true;
                 break;
@@ -200,14 +217,17 @@ public class UseItem : MonoBehaviour
                 SceneMng.SceneLoad((int)SceneMng.SCENE.UNIHOUSE);
                 break;
             case 22:    // 防御力アップ(単体)
+                SceneMng.SetSE(2);
                 buffExItemFlg_ = true;
                 tmpFlg = true;
                 buff_ = (3, -1);
                 break;
             case 23:    // 全体小ダメージ
+                SceneMng.SetSE(13);
                 GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(20);
                 break;
             case 24:    // 物理/魔法攻撃力アップ(単体)
+                SceneMng.SetSE(2);
                 buffExItemFlg_ = true;
                 tmpFlg = true;
                 buff_ = (1, 2);
@@ -229,18 +249,22 @@ public class UseItem : MonoBehaviour
                 }
                 break;
             case 26:    // 暗闇消し
+                SceneMng.SetSE(10);
                 condition_ = CharaBase.CONDITION.DARK;
                 tmpFlg = true;
                 break;
             case 27:    // MPポーション(小)
+                SceneMng.SetSE(9);
                 hpmpNum_ = (0, 35);
                 tmpFlg = true;
                 break;
             case 28:    // HPポーション(中)
+                SceneMng.SetSE(9);
                 hpmpNum_ = (65, 0);
                 tmpFlg = true;
                 break;
             case 29:    // 麻痺消し
+                SceneMng.SetSE(10);
                 condition_ = CharaBase.CONDITION.PARALYSIS;
                 tmpFlg = true;
                 break;
@@ -250,6 +274,7 @@ public class UseItem : MonoBehaviour
                 FieldMng.stopEncountTimeFlg = true;
                 break;
             case 31:    // 速度アップ(単体)
+                SceneMng.SetSE(2);
                 buffExItemFlg_ = true;
                 tmpFlg = true;
                 buff_ = (4, -1);
@@ -258,21 +283,26 @@ public class UseItem : MonoBehaviour
                 // 持っているだけで効果がでるから、ここに処理は書かない
                 break;
             case 33:    // 蘇生(最大HPの半分)
+                SceneMng.SetSE(9);
                 alive = "half";
                 tmpFlg = true;
                 break;
             case 34:    // HPポーション(大)
+                SceneMng.SetSE(9);
                 hpmpNum_ = (130, 0);
                 tmpFlg = true;
                 break;
             case 35:    // MPポーション(中)
+                SceneMng.SetSE(9);
                 hpmpNum_ = (0, 65);
                 tmpFlg = true;
                 break;
             case 36:    // 全体中ダメージ
+                SceneMng.SetSE(13);
                 GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(45);
                 break;
             case 37:    // 蘇生(HP全快)
+                SceneMng.SetSE(9);
                 alive = "all";
                 tmpFlg = true;
                 break;

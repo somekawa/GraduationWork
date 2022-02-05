@@ -26,6 +26,7 @@ public class OtherCollision : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.Space))
             {
+                SceneMng.SetSE(3);
                 Debug.Log(other.name);
                 Debug.Log("スペースキーを押下しました");
                 var nameCheck = other.name.Split('_');
@@ -46,15 +47,11 @@ public class OtherCollision : MonoBehaviour
                 }
             }
         }
-        else if (other.CompareTag("Chest"))
-        {
-            Debug.Log("宝箱と接触しました");
-        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Drop"))
+        if (other.CompareTag("Drop") || other.CompareTag("Chest"))
         {
             // 接触した瞬間
             if (infoImage_.gameObject.activeSelf == false)

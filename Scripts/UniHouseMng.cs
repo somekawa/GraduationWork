@@ -65,7 +65,7 @@ public class UniHouseMng : MonoBehaviour
         magicCreateMng.gameObject.SetActive(false);
 
         // ステータスアップを消すか判定する
-        if (!SceneMng.GetFinStatusUpTime())
+        if (!SceneMng.GetFinStatusUpTime().Item2)
         {
             for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
             {
@@ -104,6 +104,8 @@ public class UniHouseMng : MonoBehaviour
             return; // 休むボタンを押しても反応しないようにする
         }
 
+        SceneMng.SetSE(0);
+
         SceneMng.SetTimeGear(SceneMng.TIMEGEAR.MORNING);   // 時間経過
         Debug.Log("休むボタンが押下されました 料理効果がきれて体力回復します");
 
@@ -120,6 +122,7 @@ public class UniHouseMng : MonoBehaviour
 
     public void ClickAlchemyButton()
     {
+        SceneMng.SetSE(0);
         alchemyMng.gameObject.SetActive(true);
         uniHouseCanvas.gameObject.SetActive(false);
         alchemyMng.GetComponent<ItemCreateMng>().Init();
@@ -127,11 +130,13 @@ public class UniHouseMng : MonoBehaviour
     }
 
     public void ClickMagicCreateButton()
-    {    
+    {
         // 空のマテリアを1つ以上持っていたらワード合成ができる
         //if (0 < Bag_Materia.materiaState[Bag_Materia.emptyMateriaNum].haveCnt)
         //{
-            uniHouseCanvas.gameObject.SetActive(false);
+        SceneMng.SetSE(0);
+
+        uniHouseCanvas.gameObject.SetActive(false);
             magicCreateMng.gameObject.SetActive(true);
             magicCreateMng.GetComponent<MagicCreate>().Init();
       //  }

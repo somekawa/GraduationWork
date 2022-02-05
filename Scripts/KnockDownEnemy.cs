@@ -31,6 +31,12 @@ public class KnockDownEnemy : MonoBehaviour
             // 土
             bagWord_.WordGetCheck(InitPopList.WORD.ELEMENT_ATTACK, 2, 7);// 土
         }
+        else if(gameObject.name == "BossParty")
+        {
+            // Field2の中ボス
+            // 補助
+            bagWord_.WordGetCheck(InitPopList.WORD.ELEMENT_ASSIST, 0, 4);
+        }
         else if(gameObject.name == "PoisonSlime")
         {
             // メインクエスト「毒の霧を晴らして」をクリアにする。

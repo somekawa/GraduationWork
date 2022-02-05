@@ -284,13 +284,14 @@ public class BookStoreMng : MonoBehaviour
                     if (haveMoney_ < bookState_[i].price)
                     {
                         bookState_[i].btn.interactable = false;
+                        bookState_[i].checkBox.gameObject.SetActive(false);
                     }
                     else
                     {
                         bookState_[i].btn.interactable = true;
+                        bookState_[i].checkBox.gameObject.SetActive(true);
                         activeCnt_++;
                     }
-                    bookState_[i].checkBox.gameObject.SetActive(bookState_[i].btn.interactable);
                 }
             }
         }
@@ -311,6 +312,7 @@ public class BookStoreMng : MonoBehaviour
 
     public void OnClickBookCheckButton()
     {
+        SceneMng.SetSE(0);
         Debug.Log("本を見るボタンを押下しました");
         bookStoreCanvas_.SetActive(false);
         bookStoreUI.SetActive(true);
@@ -452,6 +454,8 @@ public class BookStoreMng : MonoBehaviour
 
     public void OnClickBuyBtn()
     {
+        SceneMng.SetSE(2);
+
         // お金の減少処理
         SceneMng.SetHaveMoney(SceneMng.GetHaveMoney() - totalPrice_);
         haveMoney_ = SceneMng.GetHaveMoney();

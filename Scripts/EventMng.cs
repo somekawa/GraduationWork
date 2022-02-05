@@ -4,7 +4,7 @@ public static class EventMng
 {
     // 自由に店に出入りしたいときは99とかいれとくといいかも。本来は0
     private static int chapterNum = 0;   // 現在のチャプター進行度(0からスタート)
-    private static int oldNum = 0;
+    private static int oldNum = -1;
 
     // チャプター進行度の更新
     // 読み返し機能を作成するときには引数部分に該当するチャプター番号を入れるようにする
@@ -23,9 +23,47 @@ public static class EventMng
         }
 
         bool tmpFlg = false;
-        if (num == 100)
+        //if (num == 100)
+        //{
+        //    // 全滅時の特殊会話時には、全滅前のチャプター番号を保存しておく
+        //    oldNum = chapterNum;
+        //    tmpFlg = true;
+
+        //    for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+        //    {
+        //        // バトルで死亡したまま終了していたときは、HP1の状態で立ち上がらせる
+        //        if (SceneMng.charasList_[i].GetDeathFlg())
+        //        {
+        //            SceneMng.charasList_[i].SetDeathFlg(false);
+        //            SceneMng.charasList_[i].SetHP(1);
+        //        }
+        //        SceneMng.charasList_[i].ButtleInit();
+        //    }
+        //}
+
+        //if (oldNum != 100 && num == 101)
+        //{
+        //    // さっきまでの会話が全滅時の特殊会話だったときは、番号を100の前に入れてたやつに戻す
+        //    chapterNum = oldNum;
+        //}
+        //else
+        //{
+        //    // 通常の会話処理
+        //    chapterNum = num;
+        //}
+
+        if (oldNum >= 0)
         {
-            // 全滅時の特殊会話時には、全滅前のチャプター番号を保存しておく
+            // さっきまでの会話が特殊会話だったときは、番号を前に入れてたやつに戻す
+            chapterNum = oldNum;
+            oldNum = -1;
+            SceneMng.SceneLoad((int)scene, tmpFlg);
+            return;
+        }
+
+        if (oldNum < 0 && num >= 100)
+        {
+            // 特殊会話時には、前のチャプター番号を保存しておく
             oldNum = chapterNum;
             tmpFlg = true;
 
@@ -41,16 +79,8 @@ public static class EventMng
             }
         }
 
-        if (oldNum != 100 && num == 101)
-        {
-            // さっきまでの会話が全滅時の特殊会話だったときは、番号を100の前に入れてたやつに戻す
-            chapterNum = oldNum;
-        }
-        else
-        {
-            // 通常の会話処理
-            chapterNum = num;
-        }
+        // 通常の会話処理
+        chapterNum = num;
 
         SceneMng.SceneLoad((int)scene, tmpFlg);
     }

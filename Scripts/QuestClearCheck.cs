@@ -74,6 +74,23 @@ public class QuestClearCheck : MonoBehaviour
         return orderQuestsList_;
     }
 
+    public static void CancelOrderQuest(int num)
+    {
+        for (int i = 0; i < orderQuestsList_.Count; i++)
+        {
+            // 削除番号と一致していたら
+            if (orderQuestsList_[i].Item1.name == num.ToString())
+            {
+                // 消したいクエストに一番最後の要素を移す
+                //(削除番号が0でリストの最後が2なら、2を0のあったところにコピーして、末尾の2を削除する方式)
+                orderQuestsList_[i] = orderQuestsList_[orderQuestsList_.Count - 1];
+                // 一番最後の要素を削除
+                orderQuestsList_.RemoveAt(orderQuestsList_.Count - 1);
+                break;
+            }
+        }
+    }
+
     public static void SetClearedQuestsList(int num)
     {
         for (int i = 0; i < clearedQuestsList_.Count; i++)

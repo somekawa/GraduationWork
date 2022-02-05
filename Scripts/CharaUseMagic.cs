@@ -189,7 +189,7 @@ public class CharaUseMagic : MonoBehaviour
 
     public int MPdecrease(Bag_Magic.MagicData magicData)
     {
-        return magicData.rate; // 消費MP情報
+        return magicData.mp; // 消費MP情報
     }
 
     public int GetHealPower()
@@ -316,12 +316,14 @@ public class CharaUseMagic : MonoBehaviour
                 {
                     // 反射魔法の時(同じエフェクトを使うから固定番号)
                     obj = assetBundle_.LoadAsset<GameObject>("0-0-1-2");
+                    SceneMng.SetSE(11);
                     //obj = Resources.Load("MagicPrefabs/0-0-1-2") as GameObject;
                 }
                 else
                 {
                     // 吸収魔法の時(同じエフェクトを使うから固定番号)
                     obj = assetBundle_.LoadAsset<GameObject>("0-0-1-3");
+                    SceneMng.SetSE(12);
                     //obj = Resources.Load("MagicPrefabs/0-0-1-3") as GameObject;
                 }
             }
@@ -347,11 +349,29 @@ public class CharaUseMagic : MonoBehaviour
             if (split[1] == 1.ToString() && split.Length == 4)
             {
                 // 敵へのデバフ魔法の時(同じエフェクトを使うから固定番号)
+                SceneMng.SetSE(4);
                 obj = assetBundle_.LoadAsset<GameObject>("0-1-1-1");
                 //obj = Resources.Load("MagicPrefabs/0-1-1-1") as GameObject;
             }
             else
             {
+                switch(elementNum_)
+                {
+                    case 2:
+                        SceneMng.SetSE(5);
+                        break;
+                    case 3:
+                        SceneMng.SetSE(6);
+                        break;
+                    case 4:
+                        SceneMng.SetSE(8);
+                        break;
+                    case 5:
+                        SceneMng.SetSE(7);
+                        break;
+                    default:
+                        break;
+                }
                 obj = assetBundle_.LoadAsset<GameObject>(magicPrefabNum_);
                 //obj = Resources.Load("MagicPrefabs/" + magicPrefabNum_) as GameObject;
             }
@@ -401,14 +421,17 @@ public class CharaUseMagic : MonoBehaviour
                 case 0:     // HP
                     info2 = "HP";
                     break;
-                case 1:     // 毒
-                    info2 = "毒";
+                case 5:     // 毒
+                    info4 += "(毒)";
                     break;
-                case 2:     // 暗闇
-                    info2 = "暗闇";
+                case 6:     // 暗闇
+                    info4 += "(暗闇)";
                     break;
-                case 3:     // 麻痺
-                    info2 = "麻痺";
+                case 7:     // 麻痺
+                    info4 += "(麻痺)";
+                    break;
+                case 8:     // 即死
+                    info4 += "(即死)";
                     break;
                 default:
                     Debug.Log("不明なsub2ワードです");

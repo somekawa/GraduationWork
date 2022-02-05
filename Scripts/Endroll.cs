@@ -125,7 +125,7 @@ public class Endroll : MonoBehaviour
         // キャラクター数分のfor文を回す
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
         {
-            saveCsvSc_.SaveData(SceneMng.GetCharasSettings(i));
+            saveCsvSc_.SaveData(SceneMng.GetCharasSettings(i),i);
         }
         saveCsvSc_.SaveEnd();
 

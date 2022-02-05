@@ -401,12 +401,38 @@ public class CharacterMng : MonoBehaviour
         {
             if(FieldMng.nowMode != FieldMng.MODE.FORCEDBUTTLE)
             {
-                buttleMng_.CallDeleteEnemy();
+                SetSE(0);
 
-                FieldMng.nowMode = FieldMng.MODE.SEARCH;
-                charMap_[CHARACTERNUM.UNI].gameObject.transform.position = buttleMng_.GetFieldPos();
+                // 逃走できるか判断する
+                var tmpSpeed = charasList_[(int)nowTurnChar_].Speed();
+                if (tmpSpeed * 5 < 60)
+                {
+                    // 逃走確率の最低値
+                    tmpSpeed = 60;
+                }
 
-                Debug.Log("Uniは逃げ出した");
+                tmpSpeed += charasList_[(int)nowTurnChar_].Luck();
+
+                int range = Random.Range(0, 100);
+
+                if(range <= tmpSpeed)
+                {
+                    buttleMng_.CallDeleteEnemy();
+
+                    FieldMng.nowMode = FieldMng.MODE.SEARCH;
+                    charMap_[CHARACTERNUM.UNI].gameObject.transform.position = buttleMng_.GetFieldPos();
+
+                    Debug.Log(range + "<=" + tmpSpeed + "で、成功したUniたちは逃げ出した");
+                }
+                else
+                {
+                    Debug.Log(range + ">" + tmpSpeed + "で、失敗したUniたちは逃げられない");
+
+                    // 逃げられないときは、敵のターンに回したい
+                    // 前のキャラの行動が終わったからターンを移す
+                    buttleMng_.SetMoveTurn(true);
+                }
+
             }
             else
             {
@@ -456,7 +482,9 @@ public class CharacterMng : MonoBehaviour
         // キャラ毎のモーションを呼ぶ
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if(setMagicObj_.activeSelf)    // 魔法コマンド選択中のとき
+            SetSE(0);
+
+            if (setMagicObj_.activeSelf)    // 魔法コマンド選択中のとき
             {
                 // 魔法コマンド選択中のとき
                 buttleAnounceText_.text = announceText_[1];
@@ -559,11 +587,24 @@ public class CharacterMng : MonoBehaviour
                                     {
                                         // nullのときは魔法を設定していないから透過する
                                         magicImage_[i].color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
+                                        // マークを非表示
+                                        magicImage_[i].transform.GetChild(0).gameObject.SetActive(false);
                                     }
                                     else
                                     {
                                         magicImage_[i].color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
                                         magicImage_[i].sprite = charasList_[(int)nowTurnChar_].GetMagicImage(i);
+
+                                        if(charasList_[(int)nowTurnChar_].GetMagicNum(i).rate == 2)
+                                        {
+                                            // 大成功の魔法だから、マークを表示する
+                                            magicImage_[i].transform.GetChild(0).gameObject.SetActive(true);
+                                        }
+                                        else
+                                        {
+                                            // 大成功の魔法だから、マークを表示する
+                                            magicImage_[i].transform.GetChild(0).gameObject.SetActive(false);
+                                        }
                                     }
                                 }
                             }
@@ -1218,6 +1259,7 @@ public class CharacterMng : MonoBehaviour
             {
                 Bag_Item.itemState[deathBstNoEffectItemNum_.Item1].haveCnt--;
                 Debug.Log("アイテムが即死を肩代わりしてくれた");
+                SetSE(11);
                 return;
             }
             else
@@ -1227,6 +1269,7 @@ public class CharacterMng : MonoBehaviour
                 {
                     Bag_Item.itemState[deathBstNoEffectItemNum_.Item2].haveCnt--;
                     Debug.Log("大成功アイテムが即死を肩代わりしてくれた");
+                    SetSE(11);
                     return;
                 }
             }
@@ -1249,9 +1292,10 @@ public class CharacterMng : MonoBehaviour
             // Chara.csに死亡情報を入れる
             charasList_[num].SetDeathFlg(true);
         }
+
+        SetSE(16);
     }
 
-    //@ 不足処理あり(死亡時の回復をnoeffectにしたほうがいい)
     public void SetCharaArrowActive(bool allflag, bool randFlg,int whatHeal,int sub3Num)
     {
         // 誰か1人をtrueにする場合は、上から順なので0番の人をtrueにする
@@ -1321,6 +1365,7 @@ public class CharacterMng : MonoBehaviour
             {
                 if (Input.GetKeyDown(KeyCode.H))
                 {
+                    SetSE(0);
                     // ユニより数値が小さくならないようにする
                     if (--selectChara < CHARACTERNUM.UNI)
                     {
@@ -1336,6 +1381,7 @@ public class CharacterMng : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.J))
                 {
+                    SetSE(0);
                     // ジャックより数値が大きくならないようにする
                     if (++selectChara > CHARACTERNUM.JACK)
                     {
@@ -1357,6 +1403,8 @@ public class CharacterMng : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                SetSE(0);
+
                 if (!allflag)    // 単体回復
                 {
                     // enePosとtargetNumは入れなくてよい(charaPos_に発動相手の座標を入れるようにする)
@@ -1370,6 +1418,7 @@ public class CharacterMng : MonoBehaviour
                     {
                         if (whatHeal == 0)   // HP回復
                         {
+                            SetSE(9);
                             // キャラのHPを増やす(スライドバー変更)
                             StartCoroutine(eachCharaData_[(int)selectChara].charaHPMPMap.Item1.MoveSlideBar(charasList_[(int)selectChara].HP() + useMagic_.GetHealPower(), charasList_[(int)selectChara].HP()));
                             // 内部数値の変更を行う
@@ -1377,8 +1426,9 @@ public class CharacterMng : MonoBehaviour
                         }
                         else
                         {
+                            SetSE(10);
                             // 毒・暗闇・麻痺回復
-                            charasList_[(int)selectChara].ConditionReset(false, whatHeal);
+                            charasList_[(int)selectChara].ConditionReset(false, whatHeal-3);
                             badStatusMng_.SetBstIconImage((int)selectChara, -1, charaBstIconImage_, charasList_[(int)selectChara].GetBS(), true);
                         }
                     }
@@ -1404,6 +1454,7 @@ public class CharacterMng : MonoBehaviour
 
                         if (whatHeal == 0)
                         {
+                            SetSE(9);
                             // キャラのHPを増やす(スライドバー変更)
                             StartCoroutine(eachCharaData_[array[i]].charaHPMPMap.Item1.MoveSlideBar(charasList_[array[i]].HP() + useMagic_.GetHealPower(), charasList_[array[i]].HP()));
                             // 内部数値の変更を行う
@@ -1412,8 +1463,9 @@ public class CharacterMng : MonoBehaviour
                         }
                         else
                         {
+                            SetSE(10);
                             // 毒・暗闇・麻痺回復
-                            charasList_[array[i]].ConditionReset(false, whatHeal);
+                            charasList_[array[i]].ConditionReset(false, whatHeal-3);
                             badStatusMng_.SetBstIconImage(array[i], -1, charaBstIconImage_, charasList_[array[i]].GetBS(), true);
                             Debug.Log((CHARACTERNUM)array[i] + "の状態異常を回復しました");
                         }
@@ -1470,6 +1522,7 @@ public class CharacterMng : MonoBehaviour
             {
                 if (Input.GetKeyDown(KeyCode.H))
                 {
+                    SetSE(0);
                     // ユニより数値が小さくならないようにする
                     if (--selectChara < CHARACTERNUM.UNI)
                     {
@@ -1485,6 +1538,7 @@ public class CharacterMng : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(KeyCode.J))
                 {
+                    SetSE(0);
                     // ジャックより数値が大きくならないようにする
                     if (++selectChara > CHARACTERNUM.JACK)
                     {
@@ -1506,6 +1560,7 @@ public class CharacterMng : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                SetSE(0);
                 if (!allflag)    // 単体バフ
                 {
                     // enePosとtargetNumは入れなくてよい(charaPos_に発動相手の座標を入れるようにする)
@@ -1523,6 +1578,7 @@ public class CharacterMng : MonoBehaviour
                             var buffnum = charasList_[(int)selectChara].SetBuff(useMagic_.GetTailNum(), whatBuff);
                             if (!buffnum.Item2)
                             {
+                                SetSE(2);
                                 action((int)selectChara, buffnum.Item1);
                             }
                         }
@@ -1569,6 +1625,7 @@ public class CharacterMng : MonoBehaviour
                             var buffnum = charasList_[array[i]].SetBuff(useMagic_.GetTailNum(), whatBuff);
                             if(!buffnum.Item2)
                             {
+                                SetSE(2);
                                 action(array[i], buffnum.Item1);
                             }
                         }

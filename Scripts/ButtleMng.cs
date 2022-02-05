@@ -38,12 +38,30 @@ public class ButtleMng : MonoBehaviour
     private int[] saveEnemyNum_ = new int[5];
     private bool bossFlag_ = false;
 
+    private GameObject escapeImageObj_;
+    private bool escapeMissFlg_ = false;
+    private float escapeMissImageCnt = 0.0f;
+
+    private List<GameObject> subjugationObj_ = new List<GameObject>();
+
     void Start()
     {
         characterMng_ = GameObject.Find("CharacterMng").GetComponent<CharacterMng>();
         enemyInstanceMng_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>();
+        escapeImageObj_ = buttleUICanvas.transform.Find("EscapeMiss").gameObject;
         buttleUICanvas.gameObject.SetActive(false);
         buttleResult_ = gameObject.GetComponent<ButtleResult>();
+
+        subjugationObj_.Clear();
+        GameObject[] tagobjs = GameObject.FindGameObjectsWithTag("Quest");
+        for(int i = 0; i < tagobjs.Length; i++)
+        {
+            // 討伐数が決まっていて、フィールド番号が一致しているものを保存する
+            if(tagobjs[i].GetComponent<CompleteQuest>().GetNeedSubjugation() > 0)
+            {
+                subjugationObj_.Add(tagobjs[i]);
+            }
+        }
     }
 
     void Update()
@@ -56,6 +74,22 @@ public class ButtleMng : MonoBehaviour
             buttleUICanvas.gameObject.SetActive(false);
             fieldUICanvas.gameObject.SetActive(true);
             return;
+        }
+
+        // 逃走失敗時に表示されるテロップ
+        if(escapeMissFlg_)
+        {
+            if(escapeMissImageCnt < 1.5f)
+            {
+                escapeMissImageCnt += Time.deltaTime;
+                escapeImageObj_.SetActive(true);
+            }
+            else
+            {
+                escapeImageObj_.SetActive(false);
+                escapeMissImageCnt = 0.0f;
+                escapeMissFlg_ = false;
+            }
         }
 
         // 戦闘開始時に設定される項目
@@ -155,7 +189,7 @@ public class ButtleMng : MonoBehaviour
                     CallDeleteEnemy();
 
                     // リザルト処理： エネミーの数、エネミーの番号（配列）
-                    buttleResult_.DropCheck(EneSelObj_.childCount, saveEnemyNum_, bossFlag_);
+                    buttleResult_.DropCheck(EneSelObj_.childCount, saveEnemyNum_, bossFlag_, subjugationObj_);
                     resultFlg_ = true;
                     characterMng_.SetCharaFieldPos();
                 }
@@ -170,7 +204,7 @@ public class ButtleMng : MonoBehaviour
     }
 
     // 行動が終わったときに呼び出されて自動で加算される
-    public void SetMoveTurn()
+    public void SetMoveTurn(bool escapeMissFlag = false)
     {
         // 加算値がリストの上限を越えたら0に戻す
         if (++moveTurnCnt_ > moveTurnList_.Count - 1)
@@ -180,6 +214,18 @@ public class ButtleMng : MonoBehaviour
 
         // 行動が切り替わる毎に、敵の状態を確認する
         lastEnemyFlg_ = characterMng_.GetLastEnemyToAttackFlg();
+
+        if(escapeMissFlag)
+        {
+            escapeMissFlg_ = true;
+            while (moveTurnList_[moveTurnCnt_].Item2 == "Uni" || moveTurnList_[moveTurnCnt_].Item2 == "Jack")
+            {
+                if (++moveTurnCnt_ > moveTurnList_.Count - 1)
+                {
+                    moveTurnCnt_ = 0;
+                }
+            }
+        }
     }
 
     public void SetDamageNum(int num)

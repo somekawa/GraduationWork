@@ -161,6 +161,8 @@ public class WarpTown : MonoBehaviour
                 speeds_[1] += 10.0f * Time.deltaTime;            // 右回転
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
+                    SceneMng.SetSE(0);
+
                     // ワープ準備
                     warpFieldScript_.SetWarpNowFlag(true);
                     Debug.Log("trueにしました");
@@ -200,6 +202,7 @@ public class WarpTown : MonoBehaviour
             {
                 if (warpNum_ < (int)warp.FIELD)
                 {
+                    SceneMng.SetSE(1);
                     warpNum_++;      // 右に移動
                 }
             }
@@ -207,6 +210,7 @@ public class WarpTown : MonoBehaviour
             {
                 if ((int)warp.HOUSE < warpNum_)
                 {
+                    SceneMng.SetSE(1);
                     warpNum_--;    // 左に移動
                 }
             }
@@ -228,6 +232,8 @@ public class WarpTown : MonoBehaviour
             // 行先決定時
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                SceneMng.SetSE(0);
+
                 if (warpNum_ == (int)warp.FIELD)
                 {
                     // フィールド選択時

@@ -27,6 +27,8 @@ public class SaveLoadCSV : MonoBehaviour
     List<string[]> csvDatas = new List<string[]>(); // CSVの中身を入れるリスト;
     List<string[]> bookCsvDatas_ = new List<string[]>(); // CSVの中身を入れるリスト;
 
+    private int[] tmpStatus = new int[8];
+
     // 書き込み始めに呼ぶ
     public void SaveStart(SAVEDATA saveData)
     {
@@ -59,7 +61,7 @@ public class SaveLoadCSV : MonoBehaviour
             Debug.Log("Book,古いデータを削除してファイル書き込み");
 
             // ステータスの項目見出し
-            string[] s1 = {"Number", "Name", "ReadCheck" };
+            string[] s1 = { "Number", "Name", "ReadCheck" };
             string s2 = string.Join(",", s1);
             sw.WriteLine(s2);
         }
@@ -70,7 +72,7 @@ public class SaveLoadCSV : MonoBehaviour
     }
 
     // キャラのステータスを引数でいれて書き込みをする
-    public void SaveData(CharaBase.CharacterSetting set)
+    public void SaveData(CharaBase.CharacterSetting set,int num)
     {
         // 実際のステータス値
         string[] data = { set.name, set.Level.ToString(),set.HP.ToString(),set.maxHP.ToString(),set.MP.ToString(),set.maxMP.ToString(),
@@ -81,6 +83,9 @@ public class SaveLoadCSV : MonoBehaviour
                           set.CharacterExp.ToString(),set.CharacterMaxExp.ToString(),set.CharacterSumExp.ToString()};
         Debug.Log(set.name + set.Level.ToString() + set.HP.ToString() + set.maxHP.ToString() + set.MP.ToString() + set.maxMP.ToString());        string write = string.Join(",", data);
         sw.WriteLine(write);
+
+        // 消した上昇分を戻す
+        SceneMng.charasList_[num].SetStatusUpByCook(SceneMng.charasList_[num].GetStatusUpByCook(false),true);
     }
 
     // 「進行度,所持金,クエストのクリア状態,宝箱と強制戦闘壁の取得とクリア状態」を保存する
@@ -158,23 +163,41 @@ public class SaveLoadCSV : MonoBehaviour
         {
             sw.WriteLine(string.Join("\n", pair.Item1.ToString() + "," + pair.Item2.ToString()));
         }
+
+        // 料理効果時間のセーブ
+        sw.WriteLine(string.Join("\n", "StatusUpFinTime"));
+        if (SceneMng.GetFinStatusUpTime().Item2)
+        {
+            sw.WriteLine(string.Join("\n", (int)SceneMng.GetFinStatusUpTime().Item1));
+        }
+
+        // 時間帯のセーブ
+        sw.WriteLine(string.Join("\n", "TimeGear"));
+        sw.WriteLine(string.Join("\n", SceneMng.GetTimeGear()));
+
+        // 料理のステータス上昇値
+        sw.WriteLine(string.Join("\n", "StatusUpChara"));
+        sw.WriteLine(string.Join("\n", SceneMng.charasList_[0].GetStatusUpByCook(true)));
+
+        SceneMng.charasList_[0].DeleteStatusUpByCook(true);
+        SceneMng.charasList_[1].DeleteStatusUpByCook(true);
     }
 
     // NewGameの際にbookData.csvの初期化をする
     public void NewGameInit()
     {
+        // その他データのセーブ
+        SaveStart(SAVEDATA.OTHER);
+        OtherSaveData();
+        SaveEnd();
+
         // キャラステータス
         SaveStart(SAVEDATA.CHARACTER);
         // キャラクター数分のfor文を回す
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
         {
-            SaveData(SceneMng.GetCharasSettings(i));
+            SaveData(SceneMng.GetCharasSettings(i),i);
         }
-        SaveEnd();
-
-        // その他データのセーブ
-        SaveStart(SAVEDATA.OTHER);
-        OtherSaveData();
         SaveEnd();
 
         // Book
@@ -209,7 +232,6 @@ public class SaveLoadCSV : MonoBehaviour
 
             for (int i = 0; i < bookname_.Count; i++)
             {
-                BookStoreMng.bookState_[i].number = i;
                 BookStoreMng.bookState_[i].bookName = bookname_[i];
                 BookStoreMng.bookState_[i].readFlag = 0;
             }
@@ -247,7 +269,7 @@ public class SaveLoadCSV : MonoBehaviour
             // キャラクター数分のfor文を回す
             for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
             {
-                //// 一時変数に入れてからじゃないとsetに入れられない
+                // 一時変数に入れてからじゃないとsetに入れられない
                 int[] tmpArray = { int.Parse(csvDatas[i + 1][12]),
                                 int.Parse(csvDatas[i + 1][13]),
                                 int.Parse(csvDatas[i + 1][14]),
@@ -257,15 +279,15 @@ public class SaveLoadCSV : MonoBehaviour
                 {
                     name = csvDatas[i + 1][0],
                     Level = int.Parse(csvDatas[i + 1][1]),
-                    HP = int.Parse(csvDatas[i + 1][2]),
-                    maxHP = int.Parse(csvDatas[i + 1][3]),
-                    MP = int.Parse(csvDatas[i + 1][4]),
-                    maxMP = int.Parse(csvDatas[i + 1][5]),
-                    Attack = int.Parse(csvDatas[i + 1][6]),
-                    MagicAttack = int.Parse(csvDatas[i + 1][7]),
-                    Defence = int.Parse(csvDatas[i + 1][8]),
-                    Speed = int.Parse(csvDatas[i + 1][9]),
-                    Luck = int.Parse(csvDatas[i + 1][10]),
+                    HP = int.Parse(csvDatas[i + 1][2]) + tmpStatus[5],
+                    maxHP = int.Parse(csvDatas[i + 1][3]) + tmpStatus[5],
+                    MP = int.Parse(csvDatas[i + 1][4]) + tmpStatus[6],
+                    maxMP = int.Parse(csvDatas[i + 1][5]) + tmpStatus[6],
+                    Attack = int.Parse(csvDatas[i + 1][6]) + tmpStatus[0],
+                    MagicAttack = int.Parse(csvDatas[i + 1][7]) + tmpStatus[1],
+                    Defence = int.Parse(csvDatas[i + 1][8]) + tmpStatus[2],
+                    Speed = int.Parse(csvDatas[i + 1][9]) + tmpStatus[3],
+                    Luck = int.Parse(csvDatas[i + 1][10]) + tmpStatus[4],
                     AnimMax = float.Parse(csvDatas[i + 1][11]),
                     Magic = tmpArray,
                 };
@@ -353,7 +375,31 @@ public class SaveLoadCSV : MonoBehaviour
                 }
                 else if (texts[i] == "ForcedButtle" || texts[i] == "ForcedButtle\r")
                 {
-                    CommonLoad(i + 1, texts, FieldMng.forcedButtleWallList,"");
+                    CommonLoad(i + 1, texts, FieldMng.forcedButtleWallList, "StatusUpFinTime");
+                }
+                else if (texts[i] == "StatusUpFinTime" || texts[i] == "StatusUpFinTime\r")
+                {
+                    if (texts[i+1] != "TimeGear" && texts[i+1] != "TimeGear\r")
+                    {
+                        SceneMng.SetFinStatusUpTime(int.Parse(texts[i + 1]), true);
+                    }
+                }
+                else if(texts[i] == "TimeGear" || texts[i] == "TimeGear\r")
+                {
+                    string a = texts[i+1];
+
+                    if(a.Contains("\r"))
+                    {
+                        a = a.Substring(0, a.IndexOf("\r"));
+                    }
+
+                    var tmp = (SceneMng.TIMEGEAR)Enum.Parse(typeof(SceneMng.TIMEGEAR), a);
+                    SceneMng.SetTimeGear(tmp);
+                }
+                else if (texts[i] == "StatusUpChara" || texts[i] == "StatusUpChara\r")
+                {
+                    int[] tmp = { int.Parse(texts[i + 1]), int.Parse(texts[i + 2]), int.Parse(texts[i + 3]), int.Parse(texts[i + 4]), int.Parse(texts[i + 5]), int.Parse(texts[i + 6]), int.Parse(texts[i + 7]), 0 };
+                    tmpStatus = tmp;    // キャラデータ確定まで一時保存
                 }
                 else
                 {
@@ -380,9 +426,7 @@ public class SaveLoadCSV : MonoBehaviour
                 BookStoreMng.bookState_ = new BookStoreMng.BookData[texts.Length - 1];  // 項目の行を-1する
             }
 
-            //int maxCnt = 0;
-            //// レシピ本があるタイミングで表示する本を進行に合わせて区切る
-            //int[] boolActiveTiming_ = new int[5] { 5, 10, 16, 22, 28 };
+            // レシピ本があるタイミングで表示する本を進行に合わせて区切る
             for (int i = 0; i < 32; i++)
             {
                 // イベント進行具合のMaxだと進行途中でロードするときにエラーする可能性があるため
@@ -391,28 +435,6 @@ public class SaveLoadCSV : MonoBehaviour
                 BookStoreMng.bookState_[i].bookName = bookCsvDatas_[i + 1][1];
                 BookStoreMng.bookState_[i].readFlag = int.Parse(bookCsvDatas_[i + 1][2]);
             }
-
-            //if (19 < EventMng.GetChapterNum())
-            //{
-            //    maxCnt = boolActiveTiming_[4];
-            //}
-            //else if (16 < EventMng.GetChapterNum())
-            //{
-            //    maxCnt = boolActiveTiming_[3];
-            //}
-            //else if (13 < EventMng.GetChapterNum())
-            //{
-            //    maxCnt = boolActiveTiming_[2];
-            //}
-            //else if (8 < EventMng.GetChapterNum())
-            //{
-            //    maxCnt = boolActiveTiming_[1];
-            //}
-            //else if (0 < EventMng.GetChapterNum())
-            //{
-            //    maxCnt = boolActiveTiming_[0];
-            //}
-
         }
     }
 
@@ -469,5 +491,10 @@ public class SaveLoadCSV : MonoBehaviour
         // set.sprite.ToString() 
         string write = string.Join(",", data);
         sw.WriteLine(write);
+    }
+
+    public int[] StatusNum()
+    {
+        return tmpStatus;
     }
 }

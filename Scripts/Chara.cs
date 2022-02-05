@@ -14,6 +14,8 @@ public class Chara : CharaBase,InterfaceButtle
     private bool deathFlg_ = false;                 // 死亡状態か確認する変数
 
     private int[] statusUp = new int[8];            // 一時アップの数値を保存する用
+    private int[] saveKeep_ = new int[8];           // セーブ時に、一時アップの数字を避難させる用
+
     private readonly int[] statusMap_ = new int[4];
     private Dictionary<int, (int, int)> buffMap_
         = new Dictionary<int, (int, int)>();        // バフ後の値とターン数を管理する<ワード順,(効果値,バフターン数)>
@@ -37,10 +39,13 @@ public class Chara : CharaBase,InterfaceButtle
         set_ = GetSetting();  // CharaBase.csからGet関数で初期設定する
 
         // 数字の初期化
-        for(int i = 0; i < statusUp.Length; i++)
+        for (int i = 0; i < statusUp.Length; i++)
         {
+            saveKeep_[i] = 0;
             statusUp[i] = 0;
         }
+
+        SetStatusUpByCook(GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>().StatusNum(), true);
     }
 
     public bool Attack()
@@ -303,6 +308,8 @@ public class Chara : CharaBase,InterfaceButtle
         set_.Level = set.Level;
         set_.HP = set.HP;
         set_.MP = set.MP;
+        set_.maxHP = set.maxHP;
+        set_.maxMP = set.maxMP;
         set_.Attack = set.Attack;
         set_.MagicAttack = set.MagicAttack;
         set_.Defence = set.Defence;
@@ -341,7 +348,19 @@ public class Chara : CharaBase,InterfaceButtle
         }
     }
 
-    public void DeleteStatusUpByCook()
+    public int[] GetStatusUpByCook(bool flag)
+    {
+        if(flag)
+        {
+            return statusUp;
+        }
+        else
+        {
+            return saveKeep_;
+        }
+    }
+
+    public void DeleteStatusUpByCook(bool loadFlag = false)
     {
         // 一時アップ分、各ステータスからマイナスする
         set_.Attack -= statusUp[0];
@@ -355,10 +374,22 @@ public class Chara : CharaBase,InterfaceButtle
         set_.HP -= statusUp[5];
         set_.MP -= statusUp[6];
 
-        // 一時アップの数字を初期化する
-        for (int i = 0; i < statusUp.Length; i++)
+        if(loadFlag)
         {
-            statusUp[i] = 0;
+            // 保存を別にうつして、一時アップの数字を初期化する
+            for (int i = 0; i < statusUp.Length; i++)
+            {
+                saveKeep_[i] = statusUp[i];
+                statusUp[i] = 0;
+            }
+        }
+        else
+        {
+            // 一時アップの数字を初期化する
+            for (int i = 0; i < statusUp.Length; i++)
+            {
+                statusUp[i] = 0;
+            }
         }
     }
 
@@ -491,6 +522,8 @@ public class Chara : CharaBase,InterfaceButtle
             set_.condition[(int)CONDITION.NON - 1].Item2 = false;
             Debug.Log("キャラは状態異常にかかった");
         }
+
+        Debug.Log("キャラは状態異常にかからなかった");
     }
 
     public override (CONDITION, bool)[] GetBS()

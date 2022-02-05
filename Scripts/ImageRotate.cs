@@ -62,12 +62,14 @@ public class ImageRotate : MonoBehaviour
         // キーによって、回転方向を決定する
         if (Input.GetKeyDown(KeyCode.J))
         {
+            SceneMng.SetSE(1);
             // 右回転
             targetRotate_ += 90.0f;
             rotateDir_ = DIR.RIGHT;
         }
         else if (Input.GetKeyDown(KeyCode.H))
         {
+            SceneMng.SetSE(1);
             // 左回転
             targetRotate_ -= 90.0f;
             rotateDir_ = DIR.LEFT;

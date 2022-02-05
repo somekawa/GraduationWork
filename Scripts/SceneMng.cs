@@ -47,6 +47,8 @@ public class SceneMng : MonoBehaviour
     // キャラオブジェクトを要素としてアタッチできるようにしておく
     public List<GameObject> charaObjList;
 
+    private static SEAudioMng seAudio_;
+
     // キーをキャラ識別enum,値を(キャラ識別に対応した)キャラオブジェクトで作ったmap
     public static Dictionary<CHARACTERNUM, GameObject> charMap_;
     public static List<Chara> charasList_ = new List<Chara>();          // Chara.csをキャラ毎にリスト化する
@@ -235,6 +237,8 @@ public class SceneMng : MonoBehaviour
             return;
         }
 
+        //GameObject.Find("Uni") = false;
+
         //@ ここでcharasList_のステータス値をcharasDataに避難させる？ 
         CharaData.SetCharaData(0,charasList_[0].GetCharaSetting());
         CharaData.SetCharaData(1,charasList_[1].GetCharaSetting());
@@ -273,10 +277,12 @@ public class SceneMng : MonoBehaviour
     {
         if (dayTime > TIMEGEAR.NIGHT) // 今が夜なら、朝が入るようにする
         {
+            SetSE(1);
             timeGrar_ = TIMEGEAR.MORNING;
         }
         else
         {
+            SetSE(1);
             timeGrar_ = dayTime;
         }
 
@@ -307,27 +313,52 @@ public class SceneMng : MonoBehaviour
     }
 
     // 料理効果が切れる時刻を保存する
-    public static void SetFinStatusUpTime()
+    public static void SetFinStatusUpTime(int num = -1,bool loadFlag = false)
     {
-        // 2つ先の時刻を設定する
-        var tmpNum = (int)timeGrar_ + 2;
-
-        // 2つ先の時刻が夜を越えた数字になったら
-        if(tmpNum > (int)TIMEGEAR.NIGHT)
+        if(loadFlag)
         {
-            // 越えた数字から4を引けばいい
-            tmpNum -= 4;
+            // 計算した数字やそのままの数字を代入して設定する
+            finStatusUpTime_ = ((TIMEGEAR)num, true);
+            GameObject.Find("DontDestroyCanvas/TimeGear/CookPowerIcon").GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+            Debug.Log("料理効果が切れるのが、" + finStatusUpTime_ + "に設定されました");
         }
+        else
+        {
+            // 2つ先の時刻を設定する
+            var tmpNum = (int)timeGrar_ + 2;
 
-        // 計算した数字やそのままの数字を代入して設定する
-        finStatusUpTime_ = ((TIMEGEAR)tmpNum,true);
+            // 2つ先の時刻が夜を越えた数字になったら
+            if (tmpNum > (int)TIMEGEAR.NIGHT)
+            {
+                // 越えた数字から4を引けばいい
+                tmpNum -= 4;
+            }
 
-        Debug.Log("料理効果が切れるのが、" + finStatusUpTime_+ "に設定されました");
+            // 計算した数字やそのままの数字を代入して設定する
+            finStatusUpTime_ = ((TIMEGEAR)tmpNum, true);
+            Debug.Log("料理効果が切れるのが、" + finStatusUpTime_ + "に設定されました");
+        }
     }
 
     // 料理効果が切れたかフラグを取得する
-    public static bool GetFinStatusUpTime()
+    public static (TIMEGEAR,bool) GetFinStatusUpTime()
     {
-        return finStatusUpTime_.Item2;
+        return finStatusUpTime_;
+    }
+
+    public static void SetSE(int num)
+    {
+        if(seAudio_ == null)
+        {
+            if(GameObject.Find("Audio/SE_Audio"))
+            {
+                seAudio_ = GameObject.Find("Audio/SE_Audio").GetComponent<SEAudioMng>();
+            }
+            else
+            {
+                seAudio_ = GameObject.Find("FieldMng/SE_Audio").GetComponent<SEAudioMng>();
+            }
+        }
+        seAudio_.OnceShotSE(num);
     }
 }

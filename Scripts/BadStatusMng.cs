@@ -25,10 +25,22 @@ public class BadStatusMng : MonoBehaviour
                             var enemy = (Enemy)(object)obj;
                             int damage = (int)(enemy.MaxHP() * 0.2f);
 
-                            // 現在HP < 毒ダメージのときは、現在HP-1した値をダメージとする(これで絶対HPが1残る)
+                            // 現在HP < 毒ダメージのときは、HPを1残すように削る
                             if(enemy.HP() < damage)
                             {
-                                damage = enemy.HP() - 1;
+                                bool tmpFlg = false;
+                                damage = 0;
+                                while(!tmpFlg)
+                                {
+                                    if(enemy.HP() - damage > 1)
+                                    {
+                                        damage++;
+                                    }
+                                    else
+                                    {
+                                        tmpFlg = true;
+                                    }
+                                }
                             }
 
                             StartCoroutine(hpmpBar.MoveSlideBar(enemy.HP() - damage, enemy.HP()));
@@ -36,17 +48,29 @@ public class BadStatusMng : MonoBehaviour
                             enemy.SetHP(enemy.HP() - damage);
 
                             Debug.Log(enemy.Name() + "は、毒でHPを" + damage + "減らします");
-
+                            SceneMng.SetSE(16);
                         }
                         else // キャラ
                         {
                             var chara = (Chara)(object)obj;
                             int damage = (int)(chara.MaxHP() * 0.2f);
 
-                            // 現在HP < 毒ダメージのときは、現在HP-1した値をダメージとする(これで絶対HPが1残る)
+                            // 現在HP < 毒ダメージのときは、HPを1残すように削る
                             if (chara.HP() < damage)
                             {
-                                damage = chara.HP() - 1;
+                                bool tmpFlg = false;
+                                damage = 0;
+                                while (!tmpFlg)
+                                {
+                                    if (chara.HP() - damage > 1)
+                                    {
+                                        damage++;
+                                    }
+                                    else
+                                    {
+                                        tmpFlg = true;
+                                    }
+                                }
                             }
 
                             StartCoroutine(hpmpBar.MoveSlideBar(chara.HP() - damage, chara.HP()));
@@ -54,6 +78,7 @@ public class BadStatusMng : MonoBehaviour
                             chara.SetHP(chara.HP() - damage);
 
                             Debug.Log(chara.Name() + "は、毒でHPを" + damage + "減らします");
+                            SceneMng.SetSE(16);
                         }
                         break;
                     default:
@@ -157,6 +182,8 @@ public class BadStatusMng : MonoBehaviour
     {
         if (!deleteFlg) // アイコンを追加する
         {
+            SceneMng.SetSE(4);
+
             // 状態異常中のアイコンを設定する
             var obj = gameobj[num];
             for (int f = 0; f < obj.transform.childCount; f++)

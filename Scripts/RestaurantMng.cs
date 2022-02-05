@@ -152,6 +152,7 @@ public class RestaurantMng : MonoBehaviour
     // 「料理を注文する」のボタン処理
     public void OnClickOrderButton()
     {
+        SceneMng.SetSE(0);
         ienumerator_ = null;
         ienumerator_ = Motion();
         StartCoroutine(ienumerator_);
@@ -170,7 +171,7 @@ public class RestaurantMng : MonoBehaviour
         Debug.Log("注文ボタンを押下しました");
 
         // フラグがtrueなら食べれないようにする
-        if(SceneMng.GetFinStatusUpTime())
+        if(SceneMng.GetFinStatusUpTime().Item2)
         {
             Debug.Log("お腹がいっぱいで食べられないヨ！！");
             return;
@@ -189,6 +190,8 @@ public class RestaurantMng : MonoBehaviour
         // 素材が要求される料理かどうかで処理を分ける
         if (tmppop.needFood == "str")
         {
+            SceneMng.SetSE(2);
+
             // 必要素材がないとき
 
             // お金の減少処理
@@ -234,6 +237,8 @@ public class RestaurantMng : MonoBehaviour
 
             if (isCanEatFlg)
             {
+                SceneMng.SetSE(2);
+
                 // 素材が足りる
                 Debug.Log("素材が足りる");
 

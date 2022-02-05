@@ -49,10 +49,12 @@ public class EnemySelect : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.J))
             {
+                SceneMng.SetSE(0);
                 selectKey_ = SelectKey.UP;
             }
             else if (Input.GetKeyDown(KeyCode.H))
             {
+                SceneMng.SetSE(0);
                 selectKey_ = SelectKey.DOWN;
             }
             else
@@ -312,6 +314,7 @@ public class EnemySelect : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.T))
         {
+            SceneMng.SetSE(0);
             SetActive(false);
             return false;
         }

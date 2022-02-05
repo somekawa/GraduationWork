@@ -30,7 +30,7 @@ public class WordList_importer : AssetPostprocessor
 
                 foreach (string sheetName in sheetNames)
                 {
-                    var exportPath = "Assets/ExcelData/" + sheetName + ".asset";
+                    var exportPath = "Assets/Resources/WordList/" + sheetName + ".asset";
                     
                     // check scriptable object
                     var data = (WordList)AssetDatabase.LoadAssetAtPath(exportPath, typeof(WordList));

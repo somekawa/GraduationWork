@@ -196,16 +196,6 @@ public class MagicCreate : MonoBehaviour
 
     public void Init()
     {
-
-        GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
-        GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
-        GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
-        GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
-
-
-
-
-
         magicCreateParent = transform.Find("ScrollView/Viewport/WordParent").GetComponent<RectTransform>();
         // ワードの最大個数を取得
         for (int i = 0; i < (int)InitPopList.WORD.INFO; i++)
@@ -225,7 +215,7 @@ public class MagicCreate : MonoBehaviour
         // 作成開始ボタン
         createBtn_ = transform.Find("InfoMng/CreateBtn").GetComponent<Button>();
         createBtn_.interactable = false;
-        createBtnText_ = createBtn_.transform.Find("Text").GetComponent<TMPro.TextMeshProUGUI>();
+        createBtnText_ = transform.Find("InfoMng/CreateBtn/Text").GetComponent<TMPro.TextMeshProUGUI>();
         createBtnText_.text = "確認";
         // 魔法合成終了ボタンを代入
         cancelBtn_ = transform.Find("InfoMng/CancelBtn").GetComponent<Button>();
@@ -823,7 +813,7 @@ public class MagicCreate : MonoBehaviour
         int power = magicPower_;
         int mp = mpPower_;
         // 失敗以外の場合は魔法を保存する
-        if (rate != (int)MovePoint.JUDGE.BAD)
+        if (rate != (int)CircleMng.JUDGE.BAD)
         {
             // 大成功の時は威力を上げてMP消費量を減少させる
             if (rate == (int)CircleMng.JUDGE.GOOD)

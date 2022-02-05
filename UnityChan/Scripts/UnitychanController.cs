@@ -22,6 +22,7 @@ public class UnitychanController : MonoBehaviour
     private RaycastHit hit; // レイが何かに当たった時の情報
     private bool isGroundFlg_;
 
+    private GameObject lodingCanvasBackImage_;  // ロード画面の背景を取得しておく
 
     void Start()
     {
@@ -91,6 +92,18 @@ public class UnitychanController : MonoBehaviour
     // rigidbodyを使用する移動計算は、FixedUpdateを利用して一定周期でおこなうようにする
     void FixedUpdate()
     {
+        // ロード画面中にキャラが移動すると、複数シーンの読み込みバグが発生する為、止められるようにする
+        if(lodingCanvasBackImage_ == null)
+        {
+            lodingCanvasBackImage_ = GameObject.Find("LoadingCanvas/BackImage").gameObject;
+        }
+
+        if(lodingCanvasBackImage_.activeSelf)
+        {
+            Debug.Log("ロード中のため、移動不可");
+            return;
+        }
+
         // 探索モード以外で自由に動かれたらいけないので、return処理を加える。
         if (FieldMng.nowMode != FieldMng.MODE.SEARCH)
         {

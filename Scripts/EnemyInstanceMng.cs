@@ -190,6 +190,8 @@ public class EnemyInstanceMng : MonoBehaviour
             return;
         }
 
+        SceneMng.SetSE(14);
+
         // ダメージと速度を渡す
         buttleMng_.SetDamageNum(enemyList_[num].Item1.Damage());
         buttleMng_.SetSpeedNum(enemyList_[num].Item1.Speed());
@@ -329,7 +331,7 @@ public class EnemyInstanceMng : MonoBehaviour
 
             // 番号でどの敵をインスタンスするか決める
             int enemyNum = Random.Range(0, enemyTest.transform.childCount);
-            //enemyNum = 3;   // ハチ固定
+            //int enemyNum = 0;   // 固定
 
             if (eventEnemy_.Item1 == null)
             {
@@ -357,7 +359,7 @@ public class EnemyInstanceMng : MonoBehaviour
                     // フォレストField以外のボス戦だったら
                     bossFlag = true;
                 }
-                
+
                 // イベント用の敵を出す
                 enemy = Instantiate(eventEnemy_.Item1, pos, Quaternion.identity) as GameObject;
                 // イベント用の敵の番号部分をenemyNumとして適用する(エクセル番号も合わせる必要がある)
@@ -590,7 +592,7 @@ public class EnemyInstanceMng : MonoBehaviour
         }
 
         int hitProbabilityOffset = 0; 
-        var damage = 0;
+        float damage = 0.0f;
         bool weakFlg = false;
         bool criticalFlg = false;
 
@@ -605,7 +607,7 @@ public class EnemyInstanceMng : MonoBehaviour
                 // 攻撃側の属性と自分の弱点属性が一致してたらダメージ量を2倍にする
                 if (enemyList_[num].Item1.Weak() == buttleMng_.GetElement())
                 {
-                    damage *= 2;
+                    damage *= 1.3f;
                     Debug.Log("敵の弱点属性！ ダメージ量2倍で" + damage);
                     weakFlg = true;
                 }
@@ -682,7 +684,7 @@ public class EnemyInstanceMng : MonoBehaviour
             // 攻撃側の属性と自分の弱点属性が一致してたらダメージ量を2倍にする
             if (enemyList_[num].Item1.Weak() == buttleMng_.GetElement())
             {
-                damage *= 2;
+                damage *= 1.3f;
                 Debug.Log("敵の弱点属性！ ダメージ量2倍で" + damage);
                 weakFlg = true;
             }
@@ -696,8 +698,10 @@ public class EnemyInstanceMng : MonoBehaviour
             }
         }
 
+        int damageNum = (int)damage;
+
         // ダメージアイコン
-        DamageIcon(num, damage.ToString(),weakFlg,criticalFlg);
+        DamageIcon(num, damageNum.ToString(),weakFlg,criticalFlg);
 
         // バッドステータスが付与されるか判定
         enemyList_[num].Item1.SetBS(buttleMng_.GetBadStatus(), hitProbabilityOffset);
@@ -717,9 +721,9 @@ public class EnemyInstanceMng : MonoBehaviour
             }
         }
 
-        StartCoroutine(enemyList_[num].Item2.MoveSlideBar(enemyList_[num].Item1.HP() - damage, enemyList_[num].Item1.HP()));
+        StartCoroutine(enemyList_[num].Item2.MoveSlideBar(enemyList_[num].Item1.HP() - damageNum, enemyList_[num].Item1.HP()));
         // 内部数値の変更を行う
-        enemyList_[num].Item1.SetHP(enemyList_[num].Item1.HP() - damage);
+        enemyList_[num].Item1.SetHP(enemyList_[num].Item1.HP() - damageNum);
 
         // 即死用に処理呼び出し
         var bst = badStatusMng_.BadStateMoveBefore(getBs, enemyList_[num].Item1, enemyList_[num].Item2, false);
@@ -729,6 +733,8 @@ public class EnemyInstanceMng : MonoBehaviour
             // 内部数値の変更を行う
             enemyList_[num].Item1.SetHP(enemyList_[num].Item1.HP() - 999);
         }
+
+        SceneMng.SetSE(16);
 
         // もしHPが0になったら、オブジェクトを削除する
         if (enemyList_[num].Item1.HP() <= 0)

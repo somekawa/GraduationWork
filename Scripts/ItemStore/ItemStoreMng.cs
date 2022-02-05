@@ -137,6 +137,7 @@ public class ItemStoreMng : MonoBehaviour
 
     public void OnClickBuyBtn()
     {
+        SceneMng.SetSE(0);
         CommonClickActive(STORE.BUY);
         tradeMng_[(int)STORE.BUY].gameObject.SetActive(true);
         shoppingText_.text = "çwì¸";
@@ -145,6 +146,7 @@ public class ItemStoreMng : MonoBehaviour
 
     public void OnClickSellBtn()
     {
+        SceneMng.SetSE(0);
         CommonClickActive(STORE.SELL);
         tradeMng_[(int)STORE.SELL].gameObject.SetActive(true);
         shoppingText_.text = "îÑãp";
@@ -338,6 +340,8 @@ public class ItemStoreMng : MonoBehaviour
 
     public void OnClickShopping()
     {
+        SceneMng.SetSE(0);
+
         // çwì¸É{É^Éìâüâ∫
         Debug.Log(saveName_ + "Ççwì¸ÇµÇ‹ÇµÇΩ");
 
