@@ -1,6 +1,22 @@
 2022/02/05更新
-
 ●対象Scene　ユニの家のシーン
+
+●AlchemyMng
+HouseInterior
+ーUniHouse
+　ーMiniGameMngCanvas
+　　ーAlchemyMng
+　　　ーCreateBtn　OnClick()にItemCreateMng.csのOnClickCreate()をアタッチ
+　　　ーCancelBtn　 OnClick()にItemCreateMng.csのOnClickCancelBtn()をアタッチ
+　　　ーScrollView
+　　　ーInfoBack
+　　　　ーNeedMateria
+　　　　　ーNeedCnt　表示は　所持数/必要数
+　　　　ーArrowImage　SourceImage:Arrow　Color（0.2,0.5,0.5） 好きな色にしていいと思う
+　　　　ーItemNameFrame　SourceImage:frame_text
+　　　　　ーItemName
+　　　　　　ーImageBack　SourceImage:SingleBox2　Color（0.8,0.8,0.5）
+
 ●MiniGameMngCanvas
 HouseInterior
 ーUniHouse
