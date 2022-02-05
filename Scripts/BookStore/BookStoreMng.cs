@@ -526,6 +526,7 @@ public class BookStoreMng : MonoBehaviour
             int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2,
                         statusUp_[4].Item2, statusUp_[5].Item2, statusUp_[6].Item2, statusUp_[7].Item2 };
             SceneMng.charasList_[(int)SceneMng.CHARACTERNUM.UNI].SetStatusUpByCook(tmp, false);
+            SceneMng.charasList_[(int)SceneMng.CHARACTERNUM.JACK].SetStatusUpByCook(tmp, false);
             // 初期化
             for (int i = 0; i < statusUp_.Length; i++)
             {
@@ -572,13 +573,4 @@ public class BookStoreMng : MonoBehaviour
     //    }
     //    saveCsvSc_.SaveEnd();
     //}
-
-    //public void SetBookSetting(BookData set)
-    //{
-    //    bookData_.bookNumber = set.bookNumber;
-    //    bookData_.bookName = set.bookName;
-    //    bookData_.readFlag = set.readFlag;
-    //}
-
-
 }
