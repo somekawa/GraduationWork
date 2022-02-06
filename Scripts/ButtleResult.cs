@@ -168,18 +168,37 @@ public class ButtleResult : MonoBehaviour
         {
             if (bossFlag == true)
             {
-                // ボスだった場合Dropがワードになるため取得ワードと番号を得る
-                var nameCheck = enemyList_[i].DropMateria().Split('_');
-                string wordName = nameCheck[0];// どのワードか
-                materiaNum[i] = int.Parse(nameCheck[1]);// 画像番号（エレメント）
+                if(SceneMng.SCENE.FIELD4==SceneMng.nowScene)
+                {
+                    // 各アイテムのドロップ数を1～5のランダムで取得
+                    dropCnt_[i] = Random.Range(1, 5);
 
-                dropObj_[i] = Instantiate(dropPrefab,
-                    new Vector2(0, 0), Quaternion.identity, dropParent);
-                dropCntText_[i] = dropObj_[i].transform.Find("DropCnt").GetComponent<Text>();
-                dropImage_[i] = dropObj_[i].transform.Find("DropImage").GetComponent<Image>();
+                    // ドロップ物を表示するためにプレハブを生成
+                    dropObj_[i] = Instantiate(dropPrefab,
+                        new Vector2(0, 0), Quaternion.identity, dropParent);
+                    dropCntText_[i] = dropObj_[i].transform.Find("DropCnt").GetComponent<Text>();
+                    dropImage_[i] = dropObj_[i].transform.Find("DropImage").GetComponent<Image>();
 
-                dropCntText_[i].text = wordName;
-                dropImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][materiaNum[i]];
+                    dropCntText_[i].text = "×" + dropCnt_[i];
+                    dropImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MATERIA][materiaNum[i]];
+                    bagMateria_.MateriaGetCheck(materiaNum[i], dropCnt_[i]);
+
+                }
+                else
+                {
+                    // ボスだった場合Dropがワードになるため取得ワードと番号を得る
+                    var nameCheck = enemyList_[i].DropMateria().Split('_');
+                    string wordName = nameCheck[0];// どのワードか
+                    materiaNum[i] = int.Parse(nameCheck[1]);// 画像番号（エレメント）
+
+                    dropObj_[i] = Instantiate(dropPrefab,
+                        new Vector2(0, 0), Quaternion.identity, dropParent);
+                    dropCntText_[i] = dropObj_[i].transform.Find("DropCnt").GetComponent<Text>();
+                    dropImage_[i] = dropObj_[i].transform.Find("DropImage").GetComponent<Image>();
+
+                    dropCntText_[i].text = wordName;
+                    dropImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][materiaNum[i]];
+                }
             }
             else
             {
@@ -204,6 +223,8 @@ public class ButtleResult : MonoBehaviour
             StartCoroutine(ActiveExpSlider(i, charasList_[i].GetDeathFlg(), saveSumExp_[i]));
         }
     }
+
+
 
     private int ExpCheck(int charaNum, int enemyNum)
     {
@@ -321,7 +342,6 @@ public class ButtleResult : MonoBehaviour
             saveSumExp_[i] = 0;
         }
 
-        //  saveSumExp_ = 0;
         // 誰のレベルも上がってなかったら何もしない
         if (levelUpFlag[(int)SceneMng.CHARACTERNUM.UNI] == false
          && levelUpFlag[(int)SceneMng.CHARACTERNUM.JACK] == false)
