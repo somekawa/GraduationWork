@@ -45,7 +45,8 @@ public class InitPopList : MonoBehaviour
     private int maxMateriaCnt_ = 0;         //配列の最大値を保存
     private int singleMateriaCnt_ = 0;         // シートに記載されてる個数
     public static GameObject[] materiaBox_; // 生成したプレハブを保存
-    public static int[,] dropNum = new int[5,3];//
+    private int[] maxDropCnt_ = new int[(int)FIELD_NUM.MAX] { 3, 3, 3, 2, 4 };// ドロップしたい個数
+    public static Dictionary<FIELD_NUM, int[]> dropNum = new Dictionary<FIELD_NUM, int[]>();
 
     public struct MateriaData
     {
@@ -70,7 +71,7 @@ public class InitPopList : MonoBehaviour
         SUB2,           // 6 HP 魔法攻撃　物理攻撃　防御力 命中/回避
         SUB1_AND_SUB2,  // 7 毒　暗闇　麻痺　即死
         SUB3,           // 8 上昇、低下、反射
-        ALL_SUB,         // 9　吸収、必中
+        ALL_SUB,        // 9 必中,吸収
         INFO,           // 10
         MAX
     }
@@ -147,16 +148,16 @@ public class InitPopList : MonoBehaviour
             materiaInfo_ = new string[maxMateriaCnt_];
 
             // 1つのフィールドにつきドロップするのは3種類のため
-            dropNum = new int[9, 3];// singleMateriaCnt_,3];
+          ////  dropNum = new int[9, 3];// singleMateriaCnt_,3];
 
             int number = 0;
-            int test=0;
             for (int f = 0; f < (int)FIELD_NUM.MAX; f++)
             {
                 materiaList_ = DataPopPrefab_.GetComponent<PopList>().GetData<MateriaList>(PopList.ListData.MATERIA, f);
                 singleMateriaCnt_= materiaList_.param.Count;
-                test += materiaList_.param.Count;
-               //     Debug.Log(test + "      ");
+                //     Debug.Log(test + "      ");
+                // フィールドに対する素材数の大きさを決める
+                dropNum[(FIELD_NUM)f] = new int[ maxDropCnt_[f]];
                 for (int i = 0; i < singleMateriaCnt_; i++)
                 {
                     materiaData[number].box = Instantiate(materiaUIBox,
@@ -167,15 +168,13 @@ public class InitPopList : MonoBehaviour
                     materiaData[number].sellPrice = materiaList_.param[i].Price_Sell;
                     materiaData[number].info = materiaList_.param[i].Info;
 
-                    if (i < 3)
+                    if (i < maxDropCnt_[f])
                     {
-                        dropNum[f, i] = number;
-                       // Debug.Log(i + "      " + dropNum[f, i]);
-                        // drop_Field0_[i] = number;
+                        dropNum[(FIELD_NUM)f][i] = number;
                     }
-
                     number++;
                 }
+                Debug.Log("dropNum" + dropNum[(FIELD_NUM)f]);
             }
 
             // Excelからワードのデータを読み込む

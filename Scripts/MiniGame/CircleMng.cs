@@ -181,7 +181,7 @@ public class CircleMng : MonoBehaviour
                                 Debug.Log("ëÂê¨å˜ÇµÇ‹ÇµÇΩ");
                                 judge_ = JUDGE.GOOD;
                             }
-                            else if (0.0f < pix[0].r && pix[0].r <= 0.1f)
+                            else if (0.0f <= pix[0].r && pix[0].r <= 0.1f)
                             {
                                 // çï
                                 judgeText_.text = "é∏îs";

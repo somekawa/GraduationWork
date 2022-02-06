@@ -67,20 +67,8 @@ public class ItemCreateMng : MonoBehaviour
 
     private int[] maxRecipActiveCnt_ = new int[5] { 0, 5, 10, 15, 19 };
 
-    // デバッグ用
-    private SaveLoadCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
-
     public void Init()
     {
-        // デバッグ用
-        saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>();
-        saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.BOOK);
-
-        GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
-        GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
-        GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
-        GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
-
 
         if (circleMng_==null)
         {

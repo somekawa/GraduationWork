@@ -174,6 +174,7 @@ public class MagicCreate : MonoBehaviour
             }
         }
 
+
         return state;
     }
 
@@ -215,7 +216,7 @@ public class MagicCreate : MonoBehaviour
         // 作成開始ボタン
         createBtn_ = transform.Find("InfoMng/CreateBtn").GetComponent<Button>();
         createBtn_.interactable = false;
-        createBtnText_ = transform.Find("InfoMng/CreateBtn/Text").GetComponent<TMPro.TextMeshProUGUI>();
+        createBtnText_ = createBtn_.transform.Find("Text").GetComponent<TMPro.TextMeshProUGUI>();
         createBtnText_.text = "確認";
         // 魔法合成終了ボタンを代入
         cancelBtn_ = transform.Find("InfoMng/CancelBtn").GetComponent<Button>();
@@ -529,24 +530,21 @@ public class MagicCreate : MonoBehaviour
             case Bag_Word.WORD_MNG.SUB3:
                 for (int i = 0; i < mngMaxCnt[(int)Bag_Word.WORD_MNG.SUB3]; i++)
                 {
+                    mCreateData[Bag_Word.WORD_MNG.SUB3][i].btn.interactable = true;
+                    mCreateData[Bag_Word.WORD_MNG.SUB3][i].pleate.SetActive(true);
+                    // 敵を選択していた場合
                     if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] == "敵")
                     {
                         CommonButtonCheck(true, "低下", Bag_Word.WORD_MNG.SUB3, i);
                     }
                     else
                     {
-                        if (selectWord_[(int)Bag_Word.WORD_MNG.SUB2] == "防御力")
+                        //// 味方を選択していた場合
+                        if (mCreateData[Bag_Word.WORD_MNG.SUB3][i].name == "必中"
+                            || mCreateData[Bag_Word.WORD_MNG.SUB3][i].name == "低下")
                         {
-                            CommonButtonCheck(true, "上昇", Bag_Word.WORD_MNG.SUB3, i);
-                        }
-                        else
-                        {
-                            CommonButtonCheck(false, "低下", Bag_Word.WORD_MNG.SUB3, i);
-                            if (mCreateData[Bag_Word.WORD_MNG.SUB3][i].name == "必中")
-                            {
-                                mCreateData[Bag_Word.WORD_MNG.SUB3][i].btn.interactable = false;
-                                mCreateData[Bag_Word.WORD_MNG.SUB3][i].pleate.SetActive(false);
-                            }
+                            mCreateData[Bag_Word.WORD_MNG.SUB3][i].btn.interactable = false;
+                            mCreateData[Bag_Word.WORD_MNG.SUB3][i].pleate.SetActive(false);
                         }
                     }
                 }
@@ -565,6 +563,12 @@ public class MagicCreate : MonoBehaviour
                 for (int i = selectKindMaxCnt_[(int)InitPopList.WORD.SUB1]; i < mngMaxCnt[(int)Bag_Word.WORD_MNG.SUB1]; i++)
                 {
                     CommonButtonCheck(false, "必中", Bag_Word.WORD_MNG.SUB1, i);
+                    // 吸収は非表示
+                    if (mCreateData[Bag_Word.WORD_MNG.SUB1][i].name == "吸収")
+                    {
+                        mCreateData[Bag_Word.WORD_MNG.SUB1][i].btn.interactable = false;
+                        mCreateData[Bag_Word.WORD_MNG.SUB1][i].pleate.SetActive(false);
+                    }
                 }
                 break;
 
@@ -583,12 +587,20 @@ public class MagicCreate : MonoBehaviour
                         mCreateData[Bag_Word.WORD_MNG.SUB2][i].btn.interactable = false;
                         mCreateData[Bag_Word.WORD_MNG.SUB2][i].btn.image.color = Color.green;
                     }
+
+                    // 吸収は非表示
+                    if (mCreateData[Bag_Word.WORD_MNG.SUB2][i].name == "吸収")
+                    {
+                        mCreateData[Bag_Word.WORD_MNG.SUB2][i].btn.interactable = false;
+                        mCreateData[Bag_Word.WORD_MNG.SUB2][i].pleate.SetActive(false);
+                    }
                 }
                 break;
 
             case Bag_Word.WORD_MNG.SUB3:
                 for (int i = 0; i < mngMaxCnt[(int)Bag_Word.WORD_MNG.SUB3]; i++)
                 {
+                    Debug.Log(mCreateData[Bag_Word.WORD_MNG.SUB3][i].name);
                     if (mCreateData[Bag_Word.WORD_MNG.SUB3][i].name == "必中")
                     {
                         // 必中を持っていたら
@@ -598,6 +610,12 @@ public class MagicCreate : MonoBehaviour
                             mCreateData[Bag_Word.WORD_MNG.SUB3][i].pleate.SetActive(true);
                         }
                     }
+                    else
+                    {
+                            mCreateData[Bag_Word.WORD_MNG.SUB3][i].btn.interactable = false;
+                            mCreateData[Bag_Word.WORD_MNG.SUB3][i].pleate.SetActive(false);
+                    }
+
                 }
                 break;
 
@@ -813,7 +831,7 @@ public class MagicCreate : MonoBehaviour
         int power = magicPower_;
         int mp = mpPower_;
         // 失敗以外の場合は魔法を保存する
-        if (rate != (int)CircleMng.JUDGE.BAD)
+        if (rate != (int)MovePoint.JUDGE.BAD)
         {
             // 大成功の時は威力を上げてMP消費量を減少させる
             if (rate == (int)CircleMng.JUDGE.GOOD)
