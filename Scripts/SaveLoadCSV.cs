@@ -44,7 +44,7 @@ public class SaveLoadCSV : MonoBehaviour
 
             // ステータスの項目見出し
             string[] s1 = { "Name", "Level", "HP","MaxHP", "MP","MaxMP", "Attack", "MagicAttack",
-            "Defence", "Speed", "Luck", "AnimMax","Magic0" ,"Magic1","Magic2" ,"Magic3","Exp","MaxExp","SumExp" };
+            "Defence", "Speed", "Luck", "AnimMax","Magic0" ,"Magic1","Magic2" ,"Magic3","Exp","MaxExp" };
             string s2 = string.Join(",", s1);
             sw.WriteLine(s2);
         }
@@ -80,8 +80,10 @@ public class SaveLoadCSV : MonoBehaviour
                           set.Speed.ToString(),set.Luck.ToString(),set.AnimMax.ToString(),
                           set.Magic[0].ToString(),set.Magic[1].ToString(),
                           set.Magic[2].ToString(),set.Magic[3].ToString(),
-                          set.CharacterExp.ToString(),set.CharacterMaxExp.ToString(),set.CharacterSumExp.ToString()};
-        Debug.Log(set.name + set.Level.ToString() + set.HP.ToString() + set.maxHP.ToString() + set.MP.ToString() + set.maxMP.ToString());        string write = string.Join(",", data);
+                          set.CharacterExp.ToString(),set.CharacterMaxExp.ToString()};
+        Debug.Log(set.name + set.Level.ToString() + set.HP.ToString() + set.maxHP.ToString() + set.MP.ToString() + set.maxMP.ToString());
+        Debug.Log(set.CharacterExp.ToString() + "     " + set.CharacterMaxExp.ToString());
+        string write = string.Join(",", data);
         sw.WriteLine(write);
 
         // 消した上昇分を戻す
@@ -290,6 +292,8 @@ public class SaveLoadCSV : MonoBehaviour
                     Luck = int.Parse(csvDatas[i + 1][10]) + tmpStatus[4],
                     AnimMax = float.Parse(csvDatas[i + 1][11]),
                     Magic = tmpArray,
+                    CharacterExp = int.Parse(csvDatas[i + 1][16]),
+                   CharacterMaxExp = int.Parse(csvDatas[i + 1][17])
                 };
                 Debug.Log(csvDatas[i + 1][0] + "            キャラデータをロード中。残り" + i);
                 SceneMng.SetCharasSettings(i, set);
@@ -431,7 +435,7 @@ public class SaveLoadCSV : MonoBehaviour
             {
                 // イベント進行具合のMaxだと進行途中でロードするときにエラーする可能性があるため
                 // 一旦すべて読み込んでおく
-                BookStoreMng.bookState_[i].number = i;
+                BookStoreMng.bookState_[i].bookNumber = i;
                 BookStoreMng.bookState_[i].bookName = bookCsvDatas_[i + 1][1];
                 BookStoreMng.bookState_[i].readFlag = int.Parse(bookCsvDatas_[i + 1][2]);
             }

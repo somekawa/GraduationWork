@@ -159,33 +159,15 @@ public class Chara : CharaBase,InterfaceButtle
         set_.MP = mp;
     }
 
-    public int CharacterSumExp()
-    {
-        return set_.CharacterSumExp;
-    }
-
     public int CharacterMaxExp()
     {
         return set_.CharacterMaxExp;
     }
+
     public int CharacterExp()
     {
         return set_.CharacterExp;
     }
-
-    public void SetCharacterExp(int num)
-    {
-        set_.CharacterExp = num;
-    }
-    public void SetCharacterSumExp(int num)
-    {
-        set_.CharacterSumExp = num;
-    }
-    public void SetCharacterMaxExp(int num)
-    {
-        set_.CharacterMaxExp = num;
-    }
-
 
     // CharaBaseクラスの抽象メソッドを実装する
     public override void LevelUp(int[] num)
@@ -196,24 +178,15 @@ public class Chara : CharaBase,InterfaceButtle
         set_.Speed += num[3];
         set_.Luck += num[4];
         set_.maxHP += num[5];
-        set_.maxMP += num[6];
-        set_.Exp += num[7];
         set_.HP += num[5];
+        set_.maxMP += num[6];
         set_.MP += num[6];
-
-
-        //set_.Level += 1;
-        //set_.HP += 10;
-        //set_.MP += 5;
-        //set_.Attack += 3;
-        //set_.MagicAttack += 2;
-        //set_.Defence += 3;
-        //set_.Speed += 2;
-        //set_.Luck += 1;
-        //// 最大値も一緒にかえる
-        //set_.maxHP += 10;
-        //set_.maxMP += 5;
-
+        set_.Level += num[7];
+        set_.CharacterMaxExp = num[9];
+        
+        // exp本購入は基本的にレベルが上がる1つ前まで上げる
+        set_.CharacterExp = num[7] == 0 ? num[9] - 1 : num[8];
+        Debug.Log(set_.CharacterExp + "           " + set_.CharacterMaxExp);
         Debug.Log("レベルアップ！");
     }
 
@@ -332,6 +305,8 @@ public class Chara : CharaBase,InterfaceButtle
         set_.Luck = set.Luck;
         set_.AnimMax = set.AnimMax;
         set_.Magic = set.Magic;
+        set_.CharacterExp = set.CharacterExp;
+        set_.CharacterMaxExp = set.CharacterMaxExp;
 
         SetTurnInit();
         // アニメーターはセットしてはいけない

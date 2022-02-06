@@ -524,9 +524,9 @@ public class BookStoreMng : MonoBehaviour
         if (statusUpFlag == true)
         {
             int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2,
-                        statusUp_[4].Item2, statusUp_[5].Item2, statusUp_[6].Item2, statusUp_[7].Item2 };
-            SceneMng.charasList_[(int)SceneMng.CHARACTERNUM.UNI].SetStatusUpByCook(tmp, false);
-            SceneMng.charasList_[(int)SceneMng.CHARACTERNUM.JACK].SetStatusUpByCook(tmp, false);
+                        statusUp_[4].Item2, statusUp_[5].Item2, statusUp_[6].Item2, statusUp_[7].Item2 ,0};
+            SceneMng.charasList_[(int)SceneMng.CHARACTERNUM.UNI].LevelUp(tmp);
+            SceneMng.charasList_[(int)SceneMng.CHARACTERNUM.JACK].LevelUp(tmp);
             // 初期化
             for (int i = 0; i < statusUp_.Length; i++)
             {

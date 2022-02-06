@@ -48,7 +48,7 @@ public class ButtleMng : MonoBehaviour
     {
         characterMng_ = GameObject.Find("CharacterMng").GetComponent<CharacterMng>();
         enemyInstanceMng_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>();
-        escapeImageObj_ = buttleUICanvas.transform.Find("EscapeMiss").gameObject;
+        ////////////////escapeImageObj_ = buttleUICanvas.transform.Find("EscapeMiss").gameObject;
         buttleUICanvas.gameObject.SetActive(false);
         buttleResult_ = gameObject.GetComponent<ButtleResult>();
 
@@ -188,8 +188,6 @@ public class ButtleMng : MonoBehaviour
 
                     CallDeleteEnemy();
 
-                    // リザルト処理： エネミーの数、エネミーの番号（配列）
-                    buttleResult_.DropCheck(EneSelObj_.childCount, saveEnemyNum_, bossFlag_, subjugationObj_);
                     resultFlg_ = true;
                     characterMng_.SetCharaFieldPos();
                 }
@@ -304,6 +302,9 @@ public class ButtleMng : MonoBehaviour
         {
             Destroy(EneSelObj_.GetChild(i).gameObject);
         }
+
+        // リザルト処理： エネミーの数、エネミーの番号（配列）
+        buttleResult_.DropCheck(EneSelObj_.childCount, saveEnemyNum_, bossFlag_, subjugationObj_);
 
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
         {

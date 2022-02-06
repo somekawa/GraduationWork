@@ -28,8 +28,8 @@ public abstract class CharaBase : object
         public float AnimMax;       // 攻撃モーションのフレームを時間に直した値が入っている(モーション切り替えで使用する)
         public int[] Magic;
         public int CharacterExp;// 取得経験値
-        public int CharacterMaxExp;// 取得経験値
-        public int CharacterSumExp;// 取得経験値
+        public int CharacterMaxExp;// レベルアップに必要な経験値
+
         public (CONDITION,bool)[] condition; // 各キャラと各敵の状態異常が確認できるようにする
 
         // 敵用の情報
@@ -99,7 +99,6 @@ public abstract class CharaBase : object
 
             setting_.CharacterExp = popCharacter.param[0].Exp;
             setting_.CharacterMaxExp = popCharacter.param[0].MaxExp;
-            setting_.CharacterSumExp = popCharacter.param[0].SumExp;
             
 
             // 最大4つまでつけられるのでここで初期化しておく

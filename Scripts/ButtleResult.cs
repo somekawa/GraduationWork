@@ -25,8 +25,6 @@ public class ButtleResult : MonoBehaviour
     private static int[] maxExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// キャラのレベルに対する上限経験値
     private static int[] nowExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// キャラの経験値
     private static int[] nextExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 次のレベルまでに必要なEXP
-    private static int[] sumExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 今まで獲得した合計Exp
-    private static int[] allExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 今まで獲得した合計Exp
     private int[] oldLevel_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// レベルアップする前のレベル
     private int[] getExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 獲得EXP
                                                                     //   private int saveSumExp_ = 0;// 獲得EXPの合計
@@ -82,8 +80,6 @@ public class ButtleResult : MonoBehaviour
             if (onceFlag_ == false)
             {
                 level_[i] = charasList_[i].Level();
-                Debug.Log("レベル" + charasList_[i].Level());
-                sumExp_[i] = charasList_[i].CharacterSumExp();
                 maxExp_[i] = charasList_[i].CharacterMaxExp();
                 nowExp_[i] = charasList_[i].CharacterExp();
             }
@@ -94,10 +90,11 @@ public class ButtleResult : MonoBehaviour
             levelText_[i].text = "Lv " + level_[i].ToString();
 
             // 経験値関連
-            allExp_[i] = sumExp_[i];
             expText_[i] = expSlider_[i].transform.Find("AddExpText").GetComponent<TMPro.TextMeshProUGUI>();
             expSlider_[i].maxValue = maxExp_[i];
             expSlider_[i].value = nowExp_[i];
+            Debug.Log(i + "   " + level_[i] + "レベル" + charasList_[i].Level());
+            Debug.Log(i + "   " + charasList_[i].CharacterExp() + "経験値" + charasList_[i].CharacterMaxExp());
         }
         onceFlag_ = true;
 
@@ -145,7 +142,7 @@ public class ButtleResult : MonoBehaviour
             }
 
             // 討伐クエストの討伐数確認
-            for(int k = 0; k < list.Count; k++)
+            for (int k = 0; k < list.Count; k++)
             {
                 // 名前部分のアンダーバーで分ける
                 var name = enemyList_[i].Name().Split('_');
@@ -213,7 +210,7 @@ public class ButtleResult : MonoBehaviour
         int getExp = 0;
         int LvCheck = level_[charaNum] - enemyLv_[enemyNum];
         Debug.Log("レベル差" + LvCheck);
-        if ( LvCheck<=0)
+        if (LvCheck <= 0)
         {
             // キャラのレベルのほうが低い場合 そのままの経験値を渡す
             getExp = enemyList_[enemyNum].GetExp();
@@ -235,28 +232,21 @@ public class ButtleResult : MonoBehaviour
         float saveValue = 0;
         // バトルで死亡したまま終了していたときは,獲得経験値を半分に
         int nowExp = deathFlag == true ? sumExp / 2 : sumExp;
-        sumExp_[charaNum] = nowExp;
         getExp_[charaNum] = nowExp;
         expText_[charaNum].text = "+" + nowExp.ToString();
-        allExp_[charaNum] += sumExp_[charaNum];// 今までの合計を保存
         Debug.Log(deathFlag + "死亡確認     獲得EXP" + nowExp);
         int sumMaxExp = (int)expSlider_[charaNum].maxValue;
         bool onceFlag = true;
         while (true)
         {
             yield return null;
-            if (sumExp_[charaNum] <= saveValue)
+            if (getExp_[charaNum] <= saveValue)
             {
                 if (onceFlag == true)
                 {
                     // 加算分だけスライダーを移動させたら移動を終了させる
                     Debug.Log(saveValue + "       スライダーの移動が終了しました");
                     nextExp_[charaNum] = (int)(expSlider_[charaNum].maxValue - expSlider_[charaNum].value);
-
-                    // 増えた値を保存
-                    charasList_[charaNum].SetCharacterExp(nextExp_[charaNum]);
-                    charasList_[charaNum].SetCharacterMaxExp((int)expSlider_[charaNum].maxValue);
-                    charasList_[charaNum].SetCharacterSumExp(allExp_[charaNum]);
 
                     if (expSlider_[charaNum].value == expSlider_[charaNum].maxValue)
                     {
@@ -413,10 +403,10 @@ public class ButtleResult : MonoBehaviour
     {
         SceneMng.SetSE(15);
 
-        // 上昇させる分を入れる
-        int[] tmp = new int[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
-        // 0Attack 1MagicAttack 2Defence 3Speed 4Luck 5HP 6MP 7 EXP
         int differenceLv = nowLevel - oldLevel;
+        // 上昇させる分を入れる
+        int[] tmp = new int[10] { 0, 0, 0, 0, 0, 0, 0, differenceLv, maxExp_[(int)chara]-nextExp, maxExp_[(int)chara] };
+        // 0Attack 1MagicAttack 2Defence 3Speed 4Luck 5HP 6MP 7Level 8exp 9maxExp
         // ユニ、ジャック共通部分
         if ((nowLevel % 3 == 0) || (3 <= differenceLv))
         {
@@ -460,12 +450,9 @@ public class ButtleResult : MonoBehaviour
                             "\n+" + tmp[3].ToString() +
                             "\n+" + tmp[4].ToString();
 
-        tmp[7] = exp;
-        for (int i = 0; i < differenceLv; i++)
-        {
-            // レベル上昇した回数分よぶ
-            SceneMng.charasList_[(int)chara].LevelUp(tmp);
-        }
+        Debug.Log(chara + " stetas" + tmp);
+        // ステータスを上げる
+        SceneMng.charasList_[(int)chara].LevelUp(tmp);
 
         oldLevel_[(int)chara] = level_[(int)chara];
     }
