@@ -45,7 +45,7 @@ public class Chara : CharaBase,InterfaceButtle
             statusUp[i] = 0;
         }
 
-        SetStatusUpByCook(GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>().StatusNum(), true);
+        SetStatusUpByCook(GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>().StatusNum());
     }
 
     public bool Attack()
@@ -188,16 +188,31 @@ public class Chara : CharaBase,InterfaceButtle
 
 
     // CharaBaseクラスの抽象メソッドを実装する
-    public override void LevelUp()
+    public override void LevelUp(int[] num)
     {
-        set_.Level += 1;
-        set_.HP += 10;
-        set_.MP += 5;
-        set_.Attack += 3;
-        set_.MagicAttack += 2;
-        set_.Defence += 3;
-        set_.Speed += 2;
-        set_.Luck += 1;
+        set_.Attack += num[0];
+        set_.MagicAttack += num[1];
+        set_.Defence += num[2];
+        set_.Speed += num[3];
+        set_.Luck += num[4];
+        set_.maxHP += num[5];
+        set_.maxMP += num[6];
+        set_.Exp += num[7];
+        set_.HP += num[5];
+        set_.MP += num[6];
+
+
+        //set_.Level += 1;
+        //set_.HP += 10;
+        //set_.MP += 5;
+        //set_.Attack += 3;
+        //set_.MagicAttack += 2;
+        //set_.Defence += 3;
+        //set_.Speed += 2;
+        //set_.Luck += 1;
+        //// 最大値も一緒にかえる
+        //set_.maxHP += 10;
+        //set_.maxMP += 5;
 
         Debug.Log("レベルアップ！");
     }
@@ -324,7 +339,7 @@ public class Chara : CharaBase,InterfaceButtle
     }
 
     // RestaurantMng.csで呼び出す(あくまでも一時的なUpだから、それぞれに加算した値を別の変数に入れておく)
-    public void SetStatusUpByCook(int[] num,bool temporaryFlag)
+    public void SetStatusUpByCook(int[] num)
     {
         set_.Attack += num[0];
         set_.MagicAttack += num[1];
@@ -336,16 +351,6 @@ public class Chara : CharaBase,InterfaceButtle
         set_.Exp += num[7];
         set_.HP += num[5];
         set_.MP += num[6];
-
-
-        if (temporaryFlag == true)
-        {
-            // 一時アップの数字保存
-            for (int i = 0; i < statusUp.Length; i++)
-            {
-                statusUp[i] = num[i];
-            }
-        }
     }
 
     public int[] GetStatusUpByCook(bool flag)

@@ -201,7 +201,7 @@ public class RestaurantMng : MonoBehaviour
             int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2, statusUp_[4].Item2, statusUp_[5].Item2, statusUp_[6].Item2, 0 };
             for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
             {
-                SceneMng.charasList_[i].SetStatusUpByCook(tmp, true);
+                SceneMng.charasList_[i].SetStatusUpByCook(tmp);
             }
             GameObject.Find("DontDestroyCanvas/TimeGear/CookPowerIcon").GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
         }
@@ -249,7 +249,7 @@ public class RestaurantMng : MonoBehaviour
                 int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2, statusUp_[4].Item2, statusUp_[5].Item2, statusUp_[6].Item2, 0 };
                 for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
                 {
-                    SceneMng.charasList_[i].SetStatusUpByCook(tmp, true);
+                    SceneMng.charasList_[i].SetStatusUpByCook(tmp);
                 }
 
                 // ‘fÞ‚ðŒ¸‚ç‚·

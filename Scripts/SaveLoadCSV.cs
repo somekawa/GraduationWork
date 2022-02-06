@@ -85,7 +85,7 @@ public class SaveLoadCSV : MonoBehaviour
         sw.WriteLine(write);
 
         // 消した上昇分を戻す
-        SceneMng.charasList_[num].SetStatusUpByCook(SceneMng.charasList_[num].GetStatusUpByCook(false),true);
+        SceneMng.charasList_[num].SetStatusUpByCook(SceneMng.charasList_[num].GetStatusUpByCook(false));
     }
 
     // 「進行度,所持金,クエストのクリア状態,宝箱と強制戦闘壁の取得とクリア状態」を保存する

@@ -153,7 +153,7 @@ public abstract class CharaBase : object
     }
 
     // 抽象関数(中身は継承先で実装する必要がある）
-    public abstract void LevelUp();
+    public abstract void LevelUp(int[] num);
     public abstract void Weapon();
     public abstract int Defence(bool flag);
     public abstract int MagicPower();

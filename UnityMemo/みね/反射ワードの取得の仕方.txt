@@ -7,11 +7,11 @@ HouseInterior
 ーMayorHouse　【MayorWordGet.csをアタッチ】
 　ーMayorHouseCanvas（名前違ったらごめん）
 　　ー【BigWindowBtn】　
-	left:middle　pos(45,12.5,0) 　width110　Height225 　Colorアルファ値を0
+	center:middle　pos(-235,-25,0) 　width200　Height240 
+	Colorアルファ値を0Rotation（0,0,-5.5）
 　　　　　OnClickにMayorWordGetにあるOnCkickGetWord()をアタッチ
-　　ー【WindowBtn】
-	center:middle　pos(-235,-25,0) 　width200　Height240
-	Rotation（0,0,-5.5）　Colorアルファ値を0
+　　ー【WindowBtn】	
+	left:middle　pos(45,12.5,0) 　width110　Height225　Colorアルファ値を0
 　　　　　OnClickにMayorWordGetにあるOnCkickGetWord()をアタッチ
 
 町長家に入った際、ボタンを5回クリックしたらワード取得状態にする
