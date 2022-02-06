@@ -327,8 +327,15 @@ public class ButtleResult : MonoBehaviour
          && levelUpFlag[(int)SceneMng.CHARACTERNUM.JACK] == false)
         {
             FieldMng.nowMode = FieldMng.MODE.SEARCH;
+            levelMng.gameObject.SetActive(false);
             resultCanvas.gameObject.SetActive(false);
+            for (int i = 0; i < enemyCnt_; i++)
+            {
+                // リザルト非表示にDropオブジェクト削除
+                Destroy(dropObj_[i]);
+            }
             enemyCnt_ = 0;
+            enemyList_.Clear();
             yield break;
         }
 

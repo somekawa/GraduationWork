@@ -13,7 +13,7 @@ public class MoveDropImage : MonoBehaviour
     private float iconSpeed_ = 0.0f;    // 放物線移動する際のスピード
     private Vector2 saveTopPos_;        // 頂点にいるときの座標を保存
 
-    // アルファ値の現象を開始する座標
+    // アルファ値の減少を開始する座標
     private Vector2 minusAlphaPos_ = new Vector2(-450.0f, -200.0f);
     private float alphaNum = 1.0f;  // 画像のアルファ値
 
@@ -38,6 +38,12 @@ public class MoveDropImage : MonoBehaviour
             yield return null;
             if (upFlag == true)
             {
+                if (FieldMng.nowMode == FieldMng.MODE.BUTTLE)
+                {
+                    // 画像移動中にバトルが始まったら破壊する
+                    Destroy(gameObject);
+                }
+
                 // 現在座標が出現座標Y+40より低い位置だったら
                 if (drop_.GetShootArrowFlag() == false)
                 {
@@ -46,7 +52,6 @@ public class MoveDropImage : MonoBehaviour
                 }
                 else
                 {
-
                     // 始点、終点、始点と終点間の距離を2分の1（0.5）に
                     middolePos_ = Vector3.Lerp(transform.localPosition, destinationPos_, 0.5f);
                     // 中間座標を求める　
