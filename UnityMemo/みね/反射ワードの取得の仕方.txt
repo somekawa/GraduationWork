@@ -1,0 +1,18 @@
+2022/02/06更新
+●対象シーンTown
+ワード【反射】の取得の仕方
+MayorWordGet.csを作成
+
+HouseInterior
+ーMayorHouse　【MayorWordGet.csをアタッチ】
+　ーMayorHouseCanvas（名前違ったらごめん）
+　　ー【BigWindowBtn】　
+	left:middle　pos(45,12.5,0) 　width110　Height225 　Colorアルファ値を0
+　　　　　OnClickにMayorWordGetにあるOnCkickGetWord()をアタッチ
+　　ー【WindowBtn】
+	center:middle　pos(-235,-25,0) 　width200　Height240
+	Rotation（0,0,-5.5）　Colorアルファ値を0
+　　　　　OnClickにMayorWordGetにあるOnCkickGetWord()をアタッチ
+
+町長家に入った際、ボタンを5回クリックしたらワード取得状態にする
+ワード取得後ボタンとMayorWordGet.csを削除
