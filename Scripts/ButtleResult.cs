@@ -461,7 +461,11 @@ public class ButtleResult : MonoBehaviour
                             "\n+" + tmp[4].ToString();
 
         tmp[7] = exp;
-        SceneMng.charasList_[(int)chara].LevelUp();
+        for (int i = 0; i < differenceLv; i++)
+        {
+            // ƒŒƒxƒ‹ã¸‚µ‚½‰ñ”•ª‚æ‚Ô
+            SceneMng.charasList_[(int)chara].LevelUp();
+        }
 
         oldLevel_[(int)chara] = level_[(int)chara];
     }
