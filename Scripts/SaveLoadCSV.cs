@@ -234,6 +234,7 @@ public class SaveLoadCSV : MonoBehaviour
 
             for (int i = 0; i < bookname_.Count; i++)
             {
+                BookStoreMng.bookState_[i].bookNumber = i;
                 BookStoreMng.bookState_[i].bookName = bookname_[i];
                 BookStoreMng.bookState_[i].readFlag = 0;
             }

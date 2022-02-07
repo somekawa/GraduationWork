@@ -137,6 +137,7 @@ public class ItemCreateMng : MonoBehaviour
             }
             Debug.Log("合成可能アイテム数" + maxCnt_);
 
+            ResetCommon();
             if (maxCnt_ == 0)
             {
                 // レシピ本を所持してない場合
@@ -181,7 +182,6 @@ public class ItemCreateMng : MonoBehaviour
         miniGameObj.transform.localPosition = new Vector3(-0.25f, 0.8f, 0.2f);
 
 
-        ResetCommon();
     }
 
     public void AlchemyRecipeSelect()
@@ -208,7 +208,7 @@ public class ItemCreateMng : MonoBehaviour
         haveCntTitle_.gameObject.SetActive(true);
         // 所持数とEX所持数
         itemhaveCnt_.text = Bag_Item.itemState[recipeNum].haveCnt + "コ\n" 
-                          + Bag_Item.itemState[recipeNum * 2].haveCnt + "コ\n";
+                          + Bag_Item.itemState[recipeNum +19].haveCnt + "コ\n";
         if (itemRecipeState[recipeNum].materia3 == "non")
         {
             needMateria_.text = itemRecipeState[recipeNum].materia1 +

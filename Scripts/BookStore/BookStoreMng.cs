@@ -1,19 +1,15 @@
-﻿using System;
-using System.IO;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class BookStoreMng : MonoBehaviour
 {
     // データ系
-    private SaveCSV_Book saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
-    private const string saveDataFilePath_ = @"Assets/Resources/Save/bookData.csv";
+    //private SaveCSV_Book saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
+    //private const string saveDataFilePath_ = @"Assets/Resources/Save/bookData.csv";
     List<string[]> csvDatas_ = new List<string[]>(); // CSVの中身を入れるリスト;
 
-    private PopListInTown popBookList_;
     private int maxCnt_ = 0;            // すべての素材数
-    private int singleCnt_ = 0;         // 1つのシートに記載されてる最大個数
 
     [SerializeField]
     private GameObject bookStoreUI;    // 本屋用のUI
@@ -76,12 +72,16 @@ public class BookStoreMng : MonoBehaviour
     private int selectCnt_ = 0;// 何冊の本を選んでいるか
     // ステータス順に並べた文字列
     private string[] statusUpStr_ = {
-        "Attack", "MagicAttack", "Defence", "Speed", "Luck", "HP", "MP", "Exp" };
+        "Attack", "MagicAttack", "Defence", "Speed", "Luck", "HP", "MP", "Exp","" };
     // アップステータスの名前とアップ値をペアにした変数 どれを選択したかを保存する
-    private (string, int)[] statusUp_ = new (string, int)[8];
+    private (string, int)[] statusUp_ = new (string, int)[9];
 
-    private int[] boolActiveTiming_ = new int[5] { 6, 12, 19,26,32 };
-    void Start()
+    private int[] boolActiveTiming_ = new int[5] { 6, 12, 19, 26, 32 };
+    private int recipCnt_ = 0;
+    private bool moneyCheck_ = false;
+    private int readCnt_ = -1;
+    
+    private void Init()
     {
         // 初期化
         for (int i = 0; i < statusUp_.Length; i++)
@@ -89,45 +89,43 @@ public class BookStoreMng : MonoBehaviour
             statusUp_[i] = (statusUpStr_[i], 0);
         }
 
+        // 同じシーン滞在中に何度も本屋に入った時に同じ処理をしないように
+        if (bagWord_==null)
+        {
+            bagWord_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Word>();
 
-        bagWord_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Word>();
-        saveCsvSc_ = GameObject.Find("TownMng").GetComponent<SaveCSV_Book>();
-
-        bookStoreCanvas_ = GameObject.Find("BookStoreCanvas");
-        bookInfoData_ = bookStoreUI.transform.Find("CheckArea/BookData").GetComponent<RectTransform>();
-        buyBtn_ = bookInfoData_.Find("BuyButton").GetComponent<Button>();
-        infoBackImage_= bookInfoData_.Find("InfoArea/Back").GetComponent<Image>();
-        infoImage_ = bookInfoData_.Find("InfoArea/Back/Image").GetComponent<Image>();
-        bookNameText_ = bookInfoData_.Find("InfoArea/Back/NameText").GetComponent<TMPro.TextMeshProUGUI>();
-        infoText_ = bookInfoData_.Find("InfoArea/Text").GetComponent<TMPro.TextMeshProUGUI>();
-        infoBackImage_.color = new Color(1.0f, 1.0f, 1.0f, 0.0f); 
+            bookStoreCanvas_ = GameObject.Find("BookStoreCanvas");
+            bookInfoData_ = bookStoreUI.transform.Find("CheckArea/BookData").GetComponent<RectTransform>();
+            buyBtn_ = bookInfoData_.Find("BuyButton").GetComponent<Button>();
+            infoBackImage_ = bookInfoData_.Find("InfoArea/Back").GetComponent<Image>();
+            infoImage_ = bookInfoData_.Find("InfoArea/Back/Image").GetComponent<Image>();
+            bookNameText_ = bookInfoData_.Find("InfoArea/Back/NameText").GetComponent<TMPro.TextMeshProUGUI>();
+            infoText_ = bookInfoData_.Find("InfoArea/Text").GetComponent<TMPro.TextMeshProUGUI>();
+            statusOrWordText_ = bookInfoData_.Find("StatusOrWordText").GetComponent<TMPro.TextMeshProUGUI>();
+            getStatusOrWordText_ = statusOrWordText_.transform.Find("GetStatusOrWordText").GetComponent<TMPro.TextMeshProUGUI>();
+         
+            totalPriceText_ = bookInfoData_.Find("TotalPriceBack/TotalPrice").GetComponent<TMPro.TextMeshProUGUI>();
+            soldOutImage_ = bookStoreUI.transform.Find("ScrollView/Viewport/SoldOut").GetComponent<Image>();
+            haveMoneyText_ = bookStoreUI.transform.Find("CheckArea/Money/Count").GetComponent<TMPro.TextMeshProUGUI>();
+        }
+        infoBackImage_.color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
         infoImage_.color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
-            infoImage_.sprite = null;// ItemImageMng.spriteMap[ItemImageMng.IMAGE.BOOK][0];
-        bookNameText_.text = "";
+        infoImage_.sprite = null;
+        bookNameText_.text = null;
         infoText_.text = "本を選択してください";
 
-        statusOrWordText_ = bookInfoData_.Find("StatusOrWordText").GetComponent<TMPro.TextMeshProUGUI>();
-        getStatusOrWordText_ = statusOrWordText_.transform.Find("GetStatusOrWordText").GetComponent<TMPro.TextMeshProUGUI>();
-        statusOrWordText_.text = "";
-        getStatusOrWordText_.text = "";
+        statusOrWordText_.text = "";// ワードかステータス関連化の表示
+        getStatusOrWordText_.text = "";// ワードの番号かステータスの上昇量
 
         // 合計料金
-        totalPriceText_ = bookInfoData_.Find("TotalPriceBack/TotalPrice").GetComponent<TMPro.TextMeshProUGUI>();
-        totalPriceText_.text = "0";
+        totalPriceText_.text = "0";// 合計料金
 
-        soldOutImage_ = bookStoreUI.transform.Find("ScrollView/Viewport/SoldOut").GetComponent<Image>();
         soldOutImage_.gameObject.SetActive(false);
 
         haveMoney_ = SceneMng.GetHaveMoney();
-        haveMoneyText_ = bookStoreUI.transform.Find("CheckArea/Money/Count").GetComponent<TMPro.TextMeshProUGUI>();
         haveMoneyText_.text = haveMoney_.ToString();
-        Debug.Log("所持金"+ haveMoney_);
-        popBookList_ = GameObject.Find("TownMng").GetComponent<PopListInTown>();
+        Debug.Log("所持金" + haveMoney_);
 
-        singleCnt_ = popBookList_.SetSingleBookCount();
-       // maxCnt_ = popBookList_.SetMaxBookCount();
-
-     //   bookState_ = new BookData[maxCnt_];
         if (19 < EventMng.GetChapterNum())
         {
             maxCnt_ = boolActiveTiming_[4];
@@ -149,9 +147,6 @@ public class BookStoreMng : MonoBehaviour
             maxCnt_ = boolActiveTiming_[0];
         }
 
-      //  DataLoad();
-        int recipCnt_ = 0;
-        int activeCnt_ = 0;
         if (bookState_ == null)
         {
             bookState_ = new BookData[maxCnt_];
@@ -167,7 +162,6 @@ public class BookStoreMng : MonoBehaviour
                     info = PopListInTown.bookInfo[i],
                     imageNum = PopListInTown.bookImageNum[i],
                 };
-
                 if (EventMng.GetChapterNum() < 1)
                 {
                     bookState_[i].readFlag = 0;
@@ -176,6 +170,7 @@ public class BookStoreMng : MonoBehaviour
                 {
                     bookState_[i].readFlag = int.Parse(csvDatas_[i + 1][1]);
                 }
+                bookState_[i].bookNumber = i;
 
                 var underbarSplit = bookState_[i].statusMng.Split('_');
                 //アンダーバーで区切ったものを、別々のリストへ入れる
@@ -210,7 +205,7 @@ public class BookStoreMng : MonoBehaviour
                 bool flag = bookState_[i].readFlag == 0 ? true : false;
                 bookState_[i].obj.gameObject.SetActive(flag);
                 bookStoreUI.SetActive(false);
-
+                readCnt_ = bookState_[i].readFlag == 0 ? +1:+0;
                 if (bookState_[i].obj.activeSelf == true)
                 {
                     if (haveMoney_ < bookState_[i].price)
@@ -222,9 +217,10 @@ public class BookStoreMng : MonoBehaviour
                     {
                         bookState_[i].btn.interactable = true;
                         bookState_[i].checkBox.gameObject.SetActive(true);
-                        activeCnt_++;
+                        moneyCheck_ = true;
                     }
                 }
+
             }
         }
         else
@@ -244,6 +240,7 @@ public class BookStoreMng : MonoBehaviour
                     info = PopListInTown.bookInfo[i],
                     imageNum = PopListInTown.bookImageNum[i],
                 };
+                bookState_[i].bookNumber = i;
                 var underbarSplit = bookState_[i].statusMng.Split('_');
                 //アンダーバーで区切ったものを、別々のリストへ入れる
                 bookState_[i].kinds = underbarSplit[0];
@@ -290,13 +287,21 @@ public class BookStoreMng : MonoBehaviour
                     {
                         bookState_[i].btn.interactable = true;
                         bookState_[i].checkBox.gameObject.SetActive(true);
-                        activeCnt_++;
+                        moneyCheck_ = true;
                     }
                 }
             }
         }
 
-        if (activeCnt_ == 0)
+        // 極級までのレシピを読んでない場合
+        if (bookState_[recipeNum_[recipCnt_ - 1]].readFlag == 0)
+        {
+            Debug.Log(bookState_[recipeNum_[recipCnt_ - 1]].bookNumber+ "       "+bookState_[recipeNum_[recipCnt_ - 1]].bookName);
+            RecipeReadCheck();
+        }
+
+
+        if (moneyCheck_ == false)
         {
             infoText_.text = "お金が足りません";
             buyBtn_.interactable = false;
@@ -305,18 +310,49 @@ public class BookStoreMng : MonoBehaviour
         {
             infoText_.text = null;
             buyBtn_.interactable = true;
-
         }
-        Debug.Log("イベント進行度チェック："+EventMng.GetChapterNum());
+
+        Debug.Log("イベント進行度チェック：" + EventMng.GetChapterNum());
+    }
+
+    private void RecipeReadCheck()
+    {
+        if (bookState_[recipeNum_[0]].readFlag == 0)
+        {
+            // レシピ初級を購入してない場合以降は買えない
+            for (int i = 1; i < recipCnt_; i++)
+            {
+                bookState_[recipeNum_[i]].obj.gameObject.SetActive(false);
+            }
+        }
+        else if (bookState_[recipeNum_[1]].readFlag == 0)
+        {
+            for (int i = 2; i < recipCnt_; i++)
+            {
+                bookState_[recipeNum_[i]].obj.gameObject.SetActive(false);
+            }
+        }
+        else if (bookState_[recipeNum_[2]].readFlag == 0)
+        {
+            for (int i = 3; i < recipCnt_; i++)
+            {
+                bookState_[recipeNum_[i]].obj.gameObject.SetActive(false);
+            }
+        }
+        else if (bookState_[recipeNum_[3]].readFlag == 0)
+        {
+            bookState_[recipeNum_[4]].obj.gameObject.SetActive(false);
+        }
     }
 
     public void OnClickBookCheckButton()
     {
         SceneMng.SetSE(0);
         Debug.Log("本を見るボタンを押下しました");
+        Init();
         bookStoreCanvas_.SetActive(false);
         bookStoreUI.SetActive(true);
-        for(int i=0;i<maxCnt_;i++)
+        for (int i = 0; i < maxCnt_; i++)
         {
             // 親が非アクティブの時に親を変えるとスケールが0になるときがあるため
             // アクティブにした後に親を変える
@@ -343,19 +379,9 @@ public class BookStoreMng : MonoBehaviour
             bookInfoData_.gameObject.SetActive(true);
         }
 
-        //if (haveMoney_ < totalPrice_ + bookState_[num].price)
-        //{
-        //    Debug.Log("所持金が足りません");
-        //    return;
-        //}
-
-
-
         // 選択してないなら本を選択したらactiveをtrue 選択済みならactiveをfalse
         bool flag = bookState_[num].checkMark.gameObject.activeSelf == false ? true : false;
         bookState_[num].checkMark.gameObject.SetActive(flag);
-        // selectBook_ = num;
-
 
         if (bookState_[num].checkMark.gameObject.activeSelf == true)
         {
@@ -386,11 +412,13 @@ public class BookStoreMng : MonoBehaviour
             if (bookState_[num].kinds == "Recipe")
             {
                 statusOrWordText_.text = "";
-                getStatusOrWordText_.text ="";
+                getStatusOrWordText_.text = "";
             }
             else
             {
-                getStatusOrWordText_.text = bookState_[num].kinds + "+" + bookState_[num].number;
+                string text = bookState_[num].kinds == "Exp" ? bookState_[num].kinds : bookState_[num].kinds + "+" + bookState_[num].number;
+                getStatusOrWordText_.text = text;
+
             }
         }
         else
@@ -407,7 +435,7 @@ public class BookStoreMng : MonoBehaviour
 
     private void MoneyCheck()
     {
-        int maxSelectPrice =SceneMng.GetHaveMoney() - totalPrice_;
+        int maxSelectPrice = SceneMng.GetHaveMoney() - totalPrice_;
         for (int i = 0; i < maxCnt_; i++)
         {
             //Debug.Log(bookState_[i].name);
@@ -465,6 +493,7 @@ public class BookStoreMng : MonoBehaviour
         int cnt = 0;
         int activeCnt_ = 0;
         bool statusUpFlag = false;
+        int recipeReadCheck_ =-1;
         for (int i = 0; i < maxCnt_; i++)
         {
             if (bookState_[i].checkMark.gameObject.activeSelf == true &&
@@ -487,17 +516,20 @@ public class BookStoreMng : MonoBehaviour
                     }
                     else
                     {
-                        // ステータス上昇関数を呼び出せるようにしておく
-                        statusUpFlag = true;
+                        if (bookState_[i].kinds == "Recipe")
+                        {
+                            recipeReadCheck_ = i;
+                            Debug.Log("購入した本の番号：" + recipeReadCheck_);
+
+                        }
+                        else
+                        {
+                            // ステータス上昇関数を呼び出せるようにしておく
+                            statusUpFlag = true;
+                        }
                     }
                     cnt++;
                 }
-            }
-
-            if (cnt == selectCnt_)
-            {
-                // 買った本と同じ個数になったらfor文をぬける
-                break;
             }
 
             if (bookState_[i].obj.activeSelf == true)
@@ -511,20 +543,45 @@ public class BookStoreMng : MonoBehaviour
                 {
                     bookState_[i].btn.interactable = true;
                     bookState_[i].checkBox.gameObject.SetActive(true);
-                    activeCnt_++;
+                    moneyCheck_ = true;
                 }
             }
+            if (cnt == readCnt_)
+            {
+                // 買った本と同じ個数になったらfor文をぬける
+                readCnt_ = cnt;
+                break;
+            }
+
         }
-        if (activeCnt_ == 0)
+
+        if (moneyCheck_ == false)
         {
             infoText_.text = "お金が足りません";
             buyBtn_.interactable = false;
         }
 
+        if (bookState_[recipeNum_[recipCnt_ - 1]].readFlag == 0
+            && recipeReadCheck_!=-1)
+        {
+            for (int r = 0; r < recipCnt_-1; r++)
+            {
+                if (recipeNum_[r] == recipeReadCheck_)
+                {
+                    if (recipeNum_[r + 1] <= maxCnt_)
+                    {
+                        bookState_[recipeNum_[r + 1]].obj.SetActive(true);
+                        break;
+                    }
+                }
+            }
+        }
+
+
         if (statusUpFlag == true)
         {
             int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2,
-                        statusUp_[4].Item2, statusUp_[5].Item2, statusUp_[6].Item2, statusUp_[7].Item2 ,0};
+                          statusUp_[4].Item2, statusUp_[5].Item2, statusUp_[6].Item2,0 ,statusUp_[7].Item2 };
             SceneMng.charasList_[(int)SceneMng.CHARACTERNUM.UNI].LevelUp(tmp);
             SceneMng.charasList_[(int)SceneMng.CHARACTERNUM.JACK].LevelUp(tmp);
             // 初期化
@@ -538,39 +595,4 @@ public class BookStoreMng : MonoBehaviour
         selectCnt_ = 0;
         bookInfoData_.gameObject.SetActive(false);
     }
-
-    public void DataLoad()
-    {
-        // Debug.Log("ロードします");
-
-        csvDatas_.Clear();
-
-        // 行分けだけにとどめる
-        string[] texts = File.ReadAllText(saveDataFilePath_).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-        for (int i = 0; i < texts.Length; i++)
-        {
-            // カンマ区切りでリストへ登録していく(2次元配列状態になる[行番号][カンマ区切り])
-            csvDatas_.Add(texts[i].Split(','));
-        }
-        Debug.Log("レシピ関連");
-        //bookState_ = new BookData[32];
-        //for(int i = 0;i < maxCnt_;i++)
-        //    {
-        //    bookState_[i].readFlag = int.Parse(csvDatas_[i+1][1]);
-        //}
-        //
-        // NewGameから始めて本屋にきたとき
-    }
-
-    //private void DataSave()
-    //{
-    //    Debug.Log("本を読みました");
-    //    saveCsvSc_.SaveStart();
-    //    for (int i = 0; i < maxCnt_; i++)
-    //    {
-    //        saveCsvSc_.SaveBookData(bookState_[i]);
-    //    }
-    //    saveCsvSc_.SaveEnd();
-    //}
 }

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,9 +16,17 @@ public class UniHouseMng : MonoBehaviour
     [SerializeField]
     private Canvas uniHouseCanvas;
 
+    [SerializeField]
+    private Image warningInfo;// 魔法かアイテムが作れないときの警告画像
+    private Text warningText_;
+
     private GameObject loadPrefab_;// タイトルシーンからの遷移かどうか
     private OnceLoad onceLoad_;// LoadPrefabにアタッチされてるScript
     public static bool onceflag_ = true;
+
+    // デバッグ用
+    private SaveLoadCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
+
 
     void Start()
     {
@@ -41,7 +50,7 @@ public class UniHouseMng : MonoBehaviour
         GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
 
         // オブジェクトがある＝タイトルシーンから遷移してきた
-       loadPrefab_ = GameObject.Find("LoadPrefab");
+        loadPrefab_ = GameObject.Find("LoadPrefab");
         if (loadPrefab_ != null)
         {
             var tmp = GameObject.Find("DontDestroyCanvas/Managers");
@@ -63,6 +72,10 @@ public class UniHouseMng : MonoBehaviour
         // 合成時のミニゲーム用Mng
         alchemyMng.gameObject.SetActive(false);
         magicCreateMng.gameObject.SetActive(false);
+        warningInfo.gameObject.SetActive(false);
+        warningText_ = warningInfo.transform.Find("Text").GetComponent<Text>();
+        warningText_.text = null;
+
 
         // ステータスアップを消すか判定する
         if (!SceneMng.GetFinStatusUpTime().Item2)
@@ -86,19 +99,25 @@ public class UniHouseMng : MonoBehaviour
 
         SceneMng.MenuSetActive(true);
 
-        if (onceflag_ == true)
-        {
-            onceflag_ = false;
-            GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
-            GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
-            GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
-            GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
-        }
+        //// デバッグ用
+        //if (onceflag_ == true)
+        //{
+        //    onceflag_ = false;
+        //    GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
+        //    GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
+        //    GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
+        //    GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
+
+        //    saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>();
+        //    saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.CHARACTER);
+        //    saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.OTHER);
+        //    saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.BOOK);
+        //}
     }
 
     public void ClickSleepButton()
     {
-        if(EventMng.GetChapterNum() < 7)    // 進行度が0～6のとき
+        if (EventMng.GetChapterNum() < 7)    // 進行度が0～6のとき
         {
             Debug.Log("現在の進行度が7未満のため、休めません");
             return; // 休むボタンを押しても反応しないようにする
@@ -123,6 +142,12 @@ public class UniHouseMng : MonoBehaviour
     public void ClickAlchemyButton()
     {
         SceneMng.SetSE(0);
+        if (BookStoreMng.bookState_[5].readFlag == 0)
+        {
+            warningText_.text = "本屋でレシピを購入しましょう";
+            StartCoroutine(Warning());
+            return;
+        }
         alchemyMng.gameObject.SetActive(true);
         uniHouseCanvas.gameObject.SetActive(false);
         alchemyMng.GetComponent<ItemCreateMng>().Init();
@@ -131,15 +156,49 @@ public class UniHouseMng : MonoBehaviour
 
     public void ClickMagicCreateButton()
     {
-        // 空のマテリアを1つ以上持っていたらワード合成ができる
-        //if (0 < Bag_Materia.materiaState[Bag_Materia.emptyMateriaNum].haveCnt)
-        //{
         SceneMng.SetSE(0);
-
+        if (EventMng.GetChapterNum() < 8)
+        {
+            // イベント8以下はワードを取得していないため押せないようにする
+            warningText_.text = "ワードが足りません";
+            StartCoroutine(Warning());
+            return;
+        }
+        else
+        {
+            // 空のマテリアを1つ以上持っていたらワード合成ができる
+            if (Bag_Materia.materiaState[Bag_Materia.emptyMateriaNum].haveCnt <= 0)
+            {
+                warningText_.text = "空のマテリアが足りません";
+                StartCoroutine(Warning());
+                return;
+            }
+        }
         uniHouseCanvas.gameObject.SetActive(false);
-            magicCreateMng.gameObject.SetActive(true);
-            magicCreateMng.GetComponent<MagicCreate>().Init();
-      //  }
+        magicCreateMng.gameObject.SetActive(true);
+        magicCreateMng.GetComponent<MagicCreate>().Init();
         Debug.Log("魔法作成ボタンが押下されました");
+    }
+
+    private IEnumerator Warning()
+    {
+        warningInfo.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+        warningInfo.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+        warningText_.color = new Color(1.0f, 0.0f, 0.0f, 1.0f);
+        warningInfo.gameObject.SetActive(true);
+        float alpha = 1.0f;
+        while (true)
+        {
+            yield return null;
+            alpha -= 0.01f;
+            warningInfo.color = new Color(1.0f, 1.0f, 1.0f, alpha);
+            warningText_.color = new Color(1.0f, 0.0f, 0.0f, alpha); 
+            if (alpha <= 0.0f)
+            {
+                warningInfo.gameObject.SetActive(false);
+                Debug.Log("警告表示を消します");
+                yield break;
+            }
+        }
     }
 }

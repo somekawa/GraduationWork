@@ -171,7 +171,7 @@ public class ButtleResult : MonoBehaviour
                 if(SceneMng.SCENE.FIELD4==SceneMng.nowScene)
                 {
                     // 各アイテムのドロップ数を1～5のランダムで取得
-                    dropCnt_[i] = Random.Range(1, 5);
+                    dropCnt_[i] = 1;
 
                     // ドロップ物を表示するためにプレハブを生成
                     dropObj_[i] = Instantiate(dropPrefab,
@@ -346,7 +346,7 @@ public class ButtleResult : MonoBehaviour
         if (levelUpFlag[(int)SceneMng.CHARACTERNUM.UNI] == false
          && levelUpFlag[(int)SceneMng.CHARACTERNUM.JACK] == false)
         {
-            FieldMng.nowMode = FieldMng.MODE.SEARCH;
+            FieldMng.nowMode = SceneMng.SCENE.FIELD4 == SceneMng.nowScene? FieldMng.MODE.NON:FieldMng.MODE.SEARCH;
             levelMng.gameObject.SetActive(false);
             resultCanvas.gameObject.SetActive(false);
             for (int i = 0; i < enemyCnt_; i++)
@@ -365,7 +365,7 @@ public class ButtleResult : MonoBehaviour
             if (levelUpFlag[(int)SceneMng.CHARACTERNUM.UNI] == false
              && levelUpFlag[(int)SceneMng.CHARACTERNUM.JACK] == false)
             {
-                FieldMng.nowMode = FieldMng.MODE.SEARCH;
+                FieldMng.nowMode = SceneMng.SCENE.FIELD4 == SceneMng.nowScene ? FieldMng.MODE.NON : FieldMng.MODE.SEARCH;
                 levelMng.gameObject.SetActive(false);
                 resultCanvas.gameObject.SetActive(false);
                 enemyCnt_ = 0;

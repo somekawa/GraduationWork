@@ -182,10 +182,13 @@ public class Chara : CharaBase,InterfaceButtle
         set_.maxMP += num[6];
         set_.MP += num[6];
         set_.Level += num[7];
-        set_.CharacterMaxExp = num[9];
-        
+        if (num[7] != 0)
+        {   
+            // レベルが上がった時しかMax値を代入しない
+            set_.CharacterMaxExp = num[9];
+        }
         // exp本購入は基本的にレベルが上がる1つ前まで上げる
-        set_.CharacterExp = num[7] == 0 ? num[9] - 1 : num[8];
+        set_.CharacterExp = num[7] == 0 ? set_.CharacterMaxExp - 1 : num[8];
         Debug.Log(set_.CharacterExp + "           " + set_.CharacterMaxExp);
         Debug.Log("レベルアップ！");
     }
