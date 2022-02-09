@@ -1,0 +1,39 @@
+.xlsは説明の部分を更新
+画像はPictureの中にSquareBoxフォルダを作成
+
+ItemStorePleateプレハブ
+SourceImage:　ItemStorePlate
+
+BookPlateプレハブ
+SourceImage:　BookPlatePlate
+
+ItemBoxプレハブ
+SourceImage:　ItemBack
+
+MagicBoxプレハブ
+SourceImage:　MagicBack
+
+MateriaBoxプレハブ
+SourceImage:　MateriaBack
+
+HouseInterior
+ーItemStore
+　ーItemStoreMng
+　　ーItemStoreUI
+　　　ーBuyMng	GridLayoutGroup　Left5　CellSize（410,85）　他はそのまま
+　　　　ーViewPort
+	ーBuyParent
+　　　ーSellMng	GridLayoutGroup　Left5　CellSize（410,85）　他はそのまま
+　　　　ーViewPort
+	ーSellParent
+　　　ーCheckArea
+　　　　ーInfoArea　ここを一時保存フォルダーItemStoreフォルダ内のものと入れ替え
+		 SourceImage:　ItemStoreIconBack
+
+ーBookStore
+　ーBookStoreMng
+　　ーBookStoreUI
+　　　ーCheckArea
+　　　　ーBookData
+　　　　　ーInfoArea　ここを一時保存フォルダーBookStoreフォルダ内のものと入れ替え
+		 　SourceImage:　BookStoreIconBack

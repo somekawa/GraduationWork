@@ -50,7 +50,6 @@ public class BookStoreMng : MonoBehaviour
     private Image soldOutImage_;// すべて買われた場合の画像
     private Button buyBtn_;// 購入するためのボタン
     private TMPro.TextMeshProUGUI infoText_;
-    private Image infoBackImage_;// 選択したアイテムの画像
     private Image infoImage_;// 選択したアイテムの画像
 
     // 合計料金
@@ -97,8 +96,7 @@ public class BookStoreMng : MonoBehaviour
             bookStoreCanvas_ = GameObject.Find("BookStoreCanvas");
             bookInfoData_ = bookStoreUI.transform.Find("CheckArea/BookData").GetComponent<RectTransform>();
             buyBtn_ = bookInfoData_.Find("BuyButton").GetComponent<Button>();
-            infoBackImage_ = bookInfoData_.Find("InfoArea/Back").GetComponent<Image>();
-            infoImage_ = bookInfoData_.Find("InfoArea/Back/Image").GetComponent<Image>();
+            infoImage_ = bookInfoData_.Find("InfoArea/Image").GetComponent<Image>();
             bookNameText_ = bookInfoData_.Find("InfoArea/Back/NameText").GetComponent<TMPro.TextMeshProUGUI>();
             infoText_ = bookInfoData_.Find("InfoArea/Text").GetComponent<TMPro.TextMeshProUGUI>();
             statusOrWordText_ = bookInfoData_.Find("StatusOrWordText").GetComponent<TMPro.TextMeshProUGUI>();
@@ -108,7 +106,6 @@ public class BookStoreMng : MonoBehaviour
             soldOutImage_ = bookStoreUI.transform.Find("ScrollView/Viewport/SoldOut").GetComponent<Image>();
             haveMoneyText_ = bookStoreUI.transform.Find("CheckArea/Money/Count").GetComponent<TMPro.TextMeshProUGUI>();
         }
-        infoBackImage_.color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
         infoImage_.color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
         infoImage_.sprite = null;
         bookNameText_.text = null;
@@ -399,7 +396,6 @@ public class BookStoreMng : MonoBehaviour
         MoneyCheck();
 
         // 本の画像
-        infoBackImage_.color = new Color(0.0f, 0.0f, 1.0f, 1.0f);
         infoImage_.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
         infoImage_.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BOOK][bookState_[num].imageNum];
         bookNameText_.text = bookState_[num].bookName;

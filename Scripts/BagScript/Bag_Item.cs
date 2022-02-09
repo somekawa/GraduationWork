@@ -51,8 +51,8 @@ public class Bag_Item : MonoBehaviour
         popItemList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
         saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_HaveItem>();
         maxCnt_ = popItemList_.SetMaxItemCount();
-        //data 
-            itemState = new ItemData[maxCnt_];
+
+        itemState = new ItemData[maxCnt_];
         for (int i = 0; i < maxCnt_; i++)
         {
             itemState[i].number = i;
@@ -60,6 +60,7 @@ public class Bag_Item : MonoBehaviour
             itemState[i].haveCnt = 0;
         }
         DataSave();
+        DataLoad();
     }
 
     public void Init()
@@ -82,7 +83,7 @@ public class Bag_Item : MonoBehaviour
 
                 itemState[i].number = int.Parse(csvDatas_[i + 1][0]);
                 itemState[i].name = csvDatas_[i + 1][1];
-              //  Debug.Log(i+"アイテムの名前："+itemState[i].name);
+               // Debug.Log(i+"アイテムの名前："+itemState[i].name);
                 // アイテムの所持数を確認
                 itemState[i].haveCnt = int.Parse(csvDatas_[i + 1][2]);
              //   Debug.Log(itemState[i].name+"アイテム個数" + itemState[i].haveCnt);
@@ -137,9 +138,10 @@ public class Bag_Item : MonoBehaviour
     {
         if (rate == 2)
         {
-            itemNum = itemNum * 2;
+            itemNum += maxCnt_/2;
+
         }
-        Debug.Log("加算されるアイテム" + itemState[itemNum].name);
+        Debug.Log(itemNum+"加算されるアイテム" + itemState[itemNum].name);
         itemState[itemNum].haveCnt = itemState[itemNum].haveCnt + createCnt;
         //  data[itemNum].haveCnt = itemState[itemNum].haveCnt;
     }

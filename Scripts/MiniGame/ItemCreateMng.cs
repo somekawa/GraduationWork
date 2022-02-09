@@ -180,14 +180,20 @@ public class ItemCreateMng : MonoBehaviour
         }
         miniGameObj.gameObject.SetActive(false);
         miniGameObj.transform.localPosition = new Vector3(-0.25f, 0.8f, 0.2f);
-
-
     }
 
     public void AlchemyRecipeSelect()
     {
         int rate = (int)circleMng_.GetMiniGameJudge();
-        bagItem_.ItemGetCheck(rate, saveItemNum_, 1);
+        if(rate==(int)CircleMng.JUDGE.BAD)
+        {
+            int materiaNum_ = Bag_Materia.emptyMateriaNum;
+            Bag_Materia.materiaState[materiaNum_].haveCnt++;
+        }
+        else
+        {
+            bagItem_.ItemGetCheck(rate, saveItemNum_, 1);
+        }
         saveBtn_.interactable = true;
         saveBtnName_ = "";
 
@@ -283,7 +289,7 @@ public class ItemCreateMng : MonoBehaviour
                 createBtn_.interactable = false;
                 cancelBtn_.interactable = false;
                 miniGameObj.gameObject.SetActive(true);
-                circleMng_.Init(circleNum_, recipeNum%4);
+                circleMng_.Init(circleNum_, recipeNum % 4);
 
                 //Debug.Log("number[0]:" + number[0] + "   number[1]:" + number[1] + "   number[2]:" + number[2]);
                 if (itemRecipeState[recipeNum].materia3 == "non")

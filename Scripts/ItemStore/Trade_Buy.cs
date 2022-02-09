@@ -24,11 +24,16 @@ public class Trade_Buy : MonoBehaviour
 
     private int[] maxCnt_;
     private int[] itemMaxCnt_ = new int[4] { 5, 10, 15, 19 };
-    private int[] materiaMaxCnt_ = new int[5] { 7, 14, 23, 28, 34 };
+    private int[] materiaMaxCnt_ = new int[5] { 7, 14, 23, 28, 35 };
+    private int materiaNum_ = -1;   // 空のマテリアの番号を保存 -1が情報が入ってない状態
 
     public void Init(int seleKind, int kind)
     // void Start()
     {
+        if(materiaNum_==-1)
+        {
+            materiaNum_ = Bag_Materia.emptyMateriaNum;
+        }
         maxCnt_ = new int[(int)ItemStoreMng.KIND.MAX];
         if (19 < EventMng.GetChapterNum())
         {
@@ -58,29 +63,41 @@ public class Trade_Buy : MonoBehaviour
         buyData[ItemStoreMng.KIND.ITEM] = InitBuyData(ItemStoreMng.KIND.ITEM, maxCnt_[(int)ItemStoreMng.KIND.ITEM]);
         buyData[ItemStoreMng.KIND.MATERIA] = InitBuyData(ItemStoreMng.KIND.MATERIA, maxCnt_[(int)ItemStoreMng.KIND.MATERIA]);
 
-        //if (popItemsList_ == null)
-        //{
-        //    popItemsList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
-
-        //    //maxCnt_ = new int[(int)ItemStoreMng.KIND.MAX];
-        //    //maxCnt_[(int)ItemStoreMng.KIND.MATERIA] = popItemsList_.SetMaxMateriaCount();
-        //    //maxCnt_[(int)ItemStoreMng.KIND.ITEM] = popItemsList_.SetMaxItemCount();
-        //    buyData[ItemStoreMng.KIND.ITEM] = InitBuyData(ItemStoreMng.KIND.ITEM, maxCnt_[(int)ItemStoreMng.KIND.ITEM]);
-        //    buyData[ItemStoreMng.KIND.MATERIA] = InitBuyData(ItemStoreMng.KIND.MATERIA, maxCnt_[(int)ItemStoreMng.KIND.MATERIA]);
-        //}
-        SetActiveBuy(seleKind, maxCnt_[seleKind]);// 表示する
-        InactiveBuy(kind, maxCnt_[kind]);// 非表示にする
+        SetActiveBuy(seleKind, maxCnt_[seleKind]);  // 表示する
+        InactiveBuy(kind, maxCnt_[kind]);           // 非表示にする
     }
 
     private StoreBuy[] InitBuyData(ItemStoreMng.KIND kind, int maxCnt)
     {
-        var data = new StoreBuy[maxCnt];
-       // Debug.Log(maxCnt);
+        StoreBuy[] data = new StoreBuy[maxCnt];
+
+        if (kind == ItemStoreMng.KIND.MATERIA
+             && EventMng.GetChapterNum() < 20)
+        {
+            data = new StoreBuy[maxCnt+1];
+            data[maxCnt].haveCnt = Bag_Materia.materiaState[materiaNum_].haveCnt;
+            data[maxCnt].price = InitPopList.materiaData[materiaNum_].buyPrice;
+            data[maxCnt].name = Bag_Materia.materiaState[materiaNum_].name;
+            data[maxCnt].obj = PopListInTown.materiaPleate[materiaNum_];
+            data[maxCnt].obj.name = data[maxCnt].name + materiaNum_;
+            data[maxCnt].btn = data[maxCnt].obj.GetComponent<Button>();
+            // 表示する名前を変更する
+            data[maxCnt].nameText = data[maxCnt].obj.transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>();
+            data[maxCnt].nameText.text = data[maxCnt].name;
+
+            // 料金を表示するText
+            data[maxCnt].priceText = data[maxCnt].obj.transform.Find("Price").GetComponent<TMPro.TextMeshProUGUI>();
+            data[maxCnt].priceText.text = data[maxCnt].price.ToString();
+            data[maxCnt].obj.transform.SetParent(buyParent.transform);
+            data[maxCnt].obj.SetActive(true);
+        }
+
+        // Debug.Log(maxCnt);
         for (int i = 0; i < maxCnt; i++)
         {
             data[i].haveCnt = kind == ItemStoreMng.KIND.ITEM ? Bag_Item.itemState[i].haveCnt : Bag_Materia.materiaState[i].haveCnt;
-            data[i].price = kind == ItemStoreMng.KIND.ITEM ? InitPopList.itemData[i].buyPrice:InitPopList.materiaData[i].buyPrice ;
-            data[i].name = kind == ItemStoreMng.KIND.ITEM ? Bag_Item.itemState[i].name: Bag_Materia.materiaState[i].name ;
+            data[i].price = kind == ItemStoreMng.KIND.ITEM ? InitPopList.itemData[i].buyPrice : InitPopList.materiaData[i].buyPrice;
+            data[i].name = kind == ItemStoreMng.KIND.ITEM ? Bag_Item.itemState[i].name : Bag_Materia.materiaState[i].name;
             data[i].obj = kind == ItemStoreMng.KIND.ITEM ? PopListInTown.itemPleate[i] : PopListInTown.materiaPleate[i];
             data[i].obj.name = data[i].name + i;
             data[i].btn = data[i].obj.GetComponent<Button>();
@@ -98,6 +115,7 @@ public class Trade_Buy : MonoBehaviour
             data[i].obj.transform.SetParent(buyParent.transform);
             data[i].obj.SetActive(true);
         }
+        Debug.Log("表示最大数" + maxCnt_);
         return data;
     }
 
