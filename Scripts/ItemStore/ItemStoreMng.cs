@@ -164,9 +164,6 @@ public class ItemStoreMng : MonoBehaviour
         itemStoreUI.transform.gameObject.SetActive(true);
         kindBtn_[(int)KIND.MATERIA].interactable = false;// 素材を表示
         kindBtn_[(int)KIND.ITEM].interactable = true;// アイテムを非表示
-        //itemStoreBtn_[0].gameObject.SetActive(false);
-        //itemStoreBtn_[1].gameObject.SetActive(false);
-        //itemStoreBtn_[2].gameObject.SetActive(false);
         itemStoreCanvas_.gameObject.SetActive(false);
     }
 
@@ -272,9 +269,9 @@ public class ItemStoreMng : MonoBehaviour
         {
             cntBtn_[0].interactable = false;
         }
-
+        Debug.Log("選択数" + itemCnt_ + "        ：最小値" + slider_.minValue);
         // 右矢印が押下できないなら押下可能状態に
-        cntBtn_[1].interactable = cntBtn_[1].interactable == false ? true : false;
+        cntBtn_[1].interactable =  itemCnt_<slider_.maxValue  ? true : false;
         CommonUpDown();
         slider_.value = itemCnt_;
     }
@@ -301,7 +298,7 @@ public class ItemStoreMng : MonoBehaviour
         }
 
         // 左矢印が押下できないなら押下可能状態に
-        cntBtn_[0].interactable = cntBtn_[0].interactable == false ? true : false;
+        cntBtn_[0].interactable = slider_.minValue < itemCnt_ ? true : false;
 
         CommonUpDown();
         slider_.value = itemCnt_;
@@ -315,7 +312,6 @@ public class ItemStoreMng : MonoBehaviour
         // 売買するアイテムの料金
         priceText_.text = totalPrice_.ToString();
         pressFlag_ = true;
-
     }
 
     public void OnNowValueCheck()
