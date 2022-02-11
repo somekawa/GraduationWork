@@ -1,6 +1,6 @@
-using System.Text.RegularExpressions;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -55,6 +55,10 @@ public class ButtleResult : MonoBehaviour
     // バッグ
     private Bag_Materia bagMateria_;
 
+    // クリックを促すアイコン
+    private Image nextIcon_;
+    private Text nextText_;
+
     void Start()
     {
         resultCanvas.gameObject.SetActive(false);
@@ -71,7 +75,8 @@ public class ButtleResult : MonoBehaviour
         Debug.Log("resultCanvas" + resultCanvas.transform.Find("UniIconFrame/EXPSlider").GetComponent<Slider>());
         expSlider_[(int)SceneMng.CHARACTERNUM.UNI] = resultCanvas.transform.Find("UniIconFrame/EXPSlider").GetComponent<Slider>();
         expSlider_[(int)SceneMng.CHARACTERNUM.JACK] = resultCanvas.transform.Find("JackIconFrame/EXPSlider").GetComponent<Slider>();
-
+        nextIcon_ = resultCanvas.transform.Find("NextIcon").GetComponent<Image>();
+        nextText_ = nextIcon_.transform.Find("Text").GetComponent<Text>();
         charasList_ = SceneMng.charasList_;
 
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
@@ -108,6 +113,7 @@ public class ButtleResult : MonoBehaviour
 
         // 素材取得用
         bagMateria_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Materia>();
+
     }
 
     public void DropCheck(int enemyCnt, int[] num, bool bossFlag, List<GameObject> list)
@@ -140,7 +146,7 @@ public class ButtleResult : MonoBehaviour
             }
 
             // 討伐クエストの討伐数確認
-            for(int k = 0; k < list.Count; k++)
+            for (int k = 0; k < list.Count; k++)
             {
                 // 名前部分のアンダーバーで分ける
                 var name = enemyList_[i].Name().Split('_');
@@ -220,6 +226,7 @@ public class ButtleResult : MonoBehaviour
             // 経験値のスライダーを動かす
             StartCoroutine(ActiveExpSlider(i, charasList_[i].GetDeathFlg(), saveSumExp_[i]));
         }
+        StartCoroutine(NextIconCheck());
     }
 
     private int ExpCheck(int charaNum, int enemyNum)
@@ -227,7 +234,7 @@ public class ButtleResult : MonoBehaviour
         int getExp = 0;
         int LvCheck = level_[charaNum] - enemyLv_[enemyNum];
         Debug.Log("レベル差" + LvCheck);
-        if ( LvCheck<=0)
+        if (LvCheck <= 0)
         {
             // キャラのレベルのほうが低い場合 そのままの経験値を渡す
             getExp = enemyList_[enemyNum].GetExp();
@@ -242,6 +249,20 @@ public class ButtleResult : MonoBehaviour
             }
         }
         return getExp;
+    }
+
+    private IEnumerator NextIconCheck()
+    {
+        // リザルト画面表示時に呼び出して　リザルト画面が消えるときに消す
+        while (true)
+        {
+            yield return null;
+            // アイコンの表示
+            // nextIcon_.gameObject.SetActive(true);
+            // アイコンの点滅処理(Time.time * 5.0の[5.0]は点滅速度調整用の数値です)
+            nextIcon_.color = new Color(1.0f, 1.0f, 1.0f, Mathf.Sin(Time.time * 5.0f) / 2 + 0.5f);
+            nextText_.color = new Color(1.0f, 1.0f, 1.0f, Mathf.Sin(Time.time * 5.0f) / 2 + 0.5f);
+        }
     }
 
     private IEnumerator ActiveExpSlider(int charaNum, bool deathFlag, int sumExp)
@@ -338,7 +359,6 @@ public class ButtleResult : MonoBehaviour
             saveSumExp_[i] = 0;
         }
 
-        //  saveSumExp_ = 0;
         // 誰のレベルも上がってなかったら何もしない
         if (levelUpFlag[(int)SceneMng.CHARACTERNUM.UNI] == false
          && levelUpFlag[(int)SceneMng.CHARACTERNUM.JACK] == false)
@@ -352,12 +372,13 @@ public class ButtleResult : MonoBehaviour
                 FieldMng.nowMode = FieldMng.MODE.SEARCH;
             }
             resultCanvas.gameObject.SetActive(false);
+            StopCoroutine(NextIconCheck());
             for (int i = 0; i < enemyCnt_; i++)
             {
                 // リザルト非表示にDropオブジェクト削除
                 Destroy(dropObj_[i]);
             }
-            enemyCnt_ = 0;
+            enemyCnt_ = 0;  // 削除し終わったら初期化
             enemyList_.Clear();
             yield break;
         }
@@ -378,12 +399,13 @@ public class ButtleResult : MonoBehaviour
                 }
                 levelMng.gameObject.SetActive(false);
                 resultCanvas.gameObject.SetActive(false);
+                StopCoroutine(NextIconCheck());
                 for (int i = 0; i < enemyCnt_; i++)
                 {
                     // リザルト非表示にDropオブジェクト削除
                     Destroy(dropObj_[i]);
                 }
-                enemyCnt_ = 0;
+                enemyCnt_ = 0;  // 削除し終わったら初期化
                 enemyList_.Clear();
                 yield break;
             }
@@ -436,7 +458,7 @@ public class ButtleResult : MonoBehaviour
     }
 
     private void LevelRelation(Vector2 pos, SceneMng.CHARACTERNUM chara,
-            int oldLevel, int nowLevel, int nextExp, int exp)
+        int oldLevel, int nowLevel, int nextExp, int exp)
     {
         SceneMng.SetSE(15);
 
