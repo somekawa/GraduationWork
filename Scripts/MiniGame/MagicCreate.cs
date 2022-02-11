@@ -831,7 +831,7 @@ public class MagicCreate : MonoBehaviour
         int power = magicPower_;
         int mp = mpPower_;
         // ¸”sˆÈŠO‚Ìê‡‚Í–‚–@‚ğ•Û‘¶‚·‚é
-        if (rate != (int)MovePoint.JUDGE.BAD)
+        if (rate != (int)CircleMng.JUDGE.BAD)
         {
             // ‘å¬Œ÷‚Ì‚ÍˆĞ—Í‚ğã‚°‚ÄMPÁ”ï—Ê‚ğŒ¸­‚³‚¹‚é
             if (rate == (int)CircleMng.JUDGE.GOOD)

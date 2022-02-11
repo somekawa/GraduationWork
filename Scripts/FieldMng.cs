@@ -39,7 +39,7 @@ public class FieldMng : MonoBehaviour
 
     public static bool stopEncountTimeFlg = false; // アイテムの効果で一時的にエンカウントを止める
     private bool stopEncountTimeFlgOld_ = false;   // 1フレーム前と比較する
-    private float toButtleTime_ = 6.0f;           // 6秒経過でバトルへ遷移する
+    private float toButtleTime_ = 6.0f;            // 6秒経過でバトルへ遷移する
     private float time_ = 0.0f;                    // 現在の経過時間
     private float keepTime_ = 0.0f;                // 現在のエンカウントまでの時間を一時保存しておく
 
@@ -274,7 +274,7 @@ public class FieldMng : MonoBehaviour
             // 値を保存しておく
             keepTime_ = toButtleTime_;
             stopEncountTimeFlgOld_ = stopEncountTimeFlg;
-            toButtleTime_ = 60.0f;
+            toButtleTime_ = 20.0f;
             Debug.Log("一時的にエンカウントが停止しました");
         }
 
@@ -329,24 +329,42 @@ public class FieldMng : MonoBehaviour
         switch (mode)
         {
             case MODE.NON:
+                if(SceneMng.nowScene == SceneMng.SCENE.FIELD4)
+                {
+                    jackObj_.SetActive(false);
+                    cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
+                    SceneMng.MenuSetActive(true,true);
+                    audios.Stop();
+                    audios.clip = BGM_search;//流すクリップを切り替える
+                    audios.Play();
+                    nowMode = MODE.SEARCH;
+                }
                 break;
 
             case MODE.SEARCH:
                 jackObj_.SetActive(false);
                 cameraMng_.SetChangeCamera(false);   // メインカメラアクティブ
-                SceneMng.MenuSetActive(true);
-                audios.Stop();
-                audios.clip = BGM_search;//流すクリップを切り替える
-                audios.Play();
+                SceneMng.MenuSetActive(true, true);
+
+                if (oldMode != MODE.MENU)
+                {
+                    audios.Stop();
+                    audios.clip = BGM_search;//流すクリップを切り替える
+                    audios.Play();
+                }
                 break;
 
             case MODE.BUTTLE:
                 jackObj_.SetActive(true);
                 cameraMng_.SetChangeCamera(true);    // サブカメラアクティブ
-                SceneMng.MenuSetActive(false);
-                audios.Stop();
-                audios.clip = BGM_normalButtle;//流すクリップを切り替える
-                audios.Play();
+                SceneMng.MenuSetActive(false,true);
+
+                if (oldMode != MODE.MENU)
+                {
+                    audios.Stop();
+                    audios.clip = BGM_normalButtle;//流すクリップを切り替える
+                    audios.Play();
+                }
                 break;
 
             case MODE.MENU:
@@ -355,10 +373,14 @@ public class FieldMng : MonoBehaviour
             case MODE.FORCEDBUTTLE:
                 jackObj_.SetActive(true);
                 cameraMng_.SetChangeCamera(true);    // サブカメラアクティブ
-                SceneMng.MenuSetActive(false);
-                audios.Stop();
-                audios.clip = BGM_bossButtle;//流すクリップを切り替える
-                audios.Play();
+                SceneMng.MenuSetActive(false,true);
+
+                if (oldMode != MODE.MENU)
+                {
+                    audios.Stop();
+                    audios.clip = BGM_bossButtle;//流すクリップを切り替える
+                    audios.Play();
+                }
                 break;
 
             default:
@@ -374,6 +396,11 @@ public class FieldMng : MonoBehaviour
     public float GetNowEncountTime()
     {
         return time_ / toButtleTime_;
+    }
+
+    public bool GetStopEncountTimeFlg()
+    {
+        return stopEncountTimeFlg;
     }
 
     // flagは、true->宝箱,false->壁(強制戦闘)の処理という風に使い分ける

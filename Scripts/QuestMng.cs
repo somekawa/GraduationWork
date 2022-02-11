@@ -102,15 +102,6 @@ public class QuestMng : MonoBehaviour
 
         // Excelの行数からクエストの合計数を設定する
         totalQuestNum_ = popQuestInfo_.param.Count;
-        // 現在の進行度番号とクエストの進行度番号を比較して、現在の進行度番号以下のクエストの個数を数える
-        int tmpQuestNum = 0;
-        for(int i = 0; i < totalQuestNum_; i++)
-        {
-            if(EventMng.GetChapterNum() >= popQuestInfo_.param[i].eventNum)
-            {
-                tmpQuestNum++;
-            }
-        }
 
         // ギルドスクリプトのインスタンス
         if (guild_ == null)
@@ -135,7 +126,7 @@ public class QuestMng : MonoBehaviour
 		//　クエスト表示用UIのコンテンツ
 		questContent_ = transform.Find("QuestUI/Background/Scroll View/Viewport/Content");
 
-        questButton_ = new QuestButton[tmpQuestNum];
+        questButton_ = new QuestButton[totalQuestNum_];
 
         popUpReward_ = transform.Find("QuestUI/PopUp").gameObject;
         rewardText_ = transform.Find("QuestUI/PopUp/GetReward").GetComponent<TMPro.TextMeshProUGUI>();
@@ -144,29 +135,37 @@ public class QuestMng : MonoBehaviour
         deliveryItemBox_[0] = deliveryBack_.transform.Find("ItemBox").gameObject;
         deliveryItemBox_[1] = deliveryBack_.transform.Find("ItemBox (1)").gameObject;
 
-        for (var i = 0; i < tmpQuestNum; i++)
-		{
-			//　クエスト用のUIプレハブを生成する
-			var questUIInstance = Instantiate(questPrefab, questContent_);
+        int tmpNum = 0;
 
+        for (var i = 0; i < totalQuestNum_; i++)
+		{
+            if (EventMng.GetChapterNum() < popQuestInfo_.param[i].eventNum)
+            {
+                continue;
+            }
+            //　クエスト用のUIプレハブを生成する
+            var questUIInstance = Instantiate(questPrefab, questContent_);
+            questUIInstance.name = i.ToString();
             // クエスト番号を設定する
             questButton_[i] = questUIInstance.GetComponent<QuestButton>();
-            questButton_[i].SetQuestNum(i);
+            questButton_[i].SetQuestNum(popQuestInfo_.param[i].num);
 
             questUIInstanceList_.Add(questUIInstance);
 
             // 5文字以上のタイトル情報のとき
-            if(popQuestInfo_.param[i].info.Length >= 5)
+            if (popQuestInfo_.param[i].info.Length >= 5)
             {
                 //　セットするコンポーネントを取得して情報を反映させる
-                questUIInstanceList_[i].Find("TitlePanel/Button/Text").GetComponent<TMPro.TextMeshProUGUI>().text =
+                questUIInstanceList_[tmpNum].Find("TitlePanel/Button/Text").GetComponent<TMPro.TextMeshProUGUI>().text =
                     popQuestInfo_.param[i].info.Substring(0, 5) + "・・";
             }
             else
             {
-                questUIInstanceList_[i].Find("TitlePanel/Button/Text").GetComponent<TMPro.TextMeshProUGUI>().text =
+                questUIInstanceList_[tmpNum].Find("TitlePanel/Button/Text").GetComponent<TMPro.TextMeshProUGUI>().text =
                     popQuestInfo_.param[i].info;
             }
+
+            tmpNum++;
         }
 
         // 初回のみ登録する
@@ -212,23 +211,35 @@ public class QuestMng : MonoBehaviour
         // QuestUIと、その子を全て表示状態にする
         questUI.SetActive(true);
 
-        for (int k = 0; k < questContent_.childCount; k++)  // 全体のクエスト分回す
+        int num = 0;
+        for (int k = 0; k < totalQuestNum_; k++)  // 全体のクエスト分回す
         {
-            questContent_.GetChild(k).gameObject.SetActive(true);   // 表示状態から調べる
-
-            // 合体させたリストに載っていたものは非表示にする
-            for (int i = 0; i < mixList.Count; i++)
+            if (questButton_[k] == null)
             {
-                if (int.Parse(mixList[i].name) == questButton_[k].GetQuestNum())
-                {
-                    questContent_.GetChild(k).gameObject.SetActive(false);
-                }
+                continue;
             }
+
+            questContent_.GetChild(num).gameObject.SetActive(true);   // 表示状態から調べる
 
             // 1度クリアしたメインクエストも非表示にする
             if (popQuestInfo_.param[k].type == "main" && questClearCnt[k] >= 1)
             {
-                questContent_.GetChild(k).gameObject.SetActive(false);
+                questContent_.GetChild(num).gameObject.SetActive(false);
+            }
+
+            num++;
+
+            // 合体させたリストに載っていたものは非表示にする
+            for (int i = 0; i < mixList.Count; i++)
+            {
+                for (int f = 0; f < questContent_.childCount; f++)  
+                {
+                    if (int.Parse(questContent_.GetChild(f).gameObject.name) == int.Parse(mixList[i].name))
+                    {
+                        questContent_.GetChild(f).gameObject.SetActive(false);
+                        break;
+                    }
+                }
             }
         }
 
@@ -252,7 +263,7 @@ public class QuestMng : MonoBehaviour
             // 指定したキーが存在するかどうか
             if (!rewardGradeUp.ContainsKey(questNum_))
             {
-                rewardGradeUp.Add(questNum_, 0.0f);
+                rewardGradeUp.Add(questNum_, 1.0f);
             }
 
             // 納品クエストかを確認する
@@ -413,6 +424,9 @@ public class QuestMng : MonoBehaviour
         {
             numSplit[i] = int.Parse(split[i]);
             Bag_Item.itemState[numSplit[i]].haveCnt -= (int)deliveryItemBox_[i].transform.Find("Slider").GetComponent<Slider>().value;
+            var tmp = int.Parse(Bag_Item.itemState[numSplit[i]].cntText.text) - (int)deliveryItemBox_[i].transform.Find("Slider").GetComponent<Slider>().value;
+            Bag_Item.itemState[numSplit[i]].cntText.text = tmp.ToString();
+
             StopCoroutine(rest_[i]); //一時停止
             rest_[i] = null;         //リセット
             nowDeliveryNum_[i] = 0; // 納品予定数の初期化
@@ -641,13 +655,21 @@ public class QuestMng : MonoBehaviour
             // 受注中クエストの更新(報告時にも非表示切り替えが発生するため)
             var tmp = QuestClearCheck.GetOrderQuestsList();
             // リストに載ってたら表示にする(questContent_の子供を見る)
-            for (int k = 0; k < questContent_.childCount; k++)  // 全体のクエスト分回す
+            for (int k = 0; k < totalQuestNum_; k++)  // 全体のクエスト分回す
             {
                 for (int i = 0; i < tmp.Count; i++)
                 {
-                    if (int.Parse(tmp[i].Item1.name) == questButton_[k].GetQuestNum())
+                    if(questButton_[k] == null)
                     {
-                        questContent_.GetChild(k).gameObject.SetActive(true);
+                        continue;
+                    }
+
+                    for (int f = 0; f < questContent_.childCount; f++)  // 全体のクエスト分回す
+                    {
+                        if (int.Parse(questContent_.GetChild(f).gameObject.name) == int.Parse(tmp[i].Item1.name))
+                        {
+                            questContent_.GetChild(f).gameObject.SetActive(true);
+                        }
                     }
                 }
             }
@@ -658,13 +680,21 @@ public class QuestMng : MonoBehaviour
             var tmp = QuestClearCheck.GetClearedQuestsList();
 
             // リストに載ってたら表示にする(questContent_の子供を見る)
-            for (int k = 0; k < questContent_.childCount; k++)  // 全体のクエスト分回す
+            for (int k = 0; k < totalQuestNum_; k++)  // 全体のクエスト分回す
             {
                 for (int i = 0; i < tmp.Count; i++)
                 {
-                    if (int.Parse(tmp[i].name) == questButton_[k].GetQuestNum())
+                    if (questButton_[k] == null)
                     {
-                        questContent_.GetChild(k).gameObject.SetActive(true);
+                        continue;
+                    }
+
+                    for (int f = 0; f < questContent_.childCount; f++)  // 全体のクエスト分回す
+                    {
+                        if (int.Parse(questContent_.GetChild(f).gameObject.name) == int.Parse(tmp[i].name))
+                        {
+                            questContent_.GetChild(f).gameObject.SetActive(true);
+                        }
                     }
                 }
             }
@@ -705,16 +735,29 @@ public class QuestMng : MonoBehaviour
             case NOWPAGE.LOOK_QUEST:
                 // クエストを選択したため受注ボタン表示
                 questOrderButton_.SetActive(true);
+                questReportButton_.SetActive(false);
+                questCancelButton_.SetActive(false);
                 break;
             case NOWPAGE.REPORT_QUEST:
                 // クエストを選択したため報告ボタン表示
                 questReportButton_.SetActive(true);
-                // ハンコを非アクティブにする
+
                 stampImg_.gameObject.SetActive(false);
+                questOrderButton_.SetActive(false);
+                questCancelButton_.SetActive(false);
                 break;
             case NOWPAGE.CANCEL_QUEST:
+                questOrderButton_.SetActive(false);
+                questReportButton_.SetActive(false);
                 // サブクエスト破棄を選択したため破棄ボタン表示
-                questCancelButton_.SetActive(true);
+                if (popQuestInfo_.param[num].type == "main")
+                {
+                    questCancelButton_.SetActive(false);
+                }
+                else
+                {
+                    questCancelButton_.SetActive(true);
+                }
                 break;
             default:
                 Debug.Log("該当しないnowPage_番号です");

@@ -245,7 +245,7 @@ public class EnemySelect : MonoBehaviour
             List<int> tmpList = new List<int>();
             for (int i = 0; i < posList_.Item1.Count; i++)
             {
-                if (posList_.Item2[i])   // ƒtƒ‰ƒO‚ªtrue‚Ì“G‚¾‚¯Add‚·‚é
+                if(!EnemyInstanceMng.enemyList_[i].Item1.GetDeathFlg())
                 {
                     tmpList.Add(i);
                 }
@@ -261,16 +261,29 @@ public class EnemySelect : MonoBehaviour
                 // ¶‚«‚Ä‚é“G‚Ì’†‚©‚çUŒ‚‘ÎÛ‚ðƒ‰ƒ“ƒ_ƒ€‚ÅŒˆ’è‚·‚é
                 for (int i = 0; i < randAttackNum; i++)
                 {
-                    tmpArray[i] = Random.Range(0, tmpList.Count);
+                    // ƒ‰ƒ“ƒ_ƒ€‚ÈƒLƒƒƒ‰‚ðŽæ“¾‚·‚é(‚½‚¾‚µAŽ€–S‚µ‚½“G‚ÍœŠO‚·‚é)
+                    do
+                    {
+                        tmpArray[i] = Random.Range(0, posList_.Item1.Count);
+
+                        if(Input.GetKeyDown(KeyCode.A))
+                        {
+                            break;
+                        }
+
+                    } while (EnemyInstanceMng.enemyList_[tmpArray[i]].Item1.GetDeathFlg());
                 }
             }
             else
             {
                 // ‘S‘Ì
                 // ¶‚«‚Ä‚é“G‚Ì”’l‚ð“ü‚ê‚é
-                for (int i = 0; i < tmpList.Count; i++)
+                for (int i = 0; i < posList_.Item1.Count; i++)
                 {
-                    tmpArray[i] = tmpList[i];
+                    if (!EnemyInstanceMng.enemyList_[i].Item1.GetDeathFlg())
+                    {
+                        tmpArray[i] = i;
+                    }
                 }
             }
         }

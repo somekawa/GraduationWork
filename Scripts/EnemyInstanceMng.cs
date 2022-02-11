@@ -130,7 +130,7 @@ public class EnemyInstanceMng : MonoBehaviour
     // ButtleMng.csでUpdate関数のように使用する
     public void Buttle(int num)
     {
-        if(anim_ == ANIMATION.NON)
+        if (anim_ == ANIMATION.NON)
         {
             anim_ = ANIMATION.BEFORE;
         }
@@ -331,7 +331,7 @@ public class EnemyInstanceMng : MonoBehaviour
 
             // 番号でどの敵をインスタンスするか決める
             int enemyNum = Random.Range(0, enemyTest.transform.childCount);
-            //int enemyNum = 0;   // 固定
+            //int enemyNum = 3;   // 固定
 
             if (eventEnemy_.Item1 == null)
             {

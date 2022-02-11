@@ -28,23 +28,11 @@ public class CharaUseMagic : MonoBehaviour
     private EnemySelect enemySelect_;
     private CharacterMng characterMng_;
 
-    AssetBundle assetBundle_;
-
     public void Init()
     {
         buttleMng_ = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
         enemySelect_ = GameObject.Find("ButtleUICanvas/EnemySelectObj").GetComponent<EnemySelect>();
         characterMng_ = GameObject.Find("CharacterMng").GetComponent<CharacterMng>();
-
-        // 他のバンドル名に変える
-        // StreamingAssetsからAssetBundleをロードする
-        if(assetBundle_ == null)
-        {
-            assetBundle_ = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/AssetBundles/StandaloneWindows/magic");
-        }
-        //// 不要になったAssetBundleのメタ情報をアンロードする
-        //assetBundle_.Unload(false);
-        //Debug.Log("破棄");
     }
 
     public void CheckUseMagic(Bag_Magic.MagicData magicData, int charaMagicPower)
@@ -177,7 +165,7 @@ public class CharaUseMagic : MonoBehaviour
             // 状態異常をButtleMng.csに渡す
             buttleMng_.SetBadStatus(magicData.sub1, magicData.sub2);
 
-            if(magicData.sub3 == 4)
+            if(magicData.sub3 == 4 || magicData.sub2 == 9)
             {
                 // 必中効果あり
                 buttleMng_.SetAutoHit(true);
@@ -305,6 +293,9 @@ public class CharaUseMagic : MonoBehaviour
     private void Common(int t,Vector3 adjustPos,bool flag)
     {
         GameObject obj = null;
+
+        var assetBundle_ = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/AssetBundles/StandaloneWindows/magic");
+
         if (flag)
         {
             var tmpStr = magicPrefabNum_;
@@ -319,12 +310,18 @@ public class CharaUseMagic : MonoBehaviour
                     SceneMng.SetSE(11);
                     //obj = Resources.Load("MagicPrefabs/0-0-1-2") as GameObject;
                 }
-                else
+                else if(split[3] == 3.ToString())
                 {
                     // 吸収魔法の時(同じエフェクトを使うから固定番号)
                     obj = assetBundle_.LoadAsset<GameObject>("0-0-1-3");
                     SceneMng.SetSE(12);
                     //obj = Resources.Load("MagicPrefabs/0-0-1-3") as GameObject;
+                }
+                else
+                {
+                    // 魔法プレハブをインスタンス化
+                    obj = assetBundle_.LoadAsset<GameObject>(magicPrefabNum_);
+                    //obj = Resources.Load("MagicPrefabs/" + magicPrefabNum_) as GameObject;
                 }
             }
             else
@@ -375,6 +372,8 @@ public class CharaUseMagic : MonoBehaviour
                 obj = assetBundle_.LoadAsset<GameObject>(magicPrefabNum_);
                 //obj = Resources.Load("MagicPrefabs/" + magicPrefabNum_) as GameObject;
             }
+
+            assetBundle_.Unload(false);
 
             // プレハブの高さも含めた位置に生成する
             var uniAttackInstance = Instantiate(obj, adjustPos + obj.transform.position, obj.transform.rotation);
@@ -554,7 +553,7 @@ public class CharaUseMagic : MonoBehaviour
                     break;
             }
 
-            if(magicData.sub3 == 4)
+            if(magicData.sub3 == 4 || magicData.sub2 == 9)
             {
                 info4 += "(必中)";
             }

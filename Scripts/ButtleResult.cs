@@ -79,6 +79,7 @@ public class ButtleResult : MonoBehaviour
             if (onceFlag_ == false)
             {
                 level_[i] = charasList_[i].Level();
+                Debug.Log("レベル" + charasList_[i].Level());
                 maxExp_[i] = charasList_[i].CharacterMaxExp();
                 nowExp_[i] = charasList_[i].CharacterExp();
             }
@@ -92,8 +93,6 @@ public class ButtleResult : MonoBehaviour
             expText_[i] = expSlider_[i].transform.Find("AddExpText").GetComponent<TMPro.TextMeshProUGUI>();
             expSlider_[i].maxValue = maxExp_[i];
             expSlider_[i].value = nowExp_[i];
-            Debug.Log(i + "   " + level_[i] + "レベル" + charasList_[i].Level());
-            Debug.Log(i + "   " + charasList_[i].CharacterExp() + "経験値" + charasList_[i].CharacterMaxExp());
         }
         onceFlag_ = true;
 
@@ -141,7 +140,7 @@ public class ButtleResult : MonoBehaviour
             }
 
             // 討伐クエストの討伐数確認
-            for (int k = 0; k < list.Count; k++)
+            for(int k = 0; k < list.Count; k++)
             {
                 // 名前部分のアンダーバーで分ける
                 var name = enemyList_[i].Name().Split('_');
@@ -167,7 +166,7 @@ public class ButtleResult : MonoBehaviour
         {
             if (bossFlag == true)
             {
-                if(SceneMng.SCENE.FIELD4==SceneMng.nowScene)
+                if (SceneMng.SCENE.FIELD4 == SceneMng.nowScene)
                 {
                     // 各アイテムのドロップ数を1～5のランダムで取得
                     dropCnt_[i] = 1;
@@ -228,7 +227,7 @@ public class ButtleResult : MonoBehaviour
         int getExp = 0;
         int LvCheck = level_[charaNum] - enemyLv_[enemyNum];
         Debug.Log("レベル差" + LvCheck);
-        if (LvCheck <= 0)
+        if ( LvCheck<=0)
         {
             // キャラのレベルのほうが低い場合 そのままの経験値を渡す
             getExp = enemyList_[enemyNum].GetExp();
@@ -291,7 +290,7 @@ public class ButtleResult : MonoBehaviour
                 else
                 {
                     // ジャックのスライダー移動まで終わったらレベルが上がったかのチェックをする
-                    if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+                    if (Input.GetMouseButtonDown(0)/* || Input.GetKeyDown(KeyCode.Space)*/)
                     {
                         maxExp_[charaNum] = (int)expSlider_[charaNum].maxValue;
                         nowExp_[charaNum] = (int)expSlider_[charaNum].value;
@@ -339,6 +338,7 @@ public class ButtleResult : MonoBehaviour
             saveSumExp_[i] = 0;
         }
 
+        //  saveSumExp_ = 0;
         // 誰のレベルも上がってなかったら何もしない
         if (levelUpFlag[(int)SceneMng.CHARACTERNUM.UNI] == false
          && levelUpFlag[(int)SceneMng.CHARACTERNUM.JACK] == false)
@@ -351,14 +351,13 @@ public class ButtleResult : MonoBehaviour
             {
                 FieldMng.nowMode = FieldMng.MODE.SEARCH;
             }
-            levelMng.gameObject.SetActive(false);
             resultCanvas.gameObject.SetActive(false);
             for (int i = 0; i < enemyCnt_; i++)
             {
                 // リザルト非表示にDropオブジェクト削除
                 Destroy(dropObj_[i]);
             }
-            enemyCnt_ = 0;  // 削除し終わったら初期化
+            enemyCnt_ = 0;
             enemyList_.Clear();
             yield break;
         }
@@ -384,7 +383,7 @@ public class ButtleResult : MonoBehaviour
                     // リザルト非表示にDropオブジェクト削除
                     Destroy(dropObj_[i]);
                 }
-                enemyCnt_ = 0;  // 削除し終わったら初期化
+                enemyCnt_ = 0;
                 enemyList_.Clear();
                 yield break;
             }
@@ -406,7 +405,7 @@ public class ButtleResult : MonoBehaviour
                     getExp_[(int)SceneMng.CHARACTERNUM.UNI]);
                 }
                 // 左ボタン押下かスペースキー押下でレベルアップ用の画像を表示
-                if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+                if (Input.GetMouseButtonDown(0)/* || Input.GetKeyDown(KeyCode.Space)*/)
                 {
                     // 確認し終わったらfalseにする
                     levelUpFlag[(int)SceneMng.CHARACTERNUM.UNI] = false;
@@ -427,7 +426,7 @@ public class ButtleResult : MonoBehaviour
                           getExp_[(int)SceneMng.CHARACTERNUM.JACK]);
                     }
                     // 左ボタン押下かスペースキー押下でレベルアップ用の画像を表示
-                    if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space))
+                    if (Input.GetMouseButtonDown(0)/* || Input.GetKeyDown(KeyCode.Space)*/)
                     {
                         levelUpFlag[(int)SceneMng.CHARACTERNUM.JACK] = false;
                     }
@@ -437,13 +436,13 @@ public class ButtleResult : MonoBehaviour
     }
 
     private void LevelRelation(Vector2 pos, SceneMng.CHARACTERNUM chara,
-        int oldLevel, int nowLevel, int nextExp, int exp)
+            int oldLevel, int nowLevel, int nextExp, int exp)
     {
         SceneMng.SetSE(15);
 
         int differenceLv = nowLevel - oldLevel;
         // 上昇させる分を入れる
-        int[] tmp = new int[10] { 0, 0, 0, 0, 0, 0, 0, differenceLv, maxExp_[(int)chara]-nextExp, maxExp_[(int)chara] };
+        int[] tmp = new int[10] { 0, 0, 0, 0, 0, 0, 0, differenceLv, maxExp_[(int)chara] - nextExp, maxExp_[(int)chara] };
         // 0Attack 1MagicAttack 2Defence 3Speed 4Luck 5HP 6MP 7Level 8exp 9maxExp
         // ユニ、ジャック共通部分
         if ((nowLevel % 3 == 0) || (3 <= differenceLv))

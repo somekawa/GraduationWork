@@ -77,7 +77,7 @@ public class Bag_Word : MonoBehaviour
             }
         }
         DataSave();
-        //DataLoad();
+        DataLoad();
     }
 
     public void Init()
@@ -309,7 +309,9 @@ public class Bag_Word : MonoBehaviour
             // カンマ区切りでリストへ登録していく(2次元配列状態になる[行番号][カンマ区切り])
             csvDatas_.Add(texts[i].Split(','));
         }
-        data = new WordData[csvDatas_.Count];
+
+        data = new WordData[29];
+        //data = new WordData[csvDatas_.Count];
         Init();
     }
 

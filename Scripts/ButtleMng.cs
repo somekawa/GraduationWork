@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -35,6 +36,7 @@ public class ButtleMng : MonoBehaviour
 
     private ButtleResult buttleResult_;     // 戦闘リザルト用
     private bool resultFlg_ = false;        // リザルト処理に1度入ったらtrueにする
+    private bool stopCharaFlg_ = false;     // リザルト前の時間で、敵アニメーション終了まで動けてしまうのを止めるためのフラグ
     private int[] saveEnemyNum_ = new int[5];
     private bool bossFlag_ = false;
 
@@ -48,7 +50,7 @@ public class ButtleMng : MonoBehaviour
     {
         characterMng_ = GameObject.Find("CharacterMng").GetComponent<CharacterMng>();
         enemyInstanceMng_ = GameObject.Find("EnemyInstanceMng").GetComponent<EnemyInstanceMng>();
-        ////////////////escapeImageObj_ = buttleUICanvas.transform.Find("EscapeMiss").gameObject;
+        escapeImageObj_ = buttleUICanvas.transform.Find("EscapeMiss").gameObject;
         buttleUICanvas.gameObject.SetActive(false);
         buttleResult_ = gameObject.GetComponent<ButtleResult>();
 
@@ -95,7 +97,9 @@ public class ButtleMng : MonoBehaviour
         // 戦闘開始時に設定される項目
         if (!setCallOnce_)
         {
+            GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Item>().Init();
             resultFlg_ = false;
+            stopCharaFlg_ = false;
             lastEnemyFlg_ = false;
             setCallOnce_ = true;
             buttleUICanvas.gameObject.SetActive(true);
@@ -115,13 +119,9 @@ public class ButtleMng : MonoBehaviour
             {
                 instanceEnemyNum_ = 3;  // 3未満(=2体まで)
             }
-            else if (SceneMng.nowScene == SceneMng.SCENE.FIELD1)
-            {
-                instanceEnemyNum_ = 4;  // 4未満(=3体まで)
-            }
             else
             {
-                instanceEnemyNum_ = 5;  // 5未満(=4体まで)
+                instanceEnemyNum_ = 4;  // 4未満(=3体まで)
             }
             var correctEnemyNum = enemyInstanceMng_.EnemyInstance(Random.Range(1, instanceEnemyNum_), buttleUICanvas);
 
@@ -162,42 +162,48 @@ public class ButtleMng : MonoBehaviour
 
         if (moveTurnList_[moveTurnCnt_].Item2 == "Uni" || moveTurnList_[moveTurnCnt_].Item2 == "Jack")
         {
-            // キャラクターの行動
-            characterMng_.Buttle();
-
-            // キャラクターの攻撃対象が最後の敵だった時
-            if (lastEnemyFlg_)
+            if(!stopCharaFlg_)
             {
-                if (enemyInstanceMng_.AllAnimationFin() && !resultFlg_)
-                {
-                    // 現在が強制戦闘中だった時
-                    if (FieldMng.nowMode == FieldMng.MODE.FORCEDBUTTLE)
-                    {
-                        // リストの中のbool部分をtrue(=取得済み)にする
-                        var tmp = FieldMng.forcedButtleWallList;
-                        for (int i = 0; i < tmp.Count; i++)
-                        {
-                            if (tmp[i].Item1 == forcedButtleWallName)
-                            {
-                                // flagをtrueに上書きする
-                                (string, bool) content = (forcedButtleWallName, true);
-                                tmp[i] = content;
-                            }
-                        }
-                    }
-
-                    CallDeleteEnemy();
-
-                    resultFlg_ = true;
-                    characterMng_.SetCharaFieldPos();
-                }
+                // キャラクターの行動
+                characterMng_.Buttle();
             }
         }
         else
         {
-            string[] arr = moveTurnList_[moveTurnCnt_].Item2.Split('_');
-            // 敵の行動
-            enemyInstanceMng_.Buttle(int.Parse(arr[1]) - 1);
+            if (!stopCharaFlg_)
+            {
+                string[] arr = moveTurnList_[moveTurnCnt_].Item2.Split('_');
+                // 敵の行動
+                enemyInstanceMng_.Buttle(int.Parse(arr[1]) - 1);
+            }
+        }
+
+        // キャラクターの攻撃対象が最後の敵だった時
+        if (lastEnemyFlg_)
+        {
+            stopCharaFlg_ = true;
+            if (enemyInstanceMng_.AllAnimationFin() && !resultFlg_)
+            {
+                // 現在が強制戦闘中だった時
+                if (FieldMng.nowMode == FieldMng.MODE.FORCEDBUTTLE)
+                {
+                    // リストの中のbool部分をtrue(=取得済み)にする
+                    var tmp = FieldMng.forcedButtleWallList;
+                    for (int i = 0; i < tmp.Count; i++)
+                    {
+                        if (tmp[i].Item1 == forcedButtleWallName)
+                        {
+                            // flagをtrueに上書きする
+                            (string, bool) content = (forcedButtleWallName, true);
+                            tmp[i] = content;
+                        }
+                    }
+                }
+
+                CallDeleteEnemy();
+                resultFlg_ = true;
+                characterMng_.SetCharaFieldPos();
+            }
         }
     }
 
@@ -210,7 +216,7 @@ public class ButtleMng : MonoBehaviour
             moveTurnCnt_ = 0;
         }
 
-        // 行動が切り替わる毎に、敵の状態を確認する
+        //// 行動が切り替わる毎に、敵の状態を確認する
         lastEnemyFlg_ = characterMng_.GetLastEnemyToAttackFlg();
 
         if(escapeMissFlag)
@@ -290,7 +296,7 @@ public class ButtleMng : MonoBehaviour
     }
 
     // ユニたちが逃げる処理や戦闘終了時に使用する
-    public void CallDeleteEnemy()
+    public void CallDeleteEnemy(bool escape = false)
     {
         enemyInstanceMng_.DeleteEnemy();
         if (EneSelObj_ == null)
@@ -303,8 +309,11 @@ public class ButtleMng : MonoBehaviour
             Destroy(EneSelObj_.GetChild(i).gameObject);
         }
 
-        // リザルト処理： エネミーの数、エネミーの番号（配列）
-        buttleResult_.DropCheck(EneSelObj_.childCount, saveEnemyNum_, bossFlag_, subjugationObj_);
+        if(!escape)
+        {
+            // リザルト処理： エネミーの数、エネミーの番号（配列）
+            buttleResult_.DropCheck(EneSelObj_.childCount, saveEnemyNum_, bossFlag_, subjugationObj_);
+        }
 
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
         {

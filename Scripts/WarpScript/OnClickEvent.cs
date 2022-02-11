@@ -29,13 +29,26 @@ public class OnClickEvent : MonoBehaviour
             return;
         }
 
-        for (int i = (int)SceneMng.SCENE.TOWN; i < (int)SceneMng.SCENE.CANCEL; i++)
+        for (int i = (int)SceneMng.SCENE.TITLE; i < (int)SceneMng.SCENE.CANCEL; i++)
         {
-            if (this.gameObject.name == WarpField.btnMng_[i].name)
+            Debug.Log(gameObject.name + " ワープ先　" + WarpField.btnMng_[i].name);
+            if (i == (int)SceneMng.SCENE.CONVERSATION)
             {
+                continue;
+            }
+
+            if (gameObject.name == WarpField.btnMng_[i].name)
+            {
+                if (i == (int)SceneMng.SCENE.TITLE)
+                {
+                    locationSelMng_.gameObject.SetActive(false);
+                    SceneMng.MenuSetActive(false,false);
+                    SceneMng.SetNowScene(SceneMng.SCENE.TITLE);
+                }
                 // クリックしたボタンの名前と一致していたら
                 SceneMng.SceneLoad(i);   // そのシーンに移動する
             }
+
         }
     }
 }

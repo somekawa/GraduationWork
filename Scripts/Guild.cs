@@ -109,7 +109,7 @@ public class Guild : HouseBase
                         EventMng.SetChapterNum(6, SceneMng.SCENE.CONVERSATION);
                     }
                     break;
-                case 8: // 現在の進行度が8で、クエスト1番を達成したら
+                case 9: // 現在の進行度が8で、クエスト1番を達成したら
                     if (questNum == 1)
                     {
                         SceneMng.SetTimeGear(SceneMng.TIMEGEAR.EVENING);    // 時間経過

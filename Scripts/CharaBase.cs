@@ -29,8 +29,8 @@ public abstract class CharaBase : object
         public int[] Magic;
         public int CharacterExp;// 取得経験値
         public int CharacterMaxExp;// レベルアップに必要な経験値
-
         public (CONDITION,bool)[] condition; // 各キャラと各敵の状態異常が確認できるようにする
+        public int[] statusUp;
 
         // 敵用の情報
         public int Exp;             // この敵を倒した際にキャラが得られる経験値
@@ -103,6 +103,7 @@ public abstract class CharaBase : object
 
             // 最大4つまでつけられるのでここで初期化しておく
             setting_.Magic = new int[4];
+            setting_.statusUp = new int[8];
         }
         else
         {

@@ -138,6 +138,7 @@ public class ItemCreateMng : MonoBehaviour
             Debug.Log("合成可能アイテム数" + maxCnt_);
 
             ResetCommon();
+
             if (maxCnt_ == 0)
             {
                 // レシピ本を所持してない場合
@@ -185,7 +186,7 @@ public class ItemCreateMng : MonoBehaviour
     public void AlchemyRecipeSelect()
     {
         int rate = (int)circleMng_.GetMiniGameJudge();
-        if(rate==(int)CircleMng.JUDGE.BAD)
+        if (rate == (int)CircleMng.JUDGE.BAD)
         {
             int materiaNum_ = Bag_Materia.emptyMateriaNum;
             Bag_Materia.materiaState[materiaNum_].haveCnt++;
@@ -194,6 +195,7 @@ public class ItemCreateMng : MonoBehaviour
         {
             bagItem_.ItemGetCheck(rate, saveItemNum_, 1);
         }
+        bagItem_.ItemGetCheck(rate, saveItemNum_, 1);
         saveBtn_.interactable = true;
         saveBtnName_ = "";
 
@@ -213,8 +215,8 @@ public class ItemCreateMng : MonoBehaviour
         // 「所持」数と「EX」所持数
         haveCntTitle_.gameObject.SetActive(true);
         // 所持数とEX所持数
-        itemhaveCnt_.text = Bag_Item.itemState[recipeNum].haveCnt + "コ\n" 
-                          + Bag_Item.itemState[recipeNum +19].haveCnt + "コ\n";
+        itemhaveCnt_.text = Bag_Item.itemState[recipeNum].haveCnt + "コ\n"
+                        + Bag_Item.itemState[recipeNum + 19].haveCnt + "コ\n";
         if (itemRecipeState[recipeNum].materia3 == "non")
         {
             needMateria_.text = itemRecipeState[recipeNum].materia1 +
@@ -289,7 +291,7 @@ public class ItemCreateMng : MonoBehaviour
                 createBtn_.interactable = false;
                 cancelBtn_.interactable = false;
                 miniGameObj.gameObject.SetActive(true);
-                circleMng_.Init(circleNum_, recipeNum % 4);
+                circleMng_.Init(circleNum_, recipeNum%4);
 
                 //Debug.Log("number[0]:" + number[0] + "   number[1]:" + number[1] + "   number[2]:" + number[2]);
                 if (itemRecipeState[recipeNum].materia3 == "non")

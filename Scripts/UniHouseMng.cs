@@ -22,11 +22,6 @@ public class UniHouseMng : MonoBehaviour
 
     private GameObject loadPrefab_;// タイトルシーンからの遷移かどうか
     private OnceLoad onceLoad_;// LoadPrefabにアタッチされてるScript
-    public static bool onceflag_ = true;
-
-    // デバッグ用
-    private SaveLoadCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
-
 
     void Start()
     {
@@ -50,7 +45,7 @@ public class UniHouseMng : MonoBehaviour
         GameObject.Find("WarpOut").GetComponent<WarpField>().Init();
 
         // オブジェクトがある＝タイトルシーンから遷移してきた
-        loadPrefab_ = GameObject.Find("LoadPrefab");
+       loadPrefab_ = GameObject.Find("LoadPrefab");
         if (loadPrefab_ != null)
         {
             var tmp = GameObject.Find("DontDestroyCanvas/Managers");
@@ -76,7 +71,6 @@ public class UniHouseMng : MonoBehaviour
         warningText_ = warningInfo.transform.Find("Text").GetComponent<Text>();
         warningText_.text = null;
 
-
         // ステータスアップを消すか判定する
         if (!SceneMng.GetFinStatusUpTime().Item2)
         {
@@ -97,27 +91,12 @@ public class UniHouseMng : MonoBehaviour
             sleepBtn_.interactable = true;
         }
 
-        SceneMng.MenuSetActive(true);
-
-        //// デバッグ用
-        //if (onceflag_ == true)
-        //{
-        //    onceflag_ = false;
-        //    GameObject.Find("Managers").GetComponent<Bag_Word>().DataLoad();
-        //    GameObject.Find("Managers").GetComponent<Bag_Magic>().DataLoad();
-        //    GameObject.Find("Managers").GetComponent<Bag_Item>().DataLoad();
-        //    GameObject.Find("Managers").GetComponent<Bag_Materia>().DataLoad();
-
-        //    saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>();
-        //    saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.CHARACTER);
-        //    saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.OTHER);
-        //    saveCsvSc_.LoadData(SaveLoadCSV.SAVEDATA.BOOK);
-        //}
+        SceneMng.MenuSetActive(true,true);
     }
 
     public void ClickSleepButton()
     {
-        if (EventMng.GetChapterNum() < 7)    // 進行度が0～6のとき
+        if(EventMng.GetChapterNum() < 7)    // 進行度が0～6のとき
         {
             Debug.Log("現在の進行度が7未満のため、休めません");
             return; // 休むボタンを押しても反応しないようにする
@@ -125,12 +104,10 @@ public class UniHouseMng : MonoBehaviour
 
         SceneMng.SetSE(0);
 
-        SceneMng.SetTimeGear(SceneMng.TIMEGEAR.MORNING);   // 時間経過
+        SceneMng.SetTimeGear(SceneMng.TIMEGEAR.MORNING,true);   // 時間経過
         Debug.Log("休むボタンが押下されました 料理効果がきれて体力回復します");
 
-        // 強制的に料理の効果を消す
-        GameObject.Find("DontDestroyCanvas/TimeGear/CookPowerIcon").GetComponent<Image>().color =
-            new Color(1.0f, 1.0f, 1.0f, 0.0f);
+        // 強制的に料理の効果を消して、体力が回復する
         for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
         {
             SceneMng.charasList_[i].DeleteStatusUpByCook();
@@ -142,12 +119,14 @@ public class UniHouseMng : MonoBehaviour
     public void ClickAlchemyButton()
     {
         SceneMng.SetSE(0);
+
         if (BookStoreMng.bookState_[5].readFlag == 0)
         {
             warningText_.text = "本屋でレシピを購入しましょう";
             StartCoroutine(Warning());
             return;
         }
+
         alchemyMng.gameObject.SetActive(true);
         uniHouseCanvas.gameObject.SetActive(false);
         alchemyMng.GetComponent<ItemCreateMng>().Init();
@@ -156,7 +135,11 @@ public class UniHouseMng : MonoBehaviour
 
     public void ClickMagicCreateButton()
     {
+        // 空のマテリアを1つ以上持っていたらワード合成ができる
+        //if (0 < Bag_Materia.materiaState[Bag_Materia.emptyMateriaNum].haveCnt)
+        //{
         SceneMng.SetSE(0);
+
         if (EventMng.GetChapterNum() < 8)
         {
             // イベント8以下はワードを取得していないため押せないようにする
@@ -192,7 +175,7 @@ public class UniHouseMng : MonoBehaviour
             yield return null;
             alpha -= 0.01f;
             warningInfo.color = new Color(1.0f, 1.0f, 1.0f, alpha);
-            warningText_.color = new Color(1.0f, 0.0f, 0.0f, alpha); 
+            warningText_.color = new Color(1.0f, 0.0f, 0.0f, alpha);
             if (alpha <= 0.0f)
             {
                 warningInfo.gameObject.SetActive(false);

@@ -20,7 +20,7 @@ public class Event_ItemStore : MonoBehaviour
         // 押下したアイテムの番号を取得
         int number = int.Parse(Regex.Replace(clickbtn_.name, @"[^0-9]", ""));
         // 数字を取り除いた名前を取得
-        string name= clickbtn_.name.Replace( number.ToString(), "");
+        string name = clickbtn_.name.Replace(number.ToString(), "");
         Debug.Log("番号：" + number + "    名前：" + name);
         itemStoreMng_.SetSelectItemName(number);
     }

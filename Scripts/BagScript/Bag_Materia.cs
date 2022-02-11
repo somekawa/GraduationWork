@@ -60,6 +60,7 @@ public class Bag_Materia : MonoBehaviour
             Debug.Log(i + "" + materiaState[i].name);
         }
         DataSave();
+        DataLoad();
     }
 
     public void Init()

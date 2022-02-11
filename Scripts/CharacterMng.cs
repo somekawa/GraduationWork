@@ -417,7 +417,7 @@ public class CharacterMng : MonoBehaviour
 
                 if(range <= tmpSpeed)
                 {
-                    buttleMng_.CallDeleteEnemy();
+                    buttleMng_.CallDeleteEnemy(true);
 
                     FieldMng.nowMode = FieldMng.MODE.SEARCH;
                     charMap_[CHARACTERNUM.UNI].gameObject.transform.position = buttleMng_.GetFieldPos();
@@ -665,7 +665,7 @@ public class CharacterMng : MonoBehaviour
                     }
                 }
                 magicCommandNumOld_ = tmp;
-                Debug.Log("魔法選択中-----現在は" + tmp + "番のコマンド上");
+                //Debug.Log("魔法選択中-----現在は" + tmp + "番のコマンド上");
             }
         }
 
@@ -910,7 +910,10 @@ public class CharacterMng : MonoBehaviour
         }
         else
         {
-            anim_ = ANIMATION.IDLE;    // ユニ
+            // IDLEに切り替わると敵の死亡処理の判定を行うので、間を開けるようにコルーチンで調節する
+            StartCoroutine(ChangeIDLETiming(1.0f));
+
+            //anim_ = ANIMATION.IDLE;    // ユニ
         }
     }
 
@@ -932,7 +935,10 @@ public class CharacterMng : MonoBehaviour
             //Debug.Log("ジャック現在値" + charMap_[nowTurnChar_].transform.localPosition);
         }
 
-        anim_ = ANIMATION.IDLE;
+        // IDLEに切り替わると敵の死亡処理の判定を行うので、間を開けるようにコルーチンで調節する
+        StartCoroutine(ChangeIDLETiming(1.0f));
+
+        //anim_ = ANIMATION.IDLE;
 
     }
 
@@ -1038,13 +1044,13 @@ public class CharacterMng : MonoBehaviour
         mpDecrease_ = 0;
 
         // IDLEに切り替わると敵の死亡処理の判定を行うので、間を開けるようにコルーチンで調節する
-        StartCoroutine(ChangeIDLETiming());
+        StartCoroutine(ChangeIDLETiming(3.0f));
     }
 
-    private IEnumerator ChangeIDLETiming()
+    private IEnumerator ChangeIDLETiming(float time)
     {
         Debug.Log("スタート");
-        yield return new WaitForSeconds(3.0f);
+        yield return new WaitForSeconds(time);
         Debug.Log("スタートから3秒後");
 
         anim_ = ANIMATION.IDLE;
@@ -1258,6 +1264,13 @@ public class CharacterMng : MonoBehaviour
             if(Bag_Item.itemState[deathBstNoEffectItemNum_.Item1].haveCnt > 0)
             {
                 Bag_Item.itemState[deathBstNoEffectItemNum_.Item1].haveCnt--;
+                // 表示中の所持数を更新
+                Bag_Item.itemState[deathBstNoEffectItemNum_.Item1].cntText.text = Bag_Item.itemState[deathBstNoEffectItemNum_.Item1].haveCnt.ToString();
+                if (Bag_Item.itemState[deathBstNoEffectItemNum_.Item1].haveCnt < 1)
+                {
+                    // 所持数が0になったら非表示にする
+                    Bag_Item.itemState[deathBstNoEffectItemNum_.Item1].box.SetActive(false);
+                }
                 Debug.Log("アイテムが即死を肩代わりしてくれた");
                 SetSE(11);
                 return;
@@ -1268,6 +1281,13 @@ public class CharacterMng : MonoBehaviour
                 if (Bag_Item.itemState[deathBstNoEffectItemNum_.Item2].haveCnt > 0)
                 {
                     Bag_Item.itemState[deathBstNoEffectItemNum_.Item2].haveCnt--;
+                    // 表示中の所持数を更新
+                    Bag_Item.itemState[deathBstNoEffectItemNum_.Item2].cntText.text = Bag_Item.itemState[deathBstNoEffectItemNum_.Item1].haveCnt.ToString();
+                    if (Bag_Item.itemState[deathBstNoEffectItemNum_.Item2].haveCnt < 1)
+                    {
+                        // 所持数が0になったら非表示にする
+                        Bag_Item.itemState[deathBstNoEffectItemNum_.Item2].box.SetActive(false);
+                    }
                     Debug.Log("大成功アイテムが即死を肩代わりしてくれた");
                     SetSE(11);
                     return;

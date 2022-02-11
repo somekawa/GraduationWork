@@ -20,6 +20,7 @@ public class ItemBagMng : MonoBehaviour
     private RectTransform charasText_;      // アイテム所持画面でアイテムを使用するかの画像
     private RectTransform infoBack_;        // 所持物の説明欄
 
+
     public enum TOPIC
     {
         NON = -1,
@@ -95,6 +96,7 @@ public class ItemBagMng : MonoBehaviour
 
         if (topicText_ == null)
         {
+
             var itemBagMng = GameObject.Find("ItemBagMng").GetComponent<RectTransform>();
             charasText_ = itemBagMng.Find("CharasText").GetComponent<RectTransform>();
             infoBack_ = itemBagMng.Find("InfoBack").GetComponent<RectTransform>();
@@ -102,6 +104,7 @@ public class ItemBagMng : MonoBehaviour
             throwAwayBtn_[0] = infoBack_.Find("ItemDelete").GetComponent<Button>();
             throwAwayBtn_[1] = infoBack_.Find("MateriaDelete").GetComponent<Button>();
             throwAwayBtn_[2] = infoBack_.Find("MagicDelete").GetComponent<Button>();
+
             topicText_ = transform.Find("Topics/TopicName").GetComponent<Text>();
             topicText_.text = topicString_[(int)TOPIC.ITEM];
         }
@@ -393,7 +396,7 @@ public class ItemBagMng : MonoBehaviour
             }
         }
 
-        if (charasText_.gameObject.activeSelf==false)
+        if (charasText_.gameObject.activeSelf == false)
         {
             // 1つ前にワードを表示していた場合
             infoBack_.gameObject.SetActive(true);

@@ -30,8 +30,6 @@ public class Endroll : MonoBehaviour
     private List<Texture2D> texture2dList = new List<Texture2D>();
     private List<Sprite> spriteList = new List<Sprite>();
 
-    private SaveLoadCSV saveCsvSc_;// SceneMng内にあるセーブ関連スクリプト
-
     void Start()
     {
         scrollTextPos_ = scrollTextTrans.anchoredPosition;
@@ -39,13 +37,6 @@ public class Endroll : MonoBehaviour
         var canvas = GameObject.Find("Canvas").transform;
         objectImage_ = canvas.Find("Image").GetComponent<Image>();
         buttons_ = GameObject.Find("Buttons").gameObject;
-
-        saveCsvSc_ = GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>();
-
-        if(GameObject.Find("DontDestroyCanvas/TimeGear"))
-        {
-            GameObject.Find("DontDestroyCanvas/TimeGear").gameObject.SetActive(false);
-        }
     }
 
     void Update()
@@ -117,33 +108,10 @@ public class Endroll : MonoBehaviour
     }
 
     // セーブしてタイトルへ戻る
-    public void SaveAndTitleButton()
+    public void TownBack()
     {
-        Debug.Log("セーブしてタイトルへ戻る");
-
-        saveCsvSc_.SaveStart(SaveLoadCSV.SAVEDATA.CHARACTER);
-        // キャラクター数分のfor文を回す
-        for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
-        {
-            saveCsvSc_.SaveData(SceneMng.GetCharasSettings(i),i);
-        }
-        saveCsvSc_.SaveEnd();
-
-        // その他データのセーブ
-        saveCsvSc_.SaveStart(SaveLoadCSV.SAVEDATA.OTHER);
-        saveCsvSc_.OtherSaveData();
-        saveCsvSc_.SaveEnd();
-
         DestroyTexture2D();
-        SceneMng.SceneLoad((int)SceneMng.SCENE.TITLE);
-    }
-
-    // セーブしないでタイトルへ戻る
-    public void NotSaveAndTitleButton()
-    {
-        Debug.Log("セーブしないでタイトルへ戻る");
-        DestroyTexture2D();
-        SceneMng.SceneLoad((int)SceneMng.SCENE.TITLE);
+        SceneMng.SceneLoad((int)SceneMng.SCENE.TOWN);
     }
 
     // Texture2DとSpriteの画像破棄処理

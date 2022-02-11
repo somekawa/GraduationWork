@@ -115,11 +115,11 @@ public class ImageRotate : MonoBehaviour
             // 指定の幅に届いていない場合は、回転方向を確認して、回転を続ける
             if (rotateDir_ == DIR.RIGHT)
             {
-                transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f));
+                transform.Rotate(new Vector3(0.0f, 0.0f, 2.0f));
             }
             else if(rotateDir_ == DIR.LEFT)
             {
-                transform.Rotate(new Vector3(0.0f, 0.0f, -0.5f));
+                transform.Rotate(new Vector3(0.0f, 0.0f, -2.0f));
             }
             else
             {

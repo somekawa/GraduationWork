@@ -31,6 +31,7 @@ public class SlipDamageGas : MonoBehaviour
                 Debug.Log("スリップダメージ");
                 for(int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
                 {
+                    SceneMng.SetSE(16);
                     if(SceneMng.charasList_[i].HP() < slipDamage_)
                     {
                         continue;   // 現在HPが2未満(=1)のときは減算処理しない

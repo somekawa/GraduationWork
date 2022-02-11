@@ -13,7 +13,7 @@ public class Chara : CharaBase,InterfaceButtle
     private int barrierNum_ = 0;                    // 防御時に値が入る
     private bool deathFlg_ = false;                 // 死亡状態か確認する変数
 
-    private int[] statusUp = new int[8];            // 一時アップの数値を保存する用
+    //private int[] statusUp = new int[8];            // 一時アップの数値を保存する用
     private int[] saveKeep_ = new int[8];           // セーブ時に、一時アップの数字を避難させる用
 
     private readonly int[] statusMap_ = new int[4];
@@ -39,13 +39,13 @@ public class Chara : CharaBase,InterfaceButtle
         set_ = GetSetting();  // CharaBase.csからGet関数で初期設定する
 
         // 数字の初期化
-        for (int i = 0; i < statusUp.Length; i++)
-        {
-            saveKeep_[i] = 0;
-            statusUp[i] = 0;
-        }
+        //for (int i = 0; i < statusUp.Length; i++)
+        //{
+        //    saveKeep_[i] = 0;
+        //    statusUp[i] = 0;
+        //}
 
-        SetStatusUpByCook(GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>().StatusNum());
+        //SetStatusUpByCook(GameObject.Find("SceneMng").GetComponent<SaveLoadCSV>().StatusNum());
     }
 
     public bool Attack()
@@ -163,7 +163,6 @@ public class Chara : CharaBase,InterfaceButtle
     {
         return set_.CharacterMaxExp;
     }
-
     public int CharacterExp()
     {
         return set_.CharacterExp;
@@ -183,7 +182,7 @@ public class Chara : CharaBase,InterfaceButtle
         set_.MP += num[6];
         set_.Level += num[7];
         if (num[7] != 0)
-        {   
+        {
             // レベルが上がった時しかMax値を代入しない
             set_.CharacterMaxExp = num[9];
         }
@@ -310,6 +309,7 @@ public class Chara : CharaBase,InterfaceButtle
         set_.Magic = set.Magic;
         set_.CharacterExp = set.CharacterExp;
         set_.CharacterMaxExp = set.CharacterMaxExp;
+        set_.statusUp = set.statusUp;
 
         SetTurnInit();
         // アニメーターはセットしてはいけない
@@ -329,13 +329,20 @@ public class Chara : CharaBase,InterfaceButtle
         set_.Exp += num[7];
         set_.HP += num[5];
         set_.MP += num[6];
+
+
+        // 一時アップの数字保存
+        for (int i = 0; i < set_.statusUp.Length; i++)
+        {
+            set_.statusUp[i] = num[i];
+        }
     }
 
     public int[] GetStatusUpByCook(bool flag)
     {
         if(flag)
         {
-            return statusUp;
+            return set_.statusUp;
         }
         else
         {
@@ -346,32 +353,39 @@ public class Chara : CharaBase,InterfaceButtle
     public void DeleteStatusUpByCook(bool loadFlag = false)
     {
         // 一時アップ分、各ステータスからマイナスする
-        set_.Attack -= statusUp[0];
-        set_.MagicAttack -= statusUp[1];
-        set_.Defence -= statusUp[2];
-        set_.Speed -= statusUp[3];
-        set_.Luck -= statusUp[4];
-        set_.maxHP -= statusUp[5];
-        set_.maxMP -= statusUp[6];
-        set_.Exp -= statusUp[7];
-        set_.HP -= statusUp[5];
-        set_.MP -= statusUp[6];
+        set_.Attack -= set_.statusUp[0];
+        set_.MagicAttack -= set_.statusUp[1];
+        set_.Defence -= set_.statusUp[2];
+        set_.Speed -= set_.statusUp[3];
+        set_.Luck -= set_.statusUp[4];
+        set_.maxHP -= set_.statusUp[5];
+        set_.maxMP -= set_.statusUp[6];
+        set_.Exp -= set_.statusUp[7];
+        set_.HP -= set_.statusUp[5];
+        set_.MP -= set_.statusUp[6];
 
-        if(loadFlag)
+        if (loadFlag)
         {
             // 保存を別にうつして、一時アップの数字を初期化する
-            for (int i = 0; i < statusUp.Length; i++)
+            for (int i = 0; i < set_.statusUp.Length; i++)
             {
-                saveKeep_[i] = statusUp[i];
-                statusUp[i] = 0;
+                saveKeep_[i] = set_.statusUp[i];
+
+                if(set_.name == "Jack")
+                {
+                    set_.statusUp[i] = 0;
+                }
             }
         }
         else
         {
             // 一時アップの数字を初期化する
-            for (int i = 0; i < statusUp.Length; i++)
+            for (int i = 0; i < set_.statusUp.Length; i++)
             {
-                statusUp[i] = 0;
+                if (set_.name == "Jack")
+                {
+                    set_.statusUp[i] = 0;
+                }
             }
         }
     }

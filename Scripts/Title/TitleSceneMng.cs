@@ -29,15 +29,19 @@ public class TitleSceneMng : MonoBehaviour
     private Vector3 xC_StartPos_ = new Vector3(-55.0f, 6.5f, 90.0f);// スタート座標
     private Vector3 xC_MaxPos_ = new Vector3(40.0f, 6.5f, 90.0f);// マックス座標
 
+    // ゲームからタイトルに戻ってきた場合に使う
+    private GameObject dontDestroy_;
+
     void Start()
     {
-        // セーブデータがあるか調べて、ないときはボタンのinteractableをfalseにする
-        //TextAsset saveFile = Resources.Load("data") as TextAsset;
-
-        //if (saveFile == null)
+        //dontDestroy_ = GameObject.Find("DontDestroyCanvas");
+        //if (dontDestroy_ != null)
         //{
-        //    GameObject.Find("Canvas/LoadGameBtn").GetComponent<Button>().interactable = false;
+        //    dontDestroy_.SetActive(false);
         //}
+
+        // フレームレートの設定
+        Application.targetFrameRate = 120;
 
         // 親は必要ないためnull
         loadPrefab_ = Instantiate(LoadPrefab,
@@ -143,6 +147,12 @@ public class TitleSceneMng : MonoBehaviour
 
         zMoveCamera_.gameObject.SetActive(false);
         xMoveCamera_.gameObject.SetActive(false);
+
         StopCoroutine(MoveCamera());
+
+        if(GameObject.Find("SceneMng"))
+        {
+            SceneMng.MenuSetActive(true,true);
+        }
     }
 }

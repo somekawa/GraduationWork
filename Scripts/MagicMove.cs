@@ -27,6 +27,11 @@ public class MagicMove : MonoBehaviour
             // 時間指定で消えてほしいエフェクト用
             Destroy(this.gameObject, destroyTime_);
         }
+        else
+        {
+            // 敵に当たらずに飛んでいってしまったやつをけす
+            Destroy(this.gameObject, 10.0f);
+        }
     }
 
     void Update()

@@ -30,7 +30,6 @@ public class ItemStoreMng : MonoBehaviour
     private RectTransform[] tradeMng_ = new RectTransform[(int)STORE.MAX];// アイテム売り買い用のキャンバス
 
     private int saveItemsNum_;  // 選択されたアイテムの番号を保存
-   // private string saveName_;   // 選択されたアイテムの名前を保存
     private int savePrice_;     // 選択されたアイテムの料金を保存
     private int kindNum_ = 0;
 
@@ -75,9 +74,9 @@ public class ItemStoreMng : MonoBehaviour
 
     private Bag_Materia bagMateria_;// 素材選択時使用
     private Bag_Item bagItem_;// アイテム選択時使用
-
     private InitPopList popItemList_;
     private int itemMaxCnt_ = 0;
+
     void Start()
     {
         itemStoreCanvas_ = GameObject.Find("ItemStoreCanvas").GetComponent<Canvas>();
@@ -191,17 +190,15 @@ public class ItemStoreMng : MonoBehaviour
         if (imageKinds == ItemImageMng.IMAGE.ITEM)
         {
             // Exアイテムが押されたらtrueにする
-            if(itemMaxCnt_ /2<= num)
+            if (itemMaxCnt_ / 2 <= num)
             {
-                imageNum -= itemMaxCnt_/2;
+                imageNum -= itemMaxCnt_ / 2;
                 exSymbol_.gameObject.SetActive(true);
             }
         }
         Debug.Log("番号：" + num + "    説明：" + itemInfo_.text);
         selectItemIcon_.sprite = ItemImageMng.spriteMap[imageKinds][imageNum];
-
         saveItemsNum_ = num;    // 番号を保存
-       // saveName_ = name;       // アイテムを保存
 
         // 表示させておく
         shoppingParent_.gameObject.SetActive(true);
@@ -269,9 +266,9 @@ public class ItemStoreMng : MonoBehaviour
         {
             cntBtn_[0].interactable = false;
         }
-        Debug.Log("選択数" + itemCnt_ + "        ：最小値" + slider_.minValue);
+
         // 右矢印が押下できないなら押下可能状態に
-        cntBtn_[1].interactable =  itemCnt_<slider_.maxValue  ? true : false;
+        cntBtn_[1].interactable = itemCnt_ < slider_.maxValue ? true : false;
         CommonUpDown();
         slider_.value = itemCnt_;
     }
@@ -299,7 +296,6 @@ public class ItemStoreMng : MonoBehaviour
 
         // 左矢印が押下できないなら押下可能状態に
         cntBtn_[0].interactable = slider_.minValue < itemCnt_ ? true : false;
-
         CommonUpDown();
         slider_.value = itemCnt_;
     }
@@ -312,6 +308,7 @@ public class ItemStoreMng : MonoBehaviour
         // 売買するアイテムの料金
         priceText_.text = totalPrice_.ToString();
         pressFlag_ = true;
+
     }
 
     public void OnNowValueCheck()
@@ -359,15 +356,13 @@ public class ItemStoreMng : MonoBehaviour
         SceneMng.SetSE(0);
 
         // 購入ボタン押下
-       // Debug.Log(saveName_ + "を購入しました");
-
         // 所持数を加算する
 
         if (storeActive_ == STORE.BUY)
         {
             if (selectKind_ == KIND.MATERIA)
             {
-                bagMateria_.MateriaGetCheck(saveItemsNum_,  itemCnt_);
+                bagMateria_.MateriaGetCheck(saveItemsNum_, itemCnt_);
             }
             else
             {
@@ -375,14 +370,14 @@ public class ItemStoreMng : MonoBehaviour
             }
             // お金の減少処理
             SceneMng.SetHaveMoney(SceneMng.GetHaveMoney() - totalPrice_);
-           // haveMoney_ -= totalPrice_;  // 所持金を減算する
+            // haveMoney_ -= totalPrice_;  // 所持金を減算する
             haveCnt_ += itemCnt_;     // 所持数を増やす
         }
         else if (storeActive_ == STORE.SELL)
         {
             if (selectKind_ == KIND.MATERIA)
             {
-                bagMateria_.MateriaGetCheck(saveItemsNum_,  -itemCnt_);
+                bagMateria_.MateriaGetCheck(saveItemsNum_, -itemCnt_);
             }
             else
             {
@@ -395,7 +390,7 @@ public class ItemStoreMng : MonoBehaviour
             Debug.Log("アイテム所持数" + haveCnt_);
             if (haveCnt_ < 1)
             {
-                transform.GetComponent<Trade_Sell>().SetHaveCntCheck(kindNum_,saveItemsNum_);
+                transform.GetComponent<Trade_Sell>().SetHaveCntCheck(kindNum_, saveItemsNum_);
                 processParent_.gameObject.SetActive(false);
             }
         }
@@ -410,10 +405,8 @@ public class ItemStoreMng : MonoBehaviour
         slider_.value = 0;
         // 初期化を兼ねて呼び出す
         SetSelectItemName(saveItemsNum_);
-        //SetSelectItemName(saveItemsNum_, saveName_);
     }
-
-    public void OnClickCancelBtn()
+        public void OnClickCancelBtn()
     {
         // 買い物を終わらせたいとき
         storeActive_ = STORE.NON;
@@ -424,14 +417,8 @@ public class ItemStoreMng : MonoBehaviour
         tradeMng_[(int)STORE.BUY].gameObject.SetActive(false);
         tradeMng_[(int)STORE.SELL].gameObject.SetActive(false);
         processParent_.gameObject.SetActive(false);
-        //itemStoreBtn_[0].gameObject.SetActive(true);
-        //itemStoreBtn_[1].gameObject.SetActive(true);
-        //itemStoreBtn_[2].gameObject.SetActive(true);
         itemStoreCanvas_.gameObject.SetActive(true);
     }
-
-
-
 
     public void OnClickItemButton()
     {

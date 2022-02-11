@@ -156,7 +156,7 @@ public class Enemy : CharaBase, InterfaceButtle
     }
 
     // CharaBaseクラスの抽象メソッドを実装する
-    public override void LevelUp()
+    public override void LevelUp(int[] num)
     {
         Debug.Log("レベルアップ！");
     }

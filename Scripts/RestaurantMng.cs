@@ -34,7 +34,13 @@ public class RestaurantMng : MonoBehaviour
     private GameObject orderButton_;                // 注文を確定するボタン
 
     private Restaurant restaurant_;
-    IEnumerator ienumerator_;
+    private IEnumerator ienumerator_;
+
+    Cook0.Param cookParam_;
+    private string[] needFood_;
+    private List<int> needFoodListNum = new List<int>();
+    private string[] needNum;
+    private List<int> needNumListNum = new List<int>();
 
     // Excelからのデータ読み込み
     private GameObject DataPopPrefab_;
@@ -170,32 +176,15 @@ public class RestaurantMng : MonoBehaviour
     {
         Debug.Log("注文ボタンを押下しました");
 
-        // フラグがtrueなら食べれないようにする
-        if(SceneMng.GetFinStatusUpTime().Item2)
-        {
-            Debug.Log("お腹がいっぱいで食べられないヨ！！");
-            return;
-        }
-
-        // 繰り返し利用するので、一時変数に保存して使う
-        var tmppop = popCookInfo_.param[num_];
-
-        // そもそもお金が足りるか確認する
-        if(tmppop.needMoney > SceneMng.GetHaveMoney())
-        {
-            Debug.Log("注文するのにお金が足りません");
-            return;
-        }
-
         // 素材が要求される料理かどうかで処理を分ける
-        if (tmppop.needFood == "str")
+        if (cookParam_.needFood == "str")
         {
             SceneMng.SetSE(2);
 
             // 必要素材がないとき
 
             // お金の減少処理
-            SceneMng.SetHaveMoney(SceneMng.GetHaveMoney() - tmppop.needMoney);
+            SceneMng.SetHaveMoney(SceneMng.GetHaveMoney() - cookParam_.needMoney);
 
             // キャラのステータスアップ処理(7番目はexpだから料理では0にする)
             int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2, statusUp_[4].Item2, statusUp_[5].Item2, statusUp_[6].Item2, 0 };
@@ -207,66 +196,29 @@ public class RestaurantMng : MonoBehaviour
         }
         else
         {
-            // 必要素材があるとき
-            // 素材が足りているか確認する
-            string[] haveCnt;
-            List<int> haveCntListNum = new List<int>();
-            string[] needNum;
-            List<int> needNumListNum = new List<int>();
-            haveCnt = tmppop.needFood.Split(',');
-            needNum = tmppop.needNum.Split(',');
-            bool isCanEatFlg = true;
+            SceneMng.SetSE(2);
 
+            // 素材が足りる
+            Debug.Log("素材が足りる");
+
+            // お金の減少処理
+            SceneMng.SetHaveMoney(SceneMng.GetHaveMoney() - cookParam_.needMoney);
+
+            // キャラのステータスアップ処理(7番目はexpだから料理では0にする)
+            int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2, statusUp_[4].Item2, statusUp_[5].Item2, statusUp_[6].Item2, 0 };
+            for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
+            {
+                SceneMng.charasList_[i].SetStatusUpByCook(tmp);
+            }
+
+            // 素材を減らす
             // カンマ区切りになったものをさらにアンダーバーで区切る
-            for (int i = 0; i < haveCnt.Length; i++)
+            for (int i = 0; i < needFood_.Length; i++)
             {
-                var underbarSplit = haveCnt[i].Split('_');
-                // アンダーバーで区切ったものを、別々のリストへ入れる
-                haveCntListNum.Add(int.Parse(underbarSplit[1]));
-
-                underbarSplit = needNum[i].Split('_');
-                // アンダーバーで区切ったものを、別々のリストへ入れる
-                needNumListNum.Add(int.Parse(underbarSplit[1]));
-
-                if (Bag_Materia.materiaState[int.Parse(haveCntListNum[i].ToString())].haveCnt < int.Parse(needNumListNum[i].ToString()))
-                {
-                    isCanEatFlg = false;
-                    Debug.Log(Bag_Materia.materiaState[int.Parse(haveCntListNum[i].ToString())].name + "の素材が" + (int.Parse(needNumListNum[i].ToString()) - Bag_Materia.materiaState[int.Parse(haveCntListNum[i].ToString())].haveCnt) + "個足りません");
-                }
+                Bag_Materia.materiaState[int.Parse(needFoodListNum[i].ToString())].haveCnt -= int.Parse(needNumListNum[i].ToString());
             }
 
-            if (isCanEatFlg)
-            {
-                SceneMng.SetSE(2);
-
-                // 素材が足りる
-                Debug.Log("素材が足りる");
-
-                // お金の減少処理
-                SceneMng.SetHaveMoney(SceneMng.GetHaveMoney() - tmppop.needMoney);
-
-                // キャラのステータスアップ処理(7番目はexpだから料理では0にする)
-                int[] tmp = { statusUp_[0].Item2, statusUp_[1].Item2, statusUp_[2].Item2, statusUp_[3].Item2, statusUp_[4].Item2, statusUp_[5].Item2, statusUp_[6].Item2, 0 };
-                for (int i = 0; i < (int)SceneMng.CHARACTERNUM.MAX; i++)
-                {
-                    SceneMng.charasList_[i].SetStatusUpByCook(tmp);
-                }
-
-                // 素材を減らす
-                // カンマ区切りになったものをさらにアンダーバーで区切る
-                for (int i = 0; i < haveCnt.Length; i++)
-                {
-                    Bag_Materia.materiaState[int.Parse(haveCntListNum[i].ToString())].haveCnt -= int.Parse(needNumListNum[i].ToString());
-                }
-
-                GameObject.Find("DontDestroyCanvas/TimeGear/CookPowerIcon").GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-            }
-            else
-            {
-                // 素材が足りない
-                Debug.Log("素材が足りない");
-                return;
-            }
+            GameObject.Find("DontDestroyCanvas/TimeGear/CookPowerIcon").GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
         }
 
         restaurant_.ChangeNPCFace("smile@sd_hmd");  // 表情変更->笑顔
@@ -282,17 +234,23 @@ public class RestaurantMng : MonoBehaviour
     {
         Debug.Log("RestaurantMngで" + num + "を受け取りました");
 
+        // 値の初期化
+        for (int i = 0; i < statusUp_.Length; i++)
+        {
+            statusUp_[i] = (statusUpStr_[i], 0);
+        }
+
         //「注文する」ボタンの表示切替
         orderButton_.SetActive(true);
 
         // 繰り返し利用するので、一時変数に保存して使う
-        var tmppop = popCookInfo_.param[num];
+        cookParam_ = popCookInfo_.param[num];
 
         // 料理名と説明を出す
-        cookInfoText_.text = tmppop.name + "\n\n" + tmppop.info;
+        cookInfoText_.text = cookParam_.name + "\n\n" + cookParam_.info;
 
         // カンマ区切り
-        var tmp = tmppop.statusUp.Split(',');
+        var tmp = cookParam_.statusUp.Split(',');
 
         List<string> tmpList = new List<string>();
         List<int> tmpListNum = new List<int>();
@@ -331,7 +289,7 @@ public class RestaurantMng : MonoBehaviour
         }
 
         // 必要素材の名称を出す(数字から素材名を取る)
-        if (tmppop.needFood == "str")
+        if (cookParam_.needFood == "str")
         {
             // needFoodの値が-1のときは必要素材が無しだから、表示はなしにする
             needFoodText_.text += "\nなし";
@@ -339,15 +297,62 @@ public class RestaurantMng : MonoBehaviour
         }
         else
         {
-            needFoodText_.text = TextSetting(tmppop, "needFood");
-            haveFoodText_.text = TextSetting(tmppop, "needNum");
+            needFoodText_.text = TextSetting(cookParam_, "needFood");
+            haveFoodText_.text = TextSetting(cookParam_, "needNum");
         }
 
         // 必要なお金を出す
-        moneyText_.text = tmppop.needMoney.ToString();
+        moneyText_.text = cookParam_.needMoney.ToString();
 
         // 選択中のメニューを保存する
         num_ = num;
+
+        CheckOrderButtonInteractive();
+    }
+
+    private void CheckOrderButtonInteractive()
+    {
+        bool isCanEatFlg = true;
+        needFoodListNum.Clear();
+        needNumListNum.Clear();
+
+        if (cookParam_.needFood != "str")
+        {
+            // 素材が足りているか確認する
+            needFood_ = cookParam_.needFood.Split(',');
+            needNum = cookParam_.needNum.Split(',');
+
+            // カンマ区切りになったものをさらにアンダーバーで区切る
+            for (int i = 0; i < needFood_.Length; i++)
+            {
+                var underbarSplit = needFood_[i].Split('_');
+                // アンダーバーで区切ったものを、別々のリストへ入れる
+                needFoodListNum.Add(int.Parse(underbarSplit[1]));
+
+                underbarSplit = needNum[i].Split('_');
+                // アンダーバーで区切ったものを、別々のリストへ入れる
+                needNumListNum.Add(int.Parse(underbarSplit[1]));
+
+                if (Bag_Materia.materiaState[int.Parse(needFoodListNum[i].ToString())].haveCnt < int.Parse(needNumListNum[i].ToString()))
+                {
+                    isCanEatFlg = false;
+                    Debug.Log(Bag_Materia.materiaState[int.Parse(needFoodListNum[i].ToString())].name + "の素材が" + (int.Parse(needNumListNum[i].ToString()) - Bag_Materia.materiaState[int.Parse(needFoodListNum[i].ToString())].haveCnt) + "個足りません");
+                }
+            }
+        }
+
+
+        // 料理が食べられないとき
+        if (SceneMng.GetFinStatusUpTime().Item2 ||
+            popCookInfo_.param[num_].needMoney > SceneMng.GetHaveMoney() ||
+            !isCanEatFlg)
+        {
+            orderButton_.GetComponent<Button>().interactable = false;
+            Debug.Log("何らかの理由で、料理が食べられません");
+            return;
+        }
+
+        orderButton_.GetComponent<Button>().interactable = true;
     }
 
     private string TextSetting(Cook0.Param tmppop, string text)

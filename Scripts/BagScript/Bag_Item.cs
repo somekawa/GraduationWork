@@ -51,7 +51,6 @@ public class Bag_Item : MonoBehaviour
         popItemList_ = GameObject.Find("SceneMng").GetComponent<InitPopList>();
         saveCsvSc_ = GameObject.Find("SceneMng/SaveMng").GetComponent<SaveCSV_HaveItem>();
         maxCnt_ = popItemList_.SetMaxItemCount();
-
         itemState = new ItemData[maxCnt_];
         for (int i = 0; i < maxCnt_; i++)
         {
@@ -83,7 +82,7 @@ public class Bag_Item : MonoBehaviour
 
                 itemState[i].number = int.Parse(csvDatas_[i + 1][0]);
                 itemState[i].name = csvDatas_[i + 1][1];
-               // Debug.Log(i+"アイテムの名前："+itemState[i].name);
+              //  Debug.Log(i+"アイテムの名前："+itemState[i].name);
                 // アイテムの所持数を確認
                 itemState[i].haveCnt = int.Parse(csvDatas_[i + 1][2]);
              //   Debug.Log(itemState[i].name+"アイテム個数" + itemState[i].haveCnt);
@@ -138,10 +137,9 @@ public class Bag_Item : MonoBehaviour
     {
         if (rate == 2)
         {
-            itemNum += maxCnt_/2;
-
+            itemNum += maxCnt_ / 2;
         }
-        Debug.Log(itemNum+"加算されるアイテム" + itemState[itemNum].name);
+        Debug.Log(itemNum + "加算されるアイテム" + itemState[itemNum].name);
         itemState[itemNum].haveCnt = itemState[itemNum].haveCnt + createCnt;
         //  data[itemNum].haveCnt = itemState[itemNum].haveCnt;
     }
@@ -191,11 +189,19 @@ public class Bag_Item : MonoBehaviour
             useBtn_ = infoBack_.transform.Find("ItemUse").GetComponent<Button>();
             info_ = infoBack_.transform.Find("InfoText").GetComponent<Text>();
         }
+
+        if (useItem_ == null)
+        {
+            useItem_ = GameObject.Find("ItemBagMng").GetComponent<UseItem>();
+        }
+
         throwAwayBtn_.gameObject.SetActive(true);
         useBtn_.gameObject.SetActive(true);
 
         // 選択されたアイテムの番号を保存
         clickItemNum_ = num;
+        // ボタンの押下可能/不可能を切り替える
+        useBtn_.interactable = useItem_.CanUseItem(clickItemNum_);
 
         StartCoroutine(MoveObj(false));
     }
@@ -244,22 +250,18 @@ public class Bag_Item : MonoBehaviour
         // ここで返り値を一時変数にいれないと、Use関数を2回通ることになってバグが生じる
         var tmp = useItem_.Use(clickItemNum_);
 
-        // 今選択中のアイテムを使える
-        if (tmp.Item1)
+        if (tmp)
         {
-            if (tmp.Item2)
-            {
-                // 対象の選択が必要
-                useItem_.TextInit(text);
-                StartCoroutine(MoveObj(true));
-            }
-            else
-            {
-                // 対象の選択が必要ない
-                // trueで返ってきたときには、使用したアイテムを-1する
-                itemState[clickItemNum_].haveCnt--;
-                itemUseFlg = true;
-            }
+            // 対象の選択が必要
+            useItem_.TextInit(text);
+            StartCoroutine(MoveObj(true));
+        }
+        else
+        {
+            // 対象の選択が必要ない
+            // trueで返ってきたときには、使用したアイテムを-1する
+            itemState[clickItemNum_].haveCnt--;
+            itemUseFlg = true;
         }
 
         // 表示中の所持数を更新
@@ -305,18 +307,24 @@ public class Bag_Item : MonoBehaviour
                 // テキストは左に、アイテム説明は右にずらす
                 if (!tmpPair[0].Item2)
                 {
-                    infoBack_.transform.position = new Vector3(infoBack_.transform.position.x + 3, infoBack_.transform.position.y, infoBack_.transform.position.z);
                     if (infoBack_.transform.localPosition.x >= tmpPair[0].Item1)
                     {
                         tmpPair[0].Item2 = true;
                     }
+                    else
+                    {
+                        infoBack_.transform.position = new Vector3(infoBack_.transform.position.x + 3, infoBack_.transform.position.y, infoBack_.transform.position.z);
+                    }
                 }
                 if (!tmpPair[1].Item2)
                 {
-                    charasText_.transform.position = new Vector3(charasText_.transform.position.x - 3, charasText_.transform.position.y, charasText_.transform.position.z);
                     if (charasText_.transform.localPosition.x <= tmpPair[1].Item1)
                     {
                         tmpPair[1].Item2 = true;
+                    }
+                    else
+                    {
+                        charasText_.transform.position = new Vector3(charasText_.transform.position.x - 3, charasText_.transform.position.y, charasText_.transform.position.z);
                     }
                 }
             }
@@ -325,18 +333,24 @@ public class Bag_Item : MonoBehaviour
                 // テキストは右に、アイテム説明は左に戻す
                 if (!tmpPair[0].Item2)
                 {
-                    infoBack_.transform.position = new Vector3(infoBack_.transform.position.x - 3, infoBack_.transform.position.y, infoBack_.transform.position.z);
                     if (infoBack_.transform.localPosition.x <= tmpPair[0].Item1)
                     {
                         tmpPair[0].Item2 = true;
                     }
+                    else
+                    {
+                        infoBack_.transform.position = new Vector3(infoBack_.transform.position.x - 3, infoBack_.transform.position.y, infoBack_.transform.position.z);
+                    }
                 }
                 if (!tmpPair[1].Item2)
                 {
-                    charasText_.transform.position = new Vector3(charasText_.transform.position.x + 3, charasText_.transform.position.y, charasText_.transform.position.z);
                     if (charasText_.transform.localPosition.x >= tmpPair[1].Item1)
                     {
                         tmpPair[1].Item2 = true;
+                    }
+                    else
+                    {
+                        charasText_.transform.position = new Vector3(charasText_.transform.position.x + 3, charasText_.transform.position.y, charasText_.transform.position.z);
                     }
                 }
             }

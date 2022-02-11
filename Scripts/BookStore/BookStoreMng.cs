@@ -79,7 +79,7 @@ public class BookStoreMng : MonoBehaviour
     private int recipCnt_ = 0;
     private bool moneyCheck_ = false;
     private int readCnt_ = -1;
-    
+
     private void Init()
     {
         // 初期化
@@ -89,7 +89,7 @@ public class BookStoreMng : MonoBehaviour
         }
 
         // 同じシーン滞在中に何度も本屋に入った時に同じ処理をしないように
-        if (bagWord_==null)
+        if (bagWord_ == null)
         {
             bagWord_ = GameObject.Find("DontDestroyCanvas/Managers").GetComponent<Bag_Word>();
 
@@ -97,11 +97,11 @@ public class BookStoreMng : MonoBehaviour
             bookInfoData_ = bookStoreUI.transform.Find("CheckArea/BookData").GetComponent<RectTransform>();
             buyBtn_ = bookInfoData_.Find("BuyButton").GetComponent<Button>();
             infoImage_ = bookInfoData_.Find("InfoArea/Image").GetComponent<Image>();
-            bookNameText_ = bookInfoData_.Find("InfoArea/Back/NameText").GetComponent<TMPro.TextMeshProUGUI>();
+            bookNameText_ = bookInfoData_.Find("InfoArea/NameText").GetComponent<TMPro.TextMeshProUGUI>();
             infoText_ = bookInfoData_.Find("InfoArea/Text").GetComponent<TMPro.TextMeshProUGUI>();
             statusOrWordText_ = bookInfoData_.Find("StatusOrWordText").GetComponent<TMPro.TextMeshProUGUI>();
             getStatusOrWordText_ = statusOrWordText_.transform.Find("GetStatusOrWordText").GetComponent<TMPro.TextMeshProUGUI>();
-         
+
             totalPriceText_ = bookInfoData_.Find("TotalPriceBack/TotalPrice").GetComponent<TMPro.TextMeshProUGUI>();
             soldOutImage_ = bookStoreUI.transform.Find("ScrollView/Viewport/SoldOut").GetComponent<Image>();
             haveMoneyText_ = bookStoreUI.transform.Find("CheckArea/Money/Count").GetComponent<TMPro.TextMeshProUGUI>();
@@ -202,7 +202,7 @@ public class BookStoreMng : MonoBehaviour
                 bool flag = bookState_[i].readFlag == 0 ? true : false;
                 bookState_[i].obj.gameObject.SetActive(flag);
                 bookStoreUI.SetActive(false);
-                readCnt_ = bookState_[i].readFlag == 0 ? +1:+0;
+                readCnt_ = bookState_[i].readFlag == 0 ? +1 : +0;
                 if (bookState_[i].obj.activeSelf == true)
                 {
                     if (haveMoney_ < bookState_[i].price)
@@ -293,7 +293,7 @@ public class BookStoreMng : MonoBehaviour
         // 極級までのレシピを読んでない場合
         if (bookState_[recipeNum_[recipCnt_ - 1]].readFlag == 0)
         {
-            Debug.Log(bookState_[recipeNum_[recipCnt_ - 1]].bookNumber+ "       "+bookState_[recipeNum_[recipCnt_ - 1]].bookName);
+            Debug.Log(bookState_[recipeNum_[recipCnt_ - 1]].bookNumber + "       " + bookState_[recipeNum_[recipCnt_ - 1]].bookName);
             RecipeReadCheck();
         }
 
@@ -489,7 +489,7 @@ public class BookStoreMng : MonoBehaviour
         int cnt = 0;
         int activeCnt_ = 0;
         bool statusUpFlag = false;
-        int recipeReadCheck_ =-1;
+        int recipeReadCheck_ = -1;
         for (int i = 0; i < maxCnt_; i++)
         {
             if (bookState_[i].checkMark.gameObject.activeSelf == true &&
@@ -558,9 +558,9 @@ public class BookStoreMng : MonoBehaviour
         }
 
         if (bookState_[recipeNum_[recipCnt_ - 1]].readFlag == 0
-            && recipeReadCheck_!=-1)
+            && recipeReadCheck_ != -1)
         {
-            for (int r = 0; r < recipCnt_-1; r++)
+            for (int r = 0; r < recipCnt_ - 1; r++)
             {
                 if (recipeNum_[r] == recipeReadCheck_)
                 {

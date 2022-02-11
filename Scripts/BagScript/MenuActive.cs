@@ -99,7 +99,12 @@ public class MenuActive : MonoBehaviour
 
     void Update()
     {
-        if(warpField_ == null)
+        if (SceneMng.nowScene == SceneMng.SCENE.TITLE)
+        {
+            return;
+        }
+
+        if (warpField_ == null)
         {
             warpField_ = GameObject.Find("WarpOut").GetComponent<WarpField>();
         }
@@ -336,8 +341,8 @@ public class MenuActive : MonoBehaviour
                 break;
 
             case CANVAS.OTHER:
-                // PictureAndQuestMng.csの初期化関数を呼ぶ
-               // GameObject.Find("DontDestroyCanvas/OtherUI").GetComponent<PictureAndQuestMng>().Init();
+                parentRectTrans_[(int)CANVAS.OTHER].Find("CanClearText").GetComponent<Text>().text = QuestClearCheck.GetClearedQuestsList().Count + "個のクエストが報告可能です";
+                Debug.Log(QuestClearCheck.GetClearedQuestsList().Count +"個のクエストが報告可能です");
                 break;
 
             default:
@@ -360,10 +365,9 @@ public class MenuActive : MonoBehaviour
     {
         parentRectTrans_[(int)CANVAS.BAG].gameObject.SetActive(flag);
 
-        // 1度全てfalseにする
         for (int i = 0; i < parentRectTrans_[(int)CANVAS.BAG].childCount; i++)
         {
-            parentRectTrans_[(int)CANVAS.BAG].GetChild(i).gameObject.SetActive(false);
+            parentRectTrans_[(int)CANVAS.BAG].GetChild(i).gameObject.SetActive(!flag);
         }
 
         if (flag)

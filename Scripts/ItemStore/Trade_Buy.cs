@@ -30,7 +30,7 @@ public class Trade_Buy : MonoBehaviour
     public void Init(int seleKind, int kind)
     // void Start()
     {
-        if(materiaNum_==-1)
+        if (materiaNum_ == -1)
         {
             materiaNum_ = Bag_Materia.emptyMateriaNum;
         }
@@ -74,7 +74,7 @@ public class Trade_Buy : MonoBehaviour
         if (kind == ItemStoreMng.KIND.MATERIA
              && EventMng.GetChapterNum() < 20)
         {
-            data = new StoreBuy[maxCnt+1];
+            data = new StoreBuy[maxCnt + 1];
             data[maxCnt].haveCnt = Bag_Materia.materiaState[materiaNum_].haveCnt;
             data[maxCnt].price = InitPopList.materiaData[materiaNum_].buyPrice;
             data[maxCnt].name = Bag_Materia.materiaState[materiaNum_].name;
@@ -96,8 +96,8 @@ public class Trade_Buy : MonoBehaviour
         for (int i = 0; i < maxCnt; i++)
         {
             data[i].haveCnt = kind == ItemStoreMng.KIND.ITEM ? Bag_Item.itemState[i].haveCnt : Bag_Materia.materiaState[i].haveCnt;
-            data[i].price = kind == ItemStoreMng.KIND.ITEM ? InitPopList.itemData[i].buyPrice : InitPopList.materiaData[i].buyPrice;
-            data[i].name = kind == ItemStoreMng.KIND.ITEM ? Bag_Item.itemState[i].name : Bag_Materia.materiaState[i].name;
+            data[i].price = kind == ItemStoreMng.KIND.ITEM ? InitPopList.itemData[i].buyPrice:InitPopList.materiaData[i].buyPrice ;
+            data[i].name = kind == ItemStoreMng.KIND.ITEM ? Bag_Item.itemState[i].name: Bag_Materia.materiaState[i].name ;
             data[i].obj = kind == ItemStoreMng.KIND.ITEM ? PopListInTown.itemPleate[i] : PopListInTown.materiaPleate[i];
             data[i].obj.name = data[i].name + i;
             data[i].btn = data[i].obj.GetComponent<Button>();

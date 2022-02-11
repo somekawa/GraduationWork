@@ -153,6 +153,7 @@ public class TextMng : MonoBehaviour
                 // マウスの左クリック押下時
                 if (Input.GetMouseButtonDown(0) && !skipFlg_ && !clickLock_)
                 {
+                    SceneMng.SetSE(0);
                     // Excelの列の最大数を越えないようにする(Countに-1をつけないとエラーになる)
                     if (nowText_ < popChapter_.param.Count - 1)
                     {

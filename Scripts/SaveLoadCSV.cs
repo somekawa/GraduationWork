@@ -294,7 +294,8 @@ public class SaveLoadCSV : MonoBehaviour
                     AnimMax = float.Parse(csvDatas[i + 1][11]),
                     Magic = tmpArray,
                     CharacterExp = int.Parse(csvDatas[i + 1][16]),
-                   CharacterMaxExp = int.Parse(csvDatas[i + 1][17])
+                    CharacterMaxExp = int.Parse(csvDatas[i + 1][17]),
+                    statusUp = tmpStatus
                 };
                 Debug.Log(csvDatas[i + 1][0] + "            キャラデータをロード中。残り" + i);
                 SceneMng.SetCharasSettings(i, set);
@@ -344,7 +345,7 @@ public class SaveLoadCSV : MonoBehaviour
                             // 指定したキーが存在するかどうか
                             if (!QuestMng.rewardGradeUp.ContainsKey(int.Parse(split[0])))
                             {
-                                QuestMng.rewardGradeUp.Add(int.Parse(split[0]), 0.0f);    
+                                QuestMng.rewardGradeUp.Add(int.Parse(split[0]), float.Parse(split[2]));    
                             }
 
                             // 受注中で、クリアしたが報告していないもの→回数の末尾に"_c"をつけるようにする。
@@ -498,8 +499,8 @@ public class SaveLoadCSV : MonoBehaviour
         sw.WriteLine(write);
     }
 
-    public int[] StatusNum()
-    {
-        return tmpStatus;
-    }
+    //public int[] StatusNum()
+    //{
+    //    return tmpStatus;
+    //}
 }

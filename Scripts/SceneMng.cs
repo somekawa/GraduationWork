@@ -199,13 +199,13 @@ public class SceneMng : MonoBehaviour
                 if (interiorMng.GetInHouseName() == "Guild")
                 {
                     // 会話シーンならMENUのみ非表示に
-                    MenuSetActive(false);
+                    MenuSetActive(false,true);
                 }
             }
             else if (nowScene == SCENE.CONVERSATION)
             {
                 // 会話シーンならMENUのみ非表示に
-                MenuSetActive(false);
+                MenuSetActive(false,true);
             }
             else
             {
@@ -215,11 +215,17 @@ public class SceneMng : MonoBehaviour
     }
 
     // この書き方のほうが確実にMenuを取得して表示/非表示を変更できる
-    public static void MenuSetActive(bool flag)
+    public static void MenuSetActive(bool flag,bool gear)
     {
         var tmp = GameObject.Find("DontDestroyCanvas").GetComponent<RectTransform>();
         for (int i = 0; i < tmp.childCount; i++)
         {
+            if (tmp.GetChild(i).gameObject.name == "TimeGear")
+            {
+                tmp.GetChild(i).gameObject.SetActive(gear);
+                continue;
+            }
+
             if (tmp.GetChild(i).gameObject.name == "Menu")
             {
                 tmp.GetChild(i).gameObject.SetActive(flag);
@@ -273,7 +279,7 @@ public class SceneMng : MonoBehaviour
         return houseName_;
     }
 
-    public static void SetTimeGear(TIMEGEAR dayTime)
+    public static void SetTimeGear(TIMEGEAR dayTime,bool sleepFlg = false)
     {
         if (dayTime > TIMEGEAR.NIGHT) // 今が夜なら、朝が入るようにする
         {
@@ -287,7 +293,7 @@ public class SceneMng : MonoBehaviour
         }
 
         // 料理の効果が切れる時間ならフラグをfalseにする
-        if(timeGrar_ == finStatusUpTime_.Item1)
+        if(timeGrar_ == finStatusUpTime_.Item1 || sleepFlg)
         {
             finStatusUpTime_.Item2 = false;
             GameObject.Find("DontDestroyCanvas/TimeGear/CookPowerIcon").GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);

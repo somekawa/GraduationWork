@@ -6,6 +6,7 @@ public class UseItem : MonoBehaviour
     // フィールドのメニュー画面からのみ使用可能:0
     // 戦闘中のみ使用可能    :1
     // どちらでも使用可能    :2
+    // どちらでも使用不可    :3(即死身代わり)
     private byte[] item_ = new byte[38]{
             2,//0:HPポーション(小)
             1,//1:毒消し
@@ -20,7 +21,7 @@ public class UseItem : MonoBehaviour
             1,//10:麻痺消し
             0,//11:エンカウント率(低下)
             1,//12:速度アップ(単体)
-            1,//13:即死身代わり
+            3,//13:即死身代わり
             1,//14:蘇生(HP小状態で)
             2,//15:HPポーション(大)
             2,//16:MPポーション(中)
@@ -40,7 +41,7 @@ public class UseItem : MonoBehaviour
             1,//29:麻痺消し
             0,//30:エンカウント率(低下)
             1,//31:速度アップ(単体)
-            1,//32:即死身代わり
+            3,//32:即死身代わり
             1,//33:蘇生(HP小状態で)
             2,//34:HPポーション(大)
             2,//35:MPポーション(中)
@@ -55,6 +56,7 @@ public class UseItem : MonoBehaviour
     private bool buffExItemFlg_ = false;    // 大成功アイテムならバフ量を増やす
     private GameObject charasText_;
     private string alive = "";
+    private int seNum_ = 0;
 
     // 画面を開いた時に1回と、回復毎に1回呼ぶ
     public void TextInit(Text[] text)
@@ -70,18 +72,21 @@ public class UseItem : MonoBehaviour
         }
     }
 
-    // 返り値について…(bool->今使えるかどうか,bool->使う際に対象の指定が必要かどうか)
-    // 2つ目がtrueになるタイミングは回復系のみ
-    public (bool,bool) Use(int itemNum)
+    // 返り値について…bool->今使えるかどうか
+    public bool  CanUseItem(int itemNum)
     {
-        Debug.Log(itemNum + "番のアイテムを使用します");
+        if (item_[itemNum] == 3)
+        {
+            Debug.Log("身代わりアイテムなので、手動使用はできません");
+            return false;
+        }
 
         // 現在フィールドのメニュー画面ならば
         // item_変数が「１」のアイテムは使用不可
-        if(FieldMng.nowMode  == FieldMng.MODE.MENU && item_[itemNum] == 1)
+        if (FieldMng.nowMode == FieldMng.MODE.MENU && item_[itemNum] == 1)
         {
             Debug.Log("戦闘中にしか使えないアイテムを使用しようとしました");
-            return (false,false);
+            return false;
         }
 
         // 現在戦闘中もしくは強制戦闘中ならば
@@ -90,39 +95,60 @@ public class UseItem : MonoBehaviour
            item_[itemNum] == 0)
         {
             Debug.Log("探索中にしか使えないアイテムを使用しようとしました");
-            return (false, false);
+            return false;
         }
+
+        if((SceneMng.nowScene == SceneMng.SCENE.TOWN || SceneMng.nowScene == SceneMng.SCENE.UNIHOUSE) &&
+            item_[itemNum] == 0)
+        {
+            Debug.Log("街もしくはユニハウスで、フィールドでしか使えないアイテムを使用しようとしました");
+            return false;
+        }
+
+        return true;
+    }
+
+
+    // 返り値について…bool->使う際に対象の指定が必要かどうか
+    // 2つ目がtrueになるタイミングは回復系のみ
+    public bool Use(int itemNum)
+    {
+        Debug.Log(itemNum + "番のアイテムを使用します");
+
 
         bool tmpFlg = false;
         switch (itemNum)
         {
             case 0:    // HPポーション(小)
-                SceneMng.SetSE(9);
+                seNum_ = 9;
                 hpmpNum_ = (10, 0);
                 tmpFlg = true;
                 break;
             case 1:    // 毒消し
-                SceneMng.SetSE(10);
+                seNum_ = 10;
                 condition_ = CharaBase.CONDITION.POISON;
                 tmpFlg = true;
                 break;
             case 2:    // カエレール(フィールドからユニハウスへ)
+                seNum_ = 0;
+                SceneMng.SetSE(seNum_);
                 FieldMng.nowMode = FieldMng.MODE.SEARCH;
                 FieldMng.oldMode = FieldMng.MODE.NON;
                 SceneMng.SceneLoad((int)SceneMng.SCENE.UNIHOUSE);
                 break;
             case 3:    // 防御力アップ(単体)
-                SceneMng.SetSE(2);
+                seNum_ = 2;
                 buffExItemFlg_ = false;
                 tmpFlg = true;
                 buff_ = (3, -1);
                 break;
             case 4:    // 全体小ダメージ
-                SceneMng.SetSE(13);
+                seNum_ = 13;
+                SceneMng.SetSE(seNum_);
                 GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(15);
                 break;
             case 5:    // 物理/魔法攻撃力アップ(単体)
-                SceneMng.SetSE(2);
+                seNum_ = 2;
                 buffExItemFlg_ = false;
                 tmpFlg = true;
                 buff_ = (1, 2);
@@ -130,6 +156,8 @@ public class UseItem : MonoBehaviour
             case 6:    // ニゲレール(強制戦闘でない場合は使用可能とする)
                 if (FieldMng.nowMode != FieldMng.MODE.FORCEDBUTTLE)
                 {
+                    seNum_ = 0;
+                    SceneMng.SetSE(seNum_);
                     var tmp = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
                     tmp.CallDeleteEnemy();
                     FieldMng.nowMode = FieldMng.MODE.SEARCH;
@@ -140,35 +168,37 @@ public class UseItem : MonoBehaviour
                 }
                 else
                 {
-                    return (false, tmpFlg);
+                    return tmpFlg;
                 }
                 break;
             case 7:    // 暗闇消し
-                SceneMng.SetSE(10);
+                seNum_ = 10;
                 condition_ = CharaBase.CONDITION.DARK;
                 tmpFlg = true;
                 break;
             case 8:    // MPポーション(小)
-                SceneMng.SetSE(9);
+                seNum_ = 9;
                 hpmpNum_ = (0, 10);
                 tmpFlg = true;
                 break;
             case 9:    // HPポーション(中)
-                SceneMng.SetSE(9);
+                seNum_ = 9;
                 hpmpNum_ = (40, 0);
                 tmpFlg = true;
                 break;
             case 10:    // 麻痺消し
-                SceneMng.SetSE(10);
+                seNum_ = 10;
                 condition_ = CharaBase.CONDITION.PARALYSIS;
                 tmpFlg = true;
                 break;
             case 11:    // エンカウント率低下
-                // 現在のエンカウント色のまま、一定時間エンカウントしなくなるようにする
+                        // 現在のエンカウント色のまま、一定時間エンカウントしなくなるようにする
+                seNum_ = 0;
+                SceneMng.SetSE(seNum_);
                 FieldMng.stopEncountTimeFlg = true;
                 break;
             case 12:    // 速度アップ(単体)
-                SceneMng.SetSE(2);
+                seNum_ = 2;
                 buffExItemFlg_ = false;
                 tmpFlg = true;
                 buff_ = (4, -1);
@@ -177,57 +207,61 @@ public class UseItem : MonoBehaviour
                 // 持っているだけで効果がでるから、ここに処理は書かない
                 break;
             case 14:    // 蘇生(最大HPの半分)
-                SceneMng.SetSE(9);
+                seNum_ = 9;
                 alive = "half";
                 tmpFlg = true;
                 break;
             case 15:    // HPポーション(大)
-                SceneMng.SetSE(9);
+                seNum_ = 9;
                 hpmpNum_ = (100, 0);
                 tmpFlg = true;
                 break;
             case 16:    // MPポーション(中)
-                SceneMng.SetSE(9);
+                seNum_ = 9;
                 hpmpNum_ = (0, 50);
                 tmpFlg = true;
                 break;
             case 17:    // 全体中ダメージ
-                SceneMng.SetSE(13);
+                seNum_ = 13;
+                SceneMng.SetSE(seNum_);
                 GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(30);
                 break;
             case 18:    // 蘇生(HP全快)
-                SceneMng.SetSE(9);
+                seNum_ = 9;
                 alive = "all";
                 tmpFlg = true;
                 break;
                 // ここから下は大成功処理--------------------------------------------------
             case 19:    // HPポーション(小)
-                SceneMng.SetSE(9);
+                seNum_ = 9;
                 hpmpNum_ = (35, 0);
                 tmpFlg = true;
                 break;
             case 20:    // 毒消し
-                SceneMng.SetSE(10);
+                seNum_ = 10;
                 condition_ = CharaBase.CONDITION.POISON;
                 tmpFlg = true;
                 break;
             case 21:    // カエレール(フィールドからユニハウスへ)
+                seNum_ = 0;
+                SceneMng.SetSE(seNum_);
                 FieldMng.nowMode = FieldMng.MODE.SEARCH;
                 FieldMng.oldMode = FieldMng.MODE.NON;
                 SceneMng.SceneLoad((int)SceneMng.SCENE.UNIHOUSE);
                 break;
             case 22:    // 防御力アップ(単体)
-                SceneMng.SetSE(2);
+                seNum_ = 2;
                 buffExItemFlg_ = true;
                 tmpFlg = true;
                 buff_ = (3, -1);
                 break;
             case 23:    // 全体小ダメージ
-                SceneMng.SetSE(13);
+                seNum_ = 13;
+                SceneMng.SetSE(seNum_);
                 GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(20);
                 break;
             case 24:    // 物理/魔法攻撃力アップ(単体)
-                SceneMng.SetSE(2);
+                seNum_ = 2;
                 buffExItemFlg_ = true;
                 tmpFlg = true;
                 buff_ = (1, 2);
@@ -235,6 +269,8 @@ public class UseItem : MonoBehaviour
             case 25:    // ニゲレール(強制戦闘でない場合は使用可能とする)
                 if (FieldMng.nowMode != FieldMng.MODE.FORCEDBUTTLE)
                 {
+                    seNum_ = 0;
+                    SceneMng.SetSE(seNum_);
                     var tmp = GameObject.Find("ButtleMng").GetComponent<ButtleMng>();
                     tmp.CallDeleteEnemy();
                     FieldMng.nowMode = FieldMng.MODE.SEARCH;
@@ -245,36 +281,37 @@ public class UseItem : MonoBehaviour
                 }
                 else
                 {
-                    return (false, tmpFlg);
+                    return tmpFlg;
                 }
                 break;
             case 26:    // 暗闇消し
-                SceneMng.SetSE(10);
+                seNum_ = 10;
                 condition_ = CharaBase.CONDITION.DARK;
                 tmpFlg = true;
                 break;
             case 27:    // MPポーション(小)
-                SceneMng.SetSE(9);
+                seNum_ = 9;
                 hpmpNum_ = (0, 35);
                 tmpFlg = true;
                 break;
             case 28:    // HPポーション(中)
-                SceneMng.SetSE(9);
+                seNum_ = 9;
                 hpmpNum_ = (65, 0);
                 tmpFlg = true;
                 break;
             case 29:    // 麻痺消し
-                SceneMng.SetSE(10);
+                seNum_ = 10;
                 condition_ = CharaBase.CONDITION.PARALYSIS;
                 tmpFlg = true;
                 break;
             case 30:    // エンカウント率低下
                 // 現在のエンカウント色のまま、一定時間エンカウントしなくなるようにする
-                //@ こっちのほうが効果を長くしたい
+                seNum_ = 0;
+                SceneMng.SetSE(seNum_);
                 FieldMng.stopEncountTimeFlg = true;
                 break;
             case 31:    // 速度アップ(単体)
-                SceneMng.SetSE(2);
+                seNum_ = 2;
                 buffExItemFlg_ = true;
                 tmpFlg = true;
                 buff_ = (4, -1);
@@ -283,38 +320,43 @@ public class UseItem : MonoBehaviour
                 // 持っているだけで効果がでるから、ここに処理は書かない
                 break;
             case 33:    // 蘇生(最大HPの半分)
-                SceneMng.SetSE(9);
+                seNum_ = 9;
                 alive = "half";
                 tmpFlg = true;
                 break;
             case 34:    // HPポーション(大)
-                SceneMng.SetSE(9);
+                seNum_ = 9;
                 hpmpNum_ = (130, 0);
                 tmpFlg = true;
                 break;
             case 35:    // MPポーション(中)
-                SceneMng.SetSE(9);
+                seNum_ = 9;
                 hpmpNum_ = (0, 65);
                 tmpFlg = true;
                 break;
             case 36:    // 全体中ダメージ
-                SceneMng.SetSE(13);
+                seNum_ = 13;
+                SceneMng.SetSE(seNum_);
                 GameObject.Find("ButtleMng").GetComponent<ButtleMng>().ItemDamage(45);
                 break;
             case 37:    // 蘇生(HP全快)
-                SceneMng.SetSE(9);
+                seNum_ = 9;
                 alive = "all";
                 tmpFlg = true;
                 break;
         }
 
         itemNum_ = itemNum;
-        return (true,tmpFlg);
+        return tmpFlg;
     }
 
     public void OnClickCharaButton(int num)
     {
-        if(!SceneMng.charasList_[num].GetDeathFlg())
+        // ここに音の処理書かないとだめ。
+        SceneMng.SetSE(seNum_);
+        // あと会話後にアイテムもらっても、メニューを開かないで戦闘で始めて開いたらおかしくなってた気がする
+
+        if (!SceneMng.charasList_[num].GetDeathFlg())
         {
             // HPMP回復
             SceneMng.charasList_[num].SetHP(SceneMng.charasList_[num].HP() + hpmpNum_.Item1);
@@ -337,6 +379,8 @@ public class UseItem : MonoBehaviour
                     {
                         // アイコンをいれる
                         bufftra.GetChild(i).GetComponent<Image>().sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BUFFICON][whatBuff - 1];
+                        bufftra.GetChild(i).GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+
                         // 矢印でアップ倍率をいれる
                         // ▲*1 = バフが1% ~30%,▲*2 = バフが31% ~70%,▲*3 = バフが71%~100%
                         for (int m = 0; m < bufftra.GetChild(i).childCount; m++)

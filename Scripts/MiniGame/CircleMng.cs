@@ -47,6 +47,8 @@ public class CircleMng : MonoBehaviour
     private Image countImage_;
     private TMPro.TextMeshProUGUI countText_;
 
+    AssetBundle assetBundle_;
+
 
     public void Init(int elementNum, int judgeNum)
     {
@@ -103,6 +105,11 @@ public class CircleMng : MonoBehaviour
 
         miniGameMng.gameObject.SetActive(true);
 
+        if (assetBundle_ == null)
+        {
+            assetBundle_ = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/AssetBundles/StandaloneWindows/create");
+        }
+
         // カウントダウン関連
         countImage_.gameObject.SetActive(true);// カウントダウン用の画像を表示する
         StartCoroutine(CountDown());        // カウントダウンを開始する
@@ -135,7 +142,8 @@ public class CircleMng : MonoBehaviour
             if (flag == false)
             {
                 // 針を回転させる
-                rotateCenter.transform.localEulerAngles -= new Vector3(0.0f, 0.0f, 0.5f);
+                rotateCenter.transform.localEulerAngles = 
+                    new Vector3(rotateCenter.transform.localEulerAngles.x, rotateCenter.transform.localEulerAngles.y, Mathf.Sin(Time.time) * -360.0f);
 
                 // スペースキー押下で回転ストップ
                 if (Input.GetKeyDown(KeyCode.Space))
@@ -163,10 +171,11 @@ public class CircleMng : MonoBehaviour
                         //Debug.DrawRay(Vector3 start(rayを開始する位置), Vector3 dir(rayの方向と長さ), Color color(ラインの色), float duration(ラインの表示される時間), bool depthTest(ラインがカメラから近いオブジェクトによって隠された場合にラインを隠すかどうか));
                         Debug.DrawRay(pos, ray1.direction * 1000.0f, Color.red, 100.0f, false);
                         // 色がない部分だとアルファ値が0を取得できる
-
+                        GameObject obj = null;
                         judgeBack_.gameObject.SetActive(true);
                         if (pix[0].a == 0.0f)
                         {
+                            SceneMng.SetSE(1);
                             // アルファ値が0＝何も塗られてない箇所
                             judgeText_.text = "成功";
                             Debug.Log("成功しました");
@@ -176,6 +185,10 @@ public class CircleMng : MonoBehaviour
                         {
                             if (0.8f < pix[0].r && pix[0].r <= 1.0f)
                             {
+                                obj = assetBundle_.LoadAsset<GameObject>("CreateGood");
+                                Instantiate(obj, this.gameObject.transform.position, obj.transform.rotation);
+
+                                SceneMng.SetSE(2);
                                 // 白
                                 judgeText_.text = "大成功";
                                 Debug.Log("大成功しました");
@@ -183,6 +196,10 @@ public class CircleMng : MonoBehaviour
                             }
                             else if (0.0f <= pix[0].r && pix[0].r <= 0.1f)
                             {
+                                obj = assetBundle_.LoadAsset<GameObject>("CreateMiss");
+                                Instantiate(obj, this.gameObject.transform.position, obj.transform.rotation);
+
+                                SceneMng.SetSE(3);
                                 // 黒
                                 judgeText_.text = "失敗";
                                 Debug.Log("失敗しました");

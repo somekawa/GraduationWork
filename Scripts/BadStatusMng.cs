@@ -192,9 +192,12 @@ public class BadStatusMng : MonoBehaviour
                 var image = obj.transform.GetChild(f).GetComponent<Image>();
                 if (image.sprite == null)
                 {
-                    image.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BADSTATUSICON][bstNum - (int)CharaBase.CONDITION.POISON];
-                    obj.transform.GetChild(f).GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-                    break;
+                    if(bstNum - (int)CharaBase.CONDITION.POISON < ItemImageMng.spriteMap[ItemImageMng.IMAGE.BADSTATUSICON].Length)
+                    {
+                        image.sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.BADSTATUSICON][bstNum - (int)CharaBase.CONDITION.POISON];
+                        obj.transform.GetChild(f).GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+                        break;
+                    }
                 }
             }
         }
@@ -209,7 +212,7 @@ public class BadStatusMng : MonoBehaviour
                 obj.transform.GetChild(f).GetComponent<Image>().color = new Color(1.0f, 1.0f, 1.0f, 0.0f);
             }
 
-            for (int i = 0; i < (int)CharaBase.CONDITION.DEATH; i++)
+            for (int i = 0; i < (int)CharaBase.CONDITION.DEATH - 1; i++)
             {
                 // 健康状態以外のコンディションのフラグがtrueになっていたら
                 if (getbs[i].Item2 && getbs[i].Item1 != CharaBase.CONDITION.NON)

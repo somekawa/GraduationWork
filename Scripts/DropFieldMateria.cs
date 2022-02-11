@@ -166,37 +166,15 @@ public class DropFieldMateria : MonoBehaviour
         while (true)
         {
             yield return null;
-
-
             if (count <= instanceCnt_)
             {
-                if (FieldMng.nowMode == FieldMng.MODE.BUTTLE)
-                {
-                    for (int i = 0; i < instanceCnt_; i++)
-                    {
-                        // 画像移動中にバトルが始まったら破壊する
-                        Destroy(materiaUIObj[instanceCnt_]);
-                    }
-                    // 値をリセット
-                    shootArrowFlag_ = false;
-                    Debug.Log("スケールとアルファ値を初期化 ");
-                    // テロップのステータスを初期化する
-                    telopImage_.gameObject.SetActive(false);
-                    telopAlpha_ = 0.0f;
-                    telopScale_ = 0.8f;
-                    telopImage_.color = new Color(1.0f, 1.0f, 1.0f, telopAlpha_);
-                    telopText_.color = new Color(1.0f, 0.0f, 1.0f, telopAlpha_);
-                    telopImage_.transform.localScale = new Vector3(telopScale_, telopScale_, telopScale_);
-                    telopImage_.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
-                }
-
                 if (telopScale_ < maxScale_)
                 {
                     // テロップの座標を上昇させる
                     telopImage_.transform.localPosition += new Vector3(0.0f, 80.0f * Time.deltaTime, 0.0f);
                     // スケールとアルファ値を大きくする
                     ChangeNums(0.8f, 0.8f);
-                    Debug.Log("スケールとアルファ値を大きくする");
+                    //Debug.Log("スケールとアルファ値を大きくする");
                 }
                 else
                 {
@@ -204,7 +182,7 @@ public class DropFieldMateria : MonoBehaviour
                     shootArrowFlag_ = true;
                     //// 不透明度をなくしスケールが変化しないように
                     ChangeNums(1.0f, 1.0f);
-                    Debug.Log("スケールとアルファ値を変化しないように");
+                    //Debug.Log("スケールとアルファ値を変化しないように");
                     yield break;
                 }
             }
@@ -245,7 +223,7 @@ public class DropFieldMateria : MonoBehaviour
             //   Debug.Log("     " + telopImage_.transform.localPosition.y);
             // スケールとアルファ値を小さくする
             ChangeNums(-0.8f, -0.8f);
-            Debug.Log("スケールとアルファ値を小さくする");
+            //Debug.Log("スケールとアルファ値を小さくする");
         }
         else
         {
