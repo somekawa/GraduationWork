@@ -27,7 +27,6 @@ public class ButtleResult : MonoBehaviour
     private static int[] nextExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 次のレベルまでに必要なEXP
     private int[] oldLevel_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// レベルアップする前のレベル
     private int[] getExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 獲得EXP
-                                                                    //   private int saveSumExp_ = 0;// 獲得EXPの合計
     private int[] saveSumExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 獲得EXPの合計
     private int[] saveSumMaxExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];
 
@@ -224,8 +223,6 @@ public class ButtleResult : MonoBehaviour
         }
     }
 
-
-
     private int ExpCheck(int charaNum, int enemyNum)
     {
         int getExp = 0;
@@ -346,7 +343,14 @@ public class ButtleResult : MonoBehaviour
         if (levelUpFlag[(int)SceneMng.CHARACTERNUM.UNI] == false
          && levelUpFlag[(int)SceneMng.CHARACTERNUM.JACK] == false)
         {
-            FieldMng.nowMode = SceneMng.SCENE.FIELD4 == SceneMng.nowScene? FieldMng.MODE.NON:FieldMng.MODE.SEARCH;
+            if (SceneMng.SCENE.FIELD4 == SceneMng.nowScene)
+            {
+                FieldMng.nowMode = FieldMng.MODE.NON;
+            }
+            else
+            {
+                FieldMng.nowMode = FieldMng.MODE.SEARCH;
+            }
             levelMng.gameObject.SetActive(false);
             resultCanvas.gameObject.SetActive(false);
             for (int i = 0; i < enemyCnt_; i++)
@@ -354,7 +358,7 @@ public class ButtleResult : MonoBehaviour
                 // リザルト非表示にDropオブジェクト削除
                 Destroy(dropObj_[i]);
             }
-            enemyCnt_ = 0;
+            enemyCnt_ = 0;  // 削除し終わったら初期化
             enemyList_.Clear();
             yield break;
         }
@@ -365,15 +369,22 @@ public class ButtleResult : MonoBehaviour
             if (levelUpFlag[(int)SceneMng.CHARACTERNUM.UNI] == false
              && levelUpFlag[(int)SceneMng.CHARACTERNUM.JACK] == false)
             {
-                FieldMng.nowMode = SceneMng.SCENE.FIELD4 == SceneMng.nowScene ? FieldMng.MODE.NON : FieldMng.MODE.SEARCH;
+                if (SceneMng.SCENE.FIELD4 == SceneMng.nowScene)
+                {
+                    FieldMng.nowMode = FieldMng.MODE.NON;
+                }
+                else
+                {
+                    FieldMng.nowMode = FieldMng.MODE.SEARCH;
+                }
                 levelMng.gameObject.SetActive(false);
                 resultCanvas.gameObject.SetActive(false);
-                enemyCnt_ = 0;
                 for (int i = 0; i < enemyCnt_; i++)
                 {
                     // リザルト非表示にDropオブジェクト削除
                     Destroy(dropObj_[i]);
                 }
+                enemyCnt_ = 0;  // 削除し終わったら初期化
                 enemyList_.Clear();
                 yield break;
             }

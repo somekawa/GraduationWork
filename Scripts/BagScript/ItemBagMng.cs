@@ -16,7 +16,9 @@ public class ItemBagMng : MonoBehaviour
     [SerializeField]
     private RectTransform statusMngObj;
 
-    private RectTransform itemBagChild_;// itemBag_の子
+    private RectTransform itemBagChild_;    // itemBag_の子
+    private RectTransform charasText_;      // アイテム所持画面でアイテムを使用するかの画像
+    private RectTransform infoBack_;        // 所持物の説明欄
 
     public enum TOPIC
     {
@@ -49,16 +51,16 @@ public class ItemBagMng : MonoBehaviour
     private StatusMagicMng magicMng_;
     private RectTransform statusMagicCheck_;// ステータス画面で魔法を表示するための親
     // 魔法セット先
-    private Button[] equipBtn_ = new Button[4];// セット先のボタン
-    private Image[] equipMagic_ = new Image[4];// セットされている魔法の画像
-    private Image[] equipExMagic_ = new Image[4];// セットされている魔法の画像
-    private Color equipBtnSelColor_ = new Color(0.1f, 0.5f, 0.7f, 1.0f);// セット先の選択中の色
-    private Color equipNormalColor_ = new Color(1.0f, 1.0f, 1.0f, 1.0f);// 何も選んでない状態の色
-    private Color equipResetColor_ = new Color(1.0f, 1.0f, 1.0f, 0.0f);// 選択できない状態の色
+    private Button[] equipBtn_ = new Button[4];     // セット先のボタン
+    private Image[] equipMagic_ = new Image[4];     // セットされている魔法の画像
+    private Image[] equipExMagic_ = new Image[4];   // セットされている魔法の画像
+    private Color equipBtnSelColor_ = new Color(0.1f, 0.5f, 0.7f, 1.0f);    // セット先の選択中の色
+    private Color equipNormalColor_ = new Color(1.0f, 1.0f, 1.0f, 1.0f);    // 何も選んでない状態の色
+    private Color equipResetColor_ = new Color(1.0f, 1.0f, 1.0f, 0.0f);     // 選択できない状態の色
     // 所持魔法一覧
-    private int[,] setImageNum_ = new int[(int)SceneMng.CHARACTERNUM.MAX, 4];// 保存される魔法の画像
+    private int[,] setImageNum_ = new int[(int)SceneMng.CHARACTERNUM.MAX, 4];   // 保存される魔法の画像
     private Button seleMagicBtn_;
-    private Button removeEquipBtn_;// 魔法をはずすボタン
+    private Button removeEquipBtn_; // 魔法をはずすボタン
 
     private int setNullNum_ = 0;// 魔法が装備されてないときの番号
     // どの魔法を保存しているか読み込む
@@ -94,11 +96,12 @@ public class ItemBagMng : MonoBehaviour
         if (topicText_ == null)
         {
             var itemBagMng = GameObject.Find("ItemBagMng").GetComponent<RectTransform>();
-            info_ = itemBagMng.Find("InfoBack/InfoText").GetComponent<Text>();
-            var infoBack = itemBagMng.Find("InfoBack").GetComponent<RectTransform>();
-            throwAwayBtn_[0] = infoBack.Find("ItemDelete").GetComponent<Button>();
-            throwAwayBtn_[1] = infoBack.Find("MateriaDelete").GetComponent<Button>();
-            throwAwayBtn_[2] = infoBack.Find("MagicDelete").GetComponent<Button>();
+            charasText_ = itemBagMng.Find("CharasText").GetComponent<RectTransform>();
+            infoBack_ = itemBagMng.Find("InfoBack").GetComponent<RectTransform>();
+            info_ = infoBack_.Find("InfoText").GetComponent<Text>();
+            throwAwayBtn_[0] = infoBack_.Find("ItemDelete").GetComponent<Button>();
+            throwAwayBtn_[1] = infoBack_.Find("MateriaDelete").GetComponent<Button>();
+            throwAwayBtn_[2] = infoBack_.Find("MagicDelete").GetComponent<Button>();
             topicText_ = transform.Find("Topics/TopicName").GetComponent<Text>();
             topicText_.text = topicString_[(int)TOPIC.ITEM];
         }
@@ -390,11 +393,20 @@ public class ItemBagMng : MonoBehaviour
             }
         }
 
+        if (charasText_.gameObject.activeSelf==false)
+        {
+            // 1つ前にワードを表示していた場合
+            infoBack_.gameObject.SetActive(true);
+            charasText_.gameObject.SetActive(true);
+        }
+
         // ワードに捨てるボタンはないためfor文で回さず直で書く
         if (stringNum_ == (int)TOPIC.WORD)
         {
             // 魔法合成からバッグのワードを開くと親の場所がずれてしまうため
             GameObject.Find("Managers").GetComponent<Bag_Word>().Init();
+            infoBack_.gameObject.SetActive(false);
+            charasText_.gameObject.SetActive(false);
         }
         else if (stringNum_ == (int)TOPIC.MATERIA)
         {

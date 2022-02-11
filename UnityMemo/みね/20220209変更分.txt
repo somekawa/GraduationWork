@@ -20,12 +20,12 @@ HouseInterior
 ーItemStore
 　ーItemStoreMng
 　　ーItemStoreUI
-　　　ーBuyMng	GridLayoutGroup　Left5　CellSize（410,85）　他はそのまま
+　　　ーBuyMng
 　　　　ーViewPort
-	ーBuyParent
-　　　ーSellMng	GridLayoutGroup　Left5　CellSize（410,85）　他はそのまま
+	ーBuyParent	GridLayoutGroup　Left5　CellSize（410,85）　他はそのまま
+　　　ーSellMng
 　　　　ーViewPort
-	ーSellParent
+	ーSellParent	GridLayoutGroup　Left5　CellSize（410,85）　他はそのまま
 　　　ーCheckArea
 　　　　ーInfoArea　ここを一時保存フォルダーItemStoreフォルダ内のものと入れ替え
 		 SourceImage:　ItemStoreIconBack
