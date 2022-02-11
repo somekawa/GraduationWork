@@ -241,7 +241,6 @@ public class MagicCreate : MonoBehaviour
         // 選んだワードを表示
         infoText_ = infoParent_.transform.Find("SelectWord").GetComponent<TMPro.TextMeshProUGUI>();
         selectWord_ = new string[(int)Bag_Word.WORD_MNG.MAX];
-        //    seleEngWord_ = new string[(int)Bag_Word.WORD_MNG.MAX];
         targetWordNum_ = Bag_Word.targetWordNum;
         materiaNum_ = Bag_Materia.emptyMateriaNum;
 
@@ -332,7 +331,7 @@ public class MagicCreate : MonoBehaviour
             mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].btn.image.color = Color.white;
             mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].btn.interactable = true;
             magicPower_ -= mCreateData[(Bag_Word.WORD_MNG)kindNum_][saveNumber_[kindNum_]].power;
-            powerText_.text = magicPower_.ToString();
+           // powerText_.text = magicPower_.ToString();
         }
         selectWord_[kindNum_] = null;
         oldNumber_[kindNum_] = -1;
@@ -353,6 +352,9 @@ public class MagicCreate : MonoBehaviour
     public void ActiveKindsCheck(Bag_Word.WORD_MNG kind, bool leftFlag)
     {
         topicText_.text = topicString_[(int)kind];
+        createBtnText_.text = "確認";
+        powerText_.text = "計算中";
+        mpText_.text = "計算中";
 
         if (leftFlag == true)
         {
@@ -744,8 +746,6 @@ public class MagicCreate : MonoBehaviour
                 createFlag_ = true;
             }
         }
-        powerText_.text = "計算中";
-
 
         createBtn_.interactable = createFlag_;
         oldNumber_[kindNum_] = saveNumber_[kindNum_];
@@ -778,6 +778,9 @@ public class MagicCreate : MonoBehaviour
         }
         else
         {
+            mpPower_ = 0;
+            magicPower_ = 0;
+
             int maxWordMng_ = (int)Bag_Word.WORD_MNG.MAX;
             if (selectWord_[(int)Bag_Word.WORD_MNG.SUB1] == null)
             {
@@ -799,8 +802,7 @@ public class MagicCreate : MonoBehaviour
                 //// SUB3をセットされてなかったら計算はSUB3まで
                 // 何もしない maxWordMng_ = (int)Bag_Word.WORD_MNG.TAIL;
             }
-
-            for (int i = (int)Bag_Word.WORD_MNG.HEAD; i < maxWordMng_; i++)
+          for (int i = (int)Bag_Word.WORD_MNG.HEAD; i < maxWordMng_; i++)
             {
                 Debug.Log(mCreateData[(Bag_Word.WORD_MNG)i][saveNumber_[i]].name + "      " + mCreateData[(Bag_Word.WORD_MNG)i][saveNumber_[i]].power);
                 mpPower_ += mCreateData[(Bag_Word.WORD_MNG)i][saveNumber_[i]].MP;
@@ -831,7 +833,7 @@ public class MagicCreate : MonoBehaviour
         int power = magicPower_;
         int mp = mpPower_;
         // 失敗以外の場合は魔法を保存する
-        if (rate != (int)CircleMng.JUDGE.BAD)
+        if (rate != (int)MovePoint.JUDGE.BAD)
         {
             // 大成功の時は威力を上げてMP消費量を減少させる
             if (rate == (int)CircleMng.JUDGE.GOOD)
