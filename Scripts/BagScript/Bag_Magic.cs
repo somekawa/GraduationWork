@@ -28,7 +28,6 @@ public class Bag_Magic : MonoBehaviour
         public int sub3;
     }
     public static MagicData[] data = new MagicData[20];
-    // public static MagicData[] saveData = new MagicData[20];
     public static Sprite[] magicSpite = new Sprite[20];
 
     // バッグ表示用
@@ -73,6 +72,7 @@ public class Bag_Magic : MonoBehaviour
         Debug.Log(data);
         number_ = 1;
         DataSave();
+        DataLoad();
     }
 
     public void Init()
@@ -107,10 +107,6 @@ public class Bag_Magic : MonoBehaviour
                 {
                     continue;
                 }
-                //  magicSpite[i]= ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[i].element];
-                // data[i].battleSet0 = bool.Parse(csvDatas[i + 1][5]);
-
-                // elementNum_[i] = minElementNum_ + data[i].element;
                 // バッグ用
                 magicObject[i] = Instantiate(bagMagicUI, new Vector2(0, 0),
                                             Quaternion.identity, bagMagicParent.transform);
@@ -172,6 +168,8 @@ public class Bag_Magic : MonoBehaviour
         statusMagicObject[number_].name = "Magic_" + data[number_].number;
         statusMagicImage_[number_] = statusMagicObject[number_].transform.Find("MagicIcon").GetComponent<Image>();
         statusMagicImage_[number_].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][element];
+        statusMagicSetText_[number_] = statusMagicObject[number_].transform.Find("SetCharaName").GetComponent<Text>();
+        statusMagicSetText_[number_].text = "";
 
         number_++;
 
