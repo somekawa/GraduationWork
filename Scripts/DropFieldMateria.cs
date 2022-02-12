@@ -175,19 +175,8 @@ public class DropFieldMateria : MonoBehaviour
                     Destroy(materiaUIObj[instanceCnt_]);
                 }
                 // 値をリセット
-                shootArrowFlag_ = false;
-                Debug.Log("スケールとアルファ値を初期化 ");
-                // テロップのステータスを初期化する
-                telopImage_.gameObject.SetActive(false);
-                telopAlpha_ = 0.0f;
-                telopScale_ = 0.8f;
-                telopImage_.color = new Color(1.0f, 1.0f, 1.0f, telopAlpha_);
-                telopText_.color = new Color(1.0f, 0.0f, 1.0f, telopAlpha_);
-                telopImage_.transform.localScale = new Vector3(telopScale_, telopScale_, telopScale_);
-                telopImage_.transform.localPosition = new Vector3(0.0f, 0.0f, 0.0f);
+                SetMoveFinish(false);
             }
-
-
 
             if (count <= instanceCnt_)
             {

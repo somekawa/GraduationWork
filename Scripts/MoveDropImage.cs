@@ -40,6 +40,8 @@ public class MoveDropImage : MonoBehaviour
             {
                 // 画像移動中にバトルが始まったら破壊する
                 // オブジェクトが破壊されたらコルーチンも止まる
+                // 1つでも生成されているとき＝名前が0番の時だけ
+                drop_.SetMoveFinish(false);
                 Destroy(gameObject);
             }
 
