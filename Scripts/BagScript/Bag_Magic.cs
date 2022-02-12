@@ -273,8 +273,15 @@ public class Bag_Magic : MonoBehaviour
         info_.text = "";
 
         int dataNumber = 0;
-        for (int i = 1; i < number_; i++)
+        for (int i = 0; i < number_; i++)
         {
+            if (i == 0)
+            {
+                data[0] = data[0];
+                data[0].number = 0;
+                continue;
+            }
+
             if (i == clickMagicNum_)
             {
                 Debug.Log("削除する魔法の名前：" + data[i].name);
@@ -282,7 +289,7 @@ public class Bag_Magic : MonoBehaviour
                 continue;
             }
             dataNumber++;// 保存時の番号をずらす
-            Debug.Log(data[dataNumber].name + "       " + data[i].name);
+            Debug.Log(data[dataNumber].name + " 削除せず保存      " + data[i].name);
             data[dataNumber] = data[i];
             data[dataNumber].number = dataNumber;
             CommonActive(false,i, dataNumber);
@@ -308,7 +315,6 @@ public class Bag_Magic : MonoBehaviour
             // ステータス用
             statusMagicObject[newNum] = statusMagicObject[oldNum];
         }
-
         // バッグ用
         magicObject[newNum].name = "Magic" + data[newNum].number;
         magicImage_[newNum] = magicObject[newNum].transform.Find("MagicIcon").GetComponent<Image>();
