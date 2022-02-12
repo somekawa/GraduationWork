@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class Trade_Sell : MonoBehaviour
 {
-    private InitPopList popItemsList_; 
+    private InitPopList popItemsList_;
 
     [SerializeField]
     private RectTransform sellParent;  // 表示位置の親
@@ -24,7 +24,7 @@ public class Trade_Sell : MonoBehaviour
     private int[] maxCnt_;            // すべての素材数
 
     public void Init(int seleKind, int kind)
-   // void Start()
+    // void Start()
     {
 
         if (popItemsList_ == null)
@@ -39,13 +39,12 @@ public class Trade_Sell : MonoBehaviour
 
         }
         SetActiveSell(seleKind, maxCnt_[seleKind]);// 表示する
-        InactiveSell( kind, maxCnt_[kind]);
+        InactiveSell(kind, maxCnt_[kind]);
     }
 
     private StoreSell[] InitSellData(ItemStoreMng.KIND kind, int maxCnt)
     {
         var data = new StoreSell[maxCnt];
-        //Debug.Log(maxCnt);
 
         for (int i = 0; i < maxCnt; i++)
         {
@@ -55,23 +54,16 @@ public class Trade_Sell : MonoBehaviour
             data[i].name = kind == ItemStoreMng.KIND.ITEM ? Bag_Item.itemState[i].name : Bag_Materia.materiaState[i].name;
             data[i].obj.name = data[i].name + i;
             data[i].btn = data[i].obj.GetComponent<Button>();
+            data[i].price = kind == ItemStoreMng.KIND.ITEM ? InitPopList.itemData[i].sellPrice : InitPopList.materiaData[i].sellPrice;
 
             if (kind == ItemStoreMng.KIND.ITEM && ((maxCnt - 1) / 2 < i))
             {
-                data[i].price = InitPopList.materiaData[i - (maxCnt / 2)].sellPrice * 2;
                 data[i].name = "Ex\n" + data[i - (maxCnt / 2)].name;
             }
-            else
-            {
-                data[i].price = kind == ItemStoreMng.KIND.ITEM ? InitPopList.itemData[i].sellPrice : InitPopList.materiaData[i].sellPrice;
-            }
-
-            Debug.Log("名前チェック" + data[i].name + i);
-            // Debug.Log("店で買えるもの" + activeObj_[i]);
 
             // 表示する名前を変更する
             data[i].nameText = data[i].obj.transform.Find("Name").GetComponent<TMPro.TextMeshProUGUI>();
-            data[i].nameText.text = data[i].name + i;
+            data[i].nameText.text = data[i].name+i;
 
             // 料金を表示するText
             data[i].priceText = data[i].obj.transform.Find("Price").GetComponent<TMPro.TextMeshProUGUI>();
@@ -99,7 +91,7 @@ public class Trade_Sell : MonoBehaviour
 
             // 表示する料金を買い値に変更
             sellData[(ItemStoreMng.KIND)kindNum][i].priceText.text = sellData[(ItemStoreMng.KIND)kindNum][i].price.ToString();
-           
+
             // すべて表示させておいて
             sellData[(ItemStoreMng.KIND)kindNum][i].obj.SetActive(true);
 
@@ -131,7 +123,7 @@ public class Trade_Sell : MonoBehaviour
         }
     }
 
-    public void SetHaveCntCheck(int kindNum,int materiaNum)
+    public void SetHaveCntCheck(int kindNum, int materiaNum)
     {
         // 指定素材の所持数が0個になったら呼び出される
         sellData[(ItemStoreMng.KIND)kindNum][materiaNum].obj.SetActive(false);
