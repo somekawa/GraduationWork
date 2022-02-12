@@ -805,6 +805,17 @@ public class MagicCreate : MonoBehaviour
                 {
                     // 何もしない
                 }
+
+                // 攻撃系Element選択時に「必中」を持っていない時
+                // Sab2の時点で「必中」を選択時
+                if (Bag_Word.wordState[InitPopList.WORD.SUB3][targetWordNum_].getFlag == 0
+                 || selectWord_[(int)Bag_Word.WORD_MNG.SUB2] == "必中")
+                {
+                    if ((int)Bag_Word.WORD_MNG.SUB2 <= kindNum_)
+                    {
+                        arrowBtn_[1].interactable = false;// 右矢印を押したら必ずfalse
+                    }
+                }
             }
         }
 
