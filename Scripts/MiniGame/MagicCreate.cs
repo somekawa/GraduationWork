@@ -665,8 +665,11 @@ public class MagicCreate : MonoBehaviour
             // 1つ前に押されたボタンは初期状態に戻す
             mCreateData[(Bag_Word.WORD_MNG)kindNum_][oldNumber_[kindNum_]].btn.image.color = Color.white;
             mCreateData[(Bag_Word.WORD_MNG)kindNum_][oldNumber_[kindNum_]].btn.interactable = true;
-            // 選択していた分のワードの威力を減らす
-            magicPower_ -= mCreateData[(Bag_Word.WORD_MNG)kindNum_][oldNumber_[kindNum_]].power;
+            // 威力とMPの計算をリセットさせるため
+            createBtnText_.text = "確認";
+            powerText_.text = "計算中";
+            mpText_.text = "計算中";
+            createFlag_ = false;
         }
 
 
