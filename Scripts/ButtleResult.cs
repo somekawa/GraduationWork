@@ -29,6 +29,7 @@ public class ButtleResult : MonoBehaviour
     private int[] getExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 獲得EXP
     private int[] saveSumExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];// 獲得EXPの合計
     private int[] saveSumMaxExp_ = new int[(int)SceneMng.CHARACTERNUM.MAX];
+    private bool[] sliderFinishFlag_ = new bool[(int)SceneMng.CHARACTERNUM.MAX] { false, false };
 
     // 敵のレベル
     private int[] enemyLv_;//
@@ -306,17 +307,26 @@ public class ButtleResult : MonoBehaviour
                 {
                     maxExp_[charaNum] = (int)expSlider_[charaNum].maxValue;
                     nowExp_[charaNum] = (int)expSlider_[charaNum].value;
+                    sliderFinishFlag_[(int)SceneMng.CHARACTERNUM.UNI] = true;
                     yield break;
                 }
                 else
                 {
-                    // ジャックのスライダー移動まで終わったらレベルが上がったかのチェックをする
-                    if (Input.GetMouseButtonDown(0)/* || Input.GetKeyDown(KeyCode.Space)*/)
+                    if (sliderFinishFlag_[(int)SceneMng.CHARACTERNUM.UNI] == true
+                     && sliderFinishFlag_[(int)SceneMng.CHARACTERNUM.JACK] == true)
                     {
+                        // 両方のスライダー移動まで終わったらレベルが上がったかのチェックをする
+                        if (Input.GetMouseButtonDown(0))
+                        {
+                            StartCoroutine(ActiveResult());
+                            yield break;
+                        }
+                    }
+                    else
+                    {
+                        sliderFinishFlag_[(int)SceneMng.CHARACTERNUM.JACK] = true;
                         maxExp_[charaNum] = (int)expSlider_[charaNum].maxValue;
                         nowExp_[charaNum] = (int)expSlider_[charaNum].value;
-                        StartCoroutine(ActiveResult());
-                        yield break;
                     }
                 }
             }
@@ -349,6 +359,10 @@ public class ButtleResult : MonoBehaviour
 
     private IEnumerator ActiveResult()
     {
+        // スライダー移動差が出ないように初期化
+        sliderFinishFlag_[(int)SceneMng.CHARACTERNUM.UNI] = false;
+        sliderFinishFlag_[(int)SceneMng.CHARACTERNUM.JACK] = false;
+
         // ジャックの経験値スライダーまで終わったら処理をする
         // 0 Uni    1 Jack
         bool[] levelUpFlag = new bool[(int)SceneMng.CHARACTERNUM.MAX] { false, false };
@@ -421,13 +435,13 @@ public class ButtleResult : MonoBehaviour
                 if (oldLevel_[(int)SceneMng.CHARACTERNUM.UNI] != level_[(int)SceneMng.CHARACTERNUM.UNI])
                 {
                     LevelRelation(new Vector2(-350.0f, -105.0f), SceneMng.CHARACTERNUM.UNI,
-                    oldLevel_[(int)SceneMng.CHARACTERNUM.UNI],
-                    level_[(int)SceneMng.CHARACTERNUM.UNI],
-                    nextExp_[(int)SceneMng.CHARACTERNUM.UNI],
-                    getExp_[(int)SceneMng.CHARACTERNUM.UNI]);
+                                oldLevel_[(int)SceneMng.CHARACTERNUM.UNI],
+                                level_[(int)SceneMng.CHARACTERNUM.UNI],
+                                nextExp_[(int)SceneMng.CHARACTERNUM.UNI],
+                                getExp_[(int)SceneMng.CHARACTERNUM.UNI]);
                 }
                 // 左ボタン押下かスペースキー押下でレベルアップ用の画像を表示
-                if (Input.GetMouseButtonDown(0)/* || Input.GetKeyDown(KeyCode.Space)*/)
+                if (Input.GetMouseButtonDown(0))
                 {
                     // 確認し終わったらfalseにする
                     levelUpFlag[(int)SceneMng.CHARACTERNUM.UNI] = false;
@@ -441,14 +455,14 @@ public class ButtleResult : MonoBehaviour
                     if (oldLevel_[(int)SceneMng.CHARACTERNUM.JACK] != level_[(int)SceneMng.CHARACTERNUM.JACK])
                     {
                         LevelRelation(new Vector2(-350.0f, -240.0f),
-                            SceneMng.CHARACTERNUM.JACK,
-                        oldLevel_[(int)SceneMng.CHARACTERNUM.JACK],
-                        level_[(int)SceneMng.CHARACTERNUM.JACK],
-                        nextExp_[(int)SceneMng.CHARACTERNUM.JACK],
-                          getExp_[(int)SceneMng.CHARACTERNUM.JACK]);
+                                      SceneMng.CHARACTERNUM.JACK,
+                                      oldLevel_[(int)SceneMng.CHARACTERNUM.JACK],
+                                      level_[(int)SceneMng.CHARACTERNUM.JACK],
+                                      nextExp_[(int)SceneMng.CHARACTERNUM.JACK],
+                                      getExp_[(int)SceneMng.CHARACTERNUM.JACK]);
                     }
                     // 左ボタン押下かスペースキー押下でレベルアップ用の画像を表示
-                    if (Input.GetMouseButtonDown(0)/* || Input.GetKeyDown(KeyCode.Space)*/)
+                    if (Input.GetMouseButtonDown(0))
                     {
                         levelUpFlag[(int)SceneMng.CHARACTERNUM.JACK] = false;
                     }

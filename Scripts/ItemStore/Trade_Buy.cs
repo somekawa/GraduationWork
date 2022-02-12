@@ -5,8 +5,6 @@ using UnityEngine.UI;
 
 public class Trade_Buy : MonoBehaviour
 {
-    private InitPopList popItemsList_;
-
     [SerializeField]
     private RectTransform buyParent;   // 表示位置の親
 
@@ -16,8 +14,8 @@ public class Trade_Buy : MonoBehaviour
         public Button btn;
         public TMPro.TextMeshProUGUI priceText;        // 表示する値段
         public TMPro.TextMeshProUGUI nameText;         // 表示する素材の名前
-        public int price;// = new int[2];
-        public int haveCnt;// = new int[2];
+        public int price;
+        public int haveCnt;
         public string name;
     }
     public static Dictionary<ItemStoreMng.KIND, StoreBuy[]> buyData = new Dictionary<ItemStoreMng.KIND, StoreBuy[]>();
@@ -96,8 +94,8 @@ public class Trade_Buy : MonoBehaviour
         for (int i = 0; i < maxCnt; i++)
         {
             data[i].haveCnt = kind == ItemStoreMng.KIND.ITEM ? Bag_Item.itemState[i].haveCnt : Bag_Materia.materiaState[i].haveCnt;
-            data[i].price = kind == ItemStoreMng.KIND.ITEM ? InitPopList.itemData[i].buyPrice:InitPopList.materiaData[i].buyPrice ;
-            data[i].name = kind == ItemStoreMng.KIND.ITEM ? Bag_Item.itemState[i].name: Bag_Materia.materiaState[i].name ;
+            data[i].price = kind == ItemStoreMng.KIND.ITEM ? InitPopList.itemData[i].buyPrice : InitPopList.materiaData[i].buyPrice;
+            data[i].name = kind == ItemStoreMng.KIND.ITEM ? Bag_Item.itemState[i].name : Bag_Materia.materiaState[i].name;
             data[i].obj = kind == ItemStoreMng.KIND.ITEM ? PopListInTown.itemPleate[i] : PopListInTown.materiaPleate[i];
             data[i].obj.name = data[i].name + i;
             data[i].btn = data[i].obj.GetComponent<Button>();
@@ -139,6 +137,11 @@ public class Trade_Buy : MonoBehaviour
 
     public void InactiveBuy(int kindNum, int maxCnt)
     {
+        if (kindNum == (int)ItemStoreMng.KIND.MATERIA
+            && EventMng.GetChapterNum() < 20)
+        {
+            buyData[ItemStoreMng.KIND.MATERIA][maxCnt].obj.SetActive(false);
+        }
         // 非アクティブにしたいとき
         for (int i = 0; i < maxCnt; i++)
         {

@@ -57,8 +57,8 @@ public class Bag_Magic : MonoBehaviour
 
     // 魔法を捨てる関連
     private int clickMagicNum_ = -1;
-    private Button throwAwayBtn_;
-    private Text info_;         // クリックしたアイテムを説明する欄
+    private Button throwAwayBtn_;   // 捨てるボタン
+    private Text info_;             // クリックしたアイテムを説明する欄
 
     private List<Chara> charasList_ = new List<Chara>();
 
@@ -106,25 +106,9 @@ public class Bag_Magic : MonoBehaviour
                 {
                     continue;
                 }
-                // バッグ用
-                magicObject[i] = Instantiate(bagMagicUI, new Vector2(0, 0),
-                                            Quaternion.identity, bagMagicParent.transform);
-                magicObject[i].name = "Magic" + data[i].number;
-                magicImage_[i] = magicObject[i].transform.Find("MagicIcon").GetComponent<Image>();
-                magicImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[i].element];
-                magicExImage_[i] = magicObject[i].transform.Find("ExImage").GetComponent<Image>();
-                // ステータス用の座標に変更
-                statusMagicObject[i] = Instantiate(statusMagicUI, new Vector2(0, 0),
-                                                Quaternion.identity, statusMagicParent.transform);
-                statusMagicObject[i].name = "Magic" + data[i].number;
-                statusMagicImage_[i] = statusMagicObject[i].transform.Find("MagicIcon").GetComponent<Image>();
-                statusMagicImageEx_[i] = statusMagicObject[i].transform.Find("ExImage").GetComponent<Image>();
-                statusMagicBtn_[i] = statusMagicObject[i].GetComponent<Button>();
-                statusMagicSetText_[i] = statusMagicBtn_[i].transform.Find("SetCharaName").GetComponent<Text>();
-                statusMagicSetText_[i].text = "";               
+                CommonActive(true,i, i);
 
                 // Debug.Log(statusMagicBtn_[i].name);
-                statusMagicImage_[i].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[i].element];
                 //Debug.Log(data[i].name + "           " + data[i].number);
 
                 bool exFlag = data[i].rate == 2 ? true : false;
@@ -149,26 +133,8 @@ public class Bag_Magic : MonoBehaviour
         data[number_].sub2 = sub2;
         data[number_].sub3 = sub3;
         //Debug.Log("保存した魔法" + data[number_].main + data[number_].sub);
-        //  DataSave();
 
-        // バッグ用
-        magicObject[number_] = Instantiate(bagMagicUI, new Vector2(0, 0),
-                                            Quaternion.identity, bagMagicParent.transform);
-        magicObject[number_].name = "Magic_" + data[number_].number;
-        magicImage_[number_] = magicObject[number_].transform.Find("MagicIcon").GetComponent<Image>();
-        magicImage_[number_].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][element];
-        //Debug.Log(data[number_].name + "  " + data[number_].power + "  " + data[number_].rate + "  " + data[number_].ability);
-
-        // ステータス用の座標に変更
-        statusMagicObject[number_] = Instantiate(statusMagicUI, new Vector2(0, 0),
-                                        Quaternion.identity, statusMagicParent.transform);
-        statusMagicObject[number_].name = "Magic_" + data[number_].number;
-        statusMagicImage_[number_] = statusMagicObject[number_].transform.Find("MagicIcon").GetComponent<Image>();
-        statusMagicImage_[number_].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][element];
-        statusMagicBtn_[number_] = statusMagicObject[number_].GetComponent<Button>();
-        statusMagicSetText_[number_] = statusMagicBtn_[number_].transform.Find("SetCharaName").GetComponent<Text>();
-        statusMagicSetText_[number_].text = "";
-
+        CommonActive(true, number_, number_);
         number_++;
 
         // 現在受注中のクエストを見る
@@ -287,8 +253,8 @@ public class Bag_Magic : MonoBehaviour
 
         // 選択されたアイテムの番号を保存
         clickMagicNum_ = num;
-        info_.text = useMagic_.MagicInfoMake(data[clickMagicNum_])+"\n" +
-            "威力:" + data[clickMagicNum_].power+"消費MP:" + data[clickMagicNum_].mp;
+        info_.text = useMagic_.MagicInfoMake(data[clickMagicNum_]) + "\n" +
+            "威力:" + data[clickMagicNum_].power + "消費MP:" + data[clickMagicNum_].mp;
     }
 
     public void OnClickThrowAwayButton()
@@ -309,7 +275,6 @@ public class Bag_Magic : MonoBehaviour
         int dataNumber = 0;
         for (int i = 1; i < number_; i++)
         {
-
             if (i == clickMagicNum_)
             {
                 Debug.Log("削除する魔法の名前：" + data[i].name);
@@ -320,28 +285,48 @@ public class Bag_Magic : MonoBehaviour
             Debug.Log(data[dataNumber].name + "       " + data[i].name);
             data[dataNumber] = data[i];
             data[dataNumber].number = dataNumber;
-
-            // バッグ用
-            magicObject[dataNumber] = magicObject[i];
-            magicObject[dataNumber].name = "Magic" + data[dataNumber].number;
-            magicImage_[dataNumber] = magicObject[dataNumber].transform.Find("MagicIcon").GetComponent<Image>();
-            magicImage_[dataNumber].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[dataNumber].element];
-
-            // ステータス用
-            statusMagicObject[dataNumber] = statusMagicObject[i];
-            statusMagicObject[dataNumber].name = "Magic" + data[dataNumber].number;
-            statusMagicImage_[dataNumber] = statusMagicObject[dataNumber].transform.Find("MagicIcon").GetComponent<Image>();
-            statusMagicBtn_[dataNumber] = statusMagicObject[dataNumber].GetComponent<Button>();
-            statusMagicImage_[dataNumber].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[dataNumber].element];
-            statusMagicSetText_[dataNumber] = statusMagicBtn_[dataNumber].transform.Find("SetCharaName").GetComponent<Text>();
-            statusMagicSetText_[dataNumber].text = "";
-
+            CommonActive(false,i, dataNumber);
         }
-
         number_ = dataNumber;
-
     }
 
+    private void CommonActive(bool instanceFlag,int oldNum, int newNum)
+    {
+        if(instanceFlag == true)
+        {
+            // バッグ用
+            magicObject[newNum] = Instantiate(bagMagicUI, new Vector2(0, 0),
+                                                Quaternion.identity, bagMagicParent.transform);
+            // ステータス用の座標に変更
+            statusMagicObject[newNum] = Instantiate(statusMagicUI, new Vector2(0, 0),
+                                            Quaternion.identity, statusMagicParent.transform);
+        }
+        else
+        {
+            // バッグ用
+            magicObject[newNum] = magicObject[oldNum];
+            // ステータス用
+            statusMagicObject[newNum] = statusMagicObject[oldNum];
+        }
 
+        // バッグ用
+        magicObject[newNum].name = "Magic" + data[newNum].number;
+        magicImage_[newNum] = magicObject[newNum].transform.Find("MagicIcon").GetComponent<Image>();
+        magicImage_[newNum].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[newNum].element];
+        magicExImage_[newNum] = magicObject[newNum].transform.Find("ExImage").GetComponent<Image>();
 
+        // ステータス用
+        statusMagicObject[newNum].name = "Magic" + data[newNum].number;
+        statusMagicBtn_[newNum] = statusMagicObject[newNum].GetComponent<Button>();
+        statusMagicImage_[newNum] = statusMagicObject[newNum].transform.Find("MagicIcon").GetComponent<Image>();
+        statusMagicImage_[newNum].sprite = ItemImageMng.spriteMap[ItemImageMng.IMAGE.MAGIC][data[newNum].element];
+        statusMagicSetText_[newNum] = statusMagicBtn_[newNum].transform.Find("SetCharaName").GetComponent<Text>();
+        statusMagicSetText_[newNum].text = "";
+        statusMagicImageEx_[newNum] = statusMagicObject[newNum].transform.Find("ExImage").GetComponent<Image>();
+
+        // 大成功、成功チェック
+        bool exFlag = data[newNum].rate == 2 ? true : false;
+        statusMagicImageEx_[newNum].gameObject.SetActive(exFlag);
+        magicExImage_[newNum].gameObject.SetActive(exFlag);
+    }
 }
